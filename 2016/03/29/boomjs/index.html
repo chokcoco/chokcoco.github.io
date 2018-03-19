@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    
+    <title>【BOOM】一款有趣的Javascript爆炸动画效果 | Coco ’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="author" content="Coco">
+    
+    
+    <meta name="keywords" content="CSS3动画, boom, javascript动画, boomJS, jQuery队列">
+    <meta name="description" content="实践出真知，有的时候看到一些有趣的现象就想着用自己所学的知识复现一下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【BOOM】一款有趣的Javascript爆炸动画效果 | Coco ’s blog">
+<meta property="og:url" content="http://sbco.cc/2016/03/29/boomjs/index.html">
+<meta property="og:site_name" content="Coco ’s blog">
+<meta property="og:description" content="实践出真知，有的时候看到一些有趣的现象就想着用自己所学的知识复现一下。">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201603/608782-20160329172558519-1556108424.gif">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201603/608782-20160329172955207-1171725961.gif">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160406212531218-1244701532.gif">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201603/608782-20160329174940629-1244384805.jpg">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201603/608782-20160329175415879-795860893.jpg">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201603/608782-20160329180108660-1834990187.jpg">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201603/608782-20160329181134285-701094219.jpg">
+<meta property="og:updated_time" content="2016-06-07T08:58:36.105Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【BOOM】一款有趣的Javascript爆炸动画效果 | Coco ’s blog">
+<meta name="twitter:description" content="实践出真知，有的时候看到一些有趣的现象就想着用自己所学的知识复现一下。">
+<meta name="twitter:image" content="http://images2015.cnblogs.com/blog/608782/201603/608782-20160329172558519-1556108424.gif">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+</head>
+<body>
+    <span class="mobile btn-mobile-menu">
+      <i class="icon icon-list btn-mobile-menu__icon"></i>
+      <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+    
+<header class="panel-cover panel-cover--collapsed">
+
+  <div class="panel-main">
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+        
+        <img src="/images/logo.png" alt="Coco ’s blog logo" class="panel-cover__logo logo" title="Click Me!!!"/>
+        
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Coco ’s blog</a></h1>
+        <hr class="panel-cover__divider" />
+        
+        <p class="panel-cover__description">
+          少年不知愁滋味 为赋新词强说愁
+        </p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        <div class="navigation-wrapper">
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about/html/" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+              <a target="_blank" href="https://github.com/chokcoco"><li class='navigation__item github' title="To my Github"></li></a>
+              <a target="_blank" href="http://www.cnblogs.com/coco1s/"> <li class='navigation__item'><div class='navigation__item blog' title="To my cnblogs"></div></li></a>
+            </ul>
+          </nav>
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+-------------------------------->
+<!-- add social info here -->
+
+
+        </div>
+      </div>
+    </div>
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner entry">
+        
+<article class="post-container post-container--single">
+  <header class="post-header">
+    <h1 class="post-title">【BOOM】一款有趣的Javascript爆炸动画效果</h1>
+    
+    <div class="post-meta">
+      <time datetime="2016-03-29" class="post-meta__date date">2016-03-29</time>
+      <span id="busuanzi_container_page_pv">
+        • 阅读量（<span id="busuanzi_value_page_pv"></span>）
+      </span>
+      <span class="post-meta__tags tags">
+          
+          
+             &#8226; 标签:
+            <font class="tags">
+              <a class="tags-link" href="/tags/jQuery源码分析/">jQuery源码分析</a>, <a class="tags-link" href="/tags/web动画/">web动画</a>
+            </font>
+          
+      </span>
+
+    </div>
+    
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>实践出真知，有的时候看到一些有趣的现象就想着用自己所学的知识复现一下。<a id="more"></a></p><h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>前几天在 github 上看到同事的一个这样的小项目，在 IOS 上实现了这样一个小动画效果，看上去蛮炫的，效果图：<br><img src="http://images2015.cnblogs.com/blog/608782/201603/608782-20160329172558519-1556108424.gif" alt=""></p><p>我就寻思着，在浏览器环境下，用 Javascript 怎么实现呢？</p><p>在浓烈的好奇心驱使下，最终利用 Javascript 和 CSS3 完成了模仿上面的效果，通过调用方法，可以将页面上的图片一键爆炸，我给它起了个 boomJS 的名字，贴两张效果图：<br><img src="http://images2015.cnblogs.com/blog/608782/201603/608782-20160329172955207-1171725961.gif" alt=""><br><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160406212531218-1244701532.gif" alt=""></p><h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>我感觉效果还是可以的，因为没有使用 canvas ，所以无法取到图片上每个像素的颜色值。使用了一些比较讨（sha）巧（bi）的方法，下面简单讲讲如何实现的：</p><h3 id="Step-1构造新图容器，隐藏原图"><a href="#Step-1构造新图容器，隐藏原图" class="headerlink" title="Step.1构造新图容器，隐藏原图"></a>Step.1构造新图容器，隐藏原图</h3><p>原本的图是标签的图，一张整图，最终的效果当然不是在原图上 boom ，看上去连贯的动画本质上只是一个障眼法，利用 Javascript 做了一些巧妙的变换，所以第一步所做的就是取到原图的高宽及相对浏览器视窗的定位，再创建一个新的容器附着在原图之上，然后隐藏原图。</p><p>这个方法里面我主要用到了 getBoundingClientRect 这个方法，该方法返回元素的大小及其相对于视口的位置，完美满足我的需要。</p><p>嗯，这一步做了什么呢？简单的如下所示：<br><img src="http://images2015.cnblogs.com/blog/608782/201603/608782-20160329174940629-1244384805.jpg" alt=""></p><h3 id="Step-2生成一张张是碎裂小图"><a href="#Step-2生成一张张是碎裂小图" class="headerlink" title="Step.2生成一张张是碎裂小图"></a>Step.2生成一张张是碎裂小图</h3><p>最后效果是图片 boom 一下裂开，所以第二步要做的就是模拟出一小块一小块小图，这里每一个小块就是一个新的 div ，然后利用图片的定位 background-position 将其定位到合适的位置，嘿，看看效果：<br><img src="http://images2015.cnblogs.com/blog/608782/201603/608782-20160329175415879-795860893.jpg" alt=""></p><p>可以看到，这里分割成了很多个小块，每个小块其实是一个 div 然后，这些小块被添加到我们上一步中设置的容器当中，然后利用原图设置 div 的背景图，所有 div 利用的都是原图一张背景图，接着图片定位就可以完成这样一个效果，说起来很简单，但是中间经历了很多计算，如何分割图片，图片的 width 与 height 比（是横图还是竖图），每个小块 div 的定位及小 div 背景图的定位，具体的可以到这里看看:boomJS。</p><p>最后为了好看，设置了圆角，但是这样爆炸的话，感觉不够真实，图片一块一块的清晰可辨。所以利用缩放 scale ，随机让每个小块放大或者缩小，再看看缩放后的效果：<br><img src="http://images2015.cnblogs.com/blog/608782/201603/608782-20160329180108660-1834990187.jpg" alt=""></p><p>嗯，模糊了很多，效果近一步增强，这样爆开来比较真实。</p><h3 id="Step-3-BOOM-爆炸！"><a href="#Step-3-BOOM-爆炸！" class="headerlink" title="Step.3 BOOM 爆炸！"></a>Step.3 BOOM 爆炸！</h3><p>嗯，到了鸡冻人心的最后一步，要做的就是给每一个 div 小块设置运动轨迹，然后同时爆开。</p><p>比较繁琐，需要先算出图片的中心点，然后每个 div 块点以中心为基准点向外做直线运动，不得不说，做这个我还特意恶补了一下高中的几何知识（囧）。为了效果更加真实，每个 div 块运动的直线距离添加一个正负值恰当的随机数，那么就可以达到有的块炸的比较远，有的块炸的比较近。利用未缩放的小块图片做一下大概的示意图：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201603/608782-20160329181134285-701094219.jpg" alt=""></p><p>最后在炸裂的瞬间，让每个小块渐变消失，就可以完成上面 gif 所示的效果了。</p><h2 id="总结一下"><a href="#总结一下" class="headerlink" title="总结一下"></a>总结一下</h2><p>其实过程当中还有很多细节没有提及，比较重要的是动画触发的时序控制，因为最近在研读 jQuery 源码，就简单的利用了 jQuery 的队列来实现控制时序。</p><p>提到了就安利一下，我在 github 上关于 jQuery 源码的全文注解，感兴趣的可以围观一下。 <a href="https://github.com/chokcoco/jQuery-" target="_blank" rel="external">jQuery v1.10.2 源码注解</a>。</p><p>然后本文没有贴代码，这个动画效果完整的代码在我的 github 上，有兴趣也可以围观一下： <a href="https://github.com/chokcoco/boomJS" target="_blank" rel="external">boomJS</a> 。</p>
+  </section>
+
+  
+  
+
+</article>
+
+
+<!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key="post-boomjs" data-title="【BOOM】一款有趣的Javascript爆炸动画效果" data-url="http://sbco.cc/2016/03/29/boomjs/"></div>
+<!-- 多说评论框 end -->
+
+
+        <footer class="footer">
+	<div class="friendLink">友情链接：
+		<ul>
+			<li><a href="http://www.cnblogs.com/coco1s/">Coco</a></li>
+			<li><a href="http://www.chengfeilong.com/">Scott's Blog</a></li>
+			<li><a href="http://www.52cik.com/">楼教主</a></li>
+			<li><a href="http://blog.aisuso.com/">姚嘉鑫博客</a></li>
+		</ul>
+	</div>
+	<div class="copy_right"> &copy; chokcoco </div>
+	<span class="footer__copyright"> 2014-2016. | 由<a href="https://hexo.io/"> Hexo </a>强力驱动 | 主题<a href="https://github.com/someus/huno"> Huno </a></span>
+
+</footer>
+<!-- 多说公共JS代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"sbco"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- 多说公共JS代码 end -->
+<!-- cnzz统计 -->
+<script type="text/javascript">
+	var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- 文章阅读数统计 -->
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 百度爬虫推送 -->
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+      </div>
+    </div>
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+</body>
+</html>

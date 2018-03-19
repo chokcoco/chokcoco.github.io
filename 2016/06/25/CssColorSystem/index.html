@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    
+    <title>【CSS进阶】CSS 颜色体系详解 | Coco ’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="author" content="Coco">
+    
+    
+    <meta name="keywords" content="color, transparent , currentColor , gba(), hsl, 颜色关键字">
+    <meta name="description" content="说到 CSS 颜色，相比大家都不会陌生，本文是我个人对 CSS 颜色体系的一个系统总结与学习，分享给大家。先用一张图直观的感受一下与 CSS 颜色相关大概覆盖了哪些内容。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【CSS进阶】CSS 颜色体系详解 | Coco ’s blog">
+<meta property="og:url" content="http://sbco.cc/2016/06/25/CssColorSystem/index.html">
+<meta property="og:site_name" content="Coco ’s blog">
+<meta property="og:description" content="说到 CSS 颜色，相比大家都不会陌生，本文是我个人对 CSS 颜色体系的一个系统总结与学习，分享给大家。先用一张图直观的感受一下与 CSS 颜色相关大概覆盖了哪些内容。">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/cssColorSystem/CssSystem.png">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/cssColorSystem/css2color.jpg">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/cssColorSystem/css3color.jpg">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/cssColorSystem/triangle.jpg">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160527112625428-906375003.gif">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/cssColorSystem/currentColorpollify.jpg">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/cssColorSystem/rgb.jpg">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/cssColorSystem/rgb16.png">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/cssColorSystem/rgbsheet.jpg">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/cssColorSystem/hsl.jpg">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/cssColorSystem/rgb2hsl.gif">
+<meta property="og:updated_time" content="2016-06-28T02:18:48.741Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【CSS进阶】CSS 颜色体系详解 | Coco ’s blog">
+<meta name="twitter:description" content="说到 CSS 颜色，相比大家都不会陌生，本文是我个人对 CSS 颜色体系的一个系统总结与学习，分享给大家。先用一张图直观的感受一下与 CSS 颜色相关大概覆盖了哪些内容。">
+<meta name="twitter:image" content="http://sbco.cc/../../../../images/post/cssColorSystem/CssSystem.png">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+</head>
+<body>
+    <span class="mobile btn-mobile-menu">
+      <i class="icon icon-list btn-mobile-menu__icon"></i>
+      <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+    
+<header class="panel-cover panel-cover--collapsed">
+
+  <div class="panel-main">
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+        
+        <img src="/images/logo.png" alt="Coco ’s blog logo" class="panel-cover__logo logo" title="Click Me!!!"/>
+        
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Coco ’s blog</a></h1>
+        <hr class="panel-cover__divider" />
+        
+        <p class="panel-cover__description">
+          少年不知愁滋味 为赋新词强说愁
+        </p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        <div class="navigation-wrapper">
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about/html/" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+              <a target="_blank" href="https://github.com/chokcoco"><li class='navigation__item github' title="To my Github"></li></a>
+              <a target="_blank" href="http://www.cnblogs.com/coco1s/"> <li class='navigation__item'><div class='navigation__item blog' title="To my cnblogs"></div></li></a>
+            </ul>
+          </nav>
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+-------------------------------->
+<!-- add social info here -->
+
+
+        </div>
+      </div>
+    </div>
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner entry">
+        
+<article class="post-container post-container--single">
+  <header class="post-header">
+    <h1 class="post-title">【CSS进阶】CSS 颜色体系详解</h1>
+    
+    <div class="post-meta">
+      <time datetime="2016-06-25" class="post-meta__date date">2016-06-25</time>
+      <span id="busuanzi_container_page_pv">
+        • 阅读量（<span id="busuanzi_value_page_pv"></span>）
+      </span>
+      <span class="post-meta__tags tags">
+          
+          
+             &#8226; 标签:
+            <font class="tags">
+              <a class="tags-link" href="/tags/CSS/">CSS</a>
+            </font>
+          
+      </span>
+
+    </div>
+    
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>说到 CSS 颜色，相比大家都不会陌生，本文是我个人对 CSS 颜色体系的一个系统总结与学习，分享给大家。</p><p>先用一张图直观的感受一下与 CSS 颜色相关大概覆盖了哪些内容。</p><p><img src="../../../../images/post/cssColorSystem/CssSystem.png" alt="CSS 颜色体系"><a id="more"></a></p><p>接下来的行文内容大概会按照这个顺序进行，内容十分基础，可选择性跳到相应内容处阅读。</p><h2 id="色彩关键字"><a href="#色彩关键字" class="headerlink" title="色彩关键字"></a>色彩关键字</h2><p>嗯，色彩关键字很好理解。它表示一个具体的颜色值，且它不区分大小写。譬如这样 <code>color:red</code> 的 red 即是一个色彩关键字。</p><p>在 CSS3 之前，也就是 <a href="https://www.w3.org/TR/CSS2/" target="_blank" rel="external">CSS 标准 2</a>，一共包含了 17 个基本颜色，分别是：</p><p><img src="../../../../images/post/cssColorSystem/css2color.jpg" alt="CSS2 色彩关键字"></p><p>而到了 CSS3，色彩关键字得到了极大的扩充，达到了 147 个。下面仅仅是列出了一部分:</p><p><img src="../../../../images/post/cssColorSystem/css3color.jpg" alt="CSS3 色彩关键字"></p><p><a href="http://sbco.cc/demo/color/html/">完整的 CSS3 色彩关键字戳我查看</a></p><p>值得注意的是，未知的关键字会让 CSS 属性无效。</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/ZOLdBP/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/ZOLdBP/" target="_blank" rel="external">colorTest</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.</iframe><p>这里的这个测试 test3 是为了说明，当传入的色彩关键字错误，CSS 属性将无效而不是使用当前的 <code>currentColor</code> 替代。 <code>currentColor</code>会在下文说明。</p><h2 id="哪些属性可以设置颜色"><a href="#哪些属性可以设置颜色" class="headerlink" title="哪些属性可以设置颜色"></a>哪些属性可以设置颜色</h2><p>所有可以用到颜色值的地方，都可以用色彩关键字替代，那么在 CSS 中，什么地方可以用到颜色值呢？</p><ul><li><p>文本的颜色 <code>color:red</code></p></li><li><p>元素的背景色 <code>background-color:red</code> （包含各类渐变）</p></li><li><p>元素的边框 <code>border-color:red</code></p></li><li><p>元素的盒阴影或文字阴影 <code>box-shadow:0 0 0 1px red</code> | <code>text-shadow:5px 5px 5px red</code></p></li><li><p>运用在一些滤镜当中 <code>filter: drop-shadow(16px 16px 20px red)</code></p></li><li><p><code>&lt;hr /&gt;</code> 水平线的颜色</p></li></ul><p>一些无法直接设置，但是可以被得到或者继承当前元素 currentColor 的属性：</p><ul><li><p><code>&lt;img&gt;</code> 的 alt 文本。也就是，当无法显示图像时，代替图像出现的文本，会继承这个颜色值。</p></li><li><p>ul 列表项的小点</p></li></ul><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/KMajZb/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/KMajZb/" target="_blank" rel="external">KMajZb</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.</iframe><p>一些比较常见的就不举例了，说一下 <code>&lt;hr/&gt;</code> 、 <code>&lt;img&gt;</code> 的 alt 文本和 ul 列表项的小点。</p><p>经过测试， <code>&lt;hr/&gt;</code>的颜色值，可以通过设置它的 border 的颜色值来表示。</p><p><code>&lt;img&gt;</code> 的 alt 文本和 ul 列表项的小点则会继承当前元素 currentColor 的属性。</p><p>对于表单控件 <code>&lt;input type=&quot;radio&quot;&gt;</code> <code>&lt;input type=&quot;checkbox&quot;&gt;</code> ，暂时没有找到很好的直接改变颜色的方法，如果有知道希望不吝赐教。</p><h2 id="transparent"><a href="#transparent" class="headerlink" title="transparent"></a>transparent</h2><p>transparent 的字面意思就是透明。它用来表示一个完全透明的颜色，即该颜色看上去将是背景色。</p><p>也可以理解为它是 <code>rgba(0,0,0,0)</code> 的简写。</p><p>值得注意的是:</p><ul><li>在 CSS3 之前，transparent 关键字不是一个真实的颜色，只能用于 <code>background-color</code> 和 <code>border-color</code>中，表示一个透明的颜色。而在支持 CSS3 的浏览器中，它被重新定义为一个真实的颜色，transparent 可以用于任何需要 <code>color</code> 值的地方，像 color 属性。</li></ul><p>那么这个透明值有什么用呢？简单列举一些例子：</p><h3 id="transparent-用于-border，绘制三角形"><a href="#transparent-用于-border，绘制三角形" class="headerlink" title="transparent 用于 border，绘制三角形"></a>transparent 用于 border，绘制三角形</h3><p>这算是 transparent 最常见的一个用法，用于绘制三角形。</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/GqrVpB/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/GqrVpB/" target="_blank" rel="external">transparentBorder</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.</iframe><p>结合上图图1、图2，可以看到利用一个高宽为 0 的 div，设置它的 border ，当任意三边的 border 颜色为 transparent 时，则可以得到任意朝向的一个三角形。</p><p>像上文说的，由于 transparent 在低版本浏览器中（IE78）可以使用在 border、background 中，所以此方法兼容性很好，可以利用于很多场景。</p><p><img src="../../../../images/post/cssColorSystem/triangle.jpg" alt="transparent 用于 border"></p><h3 id="transparent-用于-border，实现增大点击热区"><a href="#transparent-用于-border，实现增大点击热区" class="headerlink" title="transparent 用于 border，实现增大点击热区"></a>transparent 用于 border，实现增大点击热区</h3><p>按钮是我们网页设计中十分重要的一环，而按钮的设计也与用户体验息息相关。让用户更容易的点击到按钮无疑能很好的增加用户体验，尤其是在移动端，按钮通常都很小，但是有时由于设计稿限制，我们不能直接去改变按钮元素的高宽。那么这个时候有什么办法在不改变按钮原本大小的情况下去增加他的点击热区呢？</p><p>这里，借助透明的 border 可以轻松帮我们实现（我 <a href="http://www.cnblogs.com/coco1s/p/5528393.html" target="_blank" rel="external">之前一篇文章</a>写到过，利用伪元素也可以实现），利用一层透明的 <code>border:20px solid transparent</code> 我们可以这样写：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/LZxwgm/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/LZxwgm/" target="_blank" rel="external">borderTransparent2</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.</iframe><p>试着将光标靠近 <code>Btn</code>，会发现在还未到达有颜色区域之前，就已经触发了鼠标的交互响应事件 <code>hover</code>，利用这一点在移动端可以很好的扩大按钮的可点击区域又不至于改变按钮本身的形状。像这样：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160527112625428-906375003.gif" alt="transparent 用于 border，实现增大点击热区"></p><p>嗯哼，这里我们将 <code>border</code> 用于了扩大鼠标点击区域，然而真实情况是有的时候我们的按钮必须要用到 border，而 border 又只能设置一重（无法像 <code>box-shadow</code>和 <code>渐变</code>一样设置多重 border），这个时候如果还需要运用这种方法，可以使用内阴影 <code>box-shadow</code>模拟一层 border，像这样：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/EyZqrb/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/EyZqrb/" target="_blank" rel="external">borderTransparent3</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.</iframe><h3 id="transparent-用于-background"><a href="#transparent-用于-background" class="headerlink" title="transparent 用于 background"></a>transparent 用于 background</h3><p>transparent 用于 background，通常可以制造出各种各样的背景图像。这里举个简单的例子，利用透明渐变，实现一个切角图形：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/ZOezEJ/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/ZOezEJ/" target="_blank" rel="external">backgroundTransparent</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.</iframe><p>通过 <code>线性渐变 linear-gradient</code> 实现从透明色到实色的变化，将四个四分之一大小（ <code>background-size: 50% 50%</code>）的图形组合在一起，就生成了一个切角图形。</p><p>利用 transparent 与渐变的配合还能生成各种各样美妙的图形，可以戳下面看看：</p><ul><li><p><a href="http://sbco.cc/magicCss/html/index.html">CSS3奇思妙想</a></p></li><li><p><a href="http://lea.verou.me/css3patterns/" target="_blank" rel="external">CSS3 Patterns Gallery</a></p></li></ul><h3 id="transparent-用于文本-color"><a href="#transparent-用于文本-color" class="headerlink" title="transparent 用于文本 color"></a>transparent 用于文本 color</h3><p>配合 box-shadow ，在文本上运用 transparent，可以营造出一种文字发光的效果，鼠标 hover 下面的文字试试：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/WxpewG/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/WxpewG/" target="_blank" rel="external">WxpewG</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.</iframe><p>transparent 其实还有很多作用，暂且说这么多，欢迎继续讨论。</p><h2 id="currentColor"><a href="#currentColor" class="headerlink" title="currentColor"></a>currentColor</h2><p>很多人都不知道还有 <code>currentColor</code> 这个东东。和 transparent 一样，它也是一个关键字，顾名思义，它表示当前颜色。它来自自属性或者继承于它的父属性。</p><p>可以简单的理解为当前 CSS 标签所继承或设定的文本颜色，即 color 的值。</p><p>那它具体可以怎么用呢，根据我们书写 CSS 的原则 DRY(Don’t Repeat Yourself)，使用这个关键字可以很好的减少改动 CSS 时的工作量。看个例子：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/EyWYXe/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/EyWYXe/" target="_blank" rel="external">currentColor</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.</iframe><p>上面的例子，我只在 color 里写了颜色，在 border 和 box-shadow 中使用了 currentColor 属性。可以看到，这两个属性的颜色值都被设置为了 color 中设置的值，当我们需要用到这种同色表现的时候，使用 currentColor 更佳，方便日后改动。</p><p>但是，currentColor 是 CSS3 新增的，在老版本浏览器下是无法识别的。那么是否在老版本浏览器下就无法使用了呢，也不尽然，还是有一些特例的，看看下面这个：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/ezvOer/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/ezvOer/" target="_blank" rel="external">currentColor2</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.</iframe><p>可以看到，上面我只在 color 里写了颜色，border 的值为 <code>1px solid</code>，box-shadow 也是，并没有带上颜色值，但是依然表现为了 currentColor 的值。这是因为边框颜色和阴影颜色默认就是当前盒子的文本颜色，其中 border 兼容性很好，可以支持到 IE6 。</p><p>当然 border 和 box-shadow 是特例，不是所有需要填写颜色值的属性不填写都会默认继承文本的值的。</p><p>那么元素中将会得到或者继承元素 color 值有哪些呢：</p><ol><li>元素的文本内容</li><li>文本的轮廓</li><li>元素的边框</li><li>元素的盒阴影</li><li>filter:drop-shadow()</li><li><code>&lt;img&gt;</code> 的 alt 文本。也就是，当无法显示图像时，代替图像出现的文本，会继承这个颜色值。</li><li>列表项的小黑点和边框</li><li>一些浏览器（比如Chrome）水平线（ <code>&lt;hr&gt;</code>）的边框颜色。（没有边框的话，颜色就不会受影响）。</li></ol><h3 id="currentColor-的兼容性"><a href="#currentColor-的兼容性" class="headerlink" title="currentColor 的兼容性"></a>currentColor 的兼容性</h3><p><img src="../../../../images/post/cssColorSystem/currentColorpollify.jpg" alt="currentColorpollify"></p><h2 id="rgb-与-rgba"><a href="#rgb-与-rgba" class="headerlink" title="rgb() 与 rgba()"></a>rgb() 与 rgba()</h2><p>颜色表示模型的话，简单了解一下。</p><p>rgb() 表示颜色的红-绿-蓝（red-green-blue (RGB)）模式，rgba() 多一个 a ，表示其透明度，取值为 0-1。</p><p>rgb 的颜色模型通常由一个立方体表示：</p><p><img src="../../../../images/post/cssColorSystem/rgb.jpg" alt="rgb颜色模型"></p><p>我们知道，通常我们使用的时候，不使用缩写的话，使用十六进制符号 #RRGGBB,</p><p><img src="../../../../images/post/cssColorSystem/rgb16.png" alt="rgb颜色模型#rrggbb"></p><p>在 #RRGGBB 中，RR 表示 红色的深浅，GG 表示绿色的深浅，BB 表示蓝色的深浅。取值都是从 00 - FF，值越大表示该颜色越深。</p><p>如果采用 rgb(RR,GG,BB) 的写法，RR 取值 0~255 或者百分比，255 相当于 100%，和十六进制符号里的 F 或 FF 。</p><p>了解了 rgb() 的含义的话，记住常用的颜色值其实是很容易的，像上面说的 RR 表示红色的深浅，那么理解记忆 <code>#FF0000</code> 表示为红色就 so easy 了，同理可以得到 <code>#00FF00</code> 表示绿色， <code>#0000FF</code>表示蓝色。</p><p>再记住颜色的叠加原理：</p><p><img src="../../../../images/post/cssColorSystem/rgbsheet.jpg" alt="rgb颜色叠加模型"></p><p>我们就可以轻松的记住， <code>#FF00FF</code>红蓝叠加表示紫色， <code>#FFFF00</code>红绿叠加表示黄色， <code>#00FFFF</code>蓝绿叠加表示青色。</p><h2 id="hsl-与-hsla"><a href="#hsl-与-hsla" class="headerlink" title="hsl() 与 hsla()"></a>hsl() 与 hsla()</h2><p>除了 rgb 表示法，颜色也可以使用 hsl() 表示。hsl()被定义为色相-饱和度-明度（Hue-saturation-lightness），hsla() 多一个 a ，表示其透明度，取值为 0-1。。</p><p>hsl 相比 rgb 的优点是更加直观：你可以估算你想要的颜色，然后微调。它也更易于创建相称的颜色集合。</p><p>hsl 的颜色模型通常由一个圆柱体表示：</p><p><img src="../../../../images/post/cssColorSystem/hsl.jpg" alt="hsl颜色模型"></p><ul><li>色相（H）是色彩的基本属性，就是平常所说的颜色名称，如红色、黄色等。</li><li>饱和度（S）是指色彩的纯度，越高色彩越纯，低则逐渐变灰，取0-100%的数值。</li><li>明度（V），亮度（L），取0-100%。</li></ul><p>其实对于我们前端而言，使用 hsl 表示颜色会更方便。</p><p>以一个按钮为例，我们用 hsl 颜色表示法表示按钮 normal 状态下的背景色值，我们希望 hover 的时候，背景色暗一点，而 active 的时候背景色亮一点。如果采用 rgb 表示法，我们需要 3 个完全不一样的颜色，而采用 hsl 表示法，我们只需要在 hover 和 active 的时候去改的 颜色值的 l （即Light，亮度）值即可。运用上面出现过的一个例子再看看：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/LZxwgm/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/LZxwgm/" target="_blank" rel="external">borderTransparent2</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.</iframe><p>这里 <code>background:hsl(200, 60%, 60%)</code> 在 hover 和 active 的时候，我只改动了 hsl 颜色值的第三个值达到了我们希望的效果。</p><h3 id="rgb-到-hsl-的转换"><a href="#rgb-到-hsl-的转换" class="headerlink" title="rgb 到 hsl 的转换"></a>rgb 到 hsl 的转换</h3><p>这里有个小 tips 可能有些人不知道，在开发阶段我们只有一个 rgb 值，但是希望转换成 hsl 值，使用 chrome 开发者工具可以很便捷的做到，如下图，我们只需要选中我们想转换的颜色值，按住键盘左 <code>shift</code>，点击这个颜色表示框，即可进行转换：</p><p><img src="../../../../images/post/cssColorSystem/rgb2hsl.gif" alt="rgb到hsl的转换"></p><p>到此本文结束，比较基础，希望有人看。如果还有什么疑问或者建议，可以多多交流，原创文章，文笔有限，才疏学浅，文中若有不正之处，万望告知。</p><p>如果本文对你有帮助，请点下推荐，写文章不容易。</p>
+  </section>
+
+  
+  
+
+</article>
+
+
+<!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key="post-CssColorSystem" data-title="【CSS进阶】CSS 颜色体系详解" data-url="http://sbco.cc/2016/06/25/CssColorSystem/"></div>
+<!-- 多说评论框 end -->
+
+
+        <footer class="footer">
+	<div class="friendLink">友情链接：
+		<ul>
+			<li><a href="http://www.cnblogs.com/coco1s/">Coco</a></li>
+			<li><a href="http://www.chengfeilong.com/">Scott's Blog</a></li>
+			<li><a href="http://www.52cik.com/">楼教主</a></li>
+			<li><a href="http://blog.aisuso.com/">姚嘉鑫博客</a></li>
+		</ul>
+	</div>
+	<div class="copy_right"> &copy; chokcoco </div>
+	<span class="footer__copyright"> 2014-2016. | 由<a href="https://hexo.io/"> Hexo </a>强力驱动 | 主题<a href="https://github.com/someus/huno"> Huno </a></span>
+
+</footer>
+<!-- 多说公共JS代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"sbco"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- 多说公共JS代码 end -->
+<!-- cnzz统计 -->
+<script type="text/javascript">
+	var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- 文章阅读数统计 -->
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 百度爬虫推送 -->
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+      </div>
+    </div>
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+</body>
+</html>

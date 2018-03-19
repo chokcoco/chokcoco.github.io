@@ -1,0 +1,1 @@
+!function(n,i){function o(){for(var n=$("li"),i=n.length,o=0;i>o;o++){var t=n.eq(o),c=t.text().split("#")[1];t.find("div").css("background-color","#"+c)}}o()}(window);

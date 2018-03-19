@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    
+    <title>【前端性能】高性能滚动 scroll 及页面渲染优化 | Coco ’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="author" content="Coco">
+    
+    
+    <meta name="keywords" content="滚动优化, scroll优化, 防抖与节流">
+    <meta name="description" content="最近在研究页面渲染及web动画的性能问题，以及拜读 《CSS SECRET》（CSS揭秘）这本大作。本文主要想谈谈页面优化之滚动优化。主要内容包括了为何需要优化滚动事件，滚动与页面渲染的关系，节流与防抖，pointer-events:none 优化滚动。因为本文涉及了很多很多基础，可以对照上面的知识点，选择性跳到相应地方阅读。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【前端性能】高性能滚动 scroll 及页面渲染优化 | Coco ’s blog">
+<meta property="og:url" content="http://sbco.cc/2016/05/17/scroll/index.html">
+<meta property="og:site_name" content="Coco ’s blog">
+<meta property="og:description" content="最近在研究页面渲染及web动画的性能问题，以及拜读 《CSS SECRET》（CSS揭秘）这本大作。本文主要想谈谈页面优化之滚动优化。主要内容包括了为何需要优化滚动事件，滚动与页面渲染的关系，节流与防抖，pointer-events:none 优化滚动。因为本文涉及了很多很多基础，可以对照上面的知识点，选择性跳到相应地方阅读。">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160516205933748-797476534.gif">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160516214245123-1124441228.jpg">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160517194417998-1526294600.jpg">
+<meta property="og:updated_time" content="2016-06-07T08:55:00.532Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【前端性能】高性能滚动 scroll 及页面渲染优化 | Coco ’s blog">
+<meta name="twitter:description" content="最近在研究页面渲染及web动画的性能问题，以及拜读 《CSS SECRET》（CSS揭秘）这本大作。本文主要想谈谈页面优化之滚动优化。主要内容包括了为何需要优化滚动事件，滚动与页面渲染的关系，节流与防抖，pointer-events:none 优化滚动。因为本文涉及了很多很多基础，可以对照上面的知识点，选择性跳到相应地方阅读。">
+<meta name="twitter:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160516205933748-797476534.gif">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+</head>
+<body>
+    <span class="mobile btn-mobile-menu">
+      <i class="icon icon-list btn-mobile-menu__icon"></i>
+      <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+    
+<header class="panel-cover panel-cover--collapsed">
+
+  <div class="panel-main">
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+        
+        <img src="/images/logo.png" alt="Coco ’s blog logo" class="panel-cover__logo logo" title="Click Me!!!"/>
+        
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Coco ’s blog</a></h1>
+        <hr class="panel-cover__divider" />
+        
+        <p class="panel-cover__description">
+          少年不知愁滋味 为赋新词强说愁
+        </p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        <div class="navigation-wrapper">
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about/html/" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+              <a target="_blank" href="https://github.com/chokcoco"><li class='navigation__item github' title="To my Github"></li></a>
+              <a target="_blank" href="http://www.cnblogs.com/coco1s/"> <li class='navigation__item'><div class='navigation__item blog' title="To my cnblogs"></div></li></a>
+            </ul>
+          </nav>
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+-------------------------------->
+<!-- add social info here -->
+
+
+        </div>
+      </div>
+    </div>
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner entry">
+        
+<article class="post-container post-container--single">
+  <header class="post-header">
+    <h1 class="post-title">【前端性能】高性能滚动 scroll 及页面渲染优化</h1>
+    
+    <div class="post-meta">
+      <time datetime="2016-05-17" class="post-meta__date date">2016-05-17</time>
+      <span id="busuanzi_container_page_pv">
+        • 阅读量（<span id="busuanzi_value_page_pv"></span>）
+      </span>
+      <span class="post-meta__tags tags">
+          
+          
+             &#8226; 标签:
+            <font class="tags">
+              <a class="tags-link" href="/tags/javascript/">javascript</a>, <a class="tags-link" href="/tags/性能优化/">性能优化</a>, <a class="tags-link" href="/tags/编码技巧/">编码技巧</a>
+            </font>
+          
+      </span>
+
+    </div>
+    
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>最近在研究页面渲染及web动画的性能问题，以及拜读 <a href="https://github.com/cssmagic/CSS-Secrets" target="_blank" rel="external">《CSS SECRET》</a>（CSS揭秘）这本大作。</p><p>本文主要想谈谈页面优化之滚动优化。</p><p>主要内容包括了为何需要优化滚动事件，滚动与页面渲染的关系，节流与防抖，pointer-events:none 优化滚动。因为本文涉及了很多很多基础，可以对照上面的知识点，选择性跳到相应地方阅读。<a id="more"></a></p><h2 id="滚动优化的由来"><a href="#滚动优化的由来" class="headerlink" title="滚动优化的由来"></a>滚动优化的由来</h2><p>滚动优化其实也不仅仅指滚动（scroll 事件），还包括了例如 resize 这类会频繁触发的事件。简单的看看：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="keyword">var</span> i =
+              <span class="number">0</span>;</span>
+            <br>
+            <span class="line">
+              <span class="built_in">window</span>.addEventListener(
+              <span class="string">'scroll'</span>,
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params"></span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="built_in">console</span>.log(i++);</span>
+            <br>
+            <span class="line">&#125;,
+              <span class="literal">false</span>);</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>输出如下：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160516205933748-797476534.gif" alt=""></p><p>在绑定 scroll 、resize 这类事件时，当它发生时，它被触发的频次非常高，间隔很近。如果事件中涉及到大量的位置计算、DOM 操作、元素重绘等工作且这些工作无法在下一个 scroll 事件触发前完成，就会造成浏览器掉帧。加之用户鼠标滚动往往是连续的，就会持续触发 scroll 事件导致掉帧扩大、浏览器 CPU 使用率增加、用户体验受到影响。</p><p>在滚动事件中绑定回调应用场景也非常多，在图片的懒加载、下滑自动加载数据、侧边浮动导航栏等中有着广泛的应用。</p><p>当用户浏览网页时，拥有平滑滚动经常是被忽视但却是用户体验中至关重要的部分。当滚动表现正常时，用户就会感觉应用十分流畅，令人愉悦，反之，笨重不自然卡顿的滚动，则会给用户带来极大不舒爽的感觉。</p><h2 id="滚动与页面渲染的关系"><a href="#滚动与页面渲染的关系" class="headerlink" title="滚动与页面渲染的关系"></a>滚动与页面渲染的关系</h2><p>为什么滚动事件需要去优化？因为它影响了性能。那它影响了什么性能呢？额……这个就要从页面性能问题由什么决定说起。</p><p>我觉得搞技术一定要追本溯源，不要看到别人一篇文章说滚动事件会导致卡顿并说了一堆解决方案优化技巧就如获至宝奉为圭臬，我们需要的不是拿来主义而是批判主义，多去源头看看。</p><p>从问题出发，一步一步寻找到最后，就很容易找到问题的症结所在，只有这样得出的解决方法才容易记住。</p><p>说教了一堆废话，不喜欢的直接忽略哈，回到正题，要找到优化的入口就要知道问题出在哪里，对于页面优化而言，那么我们就要知道页面的渲染原理：</p><p>浏览器渲染原理我在我上一篇文章里也要详细的讲到，不过更多的是从动画渲染的角度去讲的： <a href="http://www.cnblogs.com/coco1s/p/5439619.html" target="_blank" rel="external">【Web动画】CSS3 3D 行星运转 &amp;&amp; 浏览器渲染原理</a> 。</p><p>想了想，还是再简单的描述下，我发现每次 review 这些知识点都有新的收获，这次换一张图，以 chrome 为例子，一个 Web 页面的展示，简单来说可以认为经历了以下下几个步骤：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160516214245123-1124441228.jpg" alt=""></p><ul><li><p>JavaScript：一般来说，我们会使用 JavaScript 来实现一些视觉变化的效果。比如做一个动画或者往页面里添加一些 DOM 元素等。</p></li><li><p>Style：计算样式，这个过程是根据 CSS 选择器，对每个 DOM 元素匹配对应的 CSS 样式。这一步结束之后，就确定了每个 DOM 元素上该应用什么 CSS 样式规则。</p></li><li><p>Layout：布局，上一步确定了每个 DOM 元素的样式规则，这一步就是具体计算每个 DOM 元素最终在屏幕上显示的大小和位置。web 页面中元素的布局是相对的，因此一个元素的布局发生变化，会联动地引发其他元素的布局发生变化。比如， 元素的宽度的变化会影响其子元素的宽度，其子元素宽度的变化也会继续对其孙子元素产生影响。因此对于浏览器来说，布局过程是经常发生的。</p></li><li><p>Paint：绘制，本质上就是填充像素的过程。包括绘制文字、颜色、图像、边框和阴影等，也就是一个 DOM 元素所有的可视效果。一般来说，这个绘制过程是在多个层上完成的。</p></li><li><p>Composite：渲染层合并，由上一步可知，对页面中 DOM 元素的绘制是在多个层上进行的。在每个层上完成绘制过程之后，浏览器会将所有层按照合理的顺序合并成一个图层，然后显示在屏幕上。对于有位置重叠的元素的页面，这个过程尤其重要，因为一旦图层的合并顺序出错，将会导致元素显示异常。</p></li></ul><p>这里又涉及了层（GraphicsLayer）的概念，GraphicsLayer 层是作为纹理(texture)上传给 GPU 的，现在经常能看到说 GPU 硬件加速，就和所谓的层的概念密切相关。但是和本文的滚动优化相关性不大，有兴趣深入了解的可以自行 google 更多。</p><p>简单来说，网页生成的时候，至少会渲染（Layout+Paint）一次。用户访问的过程中，还会不断重新的重排（reflow）和重绘（repaint）。</p><p>其中，用户 scroll 和 resize 行为（即是滑动页面和改变窗口大小）会导致页面不断的重新渲染。</p><p>当你滚动页面时，浏览器可能会需要绘制这些层(有时也被称为合成层)里的一些像素。通过元素分组，当某个层的内容改变时，我们只需要更新该层的结构，并仅仅重绘和栅格化渲染层结构里变化的那一部分，而无需完全重绘。显然，如果当你滚动时，像视差网站( <a href="http://waaac.co/" target="_blank" rel="external">戳我看看</a>)这样有东西在移动时，有可能在多层导致大面积的内容调整，这会导致大量的绘制工作。</p><h2 id="防抖（Debouncing）和节流（Throttling）"><a href="#防抖（Debouncing）和节流（Throttling）" class="headerlink" title="防抖（Debouncing）和节流（Throttling）"></a>防抖（Debouncing）和节流（Throttling）</h2><p>scroll 事件本身会触发页面的重新渲染，同时 scroll 事件的 handler 又会被高频度的触发, 因此事件的 handler 内部不应该有复杂操作，例如 DOM 操作就不应该放在事件处理中。</p><p>针对此类高频度触发事件问题（例如页面 scroll ，屏幕 resize，监听用户输入等），下面介绍两种常用的解决方法，防抖和节流。</p><h3 id="防抖（Debouncing）"><a href="#防抖（Debouncing）" class="headerlink" title="防抖（Debouncing）"></a>防抖（Debouncing）</h3><p>防抖技术即是可以把多个顺序地调用合并成一次，也就是在一定时间内，规定事件被触发的次数。</p><p>通俗一点来说，看看下面这个简化的例子：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+            <span class="line">19</span>
+            <br>
+            <span class="line">20</span>
+            <br>
+            <span class="line">21</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// 简单的防抖动函数</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">debounce</span>(
+                <span class="params">func, wait, immediate</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 定时器变量</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> timeout;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span>
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params"></span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 每次触发 scroll handler 时先清除定时器</span>
+            </span>
+            <br>
+            <span class="line"> clearTimeout(timeout);</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 指定 xx ms 后触发真正想进行的操作 handler</span>
+            </span>
+            <br>
+            <span class="line"> timeout = setTimeout(func, wait);</span>
+            <br>
+            <span class="line"> &#125;;</span>
+            <br>
+            <span class="line">&#125;;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 实际想绑定在 scroll 事件上的 handler</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">realFunc</span>(
+                <span class="params"></span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="built_in">console</span>.log(
+              <span class="string">"Success"</span>);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 采用了防抖动</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="built_in">window</span>.addEventListener(
+              <span class="string">'scroll'</span>,debounce(realFunc,
+              <span class="number">500</span>));</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 没采用防抖动</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="built_in">window</span>.addEventListener(
+              <span class="string">'scroll'</span>,realFunc);</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>上面简单的防抖的例子可以拿到浏览器下试一下，大概功能就是如果 500ms 内没有连续触发两次 scroll 事件，那么才会触发我们真正想在 scroll 事件中触发的函数。</p><p>上面的示例可以更好的封装一下：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+            <span class="line">19</span>
+            <br>
+            <span class="line">20</span>
+            <br>
+            <span class="line">21</span>
+            <br>
+            <span class="line">22</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// 防抖动函数</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">debounce</span>(
+                <span class="params">func, wait, immediate</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> timeout;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span>
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params"></span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> context =
+              <span class="keyword">this</span>, args =
+              <span class="built_in">arguments</span>;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> later =
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params"></span>) </span>&#123;</span>
+            <br>
+            <span class="line"> timeout =
+              <span class="literal">null</span>;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (!immediate) func.apply(context, args);</span>
+            <br>
+            <span class="line"> &#125;;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> callNow = immediate &amp;amp; !timeout;</span>
+            <br>
+            <span class="line"> clearTimeout(timeout);</span>
+            <br>
+            <span class="line"> timeout = setTimeout(later, wait);</span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (callNow) func.apply(context, args);</span>
+            <br>
+            <span class="line"> &#125;;</span>
+            <br>
+            <span class="line">&#125;;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> myEfficientFn = debounce(
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params"></span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 滚动中的真正的操作</span>
+            </span>
+            <br>
+            <span class="line">&#125;,
+              <span class="number">250</span>);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 绑定监听</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="built_in">window</span>.addEventListener(
+              <span class="string">'resize'</span>, myEfficientFn);</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><h3 id="节流（Throttling）"><a href="#节流（Throttling）" class="headerlink" title="节流（Throttling）"></a>节流（Throttling）</h3><p>防抖函数确实不错，但是也存在问题，譬如图片的懒加载，我希望在下滑过程中图片不断的被加载出来，而不是只有当我停止下滑时候，图片才被加载出来。又或者下滑时候的数据的 ajax 请求加载也是同理。</p><p>这个时候，我们希望即使页面在不断被滚动，但是滚动 handler 也可以以一定的频率被触发（譬如 250ms 触发一次），这类场景，就要用到另一种技巧，称为节流函数（throttling）。</p><p>节流函数，只允许一个函数在 X 毫秒内执行一次。</p><p>与防抖相比，节流函数最主要的不同在于它保证在 X 毫秒内至少执行一次我们希望触发的事件 handler。</p><p>与防抖相比，节流函数多了一个 mustRun 属性，代表 mustRun 毫秒内，必然会触发一次 handler ，同样是利用定时器，看看简单的示例：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+            <span class="line">19</span>
+            <br>
+            <span class="line">20</span>
+            <br>
+            <span class="line">21</span>
+            <br>
+            <span class="line">22</span>
+            <br>
+            <span class="line">23</span>
+            <br>
+            <span class="line">24</span>
+            <br>
+            <span class="line">25</span>
+            <br>
+            <span class="line">26</span>
+            <br>
+            <span class="line">27</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// 简单的节流函数</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">throttle</span>(
+                <span class="params">func, wait, mustRun</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> timeout,</span>
+            <br>
+            <span class="line"> startTime =
+              <span class="keyword">new</span>
+              <span class="built_in">Date</span>();</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span>
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params"></span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> context =
+              <span class="keyword">this</span>,</span>
+            <br>
+            <span class="line"> args =
+              <span class="built_in">arguments</span>,</span>
+            <br>
+            <span class="line"> curTime =
+              <span class="keyword">new</span>
+              <span class="built_in">Date</span>();</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line"> clearTimeout(timeout);</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 如果达到了规定的触发时间间隔，触发 handler</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span>(curTime - startTime &amp;gt;= mustRun)&#123;</span>
+            <br>
+            <span class="line"> func.apply(context,args);</span>
+            <br>
+            <span class="line"> startTime = curTime;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 没达到触发间隔，重新设定定时器</span>
+            </span>
+            <br>
+            <span class="line"> &#125;
+              <span class="keyword">else</span>&#123;</span>
+            <br>
+            <span class="line"> timeout = setTimeout(func, wait);</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line"> &#125;;</span>
+            <br>
+            <span class="line">&#125;;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 实际想绑定在 scroll 事件上的 handler</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">realFunc</span>(
+                <span class="params"></span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="built_in">console</span>.log(
+              <span class="string">"Success"</span>);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 采用了节流函数</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="built_in">window</span>.addEventListener(
+              <span class="string">'scroll'</span>,throttle(realFunc,
+              <span class="number">500</span>,
+              <span class="number">1000</span>));</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>上面简单的节流函数的例子可以拿到浏览器下试一下，大概功能就是如果在一段时间内 scroll 触发的间隔一直短于 500ms ，那么能保证事件我们希望调用的 handler 至少在 1000ms 内会触发一次。</p><h2 id="使用-rAF（requestAnimationFrame）触发滚动事件"><a href="#使用-rAF（requestAnimationFrame）触发滚动事件" class="headerlink" title="使用 rAF（requestAnimationFrame）触发滚动事件"></a>使用 rAF（requestAnimationFrame）触发滚动事件</h2><p>上面介绍的抖动与节流实现的方式都是借助了定时器 setTimeout ，但是如果页面只需要兼容高版本浏览器或应用在移动端，又或者页面需要追求高精度的效果，那么可以使用浏览器的原生方法 rAF（requestAnimationFrame）。</p><h3 id="requestAnimationFrame"><a href="#requestAnimationFrame" class="headerlink" title="requestAnimationFrame"></a>requestAnimationFrame</h3><p>window.requestAnimationFrame() 这个方法是用来在页面重绘之前，通知浏览器调用一个指定的函数。这个方法接受一个函数为参，该函数会在重绘前调用。</p><p>rAF 常用于 web 动画的制作，用于准确控制页面的帧刷新渲染，让动画效果更加流畅，当然它的作用不仅仅局限于动画制作，我们可以利用它的特性将它视为一个定时器。（当然它不是定时器）</p><p>通常来说，rAF 被调用的频率是每秒 60 次，也就是 1000/60 ，触发频率大概是 16.7ms 。（当执行复杂操作时，当它发现无法维持 60fps 的频率时，它会把频率降低到 30fps 来保持帧数的稳定。）</p><p>简单而言，使用 requestAnimationFrame 来触发滚动事件，相当于上面的：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">throttle(func, xx,
+              <span class="number">1000</span>/
+              <span class="number">60</span>)
+              <span class="comment">//xx 代表 xx ms内不会重复触发事件 handler</span>
+            </span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>简单的示例如下：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="keyword">var</span> ticking =
+              <span class="literal">false</span>;
+              <span class="comment">// rAF 触发锁</span>
+            </span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">onScroll</span>(
+                <span class="params"></span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span>(!ticking) &#123;</span>
+            <br>
+            <span class="line"> requestAnimationFrame(realFunc);</span>
+            <br>
+            <span class="line"> ticking =
+              <span class="literal">true</span>;</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">realFunc</span>(
+                <span class="params"></span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// do something...</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="built_in">console</span>.log(
+              <span class="string">"Success"</span>);</span>
+            <br>
+            <span class="line"> ticking =
+              <span class="literal">false</span>;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 滚动事件监听</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="built_in">window</span>.addEventListener(
+              <span class="string">'scroll'</span>, onScroll,
+              <span class="literal">false</span>);</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>上面简单的使用 rAF 的例子可以拿到浏览器下试一下，大概功能就是在滚动的过程中，保持以 16.7ms 的频率触发事件 handler。</p><p>使用 requestAnimationFrame 优缺点并存，首先我们不得不考虑它的兼容问题，其次因为它只能实现以 16.7ms 的频率来触发，代表它的可调节性十分差。但是相比 throttle(func, xx, 16.7) ，用于更复杂的场景时，rAF 可能效果更佳，性能更好。</p><h3 id="总结一下"><a href="#总结一下" class="headerlink" title="总结一下"></a>总结一下</h3><ul><li><p>防抖动：防抖技术即是可以把多个顺序地调用合并成一次，也就是在一定时间内，规定事件被触发的次数。</p></li><li><p>节流函数：只允许一个函数在 X 毫秒内执行一次，只有当上一次函数执行后过了你规定的时间间隔，才能进行下一次该函数的调用。</p></li><li><p>rAF：16.7ms 触发一次 handler，降低了可控性，但是提升了性能和精确度。</p></li></ul><h2 id="简化-scroll-内的操作"><a href="#简化-scroll-内的操作" class="headerlink" title="简化 scroll 内的操作"></a>简化 scroll 内的操作</h2><p>上面介绍的方法都是如何去优化 scroll 事件的触发，避免 scroll 事件过度消耗资源的。</p><p>但是从本质上而言，我们应该尽量去精简 scroll 事件的 handler ，将一些变量的初始化、不依赖于滚动位置变化的计算等都应当在 scroll 事件外提前就绪。</p><p>建议如下：</p><h2 id="避免在-scroll-事件中修改样式属性-将样式操作从-scroll-事件中剥离"><a href="#避免在-scroll-事件中修改样式属性-将样式操作从-scroll-事件中剥离" class="headerlink" title="避免在 scroll 事件中修改样式属性 / 将样式操作从 scroll 事件中剥离"></a>避免在 scroll 事件中修改样式属性 / 将样式操作从 scroll 事件中剥离</h2><p><img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160517194417998-1526294600.jpg" alt=""></p><p>输入事件处理函数，比如 scroll / touch 事件的处理，都会在 requestAnimationFrame 之前被调用执行。</p><p>因此，如果你在 scroll 事件的处理函数中做了修改样式属性的操作，那么这些操作会被浏览器暂存起来。然后在调用 requestAnimationFrame 的时候，如果你在一开始做了读取样式属性的操作，那么这将会导致触发浏览器的强制同步布局。</p><h2 id="滑动过程中尝试使用-pointer-events-none-禁止鼠标事件"><a href="#滑动过程中尝试使用-pointer-events-none-禁止鼠标事件" class="headerlink" title="滑动过程中尝试使用 pointer-events: none 禁止鼠标事件"></a>滑动过程中尝试使用 pointer-events: none 禁止鼠标事件</h2><p>大部分人可能都不认识这个属性，嗯，那么它是干什么用的呢？</p><p><a href="https://developer.mozilla.org/zh-CN/docs/Web/CSS/pointer-events" target="_blank" rel="external">pointer-events</a> 是一个 CSS 属性，可以有多个不同的值，属性的一部分值仅仅与 SVG 有关联，这里我们只关注 <code>pointer-events: none</code> 的情况，大概的意思就是禁止鼠标行为，应用了该属性后，譬如鼠标点击，hover 等功能都将失效，即是元素不会成为鼠标事件的 target。</p><p>可以就近 F12 打开开发者工具面板，给 标签添加上 <code>pointer-events: none</code> 样式，然后在页面上感受下效果，发现所有鼠标事件都被禁止了。</p><p>那么它有什么用呢？</p><p><code>pointer-events: none</code> 可用来提高滚动时的帧频。的确，当滚动时，鼠标悬停在某些元素上，则触发其上的 hover 效果，然而这些影响通常不被用户注意，并多半导致滚动出现问题。对 <code>body</code> 元素应用 <code>pointer-events: none</code> ，禁用了包括 hover 在内的鼠标事件，从而提高滚动性能。<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">.disable-hover &#123;</span>
+            <br>
+            <span class="line"> pointer-events: none;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>大概的做法就是在页面滚动的时候, 给 <code>body</code> 添加上 <code>.disable-hover</code> 样式，那么在滚动停止之前, 所有鼠标事件都将被禁止。当滚动结束之后，再移除该属性。</p><p>可以查看这个 <a href="https://dl.dropboxusercontent.com/u/2272348/codez/expensivescroll/demo.html" target="_blank" rel="external">demo</a> 页面。</p><p>上面说 <code>pointer-events: none</code> 可用来提高滚动时的帧频 的这段话摘自 <a href="https://developer.mozilla.org/zh-CN/docs/Web/CSS/pointer-events" target="_blank" rel="external">pointer-events-MDN</a> ，还专门有文章讲解过这个技术：</p><p><a href="https://www.thecssninja.com/javascript/pointer-events-60fps" target="_blank" rel="external">使用pointer-events:none实现60fps滚动</a> 。</p><p>这就完了吗？没有，张鑫旭有一篇专门的文章，用来探讨 pointer-events: none 是否真的能够加速滚动性能，并提出了自己的质疑：</p><p><a href="http://www.zhangxinxu.com/wordpress/2014/01/pointer-events-none-avoiding-unnecessary-paints/" target="_blank" rel="external">pointer-events:none提高页面滚动时候的绘制性能？</a></p><p>结论见仁见智，使用 pointer-events: none 的场合要依据业务本身来定夺，拒绝拿来主义，多去源头看看，动手实践一番再做定夺。</p><p>其他参考文献（都是好文章，值得一读）：</p><ul><li><a href="http://jinlong.github.io/2016/04/24/Debouncing-and-Throttling-Explained-Through-Examples/" target="_blank" rel="external">实例解析防抖动（Debouncing）和节流阀（Throttling）</a></li><li><a href="http://taobaofed.org/blog/2016/04/25/performance-composite/" target="_blank" rel="external">无线性能优化：Composite</a></li><li><a href="http://www.infoq.com/cn/articles/javascript-high-performance-animation-and-page-rendering" target="_blank" rel="external">Javascript高性能动画与页面渲染</a></li><li><a href="https://developers.google.com/web/fundamentals/performance/rendering/debounce-your-input-handlers?hl=zh-cn" target="_blank" rel="external">Google Developers–渲染性能</a></li><li><a href="http://melonh.com/sharing/slides.html?file=high_performance_animation#/2" target="_blank" rel="external">Web高性能动画</a></li></ul><p>到此本文结束，如果还有什么疑问或者建议，可以多多交流，原创文章，文笔有限，才疏学浅，文中若有不正之处，万望告知。</p>
+  </section>
+
+  
+  
+
+</article>
+
+
+<!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key="post-scroll" data-title="【前端性能】高性能滚动 scroll 及页面渲染优化" data-url="http://sbco.cc/2016/05/17/scroll/"></div>
+<!-- 多说评论框 end -->
+
+
+        <footer class="footer">
+	<div class="friendLink">友情链接：
+		<ul>
+			<li><a href="http://www.cnblogs.com/coco1s/">Coco</a></li>
+			<li><a href="http://www.chengfeilong.com/">Scott's Blog</a></li>
+			<li><a href="http://www.52cik.com/">楼教主</a></li>
+			<li><a href="http://blog.aisuso.com/">姚嘉鑫博客</a></li>
+		</ul>
+	</div>
+	<div class="copy_right"> &copy; chokcoco </div>
+	<span class="footer__copyright"> 2014-2016. | 由<a href="https://hexo.io/"> Hexo </a>强力驱动 | 主题<a href="https://github.com/someus/huno"> Huno </a></span>
+
+</footer>
+<!-- 多说公共JS代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"sbco"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- 多说公共JS代码 end -->
+<!-- cnzz统计 -->
+<script type="text/javascript">
+	var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- 文章阅读数统计 -->
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 百度爬虫推送 -->
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+      </div>
+    </div>
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+</body>
+</html>

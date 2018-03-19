@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    
+    <title>【CSS进阶】伪元素的妙用2 - 多列均匀布局及title属性效果 | Coco ’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="author" content="Coco">
+    
+    
+    <meta name="keywords" content="伪元素, 伪类与伪元素, :before, :afrer,  CSS3单标签, single element, 多列均匀布局">
+    <meta name="description" content="最近无论是工作还是自我学习提升都很忙，面对长篇大论的博文总是心有余而力不足，但又不断的接触学习到零碎的但是很有意义的知识点，很想分享给大家，所以本篇可能会很短。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【CSS进阶】伪元素的妙用2 - 多列均匀布局及title属性效果 | Coco ’s blog">
+<meta property="og:url" content="http://sbco.cc/2016/07/13/pesudo2/index.html">
+<meta property="og:site_name" content="Coco ’s blog">
+<meta property="og:description" content="最近无论是工作还是自我学习提升都很忙，面对长篇大论的博文总是心有余而力不足，但又不断的接触学习到零碎的但是很有意义的知识点，很想分享给大家，所以本篇可能会很短。">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/pesudo2/hover.gif">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/pesudo2/justifyLayout.png">
+<meta property="og:updated_time" content="2016-07-13T11:25:51.905Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【CSS进阶】伪元素的妙用2 - 多列均匀布局及title属性效果 | Coco ’s blog">
+<meta name="twitter:description" content="最近无论是工作还是自我学习提升都很忙，面对长篇大论的博文总是心有余而力不足，但又不断的接触学习到零碎的但是很有意义的知识点，很想分享给大家，所以本篇可能会很短。">
+<meta name="twitter:image" content="http://sbco.cc/../../../../images/post/pesudo2/hover.gif">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+</head>
+<body>
+    <span class="mobile btn-mobile-menu">
+      <i class="icon icon-list btn-mobile-menu__icon"></i>
+      <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+    
+<header class="panel-cover panel-cover--collapsed">
+
+  <div class="panel-main">
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+        
+        <img src="/images/logo.png" alt="Coco ’s blog logo" class="panel-cover__logo logo" title="Click Me!!!"/>
+        
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Coco ’s blog</a></h1>
+        <hr class="panel-cover__divider" />
+        
+        <p class="panel-cover__description">
+          少年不知愁滋味 为赋新词强说愁
+        </p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        <div class="navigation-wrapper">
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about/html/" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+              <a target="_blank" href="https://github.com/chokcoco"><li class='navigation__item github' title="To my Github"></li></a>
+              <a target="_blank" href="http://www.cnblogs.com/coco1s/"> <li class='navigation__item'><div class='navigation__item blog' title="To my cnblogs"></div></li></a>
+            </ul>
+          </nav>
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+-------------------------------->
+<!-- add social info here -->
+
+
+        </div>
+      </div>
+    </div>
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner entry">
+        
+<article class="post-container post-container--single">
+  <header class="post-header">
+    <h1 class="post-title">【CSS进阶】伪元素的妙用2 - 多列均匀布局及title属性效果</h1>
+    
+    <div class="post-meta">
+      <time datetime="2016-07-13" class="post-meta__date date">2016-07-13</time>
+      <span id="busuanzi_container_page_pv">
+        • 阅读量（<span id="busuanzi_value_page_pv"></span>）
+      </span>
+      <span class="post-meta__tags tags">
+          
+          
+             &#8226; 标签:
+            <font class="tags">
+              <a class="tags-link" href="/tags/CSS/">CSS</a>
+            </font>
+          
+      </span>
+
+    </div>
+    
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>最近无论是工作还是自我学习提升都很忙，面对长篇大论的博文总是心有余而力不足，但又不断的接触学习到零碎的但是很有意义的知识点，很想分享给大家，所以本篇可能会很短。<a id="more"></a></p><p>本篇接我另一篇讲述 CSS 伪元素的文章： <a href="http://www.cnblogs.com/coco1s/p/5528393.html" target="_blank" rel="external">【CSS进阶】伪元素的妙用–单标签之美</a>，看完本文觉得有意思的可以再去看看上一篇，分享了一些伪元素的妙用。</p><p>正文从这里开始：</p><h2 id="哪些标签不支持伪元素？"><a href="#哪些标签不支持伪元素？" class="headerlink" title="哪些标签不支持伪元素？"></a>哪些标签不支持伪元素？</h2><p>我也是才知道这个姿势。为了不误导读者，就赶紧补充一下。</p><p>伪元素虽然强大，但是还是有一些特定的标签是不支持伪元素 before 和 after 的。</p><p>诸如 <code>&lt;img\&gt;</code> 、 <code>&lt;input\&gt;</code>、 <code>&lt;iframe\&gt;</code>，这几个标签是不支持类似 img::before 这样使用。</p><p>究其原因，要想要标签支持伪元素，需要这个元素是要可以插入内容的，也就是说这个元素要是一个容器。而 input，img，iframe 等元素都不能包含其他元素，所以不能通过伪元素插入内容。</p><h2 id="纯CSS实现title属性hover效果"><a href="#纯CSS实现title属性hover效果" class="headerlink" title="纯CSS实现title属性hover效果"></a>纯CSS实现title属性hover效果</h2><p>我们都知道，在 HTML 标签中有这样一个属性 – title，该属性规定关于元素的额外信息，就是我们可以往 title 里面填入一段文字，鼠标移到元素上时就会显示这段文本。</p><p>像是这样 <code>&lt;element title=&quot;value&quot; &gt;</code>。效果如下：</p><p><img src="../../../../images/post/pesudo2/hover.gif" alt="传统title hover效果">;</p><p>但是这个 hover 框有两个小问题：</p><ul><li><p>响应太慢，通常鼠标 hover 上去要隔 1s 左右才会出现这个 title 框</p></li><li><p>框体结构无法自定义，弹出框的样式无法自定义</p></li></ul><p>嗯，通常要解决上面的方法，或者说我们需要一个鼠标 hover 上去的时候弹出一个提示层的效果都不会采用 title 属性，而是配合使用 JS 模拟一个弹出层。</p><p>这里有一个纯 CSS 的方案可以解决这个场景，运用了伪元素，先上 Demo：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/yJPENQ/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/yJPENQ/" target="_blank" rel="external">hoverTitle</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a></iframe><p>鼠标 hover 一下文字，发现弹出层响应十分迅速（因为就是 CSS hover，没有延迟）。并且这里的弹出层的样式也可以完全自定义，没有用到 JS 代码，并且查看 HTML 代码可以看到不需要多余的标签。</p><p>怎么实现的呢？主要是运用了伪元素的 <code>content</code> 属性， <code>content</code> 通常是用于在伪元素中插入内容的。而其中有一句语法 <code>content: attr(value)</code> 类似这样，可以读取对应 HTML 标签的 <code>value</code> 属性。也就是：</p><ol><li><p>假设一个 HTML 标签定义为： <code>&lt;div data-msg=&quot;ABC&quot;&gt;</code></p></li><li><p>那么该 div 对应的伪类如果设置了 <code>content:attr(data-msg)</code> ，就可以读取到 data-msg 的值，相当于 <code>content:&quot;ABC&quot;</code></p></li></ol><p>而且框体由于是伪类生成的，所以我们可以自定义它的样式及位置，运用这个效果，我们应用在可以在许多无法正常把信息展示完的地方。</p><h2 id="借用伪元素实现多列均匀布局"><a href="#借用伪元素实现多列均匀布局" class="headerlink" title="借用伪元素实现多列均匀布局"></a>借用伪元素实现多列均匀布局</h2><p>我们经常需要实现多列均匀布局，能够自适应各种情况，如下：</p><p><img src="../../../../images/post/pesudo2/justifyLayout.png" alt="多列均匀布局">;</p><p>在移动端我们可以使用 flex 布局，但是在 PC 端如果要兼容 IE6+ ，通常都需要一些额外的标签控制最后一个元素或者配合 JS 进行运算。</p><p>我们知道，有个 <code>text-align:justify</code> 可以实现两端对齐文本效果，一开始我猜测使用它可以实现：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/AXbgbq/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/AXbgbq/" target="_blank" rel="external">AXbgbq</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a></iframe><p>试了一下是不行的，并没有实现所谓的两端对齐，查找原因，在 <a href="http://www.w3school.com.cn/cssref/pr_text_text-align.asp" target="_blank" rel="external">W3C</a> 找到这样一段解释:</p><p>最后一个水平对齐属性是 justify，它会带来自己的一些问题。CSS 中没有说明如何处理连字符，因为不同的语言有不同的连字符规则。规范没有尝试去调和这样一些很可能不完备的规则，而是干脆不提这个问题。</p><p>额，我看完上面一大段解释还是没明白上面意思，再继续查证，才找到原因：</p><p>虽然 text-align:justify 属性是全兼容的，但是要使用它实现两端对齐，需要注意在模块之间添加[空格/换行符/制表符]才能起作用。</p><p>也就是说每一个 <code>&lt;i&gt;1&lt;/i&gt;</code> 间隙，至少需要有一个空格或者换行或者制表符才行。</p><p>我尝试给每一块中间添加一个换行符，发现还是不行：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/qNVyKY/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/qNVyKY/" target="_blank" rel="external">qNVyKY</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a></iframe><p>再寻找原因，是出在最后一个元素上面，然后我找到了 <code>text-align-last</code> 这个属性，text-align-last 属性规定如何对齐文本的最后一行，并且 text-align-last 属性只有在 text-align 属性设置为 “justify” 时才起作用。</p><p>尝试给容器添加 <code>text-align-last:justify</code>，发现终于可以了，多列均匀布局：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/rLYAkj/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/rLYAkj/" target="_blank" rel="external">rLYAkj</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a></iframe><p>但是一看兼容性，惨不忍睹，只有 IE 和 最新的 chrome 支持 text-align-last 属性，也就是说，如果你不是在使用 IE 或者 最新版的 chrome 观看本文，上面这个 codePen 例子还是没有均匀分布。</p><p>好，铺垫了这么久，终于可以引出本文的主角伪元素了，上面说了要使用 <code>text-align:justify</code> 实现多列布局，要配合 <code>text-align-last</code> ，但是它的兼容性又不好，真的没办法了么，其实还是有的，使用伪元素，可以完美实现：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/grXgXy/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/grXgXy/" target="_blank" rel="external">justifyLayout</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a></iframe><p>通过给伪元素 :after 设置 <code>inline-block</code> ，配合容器的 <code>text-align: justify</code> 就可以轻松实现多列均匀布局了。配合几句 hack 代码，可以实现兼容到 IE6+ ，最重要的是代码不长，很好理解。</p><p>本文主要就是多介绍了伪元素的两种实用方法，更多伪元素的妙用可以戳<br><a href="http://chokcoco.github.io/magicCss/html/index.html" target="_blank" rel="external">CSS3奇思妙想，采用单标签完成各种图案 – Demo</a> （请用 Chrome 浏览器打开，非常值得一看）。</p><p>我另一篇讲述 CSS 伪元素的文章： <a href="http://www.cnblogs.com/coco1s/p/5528393.html" target="_blank" rel="external">【CSS进阶】伪元素的妙用–单标签之美</a>，看完本文觉得有意思的可以再去看看上一篇。</p><p>也希望觉得不错的同学顺手在我的 Github 点个 star ： <a href="https://github.com/chokcoco/magicCss" target="_blank" rel="external">CSS3奇思妙想</a> 。</p><p>希望这篇文章对大家有所帮助，尤其是在对问题解决的思维层面上。</p><p>到此本文结束，如果还有什么疑问或者建议，可以多多交流，原创文章，文笔有限，才疏学浅，文中若有不正之处，万望告知。</p>
+  </section>
+
+  
+  
+
+</article>
+
+
+<!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key="post-pesudo2" data-title="【CSS进阶】伪元素的妙用2 - 多列均匀布局及title属性效果" data-url="http://sbco.cc/2016/07/13/pesudo2/"></div>
+<!-- 多说评论框 end -->
+
+
+        <footer class="footer">
+	<div class="friendLink">友情链接：
+		<ul>
+			<li><a href="http://www.cnblogs.com/coco1s/">Coco</a></li>
+			<li><a href="http://www.chengfeilong.com/">Scott's Blog</a></li>
+			<li><a href="http://www.52cik.com/">楼教主</a></li>
+			<li><a href="http://blog.aisuso.com/">姚嘉鑫博客</a></li>
+		</ul>
+	</div>
+	<div class="copy_right"> &copy; chokcoco </div>
+	<span class="footer__copyright"> 2014-2016. | 由<a href="https://hexo.io/"> Hexo </a>强力驱动 | 主题<a href="https://github.com/someus/huno"> Huno </a></span>
+
+</footer>
+<!-- 多说公共JS代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"sbco"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- 多说公共JS代码 end -->
+<!-- cnzz统计 -->
+<script type="text/javascript">
+	var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- 文章阅读数统计 -->
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 百度爬虫推送 -->
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+      </div>
+    </div>
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+</body>
+</html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    
+    <title>【CSS3 3D 动画】酷炫的3D旋转透视 | Coco ’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="author" content="Coco">
+    
+    
+    <meta name="keywords" content="reflow, CSS3动画, css3 3D, CSS3行星, 3D 透视变换, GPU 层, 重绘与回流, repaint, will-change">
+    <meta name="description" content="之前学习 react+webpack ，偶然路过 webpack 官网 ，看到顶部的 LOGO ，就很感兴趣。最近觉得自己 CSS3 过于薄弱，想着深入学习一番，遂以这个 LOGO 为切入口，好好研究学习了一下相关的 CSS3 属性。webpack 的 LOGO 动画效果乍看不是很难，深入了解之后，觉得内部其实大有学问，自己折腾了一番，做了一系列相关的 CSS3 动画效果。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【CSS3 3D 动画】酷炫的3D旋转透视 | Coco ’s blog">
+<meta property="og:url" content="http://sbco.cc/2016/04/21/css33dspective/index.html">
+<meta property="og:site_name" content="Coco ’s blog">
+<meta property="og:description" content="之前学习 react+webpack ，偶然路过 webpack 官网 ，看到顶部的 LOGO ，就很感兴趣。最近觉得自己 CSS3 过于薄弱，想着深入学习一番，遂以这个 LOGO 为切入口，好好研究学习了一下相关的 CSS3 属性。webpack 的 LOGO 动画效果乍看不是很难，深入了解之后，觉得内部其实大有学问，自己折腾了一番，做了一系列相关的 CSS3 动画效果。">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420200619726-1892214308.gif">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420200713757-1615207836.gif">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420200745726-1099998183.gif">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420204327070-2018617361.jpg">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420211622538-1247795543.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420212046913-8708739.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420212424210-970963234.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420213037460-2134833277.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420213602023-1033538645.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420213703210-315149157.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160421144115507-846563066.gif">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160421144121851-1403370952.gif">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160421171539163-374398889.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160421180215460-365044426.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160421175805882-2088861080.png">
+<meta property="og:updated_time" content="2016-06-06T02:13:22.756Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【CSS3 3D 动画】酷炫的3D旋转透视 | Coco ’s blog">
+<meta name="twitter:description" content="之前学习 react+webpack ，偶然路过 webpack 官网 ，看到顶部的 LOGO ，就很感兴趣。最近觉得自己 CSS3 过于薄弱，想着深入学习一番，遂以这个 LOGO 为切入口，好好研究学习了一下相关的 CSS3 属性。webpack 的 LOGO 动画效果乍看不是很难，深入了解之后，觉得内部其实大有学问，自己折腾了一番，做了一系列相关的 CSS3 动画效果。">
+<meta name="twitter:image" content="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420200619726-1892214308.gif">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+</head>
+<body>
+    <span class="mobile btn-mobile-menu">
+      <i class="icon icon-list btn-mobile-menu__icon"></i>
+      <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+    
+<header class="panel-cover panel-cover--collapsed">
+
+  <div class="panel-main">
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+        
+        <img src="/images/logo.png" alt="Coco ’s blog logo" class="panel-cover__logo logo" title="Click Me!!!"/>
+        
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Coco ’s blog</a></h1>
+        <hr class="panel-cover__divider" />
+        
+        <p class="panel-cover__description">
+          少年不知愁滋味 为赋新词强说愁
+        </p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        <div class="navigation-wrapper">
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about/html/" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+              <a target="_blank" href="https://github.com/chokcoco"><li class='navigation__item github' title="To my Github"></li></a>
+              <a target="_blank" href="http://www.cnblogs.com/coco1s/"> <li class='navigation__item'><div class='navigation__item blog' title="To my cnblogs"></div></li></a>
+            </ul>
+          </nav>
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+-------------------------------->
+<!-- add social info here -->
+
+
+        </div>
+      </div>
+    </div>
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner entry">
+        
+<article class="post-container post-container--single">
+  <header class="post-header">
+    <h1 class="post-title">【CSS3 3D 动画】酷炫的3D旋转透视</h1>
+    
+    <div class="post-meta">
+      <time datetime="2016-04-21" class="post-meta__date date">2016-04-21</time>
+      <span id="busuanzi_container_page_pv">
+        • 阅读量（<span id="busuanzi_value_page_pv"></span>）
+      </span>
+      <span class="post-meta__tags tags">
+          
+          
+             &#8226; 标签:
+            <font class="tags">
+              <a class="tags-link" href="/tags/CSS3/">CSS3</a>, <a class="tags-link" href="/tags/web动画/">web动画</a>
+            </font>
+          
+      </span>
+
+    </div>
+    
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>之前学习 react+webpack ，偶然路过 <a href="https://webpack.github.io/" target="_blank" rel="external">webpack 官网</a> ，看到顶部的 LOGO ，就很感兴趣。</p><p>最近觉得自己 CSS3 过于薄弱，想着深入学习一番，遂以这个 LOGO 为切入口，好好研究学习了一下相关的 CSS3 属性。webpack 的 LOGO 动画效果乍看不是很难，深入了解之后，觉得内部其实大有学问，自己折腾了一番，做了一系列相关的 CSS3 动画效果。<a id="more"></a></p><p>先上 <a href="http://chokcoco.github.io/demo/css3demo/html/index.html" target="_blank" rel="external">demo</a> ，没有将精力放在兼容上，请用 chrome 打开。</p><p>本文完整的代码，以及更多的 CSS3 效果，在我 <a href="https://github.com/chokcoco/css3-" target="_blank" rel="external">github</a> 上可以看到，也希望大家可以点个 star。</p><p>嗯，可能有些人打不开 demo 或者页面乱了，贴几张效果图：（图片有点大，耐心等待一会）</p><h4 id="立方体-3D-旋转"><a href="#立方体-3D-旋转" class="headerlink" title="立方体 3D 旋转"></a>立方体 3D 旋转</h4><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420200619726-1892214308.gif" alt=""></p><h4 id="3D-透视照片墙"><a href="#3D-透视照片墙" class="headerlink" title="3D 透视照片墙"></a>3D 透视照片墙</h4><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420200713757-1615207836.gif" alt=""></p><h4 id="跳跃的音符"><a href="#跳跃的音符" class="headerlink" title="跳跃的音符"></a>跳跃的音符</h4><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420200745726-1099998183.gif" alt=""></p><p>可能上面的效果对精通 CSS3 的而言小菜一碟，写本文的目的也是我自己学习积累的一个过程，感兴趣的就可以一起往下看啦。</p><p>其实 CSS3 效果真的很强大，上面的效果都是纯 CSS 实现，个人感觉越是深入 CSS 的学习，越是觉得自己不懂 CSS ，不过话说回来，这些效果的实用场景不大，但是作为一个有追求的前端，我觉得还是有必要去好好了解一下这些属性。</p><p>所以本文接下来要讲的大概有：</p><ul><li>transform-style: preserve-3d 三维效果</li><li>perspective and perspective-origin 3D视距，透视/景深效果</li><li>CSS3 filter CSS3滤镜</li><li>transparent、radial-gradient 透明与渐变</li></ul><h2 id="transform-style"><a href="#transform-style" class="headerlink" title="transform-style"></a>transform-style</h2><p>要利用 CSS3 实现 3D 的效果，最主要的就是借助 transform-style 属性。transform-style 只有两个值可以选择：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// 语法：</span>
+            </span>
+            <br>
+            <span class="line">transform-style: flat|preserve
+              <span class="number">-3</span>d;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">transform-style: flat;
+              <span class="comment">// 默认，子元素将不保留其 3D 位置</span>
+            </span>
+            <br>
+            <span class="line">transform-style: preserve
+              <span class="number">-3</span>d;
+              <span class="comment">// 子元素将保留其 3D 位置。</span>
+            </span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>当我们指定一个容器的 transform-style 的属性值为 preserve-3d 时，容器的后代元素便会具有 3D 效果，这样说有点抽象，也就是当前父容器设置了 preserve-3d 值后，它的子元素就可以相对于父元素所在的平面，进行 3D 变形操作。</p><p>当父元素设置了 transform-style:preserve-3d 后，就可以对子元素进行 3D 变形操作了，3D 变形和 2D 变形一样可以，使用 transform 属性来设置，或者可以通过制定的函数或者通过三维矩阵来对元素变型操作：</p><ol><li><p>使用 translateX(length) 、translateY(length) 、 translateZ(length) 来进行 3D 位移操作，与 2D 操作一样，对元素进行位移操作，也可以合并为 translate3d(x,y,z) 这种写法；</p></li><li><p>使用 scaleX() 、scaleY() 、scaleY() 来进行3D 缩放操作，也可以合并为 scale3d(number,number,number) 这种写法；</p></li><li><p>使用 rotateX(angle) 、rotateY(angle) 、rotateZ(angle) 来进行 3D 旋转操作，也可以合并为 rotate3d(Xangle,Yangle,Zangle) 这种写法。</p></li></ol><p>对于 API 的学习，我建议去源头看看，不要满足于消费别人的总结， <a href="http://www.w3school.com.cn/cssref/pr_transform.asp" target="_blank" rel="external">transform-style API</a>。</p><p>这里要特别提出的，3D 坐标轴，所谓的绕 X、Y、Z 轴的三个轴，这个不难，感觉空间想象困难的，照着 API 试试，绕每个轴都转一下就明白了：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420204327070-2018617361.jpg" alt=""></p><p>了解过后，那么依靠上面所说的，其实我们就已经可以做一个立方体出来了。所谓实践出真知，下面就看看该如何一步步得到一个立方体。</p><h4 id="准备六个正方形"><a href="#准备六个正方形" class="headerlink" title="准备六个正方形"></a>准备六个正方形</h4><p>这个好理解，正方体六个面，首先用 div 做出 6 个面，包裹在同一个父级容器下面，父级容器设置 transform-style:preserve-3d ，这样接下来就可以对 6 个面进行 3D 变换操作，为了方便演示，我用 6 个颜色不一样的面：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420211622538-1247795543.png" alt=""></p><p>上面的图是示意有 6 个面，当然我们要把 6 个正方形 div 设置为绝对定位，重叠叠在一起，那么应该是这样的，只能看到一个面：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420212046913-8708739.png" alt=""></p><h4 id="父容器做简单的变换"><a href="#父容器做简单的变换" class="headerlink" title="父容器做简单的变换"></a>父容器做简单的变换</h4><p>为了最后的看上去的效果好看，我们需要先对父容器进行变换，运用上面说的 rotate 属性，将容器的角度改变一下：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">.cube-container&#123;</span>
+            <br>
+            <span class="line"> -webkit-transform: rotateX(
+              <span class="number">-33.5</span>deg) rotateY(
+              <span class="number">45</span>deg);</span>
+            <br>
+            <span class="line"> transform: rotateX(
+              <span class="number">-33.5</span>deg) rotateY(
+              <span class="number">45</span>deg);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>那么，变换之后，得到这样一个图形：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420212424210-970963234.png" alt=""></p><p>嗯，这个时候，6 个 div 面仍然是重叠在一起的。</p><h4 id="对每个面做-3D-变换"><a href="#对每个面做-3D-变换" class="headerlink" title="对每个面做 3D 变换"></a>对每个面做 3D 变换</h4><p>接下来就是对每个面进行 3D 变换了，运用 rotate 可以对 div 平面进行旋转，运用 translate 可以对 div 平面进行平移，而且要记住现在我们是在三维空间内变换，转啊转啊，我们可能会得到这样的形状：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420213037460-2134833277.png" alt=""></p><p>算好旋转角度和偏移距离，最后上面的 6 个面就可以完美拼成一个立方体咯！为了效果更好，我给每个面增加一些透明度，最后得到一个完整的立方体：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420213602023-1033538645.png" alt=""></p><p>为了更有立体感，我们可以调整父容器的旋转角度，旋转看上去更立体的角度:</p><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160420213703210-315149157.png" alt=""></p><p>至此，一个 3D 立方体就完成了。写这篇文章的时候，本来到这里，这一块应该就结束了，但是写到这里的时候，突然突发奇想，既然正方体可以（正六面体），那么正四面体，正八面体甚至球体应该也能做出来吧？</p><p>嗯，没有按住躁动的心，立马动手尝试了一番，最后做出了下面的两个：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160421144115507-846563066.gif" alt=""> <img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160421144121851-1403370952.gif" alt=""></p><p>就不再详细讨论如何一步一步得到这两个了，有兴趣的可以去我的 <a href="https://github.com/chokcoco/css3-" target="_blank" rel="external">github</a> 上看看源码，或者直接和我讨论交流，简单的谈谈思路：</p><h5 id="正四面体"><a href="#正四面体" class="headerlink" title="正四面体"></a>正四面体</h5><p>和正方体一样，我们首先要准备 4 个三角形（下面会详细讲如何利用 CSS3 制作一个三角形 div），注意 4 个三角形应该是重叠在一起的，然后将其中三个分别沿着三条边的中心点旋转 70.5 度（正四面体临面夹角），就可以得到一个正四面体。</p><p>注意沿着三条边的中心点旋转 70.5 度这句话，意思是每个图形要定位一次旋转中心，也就是 <a href="http://www.w3school.com.cn/cssref/pr_transform-origin.asp" target="_blank" rel="external">transform-origin</a> 属性，它允许我们设置旋转元素的基点位置。</p><h5 id="球体"><a href="#球体" class="headerlink" title="球体"></a>球体</h5><p>上面的 GIF 图因为添加了 animation 动画效果，看上去很像一个球体在运动，其实只用了 4 个 div，每个 div 利用 border-radius:100% 设置为圆形，然后以中心点为基准，每个圆形 div 绕 Y 轴旋转不同的角度，再让整个圆形容器绕 Y 轴动起来，就可以得到这样一个效果了。</p><h2 id="perspective-and-perspective-origin-3D视距，透视-景深效果"><a href="#perspective-and-perspective-origin-3D视距，透视-景深效果" class="headerlink" title="perspective and perspective-origin 3D视距，透视/景深效果"></a>perspective and perspective-origin 3D视距，透视/景深效果</h2><p>继续说 3D ，接下来要说的属性是 persepective 和 perspective-origin 。</p><h3 id="persepective"><a href="#persepective" class="headerlink" title="persepective"></a>persepective</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="comment">// 语法</span>
+          </span>
+          <br>
+          <span class="line">perspective: number|none;</span>
+          <br>
+        </pre></td></tr></table></figure><p>perspective 为一个元素设置三维透视的距离，仅作用于元素的后代，而不是其元素本身。</p><p>简单来说，当元素没有设置 perspective 时，也就是当 perspective:none/0 时所有后代元素被压缩在同一个二维平面上，不存在景深的效果。</p><p>而如果设置 perspective 后，将会看到三维的效果。</p><h3 id="perspective-origin"><a href="#perspective-origin" class="headerlink" title="perspective-origin"></a>perspective-origin</h3><p>perspective-origin 表示 3D 元素透视视角的基点位置，默认的透视视角中心在容器是 perspective 所在的元素，而不是他的后代元素的中点，也就是 perspective-origin: 50% 50%。<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// 语法</span>
+            </span>
+            <br>
+            <span class="line">perspective-origin: x-axis y-axis;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// x-axis : 定义该视图在 x 轴上的位置。默认值：50%</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// y-axis : 定义该视图在 y 轴上的位置。默认值：50%</span>
+            </span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>值得注意的是，CSS3 3D 变换中的透视的透视点是在浏览器的前方。</p><p>说总是很难理解，运用上面我们做出来的正方体试验一下，我设置了正方体的边长为 50 px ，这里设置正方体容器 cuber-inner 的 persepective 的为 100 px，而 perspective-origin 保持为默认值：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">-webkit-perspective-origin:
+              <span class="number">50</span>%
+              <span class="number">50</span>%;</span>
+            <br>
+            <span class="line">perspective-origin:
+              <span class="number">50</span>%
+              <span class="number">50</span>%;</span>
+            <br>
+            <span class="line">-webkit-perspective:
+              <span class="number">100</span>px;</span>
+            <br>
+            <span class="line">perspective:
+              <span class="number">100</span>px;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>上面这样设置，也就是相当于我站在 100px 的长度外去看这个立方体，效果如下：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160421171539163-374398889.png" alt=""></p><p>通过调整 persepective 和 perspective-origin 的值，可以看到不一样的图形，这个很好理解，我们观测一个物体的角度和距离物体的距离不断发生改变，我们看的物体也是不一样的，嗯想象一下小学课文，杨桃和星星，就能容易明白了。</p><p>需要提出的是，我上面的几个正多面体图形和球形图形是没有加上 persepective 值的，感兴趣的可以加上试一下看看效果。</p><h4 id="3D-透视照片墙-1"><a href="#3D-透视照片墙-1" class="headerlink" title="3D 透视照片墙"></a>3D 透视照片墙</h4><p>回到文章一开始我贴的那个 3D 照片墙，运用 transform-style: preserve-3d 和 persepective ，可以做出效果很好的这种 3D 照片墙旋转效果。</p><p>代码就不贴了，本文已经很长了，只是简单的谈谈原理，感兴趣的去 <a href="https://github.com/chokcoco/css3-" target="_blank" rel="external">扒源码</a>看看。</p><ul><li><p>设立一个舞台，也就是包裹旋转的图片们的容器，给他设置一个 persepective 距离，以及 transform-style: preserve-3d 让后代可以进行 3D 变换；</p></li><li><p>准备 N 张图片置于容器内部，N 的大小看个人喜好了，图片的 3D 旋转木马效果是类似钢管舞旋转的运动，因此是绕 Y 轴的，我们关心的是 rotateY 的大小，根据我们添加的图片数量，用 360° 的圆周角将每个图片等分，也就是让每张图片绕 Y 轴旋转固定角度依次散开：（下面的图为示意效果，我调整了一下角度和透明度）</p></li></ul><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160421180215460-365044426.png" alt=""></p><ul><li>这个时候，N 张图肯定是重合叠在了一起，所以这里关键一步是运用 translateZ(length) 让图片沿 Z 轴平移，也就是运用 translateZ 可以让图片离我们更近或者更远，因为上一步设置了图片不同的 rotateY() 角度，所以 N 张图片设定一个 translateZ 后，图片就很自然以中点为圆心分散开了，也就是这样：</li></ul><p><img src="http://images2015.cnblogs.com/blog/608782/201604/608782-20160421175805882-2088861080.png" alt=""></p><ul><li>最后利用 animation ，我们让舞台，也就是包裹着图片的容器绕 Y 轴旋转起来（rotateY），那么一个类似旋转木马的 3D 照片墙效果就完成了！</li></ul><p>这里要注意的一点是设置的 persepective 值和单个图片 translateZ(length) 的值，persepective 一定要比 translateZ(length) 的值大，否则就是相当于舞台跑你身后去了，肯定是看不到效果了。</p><p>本来想继续说</p><ul><li>CSS3 filter CSS3滤镜</li><li>transparent、radial-gradient 透明与渐变</li></ul><p>这些个可以让动画效果变得更赞的一些 CSS3 属性，但是觉得本文篇幅已经很长，而且这两个属性有点偏离主题，打算另起一文，再做深入探究。</p><p>再说两点本文没有谈到的，但是很有用处的小细节，感兴趣的可以去了解了解，也会在接下来进行详细探讨：</p><ul><li><p>使用 transform3d api 代替 transform api，强制开启 GPU 加速，提升网站动画渲染性能；</p></li><li><p>使用 CSS3 will-change 提高页面滚动、动画等渲染性能</p></li></ul><p>OK，本文到此结束，如果还有什么疑问或者建议，可以多多交流，原创文章，文笔有限，才疏学浅，文中若有不正之处，万望告知。</p><p>本文完整的代码，以及更多的 CSS3 效果，在我 <a href="https://github.com/chokcoco/css3-" target="_blank" rel="external">github</a> 上可以看到，也希望大家可以点个 star。</p><p>本文的 <a href="http://chokcoco.github.io/demo/css3demo/html/index.html" target="_blank" rel="external">demo</a> 戳我。</p>
+  </section>
+
+  
+  
+
+</article>
+
+
+<!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key="post-css33dspective" data-title="【CSS3 3D 动画】酷炫的3D旋转透视" data-url="http://sbco.cc/2016/04/21/css33dspective/"></div>
+<!-- 多说评论框 end -->
+
+
+        <footer class="footer">
+	<div class="friendLink">友情链接：
+		<ul>
+			<li><a href="http://www.cnblogs.com/coco1s/">Coco</a></li>
+			<li><a href="http://www.chengfeilong.com/">Scott's Blog</a></li>
+			<li><a href="http://www.52cik.com/">楼教主</a></li>
+			<li><a href="http://blog.aisuso.com/">姚嘉鑫博客</a></li>
+		</ul>
+	</div>
+	<div class="copy_right"> &copy; chokcoco </div>
+	<span class="footer__copyright"> 2014-2016. | 由<a href="https://hexo.io/"> Hexo </a>强力驱动 | 主题<a href="https://github.com/someus/huno"> Huno </a></span>
+
+</footer>
+<!-- 多说公共JS代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"sbco"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- 多说公共JS代码 end -->
+<!-- cnzz统计 -->
+<script type="text/javascript">
+	var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- 文章阅读数统计 -->
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 百度爬虫推送 -->
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+      </div>
+    </div>
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+</body>
+</html>

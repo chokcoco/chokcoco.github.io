@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    
+    <title>【CSS进阶】伪元素的妙用--单标签之美 | Coco ’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="author" content="Coco">
+    
+    
+    <meta name="keywords" content="伪元素, 伪类与伪元素, :before, :afrer, 单标签动画, 单标签图案, CSS3单标签, single element">
+    <meta name="description" content="最近在研读 《CSS SECRET》（CSS揭秘）这本大作，对 CSS 有了更深层次的理解，折腾了下面这个项目：CSS3奇思妙想 – Demo （请用 Chrome 浏览器打开，非常值得一看）。采用单标签完成各种图案，许多图案与本文有关。也希望觉得不错的同学顺手在我的 Github 点个 star ： CSS3奇思妙想 。正文从这里开始，本文主要讲述一下 伪元素 before 和 after 各种">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【CSS进阶】伪元素的妙用--单标签之美 | Coco ’s blog">
+<meta property="og:url" content="http://sbco.cc/2016/05/25/pesudo/index.html">
+<meta property="og:site_name" content="Coco ’s blog">
+<meta property="og:description" content="最近在研读 《CSS SECRET》（CSS揭秘）这本大作，对 CSS 有了更深层次的理解，折腾了下面这个项目：CSS3奇思妙想 – Demo （请用 Chrome 浏览器打开，非常值得一看）。采用单标签完成各种图案，许多图案与本文有关。也希望觉得不错的同学顺手在我的 Github 点个 star ： CSS3奇思妙想 。正文从这里开始，本文主要讲述一下 伪元素 before 和 after 各种">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525201157756-1649209290.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525201206803-893466836.png">
+<meta property="og:image" content="http://sbco.cc/file:///C:/Users/Administrator/AppData/Local/YNote/data/rocqiaoqi@163.com/e456abe17fff4aa8a3c76ce4a5169433/1.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525201715991-1390458301.png">
+<meta property="og:image" content="http://sbco.cc/file:///C:/Users/Administrator/AppData/Local/YNote/data/rocqiaoqi@163.com/26daa1cd95cd4fb6b6b1adba06e0eb12/clipboard.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525201736131-681121190.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525201857444-1776941861.gif">
+<meta property="og:image" content="http://sbco.cc/file:///C:/Users/Administrator/AppData/Local/YNote/data/rocqiaoqi@163.com/102a5540846042eca24090baee7e05ff/btnhoveractive.gif">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525202940334-995858207.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525202944975-74268506.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525202949803-524156901.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160527112625428-906375003.gif">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203752225-1702673023.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203756772-1327454420.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203808522-781300314.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203847819-2100257020.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203851850-2061316548.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203855678-622069500.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203858866-1439572782.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203902428-742513860.png">
+<meta property="og:updated_time" content="2016-06-07T08:54:15.292Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【CSS进阶】伪元素的妙用--单标签之美 | Coco ’s blog">
+<meta name="twitter:description" content="最近在研读 《CSS SECRET》（CSS揭秘）这本大作，对 CSS 有了更深层次的理解，折腾了下面这个项目：CSS3奇思妙想 – Demo （请用 Chrome 浏览器打开，非常值得一看）。采用单标签完成各种图案，许多图案与本文有关。也希望觉得不错的同学顺手在我的 Github 点个 star ： CSS3奇思妙想 。正文从这里开始，本文主要讲述一下 伪元素 before 和 after 各种">
+<meta name="twitter:image" content="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525201157756-1649209290.png">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+</head>
+<body>
+    <span class="mobile btn-mobile-menu">
+      <i class="icon icon-list btn-mobile-menu__icon"></i>
+      <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+    
+<header class="panel-cover panel-cover--collapsed">
+
+  <div class="panel-main">
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+        
+        <img src="/images/logo.png" alt="Coco ’s blog logo" class="panel-cover__logo logo" title="Click Me!!!"/>
+        
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Coco ’s blog</a></h1>
+        <hr class="panel-cover__divider" />
+        
+        <p class="panel-cover__description">
+          少年不知愁滋味 为赋新词强说愁
+        </p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        <div class="navigation-wrapper">
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about/html/" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+              <a target="_blank" href="https://github.com/chokcoco"><li class='navigation__item github' title="To my Github"></li></a>
+              <a target="_blank" href="http://www.cnblogs.com/coco1s/"> <li class='navigation__item'><div class='navigation__item blog' title="To my cnblogs"></div></li></a>
+            </ul>
+          </nav>
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+-------------------------------->
+<!-- add social info here -->
+
+
+        </div>
+      </div>
+    </div>
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner entry">
+        
+<article class="post-container post-container--single">
+  <header class="post-header">
+    <h1 class="post-title">【CSS进阶】伪元素的妙用--单标签之美</h1>
+    
+    <div class="post-meta">
+      <time datetime="2016-05-25" class="post-meta__date date">2016-05-25</time>
+      <span id="busuanzi_container_page_pv">
+        • 阅读量（<span id="busuanzi_value_page_pv"></span>）
+      </span>
+      <span class="post-meta__tags tags">
+          
+          
+             &#8226; 标签:
+            <font class="tags">
+              <a class="tags-link" href="/tags/CSS/">CSS</a>
+            </font>
+          
+      </span>
+
+    </div>
+    
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>最近在研读 <a href="https://github.com/cssmagic/CSS-Secrets" target="_blank" rel="external">《CSS SECRET》</a>（CSS揭秘）这本大作，对 CSS 有了更深层次的理解，折腾了下面这个项目：</p><p><a href="http://chokcoco.github.io/magicCss/html/index.html" target="_blank" rel="external">CSS3奇思妙想 – Demo</a> （请用 Chrome 浏览器打开，非常值得一看）。采用单标签完成各种图案，许多图案与本文有关。</p><p>也希望觉得不错的同学顺手在我的 Github 点个 star ： <a href="https://github.com/chokcoco/magicCss" target="_blank" rel="external">CSS3奇思妙想</a> 。</p><p>正文从这里开始，本文主要讲述一下 伪元素 before 和 after 各种妙用。<a id="more"></a></p><h2 id="before和-before的区别"><a href="#before和-before的区别" class="headerlink" title=":before和::before的区别"></a>:before和::before的区别</h2><p>在介绍具体用法之前，简单介绍下伪类和伪元素。伪类大家听的多了，伪元素可能听到的不是那么频繁，其实 CSS 对这两个是有区分的。</p><p><img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525201157756-1649209290.png" alt="CSS2及CSS3伪类区分"> <img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525201206803-893466836.png" alt="CSS3伪元素单双冒号区分"></p><p>有时你会发现伪类元素使用了两个冒号 (::) 而不是一个冒号 (:)，这是 CSS3 规范中的一部分要求，目的是为了区分伪类和伪元素，大多数浏览器都支持这两种表示方式。<br></p><figure class="highlight"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">#id:after&#123;</span>
+            <br>
+            <span class="line"> ...</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line">#id::after&#123;</span>
+            <br>
+            <span class="line"> ...</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>单冒号(:)用于 CSS3 伪类，双冒号(::)用于 CSS3 伪元素。对于 CSS2 中已经有的伪元素，例如 :before，单冒号和双冒号的写法 ::before 作用是一样的。</p><p>所以，如果你的网站只需要兼容 webkit、firefox、opera 等浏览器，建议对于伪元素采用双冒号的写法，如果不得不兼容 IE 浏览器，还是用 CSS2 的单冒号写法比较安全。</p><p>更加具体的信息，可以看看 MDN 对 <a href="https://developer.mozilla.org/zh-CN/docs/Web/CSS/Pseudo-classes" target="_blank" rel="external">伪类</a>和 <a href="https://developer.mozilla.org/zh-CN/docs/Web/CSS/Pseudo-elements" target="_blank" rel="external">伪元素</a>的理解。<br>本文的主角就是伪元素 before 和 after ，下面将具体讲讲这两个伪元素的魅力。</p><h2 id="利用-after-清除浮动"><a href="#利用-after-清除浮动" class="headerlink" title="利用 after 清除浮动"></a>利用 after 清除浮动</h2><p>这个估计是前端都知道，运用 after 伪元素清除页面浮动，不做过多解释。<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">.clearfix:after &#123;content:
+              <span class="string">"."</span>; display:block; height:
+              <span class="number">0</span>; visibility:hidden; clear:both; &#125;</span>
+            <br>
+            <span class="line">.clearfix &#123; *zoom:
+              <span class="number">1</span>; &#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><h2 id="伪元素与-css-sprites-雪碧图"><a href="#伪元素与-css-sprites-雪碧图" class="headerlink" title="伪元素与 css sprites 雪碧图"></a>伪元素与 css sprites 雪碧图</h2><p>这个也是老姿势了。雪碧图大家应该也不陌生，通过将多个图片 icon 合为一张图，从而为了减少 http 请求，很多网站对雪碧图的需求还是很大的。</p><p>但是在制作雪碧图的过程中，或者现在很多的打包工具自动生成的雪碧图，都存在着需要为每个 icon 需要预留多少边距的问题。看看下图：</p><p><img src="file:///C:/Users/Administrator/AppData/Local/YNote/data/rocqiaoqi@163.com/e456abe17fff4aa8a3c76ce4a5169433/1.png" alt=""> <img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525201715991-1390458301.png" alt="">–&gt; <img src="file:///C:/Users/Administrator/AppData/Local/YNote/data/rocqiaoqi@163.com/26daa1cd95cd4fb6b6b1adba06e0eb12/clipboard.png" alt=""> <img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525201736131-681121190.png" alt=""></p><p>譬如上面这种情况（假设按钮中的图标是采用了雪碧图），产品某天突然要求按钮从状态左变为状态右，那么雪碧图原先预留的位置边距肯定就不够了，导致其他图形出现在按钮中。</p><p>而我们通常不会为了一个小 icon 多添加一个标签（不符合语义化）。</p><p>所以通常这种情况需要用到雪碧图的话，都是在按钮中设置一个伪元素，将伪元素的高宽设置为原本 icon 的大小，再利用绝对定位定位到需要的地方，这样无论雪碧图每个 icon 的边距是多少，都能够完美适应。</p><h2 id="单个颜色实现按钮-hover-、active-的明暗变化"><a href="#单个颜色实现按钮-hover-、active-的明暗变化" class="headerlink" title="单个颜色实现按钮 hover 、active 的明暗变化"></a>单个颜色实现按钮 hover 、active 的明暗变化</h2><p>最近项目有个这样的需求，根据不同的业务场景，运营需要配置一个按钮的不同背景色值。但是我们知道，一个按钮通常而言是有 3 个色值的，normal 状态的，hover 状态的和 active 状态的，通常 hover 是比原色稍微亮一点，active 则是稍微暗一点。</p><p>大概是这样（下图）：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525201857444-1776941861.gif" alt=""></p><p><img src="file:///C:/Users/Administrator/AppData/Local/YNote/data/rocqiaoqi@163.com/102a5540846042eca24090baee7e05ff/btnhoveractive.gif" alt=""></p><p>为了减轻运营同学的负担，怎么样做到只配置一个背景色不配置 hover 和 active 颜色让按钮也能自适应跟随变化呢。是的，用上 before、after 两个伪元素可以做到。</p><h3 id="颜色小知识"><a href="#颜色小知识" class="headerlink" title="颜色小知识"></a>颜色小知识</h3><p>这里要科普一下颜色值的小知识。我们熟知的颜色表示法除了 #fff ，rgb(255,255,255)，还有 hsl(0, 100%, 100%)（HSV）。</p><p>以 HSL 为例，它是一种将 RGB 色彩模型中的点在圆柱坐标系中的表示法。HSL 即色相、饱和度、亮度。</p><p>对于一个使用 HSL 表示的颜色，我们只需要改变 L （亮度）的值，就可以得到一个更亮一点或者更暗一点的颜色。</p><p>当然改变亮度，还可以通过叠加透明层实现，这里使用伪元素改变按钮背景色就是通过叠加半透明层实现。</p><p>简单来说，在背景色上方叠加一个白色半透明层 rgba(255,255,255,.2) 可以得到一个更亮的颜色。（这句话不是很严谨，假设一个元素背景是纯白颜色，叠加白色半透明层也是不会更亮的）</p><p>反之，在背景色上方叠加一个黑色半透明层 rgba(0,0,0,.2) 可以得到一个更暗的颜色。</p><p>所以，我们用 before 伪元素生成一个与按钮大小一致的黑色半透明层 rgba(0,0,0,.2)，在 .btn:hover:before 时显示，用 after 伪元素生成一个与按钮大小一致的白色半透明层 rgba(255,255,255,.2)，在 .btn:active:before 时显示，就可以做到只配置一个背景底色，实现 hover 、active 的时的明暗变化。<br></p><figure class="highlight css"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="selector-class">.pesudo</span>
+              <span class="selector-pseudo">:before</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">position</span>: absolute;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">top</span>:
+              <span class="number">0</span>;
+              <span class="attribute">right</span>:
+              <span class="number">0</span>;
+              <span class="attribute">bottom</span>:
+              <span class="number">0</span>;
+              <span class="attribute">left</span>:
+              <span class="number">0</span>;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">z-index</span>:-
+              <span class="number">1</span>;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">background</span>:
+              <span class="built_in">rgba</span>(0,0,0,.1);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line">
+              <span class="selector-class">.pesudo</span>
+              <span class="selector-pseudo">:hover</span>
+              <span class="selector-pseudo">:before</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">content</span>:
+              <span class="string">""</span>;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line">
+              <span class="selector-class">.pesudo</span>
+              <span class="selector-pseudo">:after</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">position</span>: absolute;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">top</span>:
+              <span class="number">0</span>;
+              <span class="attribute">right</span>:
+              <span class="number">0</span>;
+              <span class="attribute">bottom</span>:
+              <span class="number">0</span>;
+              <span class="attribute">left</span>:
+              <span class="number">0</span>;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">z-index</span>:-
+              <span class="number">1</span>;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">background</span>:
+              <span class="built_in">rgba</span>(255,255,255,.2);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line">
+              <span class="selector-class">.pesudo</span>
+              <span class="selector-pseudo">:active</span>
+              <span class="selector-pseudo">:after</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">content</span>:
+              <span class="string">""</span>;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p><a href="http://chokcoco.github.io/magicCss/html/index.html#pesudo" target="_blank" rel="external">戳我看demo</a> （请用 Chrome 浏览器打开）。</p><h2 id="变形恢复"><a href="#变形恢复" class="headerlink" title="变形恢复"></a>变形恢复</h2><p>有的时候，设计师们希望通过一些比较特殊的几何图形，表达不同的意思。</p><p><img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525202940334-995858207.png" alt=""> <img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525202944975-74268506.png" alt=""> <img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525202949803-524156901.png" alt=""></p><p>用 CSS3 transfrom 属性，我们可以轻松的得到一个梯形，菱形或者平行四边形。有时我们设计师们希望在这些容器内配上文字，譬如平行四边形可以表达一种速度之感。</p><p>但是如上图所示，内容文字也会跟着 CSS3 变换一起发生了扭曲，通常我们会用一个 div 做背景进行变换，而文字则是放在另外一个 div 中。</p><p>但是运用伪元素，我们可以去掉这些不合语义化多余的标签，运用 before 伪元素，将 CSS3 变换作用于伪元素上，这样变形不会作用于位于 div 上的的文字，而且没有使用多余的标签。</p><p><a href="http://chokcoco.github.io/magicCss/html/index.html#parallelogram" target="_blank" rel="external">戳我看demo </a>（请用 Chrome 浏览器打开）。</p><h2 id="伪元素实现换行，替代换行标签"><a href="#伪元素实现换行，替代换行标签" class="headerlink" title="伪元素实现换行，替代换行标签"></a>伪元素实现换行，替代换行标签</h2><p>大家都知道，块级元素在不脱离正常布局流的情况下是会自动换行，而行级元素则不会自动换行。但在项目中，有需求是需要让行级元素也自动换行的，通常这种情况，我都是用换行标签 br 解决。而 《CSS SECRET》 中对 br 标签的描述是，这种方法不仅在可维护性方面是一种糟糕的实践，而且污染了结构层的代码。想想自己敲代码以来，用的 br 标签还真不少。</p><p>运用 after 伪元素，可以有一种非常优雅的解决方案：<br></p><figure class="highlight css"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="selector-class">.inline-element</span>
+              <span class="selector-pseudo">::after</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">content</span>:
+              <span class="string">"\A"</span>;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">white-space</span>: pre;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>通过给元素的 after 伪元素添加 content 为 “\A” 的值。这里 \A 是什么呢？</p><p>有一个 Unicode 字符是专门代表换行符的：0x000A 。 在 CSS 中，这个字符可以写作 “\000A”， 或简化为 “\A”。这里我们用它来作为 ::after 伪元素的内容。也就是在元素末尾添加了一个换行符的意思。</p><p>而 white-space: pre; 的作用是保留元素后面的空白符和换行符，结合两者，就可以轻松实现在行内级元素末尾实现换行。<br><a href="http://play.csssecrets.io/line-breaks" target="_blank" rel="external">原文Demo</a>。</p><h2 id="增强用户体验，使用伪元素实现增大点击热区"><a href="#增强用户体验，使用伪元素实现增大点击热区" class="headerlink" title="增强用户体验，使用伪元素实现增大点击热区"></a>增强用户体验，使用伪元素实现增大点击热区</h2><p>按钮是我们网页设计中十分重要的一环，而按钮的设计也与用户体验息息相关。让用户更容易的点击到按钮无疑能很好的增加用户体验，尤其是在移动端，按钮通常都很小，但是有时由于设计稿限制，我们不能直接去改变按钮元素的高宽。那么这个时候有什么办法在不改变按钮原本大小的情况下去增加他的点击热区呢？</p><p>这里，伪元素也是可以代表其宿主元素来响应的鼠标交互事件的。借助伪元素可以轻松帮我们实现，我们可以这样写：<br></p><figure class="highlight css"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="selector-class">.btn</span>
+              <span class="selector-pseudo">::befoer</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">content</span>:
+              <span class="string">""</span>;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">position</span>:absolute;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">top</span>:-
+              <span class="number">10px</span>;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">right</span>:-
+              <span class="number">10px</span>;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">bottom</span>:-
+              <span class="number">10px</span>;</span>
+            <br>
+            <span class="line">
+              <span class="attribute">left</span>:-
+              <span class="number">10px</span>;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>当然，在 PC 端下这样子看起来有点奇怪，但是合理的用在点击区域较小的移动端则能取到十分好的效果，效果如下：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160527112625428-906375003.gif" alt=""></p><h2 id="more-magic-–-单标签图案"><a href="#more-magic-–-单标签图案" class="headerlink" title="more magic – 单标签图案"></a>more magic – 单标签图案</h2><p>上面介绍的是伪元素众多用法的一部分，伪元素的作用远不止于此。有了before 、after 两个伪元素。一个标签其实可以相当于 3 个标签来使用，而配合 CSS3 强大的 3D 变换、多重背景，多重阴影等手段，让单标签作画成为了可能，下面是我仅用单个标签，实现的一些动画效果：</p><h3 id="单标签实现浏览器图标："><a href="#单标签实现浏览器图标：" class="headerlink" title="单标签实现浏览器图标："></a>单标签实现浏览器图标：</h3><p><img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203752225-1702673023.png" alt=""> <img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203756772-1327454420.png" alt=""> <img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203808522-781300314.png" alt=""></p><h3 id="单标签天气图标："><a href="#单标签天气图标：" class="headerlink" title="单标签天气图标："></a>单标签天气图标：</h3><p><img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203847819-2100257020.png" alt=""> <img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203851850-2061316548.png" alt=""> <img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203855678-622069500.png" alt=""> <img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203858866-1439572782.png" alt=""> <img src="http://images2015.cnblogs.com/blog/608782/201605/608782-20160525203902428-742513860.png" alt=""></p><p><a href="http://chokcoco.github.io/magicCss/html/index.html" target="_blank" rel="external">CSS3奇思妙想，采用单标签完成各种图案 – Demo</a> （请用 Chrome 浏览器打开，非常值得一看）。</p><p>也希望觉得不错的同学顺手在我的 Github 点个 star ： <a href="https://github.com/chokcoco/magicCss" target="_blank" rel="external">CSS3奇思妙想</a> 。</p><p>希望这篇文章对大家有所帮助，尤其是在对问题解决的思维层面上。</p><p>到此本文结束，如果还有什么疑问或者建议，可以多多交流，原创文章，文笔有限，才疏学浅，文中若有不正之处，万望告知。</p>
+  </section>
+
+  
+  
+
+</article>
+
+
+<!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key="post-pesudo" data-title="【CSS进阶】伪元素的妙用--单标签之美" data-url="http://sbco.cc/2016/05/25/pesudo/"></div>
+<!-- 多说评论框 end -->
+
+
+        <footer class="footer">
+	<div class="friendLink">友情链接：
+		<ul>
+			<li><a href="http://www.cnblogs.com/coco1s/">Coco</a></li>
+			<li><a href="http://www.chengfeilong.com/">Scott's Blog</a></li>
+			<li><a href="http://www.52cik.com/">楼教主</a></li>
+			<li><a href="http://blog.aisuso.com/">姚嘉鑫博客</a></li>
+		</ul>
+	</div>
+	<div class="copy_right"> &copy; chokcoco </div>
+	<span class="footer__copyright"> 2014-2016. | 由<a href="https://hexo.io/"> Hexo </a>强力驱动 | 主题<a href="https://github.com/someus/huno"> Huno </a></span>
+
+</footer>
+<!-- 多说公共JS代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"sbco"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- 多说公共JS代码 end -->
+<!-- cnzz统计 -->
+<script type="text/javascript">
+	var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- 文章阅读数统计 -->
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 百度爬虫推送 -->
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+      </div>
+    </div>
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+</body>
+</html>

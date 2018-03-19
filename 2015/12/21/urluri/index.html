@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    
+    <title>【基础进阶】URL详解与URL编码 | Coco ’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="author" content="Coco">
+    
+    
+    <meta name="keywords" content="URL, URI, URL格式, URL编码, escape, encodeURI, encodeURIComponent, 端口, URL解析">
+    <meta name="description" content="作为前端，每日与 URL 打交道是必不可少的。但是也许每天只是单纯的用，对其只是一知半解，随着工作的展开，我发现在日常抓包调试，接口调用，浏览器兼容等许多方面，不深入去理解URL与URL编码则会踩到很多坑。故写下此篇文章，详解一下 URL 。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【基础进阶】URL详解与URL编码 | Coco ’s blog">
+<meta property="og:url" content="http://sbco.cc/2015/12/21/urluri/index.html">
+<meta property="og:site_name" content="Coco ’s blog">
+<meta property="og:description" content="作为前端，每日与 URL 打交道是必不可少的。但是也许每天只是单纯的用，对其只是一知半解，随着工作的展开，我发现在日常抓包调试，接口调用，浏览器兼容等许多方面，不深入去理解URL与URL编码则会踩到很多坑。故写下此篇文章，详解一下 URL 。">
+<meta property="og:updated_time" content="2016-06-03T10:19:07.483Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【基础进阶】URL详解与URL编码 | Coco ’s blog">
+<meta name="twitter:description" content="作为前端，每日与 URL 打交道是必不可少的。但是也许每天只是单纯的用，对其只是一知半解，随着工作的展开，我发现在日常抓包调试，接口调用，浏览器兼容等许多方面，不深入去理解URL与URL编码则会踩到很多坑。故写下此篇文章，详解一下 URL 。">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+</head>
+<body>
+    <span class="mobile btn-mobile-menu">
+      <i class="icon icon-list btn-mobile-menu__icon"></i>
+      <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+    
+<header class="panel-cover panel-cover--collapsed">
+
+  <div class="panel-main">
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+        
+        <img src="/images/logo.png" alt="Coco ’s blog logo" class="panel-cover__logo logo" title="Click Me!!!"/>
+        
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Coco ’s blog</a></h1>
+        <hr class="panel-cover__divider" />
+        
+        <p class="panel-cover__description">
+          少年不知愁滋味 为赋新词强说愁
+        </p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        <div class="navigation-wrapper">
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about/html/" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+              <a target="_blank" href="https://github.com/chokcoco"><li class='navigation__item github' title="To my Github"></li></a>
+              <a target="_blank" href="http://www.cnblogs.com/coco1s/"> <li class='navigation__item'><div class='navigation__item blog' title="To my cnblogs"></div></li></a>
+            </ul>
+          </nav>
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+-------------------------------->
+<!-- add social info here -->
+
+
+        </div>
+      </div>
+    </div>
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner entry">
+        
+<article class="post-container post-container--single">
+  <header class="post-header">
+    <h1 class="post-title">【基础进阶】URL详解与URL编码</h1>
+    
+    <div class="post-meta">
+      <time datetime="2015-12-21" class="post-meta__date date">2015-12-21</time>
+      <span id="busuanzi_container_page_pv">
+        • 阅读量（<span id="busuanzi_value_page_pv"></span>）
+      </span>
+      <span class="post-meta__tags tags">
+          
+          
+             &#8226; 标签:
+            <font class="tags">
+              <a class="tags-link" href="/tags/URL/">URL</a>, <a class="tags-link" href="/tags/编码技巧/">编码技巧</a>
+            </font>
+          
+      </span>
+
+    </div>
+    
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>作为前端，每日与 URL 打交道是必不可少的。但是也许每天只是单纯的用，对其只是一知半解，随着工作的展开，我发现在日常抓包调试，接口调用，浏览器兼容等许多方面，不深入去理解URL与URL编码则会踩到很多坑。故写下此篇文章，详解一下 URL 。<a id="more"></a></p><h2 id="URL-与-URI"><a href="#URL-与-URI" class="headerlink" title="URL 与 URI"></a>URL 与 URI</h2><p>很多人会混淆这两个名词。</p><p>URL：(Uniform/Universal Resource Locator 的缩写，统一资源定位符)。</p><p>URI：(Uniform Resource Identifier 的缩写，统一资源标识符)。</p><p>关系：</p><p>URI 属于 URL 更低层次的抽象，一种字符串文本标准。</p><p>就是说，URI 属于父类，而 URL 属于 URI 的子类。URL 是 URI 的一个子集。</p><p>二者的区别在于，URI 表示请求服务器的路径，定义这么一个资源。而 URL 同时说明要如何访问这个资源（ <a href="http://）。" target="_blank" rel="external">http://）。</a></p><h2 id="端口-与-URL标准格式"><a href="#端口-与-URL标准格式" class="headerlink" title="端口 与 URL标准格式"></a>端口 与 URL标准格式</h2><p>何为端口？端口(Port)，相当于一种数据的传输通道。用于接受某些数据，然后传输给相应的服务，而电脑将这些数据处理后，再将相应的回复通过开启的端口传给对方。</p><p>端口的作用：因为 IP 地址与网络服务的关系是一对多的关系。所以实际上因特网上是通过 IP 地址加上端口号来区分不同的服务的。</p><p>端口是通过端口号来标记的，端口号只有整数，范围是从0 到65535。</p><h4 id="URL-标准格式"><a href="#URL-标准格式" class="headerlink" title="URL 标准格式"></a>URL 标准格式</h4><p>通常而言，我们所熟悉的 URL 的常见定义格式为：<br></p><figure class="highlight"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line"></span>
+            <br>
+            <span class="line">scheme://host[:port#]/path/.../[;url-params][?query-string][#anchor]</span>
+            <br>
+            <span class="line">scheme //有我们很熟悉的http、https、ftp以及著名的ed2k，迅雷的thunder等。</span>
+            <br>
+            <span class="line">host //HTTP服务器的IP地址或者域名</span>
+            <br>
+            <span class="line">port# //HTTP服务器的默认端口是80，这种情况下端口号可以省略。如果使用了别的端口，必须指明，例如tomcat的默认端口是8080
+              http://localhost:8080/</span>
+            <br>
+            <span class="line">path //访问资源的路径</span>
+            <br>
+            <span class="line">url-params //所带参数</span>
+            <br>
+            <span class="line">query-string //发送给http服务器的数据</span>
+            <br>
+            <span class="line">anchor //锚点定位</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><h2 id="利用-a-标签自动解析-url"><a href="#利用-a-标签自动解析-url" class="headerlink" title="利用 a 标签自动解析 url"></a>利用 a 标签自动解析 url</h2><p>开发当中一个很常见的场景是，需要从 URL 中提取一些需要的元素，譬如 host 、 请求参数等等。</p><p>通常的做法是写正则去匹配相应的字段，当然，这里要安利下述这种方法，来自 <a href="http://james.padolsey.com/javascript/parsing-urls-with-the-dom/" target="_blank" rel="external">James</a> 的 blog，原理是动态创建一个 a 标签，利用浏览器的一些原生方法及一些正则（为了健壮性正则还是要的），完美解析 URL ，获取我们想要的任意一个部分。</p><p>代码如下：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+            <span class="line">19</span>
+            <br>
+            <span class="line">20</span>
+            <br>
+            <span class="line">21</span>
+            <br>
+            <span class="line">22</span>
+            <br>
+            <span class="line">23</span>
+            <br>
+            <span class="line">24</span>
+            <br>
+            <span class="line">25</span>
+            <br>
+            <span class="line">26</span>
+            <br>
+            <span class="line">27</span>
+            <br>
+            <span class="line">28</span>
+            <br>
+            <span class="line">29</span>
+            <br>
+            <span class="line">30</span>
+            <br>
+            <span class="line">31</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// This function creates a new anchor element and uses location</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// properties (inherent) to get the desired URL data. Some String</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// operations are used (to normalize results across browsers).</span>
+            </span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">parseURL</span>(
+                <span class="params">url</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> a =
+              <span class="built_in">document</span>.createElement(
+              <span class="string">'a'</span>);</span>
+            <br>
+            <span class="line"> a.href = url;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span> &#123;</span>
+            <br>
+            <span class="line"> source: url,</span>
+            <br>
+            <span class="line"> protocol: a.protocol.replace(
+              <span class="string">':'</span>,
+              <span class="string">''</span>),</span>
+            <br>
+            <span class="line"> host: a.hostname,</span>
+            <br>
+            <span class="line"> port: a.port,</span>
+            <br>
+            <span class="line"> query: a.search,</span>
+            <br>
+            <span class="line"> params: (
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params"></span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> ret = &#123;&#125;,</span>
+            <br>
+            <span class="line"> seg = a.search.replace(
+              <span class="regexp">/^\?/</span>,
+              <span class="string">''</span>).split(
+              <span class="string">'&amp;'</span>),</span>
+            <br>
+            <span class="line"> len = seg.length, i =
+              <span class="number">0</span>, s;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">for</span> (;i&lt;len;i++) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (!seg[i]) &#123;
+              <span class="keyword">continue</span>; &#125;</span>
+            <br>
+            <span class="line"> s = seg[i].split(
+              <span class="string">'='</span>);</span>
+            <br>
+            <span class="line"> ret[s[
+              <span class="number">0</span>]] = s[
+              <span class="number">1</span>];</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span> ret;</span>
+            <br>
+            <span class="line"> &#125;)(),</span>
+            <br>
+            <span class="line"> file: (a.pathname.match(
+              <span class="regexp">/([^/?#]+)$/i</span>) || [,
+              <span class="string">''</span>])[
+              <span class="number">1</span>],</span>
+            <br>
+            <span class="line"> hash: a.hash.replace(
+              <span class="string">'#'</span>,
+              <span class="string">''</span>),</span>
+            <br>
+            <span class="line"> path: a.pathname.replace(
+              <span class="regexp">/^([^/])/</span>,
+              <span class="string">'/$1'</span>),</span>
+            <br>
+            <span class="line"> relative: (a.href.match(
+              <span class="regexp">/tps?:\/[^/]+(.+)/</span>) || [,
+              <span class="string">''</span>])[
+              <span class="number">1</span>],</span>
+            <br>
+            <span class="line"> segments: a.pathname.replace(
+              <span class="regexp">/^\//</span>,
+              <span class="string">''</span>).split(
+              <span class="string">'/'</span>)</span>
+            <br>
+            <span class="line"> &#125;;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>Usage 使用方法：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="keyword">var</span> myURL = parseURL(
+              <span class="string">'http://abc.com:8080/dir/index.html?id=255&amp;amp;m=hello#top'</span>);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">myURL.file;
+              <span class="comment">// = 'index.html'</span>
+            </span>
+            <br>
+            <span class="line">myURL.hash;
+              <span class="comment">// = 'top'</span>
+            </span>
+            <br>
+            <span class="line">myURL.host;
+              <span class="comment">// = 'abc.com'</span>
+            </span>
+            <br>
+            <span class="line">myURL.query;
+              <span class="comment">// = '?id=255&amp;amp;m=hello'</span>
+            </span>
+            <br>
+            <span class="line">myURL.params;
+              <span class="comment">// = Object = &#123; id: 255, m: hello &#125;</span>
+            </span>
+            <br>
+            <span class="line">myURL.path;
+              <span class="comment">// = '/dir/index.html'</span>
+            </span>
+            <br>
+            <span class="line">myURL.segments;
+              <span class="comment">// = Array = ['dir', 'index.html']</span>
+            </span>
+            <br>
+            <span class="line">myURL.port;
+              <span class="comment">// = '8080'</span>
+            </span>
+            <br>
+            <span class="line">myURL.protocol;
+              <span class="comment">// = 'http'</span>
+            </span>
+            <br>
+            <span class="line">myURL.source;
+              <span class="comment">// = 'http://abc.com:8080/dir/index.html?id=255</span>
+            </span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>利用上述方法，即可解析得到 URL 的任意部分。</p><h2 id="URL-编码"><a href="#URL-编码" class="headerlink" title="URL 编码"></a>URL 编码</h2><p>为什么要进行URL编码？通常如果一样东西需要编码，说明这样东西并不适合直接进行传输。</p><ul><li><p>会引起歧义：例如 URL 参数字符串中使用 key=value 这样的键值对形式来传参，键值对之间以 &amp; 符号分隔，如 ?postid=5038412&amp;t=1450591802326，服务器会根据参数串的 &amp; 和 = 对参数进行解析，如果 value 字符串中包含了 = 或者 &amp; ，如宝洁公司的简称为P&amp;G，假设需要当做参数去传递，那么可能URL所带参数可能会是这样 ?name=P&amp;G&amp;t=1450591802326，因为参数中多了一个&amp;势必会造成接收 URL 的服务器解析错误，因此必须将引起歧义的 &amp; 和 = 符号进行转义， 也就是对其进行编码。</p></li><li><p>非法字符：又如，URL 的编码格式采用的是 ASCII 码，而不是 Unicode，这也就是说你不能在 URL 中包含任何非 ASCII 字符，例如中文。否则如果客户端浏览器和服务端浏览器支持的字符集不同的情况下，中文可能会造成问题。</p></li></ul><p>那么如何编码？如下：</p><h2 id="escape-、-encodeURI-、encodeURIComponent"><a href="#escape-、-encodeURI-、encodeURIComponent" class="headerlink" title="escape 、 encodeURI 、encodeURIComponent"></a>escape 、 encodeURI 、encodeURIComponent</h2><h3 id="escape"><a href="#escape" class="headerlink" title="escape()"></a>escape()</h3><p>首先想声明的是，W3C把这个函数废弃了，身为一名前端如果还用这个函数是要打脸的。</p><p>escape只是对字符串进行编码（而其余两种是对URL进行编码），与URL编码无关。编码之后的效果是以 %XX 或者 %uXXXX 这种形式呈现的。它不会对 ASCII字符、数字 以及 @ * / + 进行编码。</p><p>根据 MDN 的说明，escape 应当换用为 encodeURI 或 encodeURIComponent；unescape 应当换用为 decodeURI 或 decodeURIComponent。escape 应该避免使用。举例如下：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="built_in">encodeURI</span>(
+              <span class="string">'https://www.baidu.com/ a b c'</span>)</span>
+            <br>
+            <span class="line">
+              <span class="comment">// "https://www.baidu.com/%20a%20b%20c"</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="built_in">encodeURIComponent</span>(
+              <span class="string">'https://www.baidu.com/ a b c'</span>)</span>
+            <br>
+            <span class="line">
+              <span class="comment">// "https%3A%2F%2Fwww.baidu.com%2F%20a%20b%20c"</span>
+            </span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">//而 escape 会编码成下面这样，eocode 了冒号却没 encode 斜杠，十分怪异，故废弃之</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="built_in">escape</span>(
+              <span class="string">'https://www.baidu.com/ a b c'</span>)</span>
+            <br>
+            <span class="line">
+              <span class="comment">// "https%3A//www.baidu.com/%20a%20b%20c"</span>
+            </span>
+            <br>
+          </pre></td></tr></table></figure><p></p><h3 id="encodeURI"><a href="#encodeURI" class="headerlink" title="encodeURI()"></a>encodeURI()</h3><p>encodeURI() 是 Javascript 中真正用来对 URL 编码的函数。它着眼于对整个URL进行编码。<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="built_in">encodeURI</span>(
+              <span class="string">"http://www.cnblogs.com/season-huang/some other thing"</span>);</span>
+            <br>
+            <span class="line">
+              <span class="comment">//"http://www.cnblogs.com/season-huang/some%20other%20thing";</span>
+            </span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>编码后变为上述结果，可以看到空格被编码成了%20，而斜杠 / ，冒号 : 并没有被编码。</p><p>是的，它用于对整个 URL 直接编码，不会对 ASCII字母 、数字 、 ~ ! @ # $ &amp; * ( ) = : / , ; ? + ‘ 进行编码。<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="built_in">encodeURI</span>(
+              <span class="string">"~!@#$&amp;amp;*()=:/,;?+'"</span>)</span>
+            <br>
+            <span class="line">
+              <span class="comment">// ~!@#$&amp;amp;*()=:/,;?+'</span>
+            </span>
+            <br>
+          </pre></td></tr></table></figure><p></p><h2 id="encodeURIComponent"><a href="#encodeURIComponent" class="headerlink" title="encodeURIComponent()"></a>encodeURIComponent()</h2><p>嘿，有的时候，我们的 URL 长这样子，请求参数中带了另一个 URL ：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="keyword">var</span> URL =
+              <span class="string">"http://www.a.com?foo=http://www.b.com?t=123&amp;amp;s=456"</span>;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>直接对它进行 encodeURI 显然是不行的。因为 encodeURI 不会对冒号 : 及斜杠 / 进行转义，那么就会出现上述所说的服务器接受到之后解析会有歧义。<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="built_in">encodeURI</span>(URL)</span>
+            <br>
+            <span class="line">
+              <span class="comment">// "http://www.a.com?foo=http://www.b.com?t=123</span>
+            </span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>这个时候，就该用到 encodeURIComponent() 。它的作用是对 URL 中的参数进行编码，记住是对参数，而不是对整个 URL 进行编码。</p><p>因为它仅仅不对 ASCII字母、数字 ~ ! * ( ) ‘ 进行编码。</p><h4 id="错误的用法："><a href="#错误的用法：" class="headerlink" title="错误的用法："></a>错误的用法：</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="keyword">var</span> URL =
+            <span class="string">"http://www.a.com?foo=http://www.b.com?t=123&amp;amp;s=456"</span>;</span>
+          <br>
+          <span class="line">
+            <span class="built_in">encodeURIComponent</span>(URL);</span>
+          <br>
+          <span class="line">
+            <span class="comment">// "http%3A%2F%2Fwww.a.com%3Ffoo%3Dhttp%3A%2F%2Fwww.b.com%3Ft%3D123%26s%3D456"</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="comment">// 错误的用法，看到第一个 http 的冒号及斜杠也被 encode 了</span>
+          </span>
+          <br>
+        </pre></td></tr></table></figure><h4 id="正确的用法：encodeURIComponent-着眼于对单个的参数进行编码："><a href="#正确的用法：encodeURIComponent-着眼于对单个的参数进行编码：" class="headerlink" title="正确的用法：encodeURIComponent() 着眼于对单个的参数进行编码："></a>正确的用法：encodeURIComponent() 着眼于对单个的参数进行编码：</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="keyword">var</span> param =
+            <span class="string">"http://www.b.com?t=123&amp;amp;s=456"</span>;
+            <span class="comment">// 要被编码的参数</span>
+          </span>
+          <br>
+          <span class="line">URL =
+            <span class="string">"http://www.a.com?foo="</span>+
+            <span class="built_in">encodeURIComponent</span>(param);</span>
+          <br>
+          <span class="line">
+            <span class="comment">//"http://www.a.com?foo=http%3A%2F%2Fwww.b.com%3Ft%3D123%26s%3D456"</span>
+          </span>
+          <br>
+        </pre></td></tr></table></figure><p>利用上述的使用 a 标签解析 URL 以及根据业务场景配合 encodeURI() 与 encodeURIComponent() 便能够很好的处理 URL 的编码问题</p><p>应用场景最常见的一个是手工拼接 URL 的时候，对每对 key-value 用 encodeURIComponent 进行转义，再进行传输。</p><p>原创文章，文笔有限，才疏学浅，文中若有不正之处，万望告知。</p>
+  </section>
+
+  
+  
+
+</article>
+
+
+<!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key="post-urluri" data-title="【基础进阶】URL详解与URL编码" data-url="http://sbco.cc/2015/12/21/urluri/"></div>
+<!-- 多说评论框 end -->
+
+
+        <footer class="footer">
+	<div class="friendLink">友情链接：
+		<ul>
+			<li><a href="http://www.cnblogs.com/coco1s/">Coco</a></li>
+			<li><a href="http://www.chengfeilong.com/">Scott's Blog</a></li>
+			<li><a href="http://www.52cik.com/">楼教主</a></li>
+			<li><a href="http://blog.aisuso.com/">姚嘉鑫博客</a></li>
+		</ul>
+	</div>
+	<div class="copy_right"> &copy; chokcoco </div>
+	<span class="footer__copyright"> 2014-2016. | 由<a href="https://hexo.io/"> Hexo </a>强力驱动 | 主题<a href="https://github.com/someus/huno"> Huno </a></span>
+
+</footer>
+<!-- 多说公共JS代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"sbco"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- 多说公共JS代码 end -->
+<!-- cnzz统计 -->
+<script type="text/javascript">
+	var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- 文章阅读数统计 -->
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 百度爬虫推送 -->
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+      </div>
+    </div>
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+</body>
+</html>

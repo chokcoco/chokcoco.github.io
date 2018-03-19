@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    
+    <title>shadow-dom 浅析 | Coco ’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="author" content="Coco">
+    
+    
+    <meta name="keywords" content="shadow-dom, shadow host">
+    <meta name="description" content="说到 shadow-dom 可能很多人会很陌生。但是其实我们肯定碰到过，本文主要想简单介绍下 shadow-dom。下面直接进入正文。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shadow-dom 浅析 | Coco ’s blog">
+<meta property="og:url" content="http://sbco.cc/2016/07/27/shadowDom/index.html">
+<meta property="og:site_name" content="Coco ’s blog">
+<meta property="og:description" content="说到 shadow-dom 可能很多人会很陌生。但是其实我们肯定碰到过，本文主要想简单介绍下 shadow-dom。下面直接进入正文。">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165024184-2034640875.jpg">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165124138-1684239797.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165150466-1435685918.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165222763-290711988.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165253247-953436276.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165335856-118242952.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165454997-1596709004.png">
+<meta property="og:updated_time" content="2016-07-27T09:07:46.303Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="shadow-dom 浅析 | Coco ’s blog">
+<meta name="twitter:description" content="说到 shadow-dom 可能很多人会很陌生。但是其实我们肯定碰到过，本文主要想简单介绍下 shadow-dom。下面直接进入正文。">
+<meta name="twitter:image" content="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165024184-2034640875.jpg">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+</head>
+<body>
+    <span class="mobile btn-mobile-menu">
+      <i class="icon icon-list btn-mobile-menu__icon"></i>
+      <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+    
+<header class="panel-cover panel-cover--collapsed">
+
+  <div class="panel-main">
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+        
+        <img src="/images/logo.png" alt="Coco ’s blog logo" class="panel-cover__logo logo" title="Click Me!!!"/>
+        
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Coco ’s blog</a></h1>
+        <hr class="panel-cover__divider" />
+        
+        <p class="panel-cover__description">
+          少年不知愁滋味 为赋新词强说愁
+        </p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        <div class="navigation-wrapper">
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about/html/" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+              <a target="_blank" href="https://github.com/chokcoco"><li class='navigation__item github' title="To my Github"></li></a>
+              <a target="_blank" href="http://www.cnblogs.com/coco1s/"> <li class='navigation__item'><div class='navigation__item blog' title="To my cnblogs"></div></li></a>
+            </ul>
+          </nav>
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+-------------------------------->
+<!-- add social info here -->
+
+
+        </div>
+      </div>
+    </div>
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner entry">
+        
+<article class="post-container post-container--single">
+  <header class="post-header">
+    <h1 class="post-title">shadow-dom 浅析</h1>
+    
+    <div class="post-meta">
+      <time datetime="2016-07-27" class="post-meta__date date">2016-07-27</time>
+      <span id="busuanzi_container_page_pv">
+        • 阅读量（<span id="busuanzi_value_page_pv"></span>）
+      </span>
+      <span class="post-meta__tags tags">
+          
+          
+             &#8226; 标签:
+            <font class="tags">
+              <a class="tags-link" href="/tags/CSS/">CSS</a>, <a class="tags-link" href="/tags/javascript/">javascript</a>
+            </font>
+          
+      </span>
+
+    </div>
+    
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>说到 shadow-dom 可能很多人会很陌生。但是其实我们肯定碰到过，本文主要想简单介绍下 <code>shadow-dom</code>。下面直接进入正文。<a id="more"></a></p><h2 id="shadow-dom-是什么"><a href="#shadow-dom-是什么" class="headerlink" title="shadow-dom 是什么"></a>shadow-dom 是什么</h2><p>顾名思义， <code>shadow-dom</code>，直译的话就是 <code>影子dom</code> ？我觉得可以理解为潜藏在黑暗中的 DOM 结构，也就是我们无法直接控制操纵的 DOM 结构。</p><p>前端同学经常用开发者工具的话，查看 DOM 结构的时候，肯定看到过下面这样的结构：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165024184-2034640875.jpg" alt="image"></p><p>这里的 <code>#shadow-root</code> 所包含的内容其实就是所谓的 <code>shadow-dom</code> 。</p><p><code>shadow-dom</code> 其实是浏览器的一种能力，它允许在浏览器渲染（paint）文档（document）的时候向其中的 Dom 结构中插入一棵 DOM 元素子树，但是特殊的是，这棵子树（shadow-dom）并不在主 DOM 树中。</p><p>举个栗子，也是最常见的例子， <code>&lt;video&gt;</code> 标签，我们创建在页面上创建一个空白的 <code>video</code> 标签： <code>&lt;video id=&#39;test&#39;&gt;&lt;/video&gt;</code>。</p><p>查看 DOM 结构如下：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165124138-1684239797.png" alt="image"></p><p>虽然我们创建的是一个空标签，但是在这个空标签内部，存在一个 <code>shadow-dom</code> ，点开 <code>shadow-dom</code> 可以看到内有乾坤，大有内容。其实这内部的具体内容，就是 <code>&lt;video&gt;</code> 的具体实现。</p><h3 id="shadow-dom-结构示意"><a href="#shadow-dom-结构示意" class="headerlink" title="shadow-dom 结构示意"></a>shadow-dom 结构示意</h3><p>再用一幅图总结一下：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165150466-1435685918.png" alt="image"></p><h4 id="document"><a href="#document" class="headerlink" title="document"></a>document</h4><p>这个很好理解，就是我们的正常文档 document 。</p><h4 id="shadow-host"><a href="#shadow-host" class="headerlink" title="shadow host"></a>shadow host</h4><p>对于一个内部有 <code>shadow-dom</code> 的元素而言，它必然需要一个宿主元素，对于上面的例子而言， <code>&lt;video&gt;</code> 标签，就是 shadow-dom 的宿主元素。</p><h4 id="shadow-root"><a href="#shadow-root" class="headerlink" title="shadow-root"></a>shadow-root</h4><p>通过 <code>createShadowRoot</code>(下文会提及) 返回的文档片段被称为 shadow-root 。它和它的后代元素，都将对用户隐藏，但是它们是实际存在的，在 chrome 中，我们可以通常审查元素去查看它们的具体 DOM 实现。</p><p>在 <code>&lt;video&gt;</code> 中，例如暂停，播放，音量控制，全屏按钮，进度条等都是 shadow-root 的后代。它们工作时会显示在屏幕上，但他们的 DOM 结构对用户是不可见的。</p><h4 id="contents"><a href="#contents" class="headerlink" title="contents"></a>contents</h4><p>就是上述所说的 <code>&lt;video&gt;</code> 中各子组件的 DOM 的具体实现。</p><h2 id="为什么需要-shadow-dom"><a href="#为什么需要-shadow-dom" class="headerlink" title="为什么需要 shadow-dom"></a>为什么需要 shadow-dom</h2><p>为什么需要有这种结构呢？</p><p>Shadow-dom 是游离在 DOM 树之外的节点树，但是他的创建基于普通 DOM 元素（非 document），并且创建后的 Shadow-dom 节点可以从界面上直观的看到。更重要的是，Shadow-dom 具有良好的密封性。</p><p>这是浏览器提供的一种“封装”功能，提供了一种强大的技术去隐藏一些实现细节。什么意思呢？以 <a href="http://www.w3school.com.cn/tiy/t.asp?f=html5_video" target="_blank" rel="external">w3c</a> 上的一个 <code>&lt;video&gt;</code> 例子为例，我们仅仅是填写了一个空白的标签，再加上 <code>src</code> 属性里填上视频地址，就可以播放视频了：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165222763-290711988.png" alt="image"></p><p>我们仅仅填写了一行代码，却拥有比这行代码更多的功能，譬如暂停，播放，音量控制，全屏按钮，进度条等等。</p><p>这些功能具体的 DOM 实现，其实都在 <code>shadow-dom</code> 中：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165253247-953436276.png" alt="image"></p><p>浏览器的开发者们意识到作为前端开发者，引用一个 <code>&lt;video&gt;</code> 标签的时候，每次还要写入一大堆 DOM 去控制控件的表现和行为，既不简洁也很困难。所以他们界定了这样一个界限，界定了哪些是你可以访问的，哪些实现细节是访问不到的。</p><p>那些不希望我们访问到的细节，则封装在了 <code>shadow-dom</code> 中。然而，浏览器本身却可以随意跨越这个边界。设置这样一个边界之后，浏览器的开发者们就可以在我们看不见的地方使用熟悉的web技术、同样的HTML元素去创建更多的功能，而不是像我们一样要在页面上用div和span来堆砌这些元素。</p><h2 id="如何控制-shadow-dom"><a href="#如何控制-shadow-dom" class="headerlink" title="如何控制 shadow-dom"></a>如何控制 shadow-dom</h2><p>既然是浏览器开发者有意隐藏起来的 DOM 结构，那么我们是否可以控制内部的 DOM 结构呢？并非完全不可以，还是有一些方法使得我们可以控制 <code>shadow-dom</code> 内的一些表现。</p><h3 id="使用伪元素控制-shadow-dom-样式"><a href="#使用伪元素控制-shadow-dom-样式" class="headerlink" title="使用伪元素控制 shadow-dom 样式"></a>使用伪元素控制 shadow-dom 样式</h3><p>这里我们要使用到伪元素，通过伪元素，我们可以控制 <code>shadow-dom</code> 中 DOM 结构的样式。</p><p>在 chrome 下，查看 <code>shadow-dom</code> 结构（如果无法看到shadow-dom需要手动打开），可以看到每个结点都加上了一个 pesudo 属性：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165335856-118242952.png" alt="image"></p><p>有了这些属性，我们可以通过伪元素的方式控制他们，譬如在一些场景下 video 标签的控制条不会自动隐藏或自动显示，可以通过伪元素指定默认显隐方式：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/xOzqLR/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/xOzqLR/" target="_blank" rel="external">xOzqLR</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.<br></iframe><p>不幸的是，上面的控制方式只适用于 chrome 浏览器，虽然大部分现代浏览器已经支持 <code>shadow-dom</code> ，但是能够审查 <code>shadow-dom</code> 内部 DOM 元素的只有 <code>chrome</code> 浏览器，其他浏览器仍会把这些细节隐藏。</p><h3 id="使用-Javascript-创建一个-shadow-dom-元素"><a href="#使用-Javascript-创建一个-shadow-dom-元素" class="headerlink" title="使用 Javascript 创建一个 shadow-dom 元素"></a>使用 Javascript 创建一个 shadow-dom 元素</h3><p>我们也可以通常 Javascript 创建 <code>shadow-dom</code> ，实现各类功能的封装，主要通过： <code>HTMLElement.prototype.createShadowRoot</code>。</p><p>看看下面这个例子，在chrome内核浏览器下，将创建一个简单的 <code>shadow-dom</code> ，将我们的代码放入一个 <code>template</code> 中，再通过 <code>importNode</code> 插入到 <code>shadow-dom</code> 中:</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/JKkWzA/?height=265&theme-id=0&default-tab=js,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/JKkWzA/" target="_blank" rel="external">createShadowDomByJs</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.<br></iframe><p>如果你现在在 chrome 内核浏览器下访问本文，那么上述的 codePen 中你应该可以看到 createShadowDomByJs 这一行文字，打开审查元素，会看到 <code>&lt;p&gt;</code> 结构是隐藏在 <code>shadow-dom</code> 中的。</p><h2 id="shadow-dom-兼容性"><a href="#shadow-dom-兼容性" class="headerlink" title="shadow-dom 兼容性"></a>shadow-dom 兼容性</h2><p><img src="http://images2015.cnblogs.com/blog/608782/201607/608782-20160727165454997-1596709004.png" alt="image"></p><h2 id="shadow-dom-的未来"><a href="#shadow-dom-的未来" class="headerlink" title="shadow-dom 的未来"></a>shadow-dom 的未来</h2><p>本文是非常基本的一些关于 <code>shadow-dom</code> 的概念，只是它的冰山一角，没有十分深入的去研究。</p><p>现行的组件都是开放式的，即最终生成的 HTML DOM 结构难以与组件外部的 DOM 进行有效结构区分，样式容易互相混淆。Shadow DOM 的 <code>封装隐藏性</code>为我们提供了解决这些问题的方法。在 Web 组件化的规范中也可以看到 Shadow-dom 的身影，使用具有良好密封性的 Shadow-dom 开发下一代 Web 组件将会是一种趋势。</p><h2 id="更多资源"><a href="#更多资源" class="headerlink" title="更多资源"></a>更多资源</h2><p>如果你读完本文后仍然意犹未尽，可以看看下面这些文章：</p><ul><li><a href="http://webcomponents.org/articles/introduction-to-shadow-dom/" target="_blank" rel="external">Introduction to Shadow DOM</a></li><li><a href="https://css-tricks.com/modular-future-web-components/" target="_blank" rel="external">A Guide to Web Components</a></li><li><a href="http://www.html5rocks.com/zh/tutorials/webcomponents/shadowdom-201/" target="_blank" rel="external">Shadow DOM 201</a></li><li><a href="http://www.toobug.net/article/what_is_shadow_dom.html" target="_blank" rel="external">[译]什么是Shadow Dom？</a></li></ul>
+  </section>
+
+  
+  
+
+</article>
+
+
+<!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key="post-shadowDom" data-title="shadow-dom 浅析" data-url="http://sbco.cc/2016/07/27/shadowDom/"></div>
+<!-- 多说评论框 end -->
+
+
+        <footer class="footer">
+	<div class="friendLink">友情链接：
+		<ul>
+			<li><a href="http://www.cnblogs.com/coco1s/">Coco</a></li>
+			<li><a href="http://www.chengfeilong.com/">Scott's Blog</a></li>
+			<li><a href="http://www.52cik.com/">楼教主</a></li>
+			<li><a href="http://blog.aisuso.com/">姚嘉鑫博客</a></li>
+		</ul>
+	</div>
+	<div class="copy_right"> &copy; chokcoco </div>
+	<span class="footer__copyright"> 2014-2016. | 由<a href="https://hexo.io/"> Hexo </a>强力驱动 | 主题<a href="https://github.com/someus/huno"> Huno </a></span>
+
+</footer>
+<!-- 多说公共JS代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"sbco"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- 多说公共JS代码 end -->
+<!-- cnzz统计 -->
+<script type="text/javascript">
+	var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- 文章阅读数统计 -->
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 百度爬虫推送 -->
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+      </div>
+    </div>
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+</body>
+</html>

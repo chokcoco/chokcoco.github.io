@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    
+    <title>【nodeJS爬虫】前端爬虫系列 -- 小爬「博客园」 | Coco ’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="author" content="Coco">
+    
+    
+    <meta name="keywords" content="nodejs, 爬虫, nodejs爬虫, 前端爬虫, 博客园爬虫, 异步并发">
+    <meta name="description" content="前端同学可能向来对爬虫不是很感冒，觉得爬虫需要用偏后端的语言，诸如 php ， python 等。当然这是在 nodejs 前了，nodejs 的出现，使得 Javascript 也可以用来写爬虫了。由于 nodejs 强大的异步特性，让我们可以轻松以异步高并发去爬取网站，当然这里的轻松指的是 cpu 的开销。要读懂本文，其实只需要有能看懂 Javascript 及 JQuery简单的 nodej">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【nodeJS爬虫】前端爬虫系列 -- 小爬「博客园」 | Coco ’s blog">
+<meta property="og:url" content="http://sbco.cc/2015/11/10/nodejsSpider/index.html">
+<meta property="og:site_name" content="Coco ’s blog">
+<meta property="og:description" content="前端同学可能向来对爬虫不是很感冒，觉得爬虫需要用偏后端的语言，诸如 php ， python 等。当然这是在 nodejs 前了，nodejs 的出现，使得 Javascript 也可以用来写爬虫了。由于 nodejs 强大的异步特性，让我们可以轻松以异步高并发去爬取网站，当然这里的轻松指的是 cpu 的开销。要读懂本文，其实只需要有能看懂 Javascript 及 JQuery简单的 nodej">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110173939400-329201525.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110175631994-2036105107.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110175642665-220296305.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110175821869-1473719874.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110175937900-1982727063.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110175943322-1553653729.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110181621384-250592381.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110181918509-2146140012.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110182100978-1296722700.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110182253431-2008115345.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110183424244-942470605.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110183537119-1227003144.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110184255759-1191374779.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110185438134-629555371.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110185443556-1170697538.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110185449119-1932771625.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110185902915-141572059.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110185907619-1655838287.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110185912884-1471738273.png">
+<meta property="og:updated_time" content="2016-06-07T09:04:56.268Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【nodeJS爬虫】前端爬虫系列 -- 小爬「博客园」 | Coco ’s blog">
+<meta name="twitter:description" content="前端同学可能向来对爬虫不是很感冒，觉得爬虫需要用偏后端的语言，诸如 php ， python 等。当然这是在 nodejs 前了，nodejs 的出现，使得 Javascript 也可以用来写爬虫了。由于 nodejs 强大的异步特性，让我们可以轻松以异步高并发去爬取网站，当然这里的轻松指的是 cpu 的开销。要读懂本文，其实只需要有能看懂 Javascript 及 JQuery简单的 nodej">
+<meta name="twitter:image" content="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110173939400-329201525.png">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+</head>
+<body>
+    <span class="mobile btn-mobile-menu">
+      <i class="icon icon-list btn-mobile-menu__icon"></i>
+      <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+    
+<header class="panel-cover panel-cover--collapsed">
+
+  <div class="panel-main">
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+        
+        <img src="/images/logo.png" alt="Coco ’s blog logo" class="panel-cover__logo logo" title="Click Me!!!"/>
+        
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Coco ’s blog</a></h1>
+        <hr class="panel-cover__divider" />
+        
+        <p class="panel-cover__description">
+          少年不知愁滋味 为赋新词强说愁
+        </p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        <div class="navigation-wrapper">
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about/html/" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+              <a target="_blank" href="https://github.com/chokcoco"><li class='navigation__item github' title="To my Github"></li></a>
+              <a target="_blank" href="http://www.cnblogs.com/coco1s/"> <li class='navigation__item'><div class='navigation__item blog' title="To my cnblogs"></div></li></a>
+            </ul>
+          </nav>
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+-------------------------------->
+<!-- add social info here -->
+
+
+        </div>
+      </div>
+    </div>
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner entry">
+        
+<article class="post-container post-container--single">
+  <header class="post-header">
+    <h1 class="post-title">【nodeJS爬虫】前端爬虫系列 -- 小爬「博客园」</h1>
+    
+    <div class="post-meta">
+      <time datetime="2015-11-10" class="post-meta__date date">2015-11-10</time>
+      <span id="busuanzi_container_page_pv">
+        • 阅读量（<span id="busuanzi_value_page_pv"></span>）
+      </span>
+      <span class="post-meta__tags tags">
+          
+          
+             &#8226; 标签:
+            <font class="tags">
+              <a class="tags-link" href="/tags/javascript/">javascript</a>, <a class="tags-link" href="/tags/nodejs/">nodejs</a>
+            </font>
+          
+      </span>
+
+    </div>
+    
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>前端同学可能向来对爬虫不是很感冒，觉得爬虫需要用偏后端的语言，诸如 php ， python 等。</p><p>当然这是在 nodejs 前了，nodejs 的出现，使得 Javascript 也可以用来写爬虫了。由于 nodejs 强大的异步特性，让我们可以轻松以异步高并发去爬取网站，当然这里的轻松指的是 cpu 的开销。</p><p>要读懂本文，其实只需要有</p><ul><li>能看懂 Javascript 及 JQuery</li><li>简单的 nodejs 基础</li><li>http 网络抓包 和 URL 基础<a id="more"></a></li></ul><p>本文较长且图多，但如果能耐下心读完本文，你会发现，简单的一个爬虫实现并不难，并且能从中学到很多东西。</p><p>本文中的完整的爬虫代码，在 <a href="https://github.com/chokcoco/cnblogSpider/tree/master" target="_blank" rel="external">我的github上可以下载</a>。主要的逻辑代码在 server.js 中，建议边对照代码边往下看。</p><p>在详细说爬虫前，先来简单看看要达成的最终目标，入口为 <a href="http://www.cnblogs.com/" target="_blank" rel="external">http://www.cnblogs.com/</a> ,博客园文章列表页每页有20篇文章，最多可以翻到200页。我这个爬虫要做的就是异步并发去爬取这4000篇文章的具体内容，拿到一些我们想要的关键数据。</p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110173939400-329201525.png" alt=""></p><h2 id="爬虫流程"><a href="#爬虫流程" class="headerlink" title="爬虫流程"></a>爬虫流程</h2><p>看到了最终结果，那么我们接下来看看该如何一步一步通过一个简单的 nodejs 爬虫拿到我们想要的数据，首先简单科普一下爬虫的流程，要完成一个爬虫，主要的步骤分为：</p><h4 id="抓取"><a href="#抓取" class="headerlink" title="抓取"></a>抓取</h4><p>爬虫爬虫，最重要的步骤就是如何把想要的页面抓取回来。并且能兼顾时间效率，能够并发的同时爬取多个页面。</p><p>同时，要获取目标内容，需要我们分析页面结构，因为 ajax 的盛行，许多页面内容并非是一个url就能请求的的回来的，通常一个页面的内容是经过多次请求异步生成的。所以这就要求我们能够利用抓包工具分析页面结构。</p><p>如果深入做下去，你会发现要面对不同的网页要求，比如有认证的，不同文件格式、编码处理，各种奇怪的url合规化处理、重复抓取问题、cookies 跟随问题、多线程多进程抓取、多节点抓取、抓取调度、资源压缩等一系列问题。</p><p>所以第一步就是拉网页回来，慢慢你会发现各种问题待你优化。</p><h4 id="存储"><a href="#存储" class="headerlink" title="存储"></a>存储</h4><p>当把页面内容抓回来后，一般不会直接分析，而是用一定策略存下来，个人觉得更好的架构应该是把分析和抓取分离，更加松散，每个环节出了问题能够隔离另外一个环节可能出现的问题，好排查也好更新发布。<br>那么存文件系统、SQL or NOSQL 数据库、内存数据库，如何去存就是这个环节的重点。</p><h4 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h4><p>对网页进行文本分析，提取链接也好，提取正文也好，总之看你的需求，但是一定要做的就是分析链接了。通常分析与存储会交替进行。可以用你认为最快最优的办法，比如正则表达式。然后将分析后的结果应用与其他环节。</p><h4 id="展示"><a href="#展示" class="headerlink" title="展示"></a>展示</h4><p>要是你做了一堆事情，一点展示输出都没有，如何展现价值？</p><p>所以找到好的展示组件，去show出肌肉也是关键。</p><p>如果你为了做个站去写爬虫，抑或你要分析某个东西的数据，都不要忘了这个环节，更好地把结果展示出来给别人感受。</p><h2 id="编写爬虫代码"><a href="#编写爬虫代码" class="headerlink" title="编写爬虫代码"></a>编写爬虫代码</h2><h4 id="Step-1-页面分析"><a href="#Step-1-页面分析" class="headerlink" title="Step.1 页面分析"></a>Step.1 页面分析</h4><p>现在我们一步一步来完成我们的爬虫，目标是爬取博客园第1页至第200页内的4000篇文章，获取其中的作者信息，并保存分析。</p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110175631994-2036105107.png" alt=""></p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110175642665-220296305.png" alt=""></p><p>共4000篇文章，所以首先我们要获得这个4000篇文章的入口，然后再异步并发的去请求4000篇文章的内容。但是这个4000篇文章的入口 URL 分布在200个页面中。所以我们要做的第一步是 从这个200个页面当中，提取出4000个 URL 。并且是通过异步并发的方式，当收集完4000个 URL 再进行下一步。那么现在我们的目标就很明确了：</p><h4 id="Step2-获取4000个文章入口URL"><a href="#Step2-获取4000个文章入口URL" class="headerlink" title="Step2.获取4000个文章入口URL"></a>Step2.获取4000个文章入口URL</h4><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110175821869-1473719874.png" alt=""></p><p>要获取这么多 URL ，首先还是得从分析单页面开始，F12 打开 devtools 。很容易发现文章入口链接保存在 class 为 titlelnk 的 <a>标签中，所以4000个 URL 就需要我们轮询 200个列表页 ，将每页的20个 链接保存起来。那么该如何异步并发的从200个页面去收集这4000个 URL 呢，继续寻找规律，看看每一页的列表页的 URL 结构：</a></p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110175937900-1982727063.png" alt=""></p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110175943322-1553653729.png" alt=""></p><p>那么，1~200页的列表页 URL 应该是这个样子的：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="keyword">for</span>(
+              <span class="keyword">var</span> i=
+              <span class="number">1</span> ; i&lt;=
+              <span class="number">200</span> ; i++)&#123;</span>
+            <br>
+            <span class="line"> pageUrls.push(
+              <span class="string">'http://www.cnblogs.com/#p'</span>+i);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>有了存放200个文章列表页的 URL ，再要获取4000个文章入口就不难了，下面贴出关键代码，一些最基本的nodejs语法（譬如如何搭建一个http服务器）默认大家都已经会了：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+            <span class="line">19</span>
+            <br>
+            <span class="line">20</span>
+            <br>
+            <span class="line">21</span>
+            <br>
+            <span class="line">22</span>
+            <br>
+            <span class="line">23</span>
+            <br>
+            <span class="line">24</span>
+            <br>
+            <span class="line">25</span>
+            <br>
+            <span class="line">26</span>
+            <br>
+            <span class="line">27</span>
+            <br>
+            <span class="line">28</span>
+            <br>
+            <span class="line">29</span>
+            <br>
+            <span class="line">30</span>
+            <br>
+            <span class="line">31</span>
+            <br>
+            <span class="line">32</span>
+            <br>
+            <span class="line">33</span>
+            <br>
+            <span class="line">34</span>
+            <br>
+            <span class="line">35</span>
+            <br>
+            <span class="line">36</span>
+            <br>
+            <span class="line">37</span>
+            <br>
+            <span class="line">38</span>
+            <br>
+            <span class="line">39</span>
+            <br>
+            <span class="line">40</span>
+            <br>
+            <span class="line">41</span>
+            <br>
+            <span class="line">42</span>
+            <br>
+            <span class="line">43</span>
+            <br>
+            <span class="line">44</span>
+            <br>
+            <span class="line">45</span>
+            <br>
+            <span class="line">46</span>
+            <br>
+            <span class="line">47</span>
+            <br>
+            <span class="line">48</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// 一些依赖库</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 一些依赖库</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> http =
+              <span class="built_in">require</span>(
+              <span class="string">"http"</span>),</span>
+            <br>
+            <span class="line"> url =
+              <span class="built_in">require</span>(
+              <span class="string">"url"</span>),</span>
+            <br>
+            <span class="line"> superagent =
+              <span class="built_in">require</span>(
+              <span class="string">"superagent"</span>),</span>
+            <br>
+            <span class="line"> cheerio =
+              <span class="built_in">require</span>(
+              <span class="string">"cheerio"</span>),</span>
+            <br>
+            <span class="line">
+              <span class="keyword">async</span> =
+              <span class="built_in">require</span>(
+              <span class="string">"async"</span>),</span>
+            <br>
+            <span class="line"> eventproxy =
+              <span class="built_in">require</span>(
+              <span class="string">'eventproxy'</span>);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> ep =
+              <span class="keyword">new</span> eventproxy(),</span>
+            <br>
+            <span class="line"> urlsArray = [],
+              <span class="comment">//存放爬取网址</span>
+            </span>
+            <br>
+            <span class="line"> pageUrls = [],
+              <span class="comment">//存放收集文章页面网站</span>
+            </span>
+            <br>
+            <span class="line"> pageNum =
+              <span class="number">200</span>;
+              <span class="comment">//要爬取文章的页数</span>
+            </span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="keyword">for</span>(
+              <span class="keyword">var</span> i=
+              <span class="number">1</span> ; i&lt;=
+              <span class="number">200</span> ; i++)&#123;</span>
+            <br>
+            <span class="line"> pageUrls.push(
+              <span class="string">'http://www.cnblogs.com/#p'</span>+i);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 主start程序</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">start</span>(
+                <span class="params"></span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">onRequest</span>(
+                <span class="params">req, res</span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 轮询 所有文章列表页</span>
+            </span>
+            <br>
+            <span class="line"> pageUrls.forEach(
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">pageUrl</span>)</span>&#123;</span>
+            <br>
+            <span class="line"> superagent.get(pageUrl)</span>
+            <br>
+            <span class="line"> .end(
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">err,pres</span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// pres.text 里面存储着请求返回的 html 内容，将它传给 cheerio.load 之后</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 就可以得到一个实现了 jquery 接口的变量，我们习惯性地将它命名为 `$`</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 剩下就都是利用$ 使用 jquery 的语法了</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> $ = cheerio.load(pres.text);</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> curPageUrls = $(
+              <span class="string">'.titlelnk'</span>);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="keyword">for</span>(
+              <span class="keyword">var</span> i =
+              <span class="number">0</span> ; i &lt; curPageUrls.length ; i++)&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> articleUrl = curPageUrls.eq(i).attr(
+              <span class="string">'href'</span>);</span>
+            <br>
+            <span class="line"> urlsArray.push(articleUrl);</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 相当于一个计数器</span>
+            </span>
+            <br>
+            <span class="line"> ep.emit(
+              <span class="string">'BlogArticleHtml'</span>, articleUrl);</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line"> &#125;);</span>
+            <br>
+            <span class="line"> &#125;);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line"> ep.after(
+              <span class="string">'BlogArticleHtml'</span>, pageUrls.length*
+              <span class="number">20</span> ,
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">articleUrls</span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 当所有 'BlogArticleHtml' 事件完成后的回调触发下面事件</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// ...</span>
+            </span>
+            <br>
+            <span class="line"> &#125;);</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line"> http.createServer(onRequest).listen(
+              <span class="number">3000</span>);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line">exports.start= start;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>这里我们用到了三个库，superagent 、 cheerio 、 eventproxy。</p><p>分别简单介绍一下：</p><h5 id="superagent"><a href="#superagent" class="headerlink" title="superagent"></a>superagent</h5><p><a href="http://visionmedia.github.io/superagent/" target="_blank" rel="external">superagent</a> 是个轻量的的 http 方面的库，是nodejs里一个非常方便的客户端请求代理模块，当我们需要进行 get 、 post 、 head 等网络请求时，尝试下它吧。</p><h5 id="cheerio"><a href="#cheerio" class="headerlink" title="cheerio"></a>cheerio</h5><p><a href="https://github.com/cheeriojs/cheerio" target="_blank" rel="external">cheerio</a> 大家可以理解成一个 Node.js 版的 jquery，用来从网页中以 css selector 取数据，使用方式跟 jquery 一样一样的。</p><h5 id="eventproxy"><a href="#eventproxy" class="headerlink" title="eventproxy"></a>eventproxy</h5><p><a href="https://github.com/JacksonTian/eventproxy" target="_blank" rel="external">eventproxy</a> 非常轻量的工具，但是能够带来一种事件式编程的思维变化。</p><p>用 js 写过异步的同学应该都知道，如果你要并发异步获取两三个地址的数据，并且要在获取到数据之后，对这些数据一起进行利用的话，常规的写法是自己维护一个计数器。</p><p>先定义一个 var count = 0，然后每次抓取成功以后，就 count++。如果你是要抓取三个源的数据，由于你根本不知道这些异步操作到底谁先完成，那么每次当抓取成功的时候，就判断一下count === 3。当值为真时，使用另一个函数继续完成操作。</p><p>而 eventproxy 就起到了这个计数器的作用，它来帮你管理到底这些异步操作是否完成，完成之后，它会自动调用你提供的处理函数，并将抓取到的数据当参数传过来。</p><p>OK，运行一下上面的函数，假设上面的内容我们保存在 server.js 中，而我们有一个这样的启动页面 index.js，</p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110181621384-250592381.png" alt=""></p><p>现在我们在回调里增加几行代码，打印出结果：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110181918509-2146140012.png" alt=""></p><p>打开node命令行，键入指令，在浏览器打开 <a href="http://localhost:3000/" target="_blank" rel="external">http://localhost:3000/</a> ，可以看到：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">node index.js</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110182100978-1296722700.png" alt=""></p><p>成功了！我们成功收集到了4000个 URL ，但是我将这个4000个 URL 去重后发现，只有20个 URL 剩下，也就是说我将每个 URL push 进数组了200次，一定是哪里错，看到200这个数字，我立马回头查看 200 个 文章列表页。</p><p>我发现，当我用 <a href="http://www.cnblogs.com/#p1" target="_blank" rel="external">http://www.cnblogs.com/#p1</a> ~ 200 访问页面的时候，返回的都是博客园的首页。 而真正的列表页，藏在这个异步请求下面：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110182253431-2008115345.png" alt=""></p><p>看看这个请求的参数：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110183424244-942470605.png" alt=""></p><p>把请求参数提取出来，我们试一下这个 URL，访问第15页列表页： <a href="http://www.cnblogs.com/?CategoryId=808&amp;CategoryType=%22SiteHome%22&amp;ItemListActionName=%22PostList%22&amp;PageIndex=15&amp;ParentCategoryId=0" target="_blank" rel="external">http://www.cnblogs.com/?CategoryId=808&amp;CategoryType=%22SiteHome%22&amp;ItemListActionName=%22PostList%22&amp;PageIndex=15&amp;ParentCategoryId=0</a> 。</p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110183537119-1227003144.png" alt=""></p><p>成功了，那么我们稍微修改下上面的代码：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">//for(var i=1 ; i&lt;= 200 ; i++)&#123;</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// pageUrls.push('http://www.cnblogs.com/#p'+i);</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">//&#125;</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">//改为</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">for</span>(
+              <span class="keyword">var</span> i=
+              <span class="number">1</span> ; i&lt;=
+              <span class="number">200</span> ; i++)&#123;</span>
+            <br>
+            <span class="line"> pageUrls.push(
+              <span class="string">'http://www.cnblogs.com/?CategoryId=808&amp;CategoryType=%22SiteHome%22&amp;ItemListActionName=%22PostList%22&amp;PageIndex='</span>+
+              i +
+              <span class="string">'&amp;ParentCategoryId=0'</span>);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>再试一次，发现这次成功收集到了 4000 个没有重复的 URL 。第二步完成！</p><h4 id="Step-3-爬取具体页面内容-使用-async-控制异步并发数量"><a href="#Step-3-爬取具体页面内容-使用-async-控制异步并发数量" class="headerlink" title="Step.3 爬取具体页面内容 使用 async 控制异步并发数量 **"></a>Step.3 爬取具体页面内容 使用 async 控制异步并发数量 **</h4><p>获取到 4000 个 URL ，并且回调入口也有了，接下来我们只需要在回调函数里继续爬取4000个具体页面，并收集我们想要的信息就好了。其实刚刚我们已经经历了第一轮爬虫爬取，只是有一点做的不好的地方是我们刚刚并没有限制并发的数量，这也是我发现 cnblog 可以改善的一点，不然很容易被单IP的巨量 URL 请求攻击到崩溃。为了做一个好公民，也为了减轻网站的压力（其实为了不被封IP），这4000个URL 我限制了同时并发量最高为5。这里用到了另一个非常强大的库 async ，让我们控制并发量变得十分轻松，简单的介绍如下。</p><h5 id="async"><a href="#async" class="headerlink" title="async"></a>async</h5><p><a href="https://github.com/caolan/async#queueworker-concurrency" target="_blank" rel="external">async</a> 是一个流程控制工具包，提供了直接而强大的异步功能mapLimit(arr, limit, iterator, callback)。</p><p>这次我们要介绍的是 async 的 mapLimit(arr, limit, iterator, callback) 接口。另外，还有个常用的控制并发连接数的接口是 queue(worker, concurrency) ，大家可以去看看它的API。</p><p>继续我们的爬虫，进到具体的文章页面，发现我们想获取的信息也不在直接请求而来的 html 页面中，而是如下这个 ajax 请求异步生成的，不过庆幸的是我们上一步收集的 URL 包含了这个请求所需要的参数，所以我们仅仅需要多做一层处理，将这个参数从 URL 中取出来再重新拼接成一个ajax URL 请求。</p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110184255759-1191374779.png" alt=""></p><p>下面，贴出代码，在我们刚刚的回调函数中，继续我们4000个页面的爬取，并且控制并发数为5：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+            <span class="line">19</span>
+            <br>
+            <span class="line">20</span>
+            <br>
+            <span class="line">21</span>
+            <br>
+            <span class="line">22</span>
+            <br>
+            <span class="line">23</span>
+            <br>
+            <span class="line">24</span>
+            <br>
+            <span class="line">25</span>
+            <br>
+            <span class="line">26</span>
+            <br>
+            <span class="line">27</span>
+            <br>
+            <span class="line">28</span>
+            <br>
+            <span class="line">29</span>
+            <br>
+            <span class="line">30</span>
+            <br>
+            <span class="line">31</span>
+            <br>
+            <span class="line">32</span>
+            <br>
+            <span class="line">33</span>
+            <br>
+            <span class="line">34</span>
+            <br>
+            <span class="line">35</span>
+            <br>
+            <span class="line">36</span>
+            <br>
+            <span class="line">37</span>
+            <br>
+            <span class="line">38</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">ep.after(
+              <span class="string">'BlogArticleHtml'</span>,pageUrls.length*
+              <span class="number">20</span>,
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">articleUrls</span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 当所有 'BlogArticleHtml' 事件完成后的回调触发下面事件</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 控制并发数</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> curCount =
+              <span class="number">0</span>;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> reptileMove =
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">url,callback</span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">//延迟毫秒数</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> delay =
+              <span class="built_in">parseInt</span>((
+              <span class="built_in">Math</span>.random() *
+              <span class="number">30000000</span>) %
+              <span class="number">1000</span>,
+              <span class="number">10</span>);</span>
+            <br>
+            <span class="line"> curCount++;</span>
+            <br>
+            <span class="line">
+              <span class="built_in">console</span>.log(
+              <span class="string">'现在的并发数是'</span>, curCount,
+              <span class="string">'，正在抓取的是'</span>, url,
+              <span class="string">'，耗时'</span> + delay +
+              <span class="string">'毫秒'</span>);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line"> superagent.get(url)</span>
+            <br>
+            <span class="line"> .end(
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">err,sres</span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// sres.text 里面存储着请求返回的 html 内容</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> $ = cheerio.load(sres.text);</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 收集数据</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 拼接URL</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> currentBlogApp = url.split(
+              <span class="string">'/p/'</span>)[
+              <span class="number">0</span>].split(
+              <span class="string">'/'</span>)[
+              <span class="number">3</span>],</span>
+            <br>
+            <span class="line"> appUrl =
+              <span class="string">"http://www.cnblogs.com/mvc/blog/news.aspx?blogApp="</span>+ currentBlogApp;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 具体收集函数</span>
+            </span>
+            <br>
+            <span class="line"> personInfo(appUrl);</span>
+            <br>
+            <span class="line"> &#125;);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line"> setTimeout(
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params"></span>) </span>&#123;</span>
+            <br>
+            <span class="line"> curCount--;</span>
+            <br>
+            <span class="line"> callback(
+              <span class="literal">null</span>,url +
+              <span class="string">'Call back content'</span>);</span>
+            <br>
+            <span class="line"> &#125;, delay);</span>
+            <br>
+            <span class="line"> &#125;;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 使用async控制异步抓取</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// mapLimit(arr, limit, iterator, [callback])</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 异步回调</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">async</span>.mapLimit(articleUrls,
+              <span class="number">5</span> ,
+              <span class="function">
+                <span class="keyword">function</span> (
+                <span class="params">url, callback</span>) </span>&#123;</span>
+            <br>
+            <span class="line"> reptileMove(url, callback);</span>
+            <br>
+            <span class="line"> &#125;,
+              <span class="function">
+                <span class="keyword">function</span> (
+                <span class="params">err,result</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 4000 个 URL 访问完成的回调函数</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// ...</span>
+            </span>
+            <br>
+            <span class="line"> &#125;);</span>
+            <br>
+            <span class="line">&#125;);</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>根据重新拼接而来的 URL ，再写一个具体的 personInfo(URL) 函数，具体获取我们要的昵称、园龄、粉丝数等信息。</p><p>这样，我们把抓取回来的信息以 JSON 串的形式存储在 catchDate 这个数组当中，</p><p>node index.js 运行一下程序，将结果打印出来，可以看到中间过程及结果：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110185438134-629555371.png" alt=""></p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110185443556-1170697538.png" alt=""></p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110185449119-1932771625.png" alt=""></p><p>至此，第三步就完成了，我们也收集到了4000条我们想要的原始数据。</p><h4 id="Step-4-分析-展示"><a href="#Step-4-分析-展示" class="headerlink" title="Step.4 分析 展示"></a>Step.4 分析 展示</h4><p>本来想将爬来的数据存入 mongoDB ，但因为这里我只抓取了 4000 条数据，相对于动不动爬几百万几千万的量级而言不值一提，故就不添加额外的操作 mongoDB 代码，专注于爬虫本身。</p><p>收集到数据之后，就想看你想怎么展示了，这里推荐使用 <a href="http://www.hcharts.cn/" target="_blank" rel="external">Highcharts</a> 纯JS图表库去展示我们的成果。当然这里我偷懒了没有做，直接用最原始的方法展示结果。</p><p>下面是我不同时间段爬取，经过简单处理后的的几张结果图：</p><p>（结果图的耗时均在并发量控制为 5 的情况下）</p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110185902915-141572059.png" alt=""></p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110185907619-1655838287.png" alt=""></p><p><img src="http://images2015.cnblogs.com/blog/608782/201511/608782-20151110185912884-1471738273.png" alt=""></p><h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>OK，至此，整个爬虫就完成了，其实代码量很少，我觉得写爬虫更多的时间是花在在处理各类问题，分析页面结构。</p><p>完整的爬虫代码，在 <a href="https://github.com/chokcoco/cnblogSpider/tree/master" target="_blank" rel="external">我的github上可以下载</a>。如果仍有疑问，可以把代码 down 到本地，重新从文章开头对照代码再实践一次，相信很多问题会迎刃而解。</p><p>参考文章： <a href="https://github.com/alsotang/node-lessons" target="_blank" rel="external">《Node.js 包教不包会》</a>。</p><p>原创文章，文笔有限，才疏学浅，文中若有不正之处，万望告知。</p>
+  </section>
+
+  
+  
+
+</article>
+
+
+<!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key="post-nodejsSpider" data-title="【nodeJS爬虫】前端爬虫系列 -- 小爬「博客园」" data-url="http://sbco.cc/2015/11/10/nodejsSpider/"></div>
+<!-- 多说评论框 end -->
+
+
+        <footer class="footer">
+	<div class="friendLink">友情链接：
+		<ul>
+			<li><a href="http://www.cnblogs.com/coco1s/">Coco</a></li>
+			<li><a href="http://www.chengfeilong.com/">Scott's Blog</a></li>
+			<li><a href="http://www.52cik.com/">楼教主</a></li>
+			<li><a href="http://blog.aisuso.com/">姚嘉鑫博客</a></li>
+		</ul>
+	</div>
+	<div class="copy_right"> &copy; chokcoco </div>
+	<span class="footer__copyright"> 2014-2016. | 由<a href="https://hexo.io/"> Hexo </a>强力驱动 | 主题<a href="https://github.com/someus/huno"> Huno </a></span>
+
+</footer>
+<!-- 多说公共JS代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"sbco"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- 多说公共JS代码 end -->
+<!-- cnzz统计 -->
+<script type="text/javascript">
+	var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- 文章阅读数统计 -->
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 百度爬虫推送 -->
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+      </div>
+    </div>
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+</body>
+</html>

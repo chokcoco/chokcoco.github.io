@@ -1,0 +1,13 @@
+# hexo robots.txt
+User-agent: *
+Allow: /
+Allow: /archives/ 
+
+Disallow: /js/
+Disallow: /css/
+Disallow: /fonts/
+Disallow: /vendors/
+Disallow: /fancybox/
+
+Sitemap: http://sbco.cc/sitemap.xml
+Sitemap: http://sbco.cc/baidusitemap.xml

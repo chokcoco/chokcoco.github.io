@@ -1,0 +1,2493 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    
+    <title>【前端安全】JavaScript防http劫持与XSS | Coco ’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="author" content="Coco">
+    
+    
+    <meta name="keywords" content="http劫持, XSS, 防劫持, 前端安全">
+    <meta name="description" content="作为前端，一直以来都知道 HTTP劫持与 XSS跨站脚本（Cross-site scripting）、 CSRF跨站请求伪造（Cross-site request forgery）。但是一直都没有深入研究过，前些日子同事的分享会偶然提及，我也对这一块很感兴趣，便深入研究了一番。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【前端安全】JavaScript防http劫持与XSS | Coco ’s blog">
+<meta property="og:url" content="http://sbco.cc/2016/08/16/httphijack/index.html">
+<meta property="og:site_name" content="Coco ’s blog">
+<meta property="og:description" content="作为前端，一直以来都知道 HTTP劫持与 XSS跨站脚本（Cross-site scripting）、 CSRF跨站请求伪造（Cross-site request forgery）。但是一直都没有深入研究过，前些日子同事的分享会偶然提及，我也对这一块很感兴趣，便深入研究了一番。">
+<meta property="og:image" content="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/EC2339B4D29B4DF8AE04654BFF139E14">
+<meta property="og:image" content="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/B84C7180C88E4A69A3CB055BEA47FEAD">
+<meta property="og:image" content="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/4D1E4F3BB93549F78E12E58B29DF3D10">
+<meta property="og:image" content="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/39A47C5CC14A47D8806019EA1C4A78FB">
+<meta property="og:image" content="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/FF970549831943BA85A6ADDE97FCD325">
+<meta property="og:image" content="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/49CE5036213842D79FBED6283862F102">
+<meta property="og:image" content="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/BB75B436750240A48DF64A9CADB056DF">
+<meta property="og:image" content="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/1D67D6C94828430B9519503BD0F7820F">
+<meta property="og:image" content="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/036C4400A4E84AF1A5AE668758CD4436">
+<meta property="og:updated_time" content="2016-08-16T09:38:27.075Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【前端安全】JavaScript防http劫持与XSS | Coco ’s blog">
+<meta name="twitter:description" content="作为前端，一直以来都知道 HTTP劫持与 XSS跨站脚本（Cross-site scripting）、 CSRF跨站请求伪造（Cross-site request forgery）。但是一直都没有深入研究过，前些日子同事的分享会偶然提及，我也对这一块很感兴趣，便深入研究了一番。">
+<meta name="twitter:image" content="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/EC2339B4D29B4DF8AE04654BFF139E14">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+</head>
+<body>
+    <span class="mobile btn-mobile-menu">
+      <i class="icon icon-list btn-mobile-menu__icon"></i>
+      <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+    
+<header class="panel-cover panel-cover--collapsed">
+
+  <div class="panel-main">
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+        
+        <img src="/images/logo.png" alt="Coco ’s blog logo" class="panel-cover__logo logo" title="Click Me!!!"/>
+        
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Coco ’s blog</a></h1>
+        <hr class="panel-cover__divider" />
+        
+        <p class="panel-cover__description">
+          少年不知愁滋味 为赋新词强说愁
+        </p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        <div class="navigation-wrapper">
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about/html/" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+              <a target="_blank" href="https://github.com/chokcoco"><li class='navigation__item github' title="To my Github"></li></a>
+              <a target="_blank" href="http://www.cnblogs.com/coco1s/"> <li class='navigation__item'><div class='navigation__item blog' title="To my cnblogs"></div></li></a>
+            </ul>
+          </nav>
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+-------------------------------->
+<!-- add social info here -->
+
+
+        </div>
+      </div>
+    </div>
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner entry">
+        
+<article class="post-container post-container--single">
+  <header class="post-header">
+    <h1 class="post-title">【前端安全】JavaScript防http劫持与XSS</h1>
+    
+    <div class="post-meta">
+      <time datetime="2016-08-16" class="post-meta__date date">2016-08-16</time>
+      <span id="busuanzi_container_page_pv">
+        • 阅读量（<span id="busuanzi_value_page_pv"></span>）
+      </span>
+      <span class="post-meta__tags tags">
+          
+          
+             &#8226; 标签:
+            <font class="tags">
+              <a class="tags-link" href="/tags/javascript，网络安全/">javascript，网络安全</a>
+            </font>
+          
+      </span>
+
+    </div>
+    
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>作为前端，一直以来都知道 <code>HTTP劫持</code>与 <code>XSS跨站脚本</code>（Cross-site scripting）、 <code>CSRF跨站请求伪造</code>（Cross-site request forgery）。但是一直都没有深入研究过，前些日子同事的分享会偶然提及，我也对这一块很感兴趣，便深入研究了一番。<a id="more"></a></p><p>最近用 JavaScript 写了一个组件，可以在前端层面防御部分 HTTP 劫持与 XSS:</p><p>已上传到 Github – <a href="https://github.com/chokcoco/httphijack" target="_blank" rel="external">httphijack.js</a> ，欢迎感兴趣看看顺手点个 star ，本文示例代码，防范方法在组件源码中皆可找到。</p><p>接下来进入正文。</p><h2 id="HTTP劫持、DNS劫持与XSS"><a href="#HTTP劫持、DNS劫持与XSS" class="headerlink" title="HTTP劫持、DNS劫持与XSS"></a>HTTP劫持、DNS劫持与XSS</h2><p>先简单讲讲什么是 HTTP 劫持与 DNS 劫持。</p><h3 id="HTTP劫持"><a href="#HTTP劫持" class="headerlink" title="HTTP劫持"></a>HTTP劫持</h3><p>什么是HTTP劫持呢，大多数情况是运营商HTTP劫持，当我们使用HTTP请求请求一个网站页面的时候，网络运营商会在正常的数据流中插入精心设计的网络数据报文，让客户端（通常是浏览器）展示“错误”的数据，通常是一些弹窗，宣传性广告或者直接显示某网站的内容，大家应该都有遇到过。</p><h3 id="DNS劫持"><a href="#DNS劫持" class="headerlink" title="DNS劫持"></a>DNS劫持</h3><p>DNS劫持就是通过劫持了DNS服务器，通过某些手段取得某域名的解析记录控制权，进而修改此域名的解析结果，导致对该域名的访问由原IP地址转入到修改后的指定IP，其结果就是对特定的网址不能访问或访问的是假网址，从而实现窃取资料或者破坏原有正常服务的目的。</p><p>DNS 劫持就更过分了，简单说就是我们请求的是 <a href="http://www.a.com/index.html，直接被重定向了http://www.b.com/index.html，本文不会过多讨论这种情况。" target="_blank" rel="external">http://www.a.com/index.html，直接被重定向了http://www.b.com/index.html，本文不会过多讨论这种情况。</a></p><h3 id="XSS跨站脚本"><a href="#XSS跨站脚本" class="headerlink" title="XSS跨站脚本"></a>XSS跨站脚本</h3><p>XSS指的是攻击者漏洞，向 Web 页面中注入恶意代码，当用户浏览该页之时，注入的代码会被执行，从而达到攻击的特殊目的。</p><p>关于这些攻击如何生成，攻击者如何注入恶意代码到页面中本文不做讨论，只要知道如 HTTP 劫持 和 XSS 最终都是恶意代码在客户端，通常也就是用户浏览器端执行，本文将讨论的就是假设注入已经存在，如何利用 Javascript 进行行之有效的前端防护。</p><h2 id="页面被嵌入-iframe-中，重定向-iframe"><a href="#页面被嵌入-iframe-中，重定向-iframe" class="headerlink" title="页面被嵌入 iframe 中，重定向 iframe"></a>页面被嵌入 iframe 中，重定向 iframe</h2><p>先来说说我们的页面被嵌入了 iframe 的情况。也就是，网络运营商为了尽可能地减少植入广告对原有网站页面的影响，通常会通过把原有网站页面放置到一个和原页面相同大小的 iframe 里面去，那么就可以通过这个 iframe 来隔离广告代码对原有页面的影响。<br><img src="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/EC2339B4D29B4DF8AE04654BFF139E14" alt="image"></p><p>这种情况还比较好处理，我们只需要知道我们的页面是否被嵌套在 iframe 中，如果是，则重定向外层页面到我们的正常页面即可。</p><p>那么有没有方法知道我们的页面当前存在于 iframe 中呢？有的，就是 <code>window.self</code> 与 <code>window.top</code> 。</p><h4 id="window-self"><a href="#window-self" class="headerlink" title="window.self"></a>window.self</h4><p>返回一个指向当前 window 对象的引用。</p><h4 id="window-top"><a href="#window-top" class="headerlink" title="window.top"></a>window.top</h4><p>返回窗口体系中的最顶层窗口的引用。</p><p>对于非同源的域名，iframe 子页面无法通过 parent.location 或者 top.location 拿到具体的页面地址，但是可以写入 top.location ，也就是可以控制父页面的跳转。</p><p>两个属性分别可以又简写为 <code>self</code> 与 <code>top</code>，所以当发现我们的页面被嵌套在 iframe 时，可以重定向父级页面：</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+          <span class="line">6</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="keyword">if</span> (self != top) &#123;</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 我们的正常页面</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> url = location.href;</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 父级页面重定向</span>
+          </span>
+          <br>
+          <span class="line"> top.location = url;</span>
+          <br>
+          <span class="line">&#125;</span>
+          <br>
+        </pre></td></tr></table></figure><h3 id="使用白名单放行正常-iframe-嵌套"><a href="#使用白名单放行正常-iframe-嵌套" class="headerlink" title="使用白名单放行正常 iframe 嵌套"></a>使用白名单放行正常 iframe 嵌套</h3><p>当然很多时候，也许运营需要，我们的页面会被以各种方式推广，也有可能是正常业务需要被嵌套在 iframe 中，这个时候我们需要一个白名单或者黑名单，当我们的页面被嵌套在 iframe 中且父级页面域名存在白名单中，则不做重定向操作。</p><p>上面也说了，使用 top.location.href 是没办法拿到父级页面的 URL 的，这时候，需要使用 <code>document.referrer</code>。</p><p>通过 document.referrer 可以拿到跨域 iframe 父页面的URL。</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+          <span class="line">6</span>
+          <br>
+          <span class="line">7</span>
+          <br>
+          <span class="line">8</span>
+          <br>
+          <span class="line">9</span>
+          <br>
+          <span class="line">10</span>
+          <br>
+          <span class="line">11</span>
+          <br>
+          <span class="line">12</span>
+          <br>
+          <span class="line">13</span>
+          <br>
+          <span class="line">14</span>
+          <br>
+          <span class="line">15</span>
+          <br>
+          <span class="line">16</span>
+          <br>
+          <span class="line">17</span>
+          <br>
+          <span class="line">18</span>
+          <br>
+          <span class="line">19</span>
+          <br>
+          <span class="line">20</span>
+          <br>
+          <span class="line">21</span>
+          <br>
+          <span class="line">22</span>
+          <br>
+          <span class="line">23</span>
+          <br>
+          <span class="line">24</span>
+          <br>
+          <span class="line">25</span>
+          <br>
+          <span class="line">26</span>
+          <br>
+          <span class="line">27</span>
+          <br>
+          <span class="line">28</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="comment">// 建立白名单</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> whiteList = [</span>
+          <br>
+          <span class="line">
+            <span class="string">'www.yy.com'</span>,</span>
+          <br>
+          <span class="line">
+            <span class="string">'res.cont.yy.com'</span>
+          </span>
+          <br>
+          <span class="line">];</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="keyword">if</span> (self != top) &#123;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="comment">// 使用 document.referrer 可以拿到跨域 iframe 父页面的 URL</span>
+          </span>
+          <br>
+          <span class="line"> parentUrl =
+            <span class="built_in">document</span>.referrer,</span>
+          <br>
+          <span class="line"> length = whiteList.length,</span>
+          <br>
+          <span class="line"> i =
+            <span class="number">0</span>;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="keyword">for</span>(; i&lt;length; i++)&#123;</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 建立白名单正则</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> reg =
+            <span class="keyword">new</span>
+            <span class="built_in">RegExp</span>(whiteList[i],
+            <span class="string">'i'</span>);</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">// 存在白名单中，放行</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">if</span>(reg.test(parentUrl))&#123;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">return</span>;</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">// 我们的正常页面</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> url = location.href;</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 父级页面重定向</span>
+          </span>
+          <br>
+          <span class="line"> top.location = url;</span>
+          <br>
+          <span class="line">&#125;</span>
+          <br>
+        </pre></td></tr></table></figure><h3 id="更改-URL-参数绕过运营商标记"><a href="#更改-URL-参数绕过运营商标记" class="headerlink" title="更改 URL 参数绕过运营商标记"></a>更改 URL 参数绕过运营商标记</h3><p>这样就完了吗？没有，我们虽然重定向了父页面，但是在重定向的过程中，既然第一次可以嵌套，那么这一次重定向的过程中页面也许又被 iframe 嵌套了，真尼玛蛋疼。</p><p>当然运营商这种劫持通常也是有迹可循，最常规的手段是在页面 URL 中设置一个参数，例如 ‘ <a href="http://www.example.com/index.html?iframe_hijack_redirected=1" target="_blank" rel="external">http://www.example.com/index.html?iframe_hijack_redirected=1</a>‘ ，其中 <code>iframe_hijack_redirected=1</code> 表示页面已经被劫持过了，就不再嵌套 iframe 了。所以根据这个特性，我们可以改写我们的 URL ，使之看上去已经被劫持了：</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+          <span class="line">6</span>
+          <br>
+          <span class="line">7</span>
+          <br>
+          <span class="line">8</span>
+          <br>
+          <span class="line">9</span>
+          <br>
+          <span class="line">10</span>
+          <br>
+          <span class="line">11</span>
+          <br>
+          <span class="line">12</span>
+          <br>
+          <span class="line">13</span>
+          <br>
+          <span class="line">14</span>
+          <br>
+          <span class="line">15</span>
+          <br>
+          <span class="line">16</span>
+          <br>
+          <span class="line">17</span>
+          <br>
+          <span class="line">18</span>
+          <br>
+          <span class="line">19</span>
+          <br>
+          <span class="line">20</span>
+          <br>
+          <span class="line">21</span>
+          <br>
+          <span class="line">22</span>
+          <br>
+          <span class="line">23</span>
+          <br>
+          <span class="line">24</span>
+          <br>
+          <span class="line">25</span>
+          <br>
+          <span class="line">26</span>
+          <br>
+          <span class="line">27</span>
+          <br>
+          <span class="line">28</span>
+          <br>
+          <span class="line">29</span>
+          <br>
+          <span class="line">30</span>
+          <br>
+          <span class="line">31</span>
+          <br>
+          <span class="line">32</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="keyword">var</span> flag =
+            <span class="string">'iframe_hijack_redirected'</span>;</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 当前页面存在于一个 iframe 中</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="comment">// 此处需要建立一个白名单匹配规则，白名单默认放行</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">if</span> (self != top) &#123;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="comment">// 使用 document.referrer 可以拿到跨域 iframe 父页面的 URL</span>
+          </span>
+          <br>
+          <span class="line"> parentUrl =
+            <span class="built_in">document</span>.referrer,</span>
+          <br>
+          <span class="line"> length = whiteList.length,</span>
+          <br>
+          <span class="line"> i =
+            <span class="number">0</span>;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="keyword">for</span>(; i&lt;length; i++)&#123;</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 建立白名单正则</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> reg =
+            <span class="keyword">new</span>
+            <span class="built_in">RegExp</span>(whiteList[i],
+            <span class="string">'i'</span>);</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">// 存在白名单中，放行</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">if</span>(reg.test(parentUrl))&#123;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">return</span>;</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> url = location.href;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> parts = url.split(
+            <span class="string">'#'</span>);</span>
+          <br>
+          <span class="line">
+            <span class="keyword">if</span> (location.search) &#123;</span>
+          <br>
+          <span class="line"> parts[
+            <span class="number">0</span>] +=
+            <span class="string">'&amp;'</span> + flag +
+            <span class="string">'=1'</span>;</span>
+          <br>
+          <span class="line"> &#125;
+            <span class="keyword">else</span> &#123;</span>
+          <br>
+          <span class="line"> parts[
+            <span class="number">0</span>] +=
+            <span class="string">'?'</span> + flag +
+            <span class="string">'=1'</span>;</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">try</span> &#123;</span>
+          <br>
+          <span class="line">
+            <span class="built_in">console</span>.log(
+            <span class="string">'页面被嵌入iframe中:'</span>, url);</span>
+          <br>
+          <span class="line"> top.location.href = parts.join(
+            <span class="string">'#'</span>);</span>
+          <br>
+          <span class="line"> &#125;
+            <span class="keyword">catch</span> (e) &#123;&#125;</span>
+          <br>
+          <span class="line">&#125;</span>
+          <br>
+        </pre></td></tr></table></figure><p>当然，如果这个参数一改，防嵌套的代码就失效了。所以我们还需要建立一个上报系统，不断增强我们的防护手段，这个后文会提及。</p><h2 id="内联事件及内联脚本拦截"><a href="#内联事件及内联脚本拦截" class="headerlink" title="内联事件及内联脚本拦截"></a>内联事件及内联脚本拦截</h2><p>在 XSS 中，其实可以注入脚本的方式非常的多，尤其是 HTML5 出来之后，一不留神，许多的新标签都可以用于注入可执行脚本。</p><p>列出一些比较常见的注入方式：</p><ol><li><code>&lt;a href=&quot;javascript:alert(1)&quot; &gt;&lt;/a&gt;</code></li><li><code>&lt;iframe src=&quot;javascript:alert(1)&quot; /&gt;</code></li><li><code>&lt;img src=&#39;x&#39; onerror=&quot;alert(1)&quot; /&gt;</code></li><li><code>&lt;video src=&#39;x&#39; onerror=&quot;alert(1)&quot; &gt;&lt;/video&gt;</code></li><li><code>&lt;div onclick=&quot;alert(1)&quot; onmouseover=&quot;alert(2)&quot; &gt;&lt;div&gt;</code></li></ol><p>除去一些未列出来的非常少见生僻的注入方式，大部分都是 <code>javascript:...</code> 及内联事件 <code>on*</code>。</p><p>我们假设注入已经发生，那么有没有办法拦截这些内联事件与内联脚本的执行呢？</p><p>对于上面列出的 (1) (5) ，这种需要用户点击或者执行某种事件之后才执行的脚本，我们是有办法进行防御的。</p><h3 id="浏览器事件模型"><a href="#浏览器事件模型" class="headerlink" title="浏览器事件模型"></a>浏览器事件模型</h3><p>这里说能够拦截，涉及到了 <code>事件模型</code>相关的原理。</p><p>我们都知道，标准浏览器事件模型存在三个阶段：</p><ul><li>捕获阶段</li><li>目标阶段</li><li>冒泡阶段</li></ul><p>对于一个这样 <code>&lt;a href=&quot;javascript:alert(1)&quot; &gt;&lt;/a&gt;</code> 的 a 标签而言，真正触发元素 <code>alert(1)</code> 是处于点击事件的目标阶段。</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/EyrjkG/?height=265&theme-id=0&default-tab=html,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/EyrjkG/" target="_blank" rel="external">EyrjkG</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.<br></iframe><p>点击上面的 <code>click me</code> ，先弹出 111 ，后弹出 222。</p><p>那么，我们只需要在点击事件模型的捕获阶段对标签内 <code>javascript:...</code> 的内容建立关键字黑名单，进行过滤审查，就可以做到我们想要的拦截效果。</p><p>对于 on* 类内联事件也是同理，只是对于这类事件太多，我们没办法手动枚举，可以利用代码自动枚举，完成对内联事件及内联脚本的拦截。</p><p>以拦截 a 标签内的 <code>href=&quot;javascript:...</code> 为例，我们可以这样写：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+            <span class="line">19</span>
+            <br>
+            <span class="line">20</span>
+            <br>
+            <span class="line">21</span>
+            <br>
+            <span class="line">22</span>
+            <br>
+            <span class="line">23</span>
+            <br>
+            <span class="line">24</span>
+            <br>
+            <span class="line">25</span>
+            <br>
+            <span class="line">26</span>
+            <br>
+            <span class="line">27</span>
+            <br>
+            <span class="line">28</span>
+            <br>
+            <span class="line">29</span>
+            <br>
+            <span class="line">30</span>
+            <br>
+            <span class="line">31</span>
+            <br>
+            <span class="line">32</span>
+            <br>
+            <span class="line">33</span>
+            <br>
+            <span class="line">34</span>
+            <br>
+            <span class="line">35</span>
+            <br>
+            <span class="line">36</span>
+            <br>
+            <span class="line">37</span>
+            <br>
+            <span class="line">38</span>
+            <br>
+            <span class="line">39</span>
+            <br>
+            <span class="line">40</span>
+            <br>
+            <span class="line">41</span>
+            <br>
+            <span class="line">42</span>
+            <br>
+            <span class="line">43</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// 建立关键词黑名单</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> keywordBlackList = [</span>
+            <br>
+            <span class="line">
+              <span class="string">'xss'</span>,</span>
+            <br>
+            <span class="line">
+              <span class="string">'BAIDU_SSP__wrapper'</span>,</span>
+            <br>
+            <span class="line">
+              <span class="string">'BAIDU_DSPUI_FLOWBAR'</span>
+            </span>
+            <br>
+            <span class="line">];</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="built_in">document</span>.addEventListener(
+              <span class="string">'click'</span>,
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">e</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> code =
+              <span class="string">""</span>;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 扫描 &lt;a href="javascript:"&gt; 的脚本</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (elem.tagName ==
+              <span class="string">'A'</span> &amp;&amp; elem.protocol ==
+              <span class="string">'javascript:'</span>) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> code = elem.href.substr(
+              <span class="number">11</span>);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (blackListMatch(keywordBlackList, code)) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 注销代码</span>
+            </span>
+            <br>
+            <span class="line"> elem.href =
+              <span class="string">'javascript:void(0)'</span>;</span>
+            <br>
+            <span class="line">
+              <span class="built_in">console</span>.log(
+              <span class="string">'拦截可疑事件:'</span> + code);</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line">&#125;,
+              <span class="literal">true</span>);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">/**</span>
+              <br>
+              <span class="line"> * [黑名单匹配]</span>
+              <br>
+              <span class="line"> * @param &#123;[Array]&#125; blackList [黑名单]</span>
+              <br>
+              <span class="line"> * @param &#123;[String]&#125; value [需要验证的字符串]</span>
+              <br>
+              <span class="line"> * @return &#123;[Boolean]&#125; [false -- 验证不通过，true -- 验证通过]</span>
+              <br>
+              <span class="line"> */</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">blackListMatch</span>(
+                <span class="params">blackList, value</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> length = blackList.length,</span>
+            <br>
+            <span class="line"> i =
+              <span class="number">0</span>;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="keyword">for</span> (; i &lt; length; i++) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 建立黑名单正则</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> reg =
+              <span class="keyword">new</span>
+              <span class="built_in">RegExp</span>(whiteList[i],
+              <span class="string">'i'</span>);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 存在黑名单中，拦截</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (reg.test(value)) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span>
+              <span class="literal">true</span>;</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span>
+              <span class="literal">false</span>;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p><a href="http://sbco.cc/demo/httphijack/index.html">可以戳我查看DEMO</a>。(打开页面后打开控制台查看 console.log)</p><p>点击图中这几个按钮，可以看到如下：</p><p><img src="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/B84C7180C88E4A69A3CB055BEA47FEAD" alt=""></p><p>这里我们用到了黑名单匹配，下文还会细说。</p><h2 id="静态脚本拦截"><a href="#静态脚本拦截" class="headerlink" title="静态脚本拦截"></a>静态脚本拦截</h2><p>XSS 跨站脚本的精髓不在于“跨站”，在于“脚本”。</p><p>通常而言，攻击者或者运营商会向页面中注入一个 <code>&lt;script&gt;</code>脚本，具体操作都在脚本中实现，这种劫持方式只需要注入一次，有改动的话不需要每次都重新注入。</p><p>我们假定现在页面上被注入了一个 <code>&lt;script src=&quot;http://attack.com/xss.js&quot;&gt;</code> 脚本，我们的目标就是拦截这个脚本的执行。</p><p>听起来很困难啊，什么意思呢。就是在脚本执行前发现这个可疑脚本，并且销毁它使之不能执行内部代码。</p><p>所以我们需要用到一些高级 API ，能够在页面加载时对生成的节点进行检测。</p><h4 id="MutationObserver"><a href="#MutationObserver" class="headerlink" title="MutationObserver"></a>MutationObserver</h4><p>MutationObserver 是 HTML5 新增的 API，功能很强大，给开发者们提供了一种能在某个范围内的 DOM 树发生变化时作出适当反应的能力。</p><p>说的很玄乎，大概的意思就是能够监测到页面 DOM 树的变换，并作出反应。</p><p><code>MutationObserver()</code> 该构造函数用来实例化一个新的Mutation观察者对象。</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">MutationObserver(</span>
+          <br>
+          <span class="line">
+            <span class="function">
+              <span class="keyword">function</span>
+              <span class="title">callback</span>
+            </span>
+            <br>
+            <span class="line">);</span>
+          </span>
+          <br>
+        </pre></td></tr></table></figure><p>而且，其中的 <code>callback</code> 会在指定的 DOM 节点(目标节点)发生变化时被调用。在调用时,观察者对象会传给该函数两个参数，第一个参数是个包含了若干个 MutationRecord 对象的数组，第二个参数则是这个观察者对象本身。</p><p>目瞪狗呆，这一大段又是啥？意思就是 MutationObserver 在观测时并非发现一个新元素就立即回调，而是将一个时间片段里出现的所有元素，一起传过来。所以在回调中我们需要进行批量处理。</p><p>所以，使用 MutationObserver ，我们可以对页面加载的每个静态脚本文件，进行监控：</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+          <span class="line">6</span>
+          <br>
+          <span class="line">7</span>
+          <br>
+          <span class="line">8</span>
+          <br>
+          <span class="line">9</span>
+          <br>
+          <span class="line">10</span>
+          <br>
+          <span class="line">11</span>
+          <br>
+          <span class="line">12</span>
+          <br>
+          <span class="line">13</span>
+          <br>
+          <span class="line">14</span>
+          <br>
+          <span class="line">15</span>
+          <br>
+          <span class="line">16</span>
+          <br>
+          <span class="line">17</span>
+          <br>
+          <span class="line">18</span>
+          <br>
+          <span class="line">19</span>
+          <br>
+          <span class="line">20</span>
+          <br>
+          <span class="line">21</span>
+          <br>
+          <span class="line">22</span>
+          <br>
+          <span class="line">23</span>
+          <br>
+          <span class="line">24</span>
+          <br>
+          <span class="line">25</span>
+          <br>
+          <span class="line">26</span>
+          <br>
+          <span class="line">27</span>
+          <br>
+          <span class="line">28</span>
+          <br>
+          <span class="line">29</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="comment">// MutationObserver 的不同兼容性写法</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> MutationObserver =
+            <span class="built_in">window</span>.MutationObserver ||
+            <span class="built_in">window</span>.WebKitMutationObserver ||</span>
+          <br>
+          <span class="line">
+            <span class="built_in">window</span>.MozMutationObserver;</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 该构造函数用来实例化一个新的 Mutation 观察者对象</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="comment">// Mutation 观察者对象能监听在某个范围内的 DOM 树变化</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> observer =
+            <span class="keyword">new</span> MutationObserver(
+            <span class="function">
+              <span class="keyword">function</span>(
+              <span class="params">mutations</span>) </span>&#123;</span>
+          <br>
+          <span class="line"> mutations.forEach(
+            <span class="function">
+              <span class="keyword">function</span>(
+              <span class="params">mutation</span>) </span>&#123;</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 返回被添加的节点,或者为null.</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> nodes = mutation.addedNodes;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="keyword">for</span> (
+            <span class="keyword">var</span> i =
+            <span class="number">0</span>; i &lt; nodes.length; i++) &#123;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> node = nodes[i];</span>
+          <br>
+          <span class="line">
+            <span class="keyword">if</span> (
+            <span class="regexp">/xss/i</span>.test(node.src))) &#123;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">try</span> &#123;</span>
+          <br>
+          <span class="line"> node.parentNode.removeChild(node);</span>
+          <br>
+          <span class="line">
+            <span class="built_in">console</span>.log(
+            <span class="string">'拦截可疑静态脚本:'</span>, node.src);</span>
+          <br>
+          <span class="line"> &#125;
+            <span class="keyword">catch</span> (e) &#123;&#125;</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line"> &#125;);</span>
+          <br>
+          <span class="line">&#125;);</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">// 传入目标节点和观察选项</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="comment">// 如果 target 为 document 或者 document.documentElement</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="comment">// 则当前文档中所有的节点添加与删除操作都会被观察到</span>
+          </span>
+          <br>
+          <span class="line">observer.observe(
+            <span class="built_in">document</span>, &#123;</span>
+          <br>
+          <span class="line"> subtree:
+            <span class="literal">true</span>,</span>
+          <br>
+          <span class="line"> childList:
+            <span class="literal">true</span>
+          </span>
+          <br>
+          <span class="line">&#125;);</span>
+          <br>
+        </pre></td></tr></table></figure><p><a href="http://sbco.cc/demo/httphijack/index.html">可以戳我查看DEMO</a>。(打开页面后打开控制台查看 console.log)</p><p>可以看到如下：</p><p><img src="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/4D1E4F3BB93549F78E12E58B29DF3D10" alt=""></p><p><code>&lt;script type=&quot;text/javascript&quot; src=&quot;./xss/a.js&quot;&gt;&lt;/script&gt;</code> 是页面加载一开始就存在的静态脚本（查看页面结构），我们使用 MutationObserver 可以在脚本加载之后，执行之前这个时间段对其内容做正则匹配，发现恶意代码则 <code>removeChild()</code> 掉，使之无法执行。</p><h3 id="使用白名单对-src-进行匹配过滤"><a href="#使用白名单对-src-进行匹配过滤" class="headerlink" title="使用白名单对 src 进行匹配过滤"></a>使用白名单对 src 进行匹配过滤</h3><p>上面的代码中，我们判断一个js脚本是否是恶意的，用的是这一句：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="keyword">if</span> (
+              <span class="regexp">/xss/i</span>.test(node.src)) &#123;&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>当然实际当中，注入恶意代码者不会那么傻，把名字改成 XSS 。所以，我们很有必要使用白名单进行过滤和建立一个拦截上报系统。</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+          <span class="line">6</span>
+          <br>
+          <span class="line">7</span>
+          <br>
+          <span class="line">8</span>
+          <br>
+          <span class="line">9</span>
+          <br>
+          <span class="line">10</span>
+          <br>
+          <span class="line">11</span>
+          <br>
+          <span class="line">12</span>
+          <br>
+          <span class="line">13</span>
+          <br>
+          <span class="line">14</span>
+          <br>
+          <span class="line">15</span>
+          <br>
+          <span class="line">16</span>
+          <br>
+          <span class="line">17</span>
+          <br>
+          <span class="line">18</span>
+          <br>
+          <span class="line">19</span>
+          <br>
+          <span class="line">20</span>
+          <br>
+          <span class="line">21</span>
+          <br>
+          <span class="line">22</span>
+          <br>
+          <span class="line">23</span>
+          <br>
+          <span class="line">24</span>
+          <br>
+          <span class="line">25</span>
+          <br>
+          <span class="line">26</span>
+          <br>
+          <span class="line">27</span>
+          <br>
+          <span class="line">28</span>
+          <br>
+          <span class="line">29</span>
+          <br>
+          <span class="line">30</span>
+          <br>
+          <span class="line">31</span>
+          <br>
+          <span class="line">32</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="comment">// 建立白名单</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> whiteList = [</span>
+          <br>
+          <span class="line">
+            <span class="string">'www.yy.com'</span>,</span>
+          <br>
+          <span class="line">
+            <span class="string">'res.cont.yy.com'</span>
+          </span>
+          <br>
+          <span class="line">];</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">/**</span>
+            <br>
+            <span class="line"> * [白名单匹配]</span>
+            <br>
+            <span class="line"> * @param &#123;[Array]&#125; whileList [白名单]</span>
+            <br>
+            <span class="line"> * @param &#123;[String]&#125; value [需要验证的字符串]</span>
+            <br>
+            <span class="line"> * @return &#123;[Boolean]&#125; [false -- 验证不通过，true -- 验证通过]</span>
+            <br>
+            <span class="line"> */</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="function">
+              <span class="keyword">function</span>
+              <span class="title">whileListMatch</span>(
+              <span class="params">whileList, value</span>) </span>&#123;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> length = whileList.length,</span>
+          <br>
+          <span class="line"> i =
+            <span class="number">0</span>;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="keyword">for</span> (; i &lt; length; i++) &#123;</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 建立白名单正则</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> reg =
+            <span class="keyword">new</span>
+            <span class="built_in">RegExp</span>(whiteList[i],
+            <span class="string">'i'</span>);</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">// 存在白名单中，放行</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">if</span> (reg.test(value)) &#123;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">return</span>
+            <span class="literal">true</span>;</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">return</span>
+            <span class="literal">false</span>;</span>
+          <br>
+          <span class="line">&#125;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">// 只放行白名单</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">if</span> (!whileListMatch(blackList, node.src)) &#123;</span>
+          <br>
+          <span class="line"> node.parentNode.removeChild(node);</span>
+          <br>
+          <span class="line">&#125;</span>
+          <br>
+        </pre></td></tr></table></figure><p>这里我们已经多次提到白名单匹配了，下文还会用到，所以可以这里把它简单封装成一个方法调用。</p><h2 id="动态脚本拦截"><a href="#动态脚本拦截" class="headerlink" title="动态脚本拦截"></a>动态脚本拦截</h2><p>上面使用 MutationObserver 拦截静态脚本，除了静态脚本，与之对应的就是动态生成的脚本。</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="keyword">var</span> script =
+            <span class="built_in">document</span>.createElement(
+            <span class="string">'script'</span>);</span>
+          <br>
+          <span class="line">script.type =
+            <span class="string">'text/javascript'</span>;</span>
+          <br>
+          <span class="line">script.src =
+            <span class="string">'http://www.example.com/xss/b.js'</span>;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="built_in">document</span>.getElementsByTagName(
+            <span class="string">'body'</span>)[
+            <span class="number">0</span>].appendChild(script);</span>
+          <br>
+        </pre></td></tr></table></figure><p>要拦截这类动态生成的脚本，且拦截时机要在它插入 DOM 树中，执行之前，本来是可以监听 <code>Mutation Events</code> 中的 <code>DOMNodeInserted</code> 事件的。</p><h4 id="Mutation-Events-与-DOMNodeInserted"><a href="#Mutation-Events-与-DOMNodeInserted" class="headerlink" title="Mutation Events 与 DOMNodeInserted"></a>Mutation Events 与 DOMNodeInserted</h4><p>打开 <a href="https://developer.mozilla.org/zh-CN/docs/Web/Guide/Events/Mutation_events" target="_blank" rel="external">MDN</a> ，第一句就是:</p><p>该特性已经从 Web 标准中删除，虽然一些浏览器目前仍然支持它，但也许会在未来的某个时间停止支持，请尽量不要使用该特性。</p><p>虽然不能用，也可以了解一下：</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+          <span class="line">6</span>
+          <br>
+          <span class="line">7</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="built_in">document</span>.addEventListener(
+            <span class="string">'DOMNodeInserted'</span>,
+            <span class="function">
+              <span class="keyword">function</span>(
+              <span class="params">e</span>) </span>&#123;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> node = e.target;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">if</span> (
+            <span class="regexp">/xss/i</span>.test(node.src) ||
+            <span class="regexp">/xss/i</span>.test(node.innerHTML)) &#123;</span>
+          <br>
+          <span class="line"> node.parentNode.removeChild(node);</span>
+          <br>
+          <span class="line">
+            <span class="built_in">console</span>.log(
+            <span class="string">'拦截可疑动态脚本:'</span>, node);</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line">&#125;,
+            <span class="literal">true</span>);</span>
+          <br>
+        </pre></td></tr></table></figure><p><code>DOMNodeInserted</code> 顾名思义，可以监听某个 DOM 范围内的结构变化，与 <code>MutationObserver</code> 相比，它的执行时机更早。</p><p>然而可惜的是，使用上面的代码拦截动态生成的脚本，可以拦截到，但是代码也执行了:</p><p><img src="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/39A47C5CC14A47D8806019EA1C4A78FB" alt=""></p><p>但是 <code>DOMNodeInserted</code> 不再建议使用，所以监听动态脚本的任务也要交给 <code>MutationObserver</code>。</p><p>可惜的是，在实际实践过程中，使用 <code>MutationObserver</code> 的结果和 <code>DOMNodeInserted</code> 一样，可以监听拦截到动态脚本的生成，但是无法在脚本执行之前，使用 <code>removeChild</code> 将其移除，所以我们还需要想想其他办法。</p><h2 id="重写-setAttribute-与-document-write"><a href="#重写-setAttribute-与-document-write" class="headerlink" title="重写 setAttribute 与 document.write"></a>重写 setAttribute 与 document.write</h2><h3 id="重写原生-Element-prototype-setAttribute-方法"><a href="#重写原生-Element-prototype-setAttribute-方法" class="headerlink" title="重写原生 Element.prototype.setAttribute 方法"></a>重写原生 Element.prototype.setAttribute 方法</h3><p>在动态脚本插入执行前，监听 DOM 树的变化拦截它行不通，脚本仍然会执行。</p><p>那么我们需要向上寻找，在脚本插入 DOM 树前的捕获它，那就是创建脚本时这个时机。</p><p>假设现在有一个动态脚本是这样创建的：</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="keyword">var</span> script =
+            <span class="built_in">document</span>.createElement(
+            <span class="string">'script'</span>);</span>
+          <br>
+          <span class="line">script.setAttribute(
+            <span class="string">'type'</span>,
+            <span class="string">'text/javascript'</span>);</span>
+          <br>
+          <span class="line">script.setAttribute(
+            <span class="string">'src'</span>,
+            <span class="string">'http://www.example.com/xss/c.js'</span>);</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="built_in">document</span>.getElementsByTagName(
+            <span class="string">'body'</span>)[
+            <span class="number">0</span>].appendChild(script);</span>
+          <br>
+        </pre></td></tr></table></figure><p>我们发现这里用到了 setAttribute 方法，如果我们能够改写这个原生方法，监听设置 <code>src</code> 属性时的值，通过黑名单或者白名单判断它，就可以判断该标签的合法性了。</p><p>而重写 <code>Element.prototype.setAttribute</code> 也是可行的：</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+          <span class="line">6</span>
+          <br>
+          <span class="line">7</span>
+          <br>
+          <span class="line">8</span>
+          <br>
+          <span class="line">9</span>
+          <br>
+          <span class="line">10</span>
+          <br>
+          <span class="line">11</span>
+          <br>
+          <span class="line">12</span>
+          <br>
+          <span class="line">13</span>
+          <br>
+          <span class="line">14</span>
+          <br>
+          <span class="line">15</span>
+          <br>
+          <span class="line">16</span>
+          <br>
+          <span class="line">17</span>
+          <br>
+          <span class="line">18</span>
+          <br>
+          <span class="line">19</span>
+          <br>
+          <span class="line">20</span>
+          <br>
+          <span class="line">21</span>
+          <br>
+          <span class="line">22</span>
+          <br>
+          <span class="line">23</span>
+          <br>
+          <span class="line">24</span>
+          <br>
+          <span class="line">25</span>
+          <br>
+          <span class="line">26</span>
+          <br>
+          <span class="line">27</span>
+          <br>
+          <span class="line">28</span>
+          <br>
+          <span class="line">29</span>
+          <br>
+          <span class="line">30</span>
+          <br>
+          <span class="line">31</span>
+          <br>
+          <span class="line">32</span>
+          <br>
+          <span class="line">33</span>
+          <br>
+          <span class="line">34</span>
+          <br>
+          <span class="line">35</span>
+          <br>
+          <span class="line">36</span>
+          <br>
+          <span class="line">37</span>
+          <br>
+          <span class="line">38</span>
+          <br>
+          <span class="line">39</span>
+          <br>
+          <span class="line">40</span>
+          <br>
+          <span class="line">41</span>
+          <br>
+          <span class="line">42</span>
+          <br>
+          <span class="line">43</span>
+          <br>
+          <span class="line">44</span>
+          <br>
+          <span class="line">45</span>
+          <br>
+          <span class="line">46</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="comment">// 保存原有接口</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> old_setAttribute = Element.prototype.setAttribute;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">// 重写 setAttribute 接口</span>
+          </span>
+          <br>
+          <span class="line">Element.prototype.setAttribute =
+            <span class="function">
+              <span class="keyword">function</span>(
+              <span class="params">name, value</span>) </span>&#123;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">// 匹配到 &lt;script src='xxx' &gt; 类型</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">if</span> (
+            <span class="keyword">this</span>.tagName ==
+            <span class="string">'SCRIPT'</span> &amp;&amp;
+            <span class="regexp">/^src$/i</span>.test(name)) &#123;</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 白名单匹配</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">if</span> (!whileListMatch(whiteList, value)) &#123;</span>
+          <br>
+          <span class="line">
+            <span class="built_in">console</span>.log(
+            <span class="string">'拦截可疑模块:'</span>, value);</span>
+          <br>
+          <span class="line">
+            <span class="keyword">return</span>;</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">// 调用原始接口</span>
+          </span>
+          <br>
+          <span class="line"> old_setAttribute.apply(
+            <span class="keyword">this</span>,
+            <span class="built_in">arguments</span>);</span>
+          <br>
+          <span class="line">&#125;;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">// 建立白名单</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> whiteList = [</span>
+          <br>
+          <span class="line">
+            <span class="string">'www.yy.com'</span>,</span>
+          <br>
+          <span class="line">
+            <span class="string">'res.cont.yy.com'</span>
+          </span>
+          <br>
+          <span class="line">];</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">/**</span>
+            <br>
+            <span class="line"> * [白名单匹配]</span>
+            <br>
+            <span class="line"> * @param &#123;[Array]&#125; whileList [白名单]</span>
+            <br>
+            <span class="line"> * @param &#123;[String]&#125; value [需要验证的字符串]</span>
+            <br>
+            <span class="line"> * @return &#123;[Boolean]&#125; [false -- 验证不通过，true -- 验证通过]</span>
+            <br>
+            <span class="line"> */</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="function">
+              <span class="keyword">function</span>
+              <span class="title">whileListMatch</span>(
+              <span class="params">whileList, value</span>) </span>&#123;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> length = whileList.length,</span>
+          <br>
+          <span class="line"> i =
+            <span class="number">0</span>;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="keyword">for</span> (; i &lt; length; i++) &#123;</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 建立白名单正则</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> reg =
+            <span class="keyword">new</span>
+            <span class="built_in">RegExp</span>(whiteList[i],
+            <span class="string">'i'</span>);</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">// 存在白名单中，放行</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="keyword">if</span> (reg.test(value)) &#123;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">return</span>
+            <span class="literal">true</span>;</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line"> &#125;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">return</span>
+            <span class="literal">false</span>;</span>
+          <br>
+          <span class="line">&#125;</span>
+          <br>
+        </pre></td></tr></table></figure><p><a href="http://sbco.cc/demo/httphijack/index.html">可以戳我查看DEMO</a>。(打开页面后打开控制台查看 console.log)</p><p>可以看到如下结果：</p><p><img src="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/FF970549831943BA85A6ADDE97FCD325" alt=""></p><p>重写 <code>Element.prototype.setAttribute</code> ，就是首先保存原有接口，然后当有元素调用 setAttribute 时，检查传入的 src 是否存在于白名单中，存在则放行，不存在则视为可疑元素，进行上报并不予以执行。最后对放行的元素执行原生的 <code>setAttribute</code> ，也就是 <code>old_setAttribute.apply(this, arguments);</code>。</p><p>上述的白名单匹配也可以换成黑名单匹配。</p><h3 id="重写嵌套-iframe-内的-Element-prototype-setAttribute"><a href="#重写嵌套-iframe-内的-Element-prototype-setAttribute" class="headerlink" title="重写嵌套 iframe 内的 Element.prototype.setAttribute"></a>重写嵌套 iframe 内的 Element.prototype.setAttribute</h3><p>当然，上面的写法如果 <code>old_setAttribute = Element.prototype.setAttribute</code> 暴露给攻击者的话，直接使用 <code>old_setAttribute</code> 就可以绕过我们重写的方法了，所以这段代码必须包在一个闭包内。</p><p>当然这样也不保险，虽然当前窗口下的 <code>Element.prototype.setAttribute</code> 已经被重写了。但是还是有手段可以拿到原生的 <code>Element.prototype.setAttribute</code> ，只需要一个新的 iframe 。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">var newIframe = document.createElement(&apos;iframe&apos;);</span>
+          <br>
+          <span class="line">document.body.appendChild(newIframe);</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">Element.prototype.setAttribute = newIframe.contentWindow.Element.prototype.setAttribute;</span>
+          <br>
+        </pre></td></tr></table></figure><p>通过这个方法，可以重新拿到原生的 <code>Element.prototype.setAttribute</code> ，因为 iframe 内的环境和外层 window 是完全隔离的。wtf?</p><p><img src="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/49CE5036213842D79FBED6283862F102" alt=""></p><p>怎么办？我们看到创建 iframe 用到了 <code>createElement</code>，那么是否可以重写原生 <code>createElement</code> 呢？但是除了 <code>createElement</code> 还有 <code>createElementNS</code> ，还有可能是页面上已经存在 iframe，所以不合适。</p><p>那就在每当新创建一个新 iframe 时，对 <code>setAttribute</code> 进行保护重写，这里又有用到 <code>MutationObserver</code> ：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+            <span class="line">19</span>
+            <br>
+            <span class="line">20</span>
+            <br>
+            <span class="line">21</span>
+            <br>
+            <span class="line">22</span>
+            <br>
+            <span class="line">23</span>
+            <br>
+            <span class="line">24</span>
+            <br>
+            <span class="line">25</span>
+            <br>
+            <span class="line">26</span>
+            <br>
+            <span class="line">27</span>
+            <br>
+            <span class="line">28</span>
+            <br>
+            <span class="line">29</span>
+            <br>
+            <span class="line">30</span>
+            <br>
+            <span class="line">31</span>
+            <br>
+            <span class="line">32</span>
+            <br>
+            <span class="line">33</span>
+            <br>
+            <span class="line">34</span>
+            <br>
+            <span class="line">35</span>
+            <br>
+            <span class="line">36</span>
+            <br>
+            <span class="line">37</span>
+            <br>
+            <span class="line">38</span>
+            <br>
+            <span class="line">39</span>
+            <br>
+            <span class="line">40</span>
+            <br>
+            <span class="line">41</span>
+            <br>
+            <span class="line">42</span>
+            <br>
+            <span class="line">43</span>
+            <br>
+            <span class="line">44</span>
+            <br>
+            <span class="line">45</span>
+            <br>
+            <span class="line">46</span>
+            <br>
+            <span class="line">47</span>
+            <br>
+            <span class="line">48</span>
+            <br>
+            <span class="line">49</span>
+            <br>
+            <span class="line">50</span>
+            <br>
+            <span class="line">51</span>
+            <br>
+            <span class="line">52</span>
+            <br>
+            <span class="line">53</span>
+            <br>
+            <span class="line">54</span>
+            <br>
+            <span class="line">55</span>
+            <br>
+            <span class="line">56</span>
+            <br>
+            <span class="line">57</span>
+            <br>
+            <span class="line">58</span>
+            <br>
+            <span class="line">59</span>
+            <br>
+            <span class="line">60</span>
+            <br>
+            <span class="line">61</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">/**</span>
+              <br>
+              <span class="line"> * 使用 MutationObserver 对生成的 iframe 页面进行监控，</span>
+              <br>
+              <span class="line"> * 防止调用内部原生 setAttribute 及 document.write</span>
+              <br>
+              <span class="line"> * @return &#123;[type]&#125; [description]</span>
+              <br>
+              <span class="line"> */</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">defenseIframe</span>(
+                <span class="params"></span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 先保护当前页面</span>
+            </span>
+            <br>
+            <span class="line"> installHook(
+              <span class="built_in">window</span>);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">/**</span>
+              <br>
+              <span class="line"> * 实现单个 window 窗口的 setAttribute保护</span>
+              <br>
+              <span class="line"> * @param &#123;[BOM]&#125; window [浏览器window对象]</span>
+              <br>
+              <span class="line"> * @return &#123;[type]&#125; [description]</span>
+              <br>
+              <span class="line"> */</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">installHook</span>(
+                <span class="params">window</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 重写单个 window 窗口的 setAttribute 属性</span>
+            </span>
+            <br>
+            <span class="line"> resetSetAttribute(
+              <span class="built_in">window</span>);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// MutationObserver 的不同兼容性写法</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> MutationObserver =
+              <span class="built_in">window</span>.MutationObserver ||
+              <span class="built_in">window</span>.WebKitMutationObserver ||
+              <span class="built_in">window</span>.MozMutationObserver;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 该构造函数用来实例化一个新的 Mutation 观察者对象</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// Mutation 观察者对象能监听在某个范围内的 DOM 树变化</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> observer =
+              <span class="keyword">new</span> MutationObserver(
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">mutations</span>) </span>&#123;</span>
+            <br>
+            <span class="line"> mutations.forEach(
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">mutation</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 返回被添加的节点,或者为null.</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> nodes = mutation.addedNodes;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 逐个遍历</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">for</span> (
+              <span class="keyword">var</span> i =
+              <span class="number">0</span>; i &lt; nodes.length; i++) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> node = nodes[i];</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 给生成的 iframe 里环境也装上重写的钩子</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (node.tagName ==
+              <span class="string">'IFRAME'</span>) &#123;</span>
+            <br>
+            <span class="line"> installHook(node.contentWindow);</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line"> &#125;);</span>
+            <br>
+            <span class="line"> &#125;);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line"> observer.observe(
+              <span class="built_in">document</span>, &#123;</span>
+            <br>
+            <span class="line"> subtree:
+              <span class="literal">true</span>,</span>
+            <br>
+            <span class="line"> childList:
+              <span class="literal">true</span>
+            </span>
+            <br>
+            <span class="line"> &#125;);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">/**</span>
+              <br>
+              <span class="line"> * 重写单个 window 窗口的 setAttribute 属性</span>
+              <br>
+              <span class="line"> * @param &#123;[BOM]&#125; window [浏览器window对象]</span>
+              <br>
+              <span class="line"> * @return &#123;[type]&#125; [description]</span>
+              <br>
+              <span class="line"> */</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">resetSetAttribute</span>(
+                <span class="params">window</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 保存原有接口</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> old_setAttribute =
+              <span class="built_in">window</span>.Element.prototype.setAttribute;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 重写 setAttribute 接口</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="built_in">window</span>.Element.prototype.setAttribute =
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">name, value</span>) </span>&#123;</span>
+            <br>
+            <span class="line"> ...</span>
+            <br>
+            <span class="line"> &#125;;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>我们定义了一个 <code>installHook</code> 方法，参数是一个 <code>window</code> ，在这个方法里，我们将重写传入的 <code>window</code> 下的 setAttribute ，并且安装一个 <code>MutationObserver</code> ，并对此窗口下未来可能创建的 <code>iframe</code> 进行监听，如果未来在此 <code>window</code> 下创建了一个 iframe ，则对新的 <code>iframe</code> 也装上 <code>installHook</code> 方法，以此进行层层保护。</p><h3 id="重写-document-write"><a href="#重写-document-write" class="headerlink" title="重写 document.write"></a>重写 document.write</h3><p>根据上述的方法，我们可以继续挖掘一下，还有什么方法可以重写，以便对页面进行更好的保护。</p><p><code>document.write</code> 是一个很不错选择，注入攻击者，通常会使用这个方法，往页面上注入一些弹窗广告。</p><p>我们可以重写 <code>document.write</code> ，使用关键词黑名单对内容进行匹配。</p><p>什么比较适合当黑名单的关键字呢？我们可以看看一些广告很多的页面：</p><p><img src="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/BB75B436750240A48DF64A9CADB056DF" alt=""></p><p>这里在页面最底部嵌入了一个 iframe ，里面装了广告代码，这里的最外层的 id 名 <code>id=&quot;BAIDU_SSP__wrapper_u2444091_0&quot;</code> 就很适合成为我们判断是否是恶意代码的一个标志，假设我们已经根据拦截上报收集到了一批黑名单列表：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+          <span class="line">6</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">// 建立正则拦截关键词</span>
+          <br>
+          <span class="line">var keywords = [</span>
+          <br>
+          <span class="line">&apos;xss&apos;,</span>
+          <br>
+          <span class="line">&apos;BAIDU_SSP__wrapper&apos;,</span>
+          <br>
+          <span class="line">&apos;BAIDU_DSPUI_FLOWBAR&apos;</span>
+          <br>
+          <span class="line">];</span>
+          <br>
+        </pre></td></tr></table></figure><p>接下来我们只需要利用这些关键字，对 <code>document.write</code> 传入的内容进行正则判断，就能确定是否要拦截 <code>document.write</code> 这段代码。<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+            <span class="line">19</span>
+            <br>
+            <span class="line">20</span>
+            <br>
+            <span class="line">21</span>
+            <br>
+            <span class="line">22</span>
+            <br>
+            <span class="line">23</span>
+            <br>
+            <span class="line">24</span>
+            <br>
+            <span class="line">25</span>
+            <br>
+            <span class="line">26</span>
+            <br>
+            <span class="line">27</span>
+            <br>
+            <span class="line">28</span>
+            <br>
+            <span class="line">29</span>
+            <br>
+            <span class="line">30</span>
+            <br>
+            <span class="line">31</span>
+            <br>
+            <span class="line">32</span>
+            <br>
+            <span class="line">33</span>
+            <br>
+            <span class="line">34</span>
+            <br>
+            <span class="line">35</span>
+            <br>
+            <span class="line">36</span>
+            <br>
+            <span class="line">37</span>
+            <br>
+            <span class="line">38</span>
+            <br>
+            <span class="line">39</span>
+            <br>
+            <span class="line">40</span>
+            <br>
+            <span class="line">41</span>
+            <br>
+            <span class="line">42</span>
+            <br>
+            <span class="line">43</span>
+            <br>
+            <span class="line">44</span>
+            <br>
+            <span class="line">45</span>
+            <br>
+            <span class="line">46</span>
+            <br>
+            <span class="line">47</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// 建立关键词黑名单</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> keywordBlackList = [</span>
+            <br>
+            <span class="line">
+              <span class="string">'xss'</span>,</span>
+            <br>
+            <span class="line">
+              <span class="string">'BAIDU_SSP__wrapper'</span>,</span>
+            <br>
+            <span class="line">
+              <span class="string">'BAIDU_DSPUI_FLOWBAR'</span>
+            </span>
+            <br>
+            <span class="line">];</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">/**</span>
+              <br>
+              <span class="line"> * 重写单个 window 窗口的 document.write 属性</span>
+              <br>
+              <span class="line"> * @param &#123;[BOM]&#125; window [浏览器window对象]</span>
+              <br>
+              <span class="line"> * @return &#123;[type]&#125; [description]</span>
+              <br>
+              <span class="line"> */</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">resetDocumentWrite</span>(
+                <span class="params">window</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> old_write =
+              <span class="built_in">window</span>.document.write;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="built_in">window</span>.document.write =
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">string</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (blackListMatch(keywordBlackList, string)) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="built_in">console</span>.log(
+              <span class="string">'拦截可疑模块:'</span>, string);</span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span>;</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 调用原始接口</span>
+            </span>
+            <br>
+            <span class="line"> old_write.apply(
+              <span class="built_in">document</span>,
+              <span class="built_in">arguments</span>);</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">/**</span>
+              <br>
+              <span class="line"> * [黑名单匹配]</span>
+              <br>
+              <span class="line"> * @param &#123;[Array]&#125; blackList [黑名单]</span>
+              <br>
+              <span class="line"> * @param &#123;[String]&#125; value [需要验证的字符串]</span>
+              <br>
+              <span class="line"> * @return &#123;[Boolean]&#125; [false -- 验证不通过，true -- 验证通过]</span>
+              <br>
+              <span class="line"> */</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">blackListMatch</span>(
+                <span class="params">blackList, value</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> length = blackList.length,</span>
+            <br>
+            <span class="line"> i =
+              <span class="number">0</span>;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="keyword">for</span> (; i &lt; length; i++) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 建立黑名单正则</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> reg =
+              <span class="keyword">new</span>
+              <span class="built_in">RegExp</span>(whiteList[i],
+              <span class="string">'i'</span>);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 存在黑名单中，拦截</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (reg.test(value)) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span>
+              <span class="literal">true</span>;</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span>
+              <span class="literal">false</span>;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>我们可以把 <code>resetDocumentWrite</code> 放入上文的 <code>installHook</code> 方法中，就能对当前 window 及所有生成的 iframe 环境内的 <code>document.write</code> 进行重写了。</p><h2 id="锁死-apply-和-call"><a href="#锁死-apply-和-call" class="headerlink" title="锁死 apply 和 call"></a>锁死 apply 和 call</h2><p>接下来要介绍的这个是锁住原生的 Function.prototype.apply 和 Function.prototype.call 方法，锁住的意思就是使之无法被重写。</p><p>这里要用到 <code>Object.defineProperty</code> ，用于锁死 apply 和 call。</p><h4 id="Object-defineProperty"><a href="#Object-defineProperty" class="headerlink" title="Object.defineProperty"></a>Object.defineProperty</h4><p>Object.defineProperty() 方法直接在一个对象上定义一个新属性，或者修改一个已经存在的属性， 并返回这个对象。<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="built_in">Object</span>.defineProperty(obj, prop, descriptor)</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>其中:</p><ul><li>obj – 需要定义属性的对象</li><li>prop – 需被定义或修改的属性名</li><li>descriptor – 需被定义或修改的属性的描述符</li></ul><p>我们可以使用如下的代码，让 call 和 apply 无法被重写。</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+          <span class="line">6</span>
+          <br>
+          <span class="line">7</span>
+          <br>
+          <span class="line">8</span>
+          <br>
+          <span class="line">9</span>
+          <br>
+          <span class="line">10</span>
+          <br>
+          <span class="line">11</span>
+          <br>
+          <span class="line">12</span>
+          <br>
+          <span class="line">13</span>
+          <br>
+          <span class="line">14</span>
+          <br>
+          <span class="line">15</span>
+          <br>
+          <span class="line">16</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="comment">// 锁住 call</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="built_in">Object</span>.defineProperty(
+            <span class="built_in">Function</span>.prototype,
+            <span class="string">'call'</span>, &#123;</span>
+          <br>
+          <span class="line"> value:
+            <span class="built_in">Function</span>.prototype.call,</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 当且仅当仅当该属性的 writable 为 true 时，该属性才能被赋值运算符改变</span>
+          </span>
+          <br>
+          <span class="line"> writable:
+            <span class="literal">false</span>,</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 当且仅当该属性的 configurable 为 true 时，该属性才能够被改变，也能够被删除</span>
+          </span>
+          <br>
+          <span class="line"> configurable:
+            <span class="literal">false</span>,</span>
+          <br>
+          <span class="line"> enumerable:
+            <span class="literal">true</span>
+          </span>
+          <br>
+          <span class="line">&#125;);</span>
+          <br>
+          <span class="line">
+            <span class="comment">// 锁住 apply</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="built_in">Object</span>.defineProperty(
+            <span class="built_in">Function</span>.prototype,
+            <span class="string">'apply'</span>, &#123;</span>
+          <br>
+          <span class="line"> value:
+            <span class="built_in">Function</span>.prototype.apply,</span>
+          <br>
+          <span class="line"> writable:
+            <span class="literal">false</span>,</span>
+          <br>
+          <span class="line"> configurable:
+            <span class="literal">false</span>,</span>
+          <br>
+          <span class="line"> enumerable:
+            <span class="literal">true</span>
+          </span>
+          <br>
+          <span class="line">&#125;);</span>
+          <br>
+        </pre></td></tr></table></figure><p>为啥要这样写呢？其实还是与上文的 <code>重写 setAttribute</code> 有关。</p><p>虽然我们将原始 Element.prototype.setAttribute 保存在了一个闭包当中，但是还有奇技淫巧可以把它从闭包中给“偷出来”。</p><p>试一下：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">(
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params"></span>) </span>&#123;&#125;)(</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 保存原有接口</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> old_setAttribute = Element.prototype.setAttribute;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 重写 setAttribute 接口</span>
+            </span>
+            <br>
+            <span class="line"> Element.prototype.setAttribute =
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">name, value</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 具体细节</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (
+              <span class="keyword">this</span>.tagName ==
+              <span class="string">'SCRIPT'</span> &amp;&amp;
+              <span class="regexp">/^src$/i</span>.test(name)) &#123;&#125;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 调用原始接口</span>
+            </span>
+            <br>
+            <span class="line"> old_setAttribute.apply(
+              <span class="keyword">this</span>,
+              <span class="built_in">arguments</span>);</span>
+            <br>
+            <span class="line"> &#125;;</span>
+            <br>
+            <span class="line">)();</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 重写 apply</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="built_in">Function</span>.prototype.apply =
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params"></span>)</span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="built_in">console</span>.log(
+              <span class="keyword">this</span>);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 调用 setAttribute</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="built_in">document</span>.getElementsByTagName(
+              <span class="string">'body'</span>)[
+              <span class="number">0</span>].setAttribute(
+              <span class="string">'data-test'</span>,
+              <span class="string">'123'</span>);</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>猜猜上面一段会输出什么？看看：<br><img src="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/1D67D6C94828430B9519503BD0F7820F" alt=""></p><p>居然返回了原生 setAttribute 方法！</p><p>这是因为我们在重写 <code>Element.prototype.setAttribute</code> 时最后有 <code>old_setAttribute.apply(this, arguments);</code> 这一句，使用到了 apply 方法，所以我们再重写 <code>apply</code> ，输出 <code>this</code> ，当调用被重写后的 setAttribute 就可以从中反向拿到原生的被保存起来的 <code>old_setAttribute</code> 了。</p><p>这样我们上面所做的嵌套 iframe 重写 setAttribute 就毫无意义了。</p><p>使用上面的 <code>Object.defineProperty</code> 可以锁死 apply 和 类似用法的 call 。使之无法被重写，那么也就无法从闭包中将我们的原生接口偷出来。这个时候才算真正意义上的成功重写了我们想重写的属性。</p><h2 id="建立拦截上报"><a href="#建立拦截上报" class="headerlink" title="建立拦截上报"></a>建立拦截上报</h2><p>防御的手段也有一些了，接下来我们要建立一个上报系统，替换上文中的 console.log() 日志。</p><p>上报系统有什么用呢？因为我们用到了白名单，关键字黑名单，这些数据都需要不断的丰富，靠的就是上报系统，将每次拦截的信息传到服务器，不仅可以让我们程序员第一时间得知攻击的发生，更可以让我们不断收集这类相关信息以便更好的应对。</p><p>这里的示例我用 <code>nodejs</code> 搭一个十分简易的服务器接受 http 上报请求。</p><p>先定义一个上报函数：</p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+          <span class="line">6</span>
+          <br>
+          <span class="line">7</span>
+          <br>
+          <span class="line">8</span>
+          <br>
+          <span class="line">9</span>
+          <br>
+          <span class="line">10</span>
+          <br>
+          <span class="line">11</span>
+          <br>
+          <span class="line">12</span>
+          <br>
+          <span class="line">13</span>
+          <br>
+          <span class="line">14</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="comment">/**</span>
+            <br>
+            <span class="line"> * 自定义上报 -- 替换页面中的 console.log()</span>
+            <br>
+            <span class="line"> * @param &#123;[String]&#125; name [拦截类型]</span>
+            <br>
+            <span class="line"> * @param &#123;[String]&#125; value [拦截值]</span>
+            <br>
+            <span class="line"> */</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="function">
+              <span class="keyword">function</span>
+              <span class="title">hijackReport</span>(
+              <span class="params">name, value</span>) </span>&#123;</span>
+          <br>
+          <span class="line">
+            <span class="keyword">var</span> img =
+            <span class="built_in">document</span>.createElement(
+            <span class="string">'img'</span>),</span>
+          <br>
+          <span class="line"> hijackName = name,</span>
+          <br>
+          <span class="line"> hijackValue = value.toString(),</span>
+          <br>
+          <span class="line"> curDate =
+            <span class="keyword">new</span>
+            <span class="built_in">Date</span>().getTime();</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">
+            <span class="comment">// 上报</span>
+          </span>
+          <br>
+          <span class="line"> img.src =
+            <span class="string">'http://www.reportServer.com/report/?msg='</span> + hijackName +
+            <span class="string">'&amp;value='</span> + hijackValue +
+          <span class="string">'&amp;time='</span> + curDate;</span>
+          <br>
+          <span class="line">&#125;</span>
+          <br>
+        </pre></td></tr></table></figure><p>假定我们的服务器地址是 <code>www.reportServer.com</code> 这里，我们运用 <code>img.src</code> 发送一个 http 请求到服务器 <code>http://www.reportServer.com/report/</code> ，每次会带上我们自定义的拦截类型，拦截内容以及上报时间。</p><p>用 Express 搭 nodejs 服务器并写一个简单的接收路由：<br></p><figure class="highlight plain"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+            <span class="line">19</span>
+            <br>
+            <span class="line">20</span>
+            <br>
+            <span class="line">21</span>
+            <br>
+            <span class="line">22</span>
+            <br>
+            <span class="line">23</span>
+            <br>
+            <span class="line">24</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">var express = require(&apos;express&apos;);</span>
+            <br>
+            <span class="line">var app = express();</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">app.get(&apos;/report/&apos;, function(req, res) &#123;</span>
+            <br>
+            <span class="line"> var queryMsg = req.query.msg,</span>
+            <br>
+            <span class="line"> queryValue = req.query.value,</span>
+            <br>
+            <span class="line"> queryTime = new Date(parseInt(req.query.time));</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line"> if (queryMsg) &#123;</span>
+            <br>
+            <span class="line"> console.log(&apos;拦截类型：&apos; + queryMsg);</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line"> if (queryValue) &#123;</span>
+            <br>
+            <span class="line"> console.log(&apos;拦截值：&apos; + queryValue);</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line"> if (queryTime) &#123;</span>
+            <br>
+            <span class="line"> console.log(&apos;拦截时间：&apos; + req.query.time);</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line">&#125;);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">app.listen(3002, function() &#123;</span>
+            <br>
+            <span class="line"> console.log(&apos;HttpHijack Server listening on port 3002!&apos;);</span>
+            <br>
+            <span class="line">&#125;);</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>运行服务器，当有上报发生，我们将会接收到如下数据：</p><p><img src="http://note.youdao.com/yws/public/resource/ebccce1165fd77c2e33c755fb2ee9e29/036C4400A4E84AF1A5AE668758CD4436" alt=""></p><p>好接下来就是数据入库，分析，添加黑名单，使用 <code>nodejs</code> 当然拦截发生时发送邮件通知程序员等等，这些就不再做展开。</p><h2 id="HTTPS-与-CSP"><a href="#HTTPS-与-CSP" class="headerlink" title="HTTPS 与 CSP"></a>HTTPS 与 CSP</h2><p>最后再简单谈谈 HTTPS 与 CSP。其实防御劫持最好的方法还是从后端入手，前端能做的实在太少。而且由于源码的暴露，攻击者很容易绕过我们的防御手段。</p><h3 id="CSP"><a href="#CSP" class="headerlink" title="CSP"></a>CSP</h3><p>CSP 即是 Content Security Policy，翻译为内容安全策略。这个规范与内容安全有关，主要是用来定义页面可以加载哪些资源，减少 XSS 的发生。</p><p>MDN – <a href="https://developer.mozilla.org/zh-CN/docs/Web/Security/CSP/CSP_policy_directives" target="_blank" rel="external">CSP</a></p><h3 id="HTTPS"><a href="#HTTPS" class="headerlink" title="HTTPS"></a>HTTPS</h3><p>能够实施 HTTP 劫持的根本原因，是 HTTP 协议没有办法对通信对方的身份进行校验以及对数据完整性进行校验。如果能解决这个问题，则劫持将无法轻易发生。</p><p>HTTPS，是 HTTP over SSL 的意思。SSL 协议是 Netscape 在 1995 年首次提出的用于解决传输层安全问题的网络协议，其核心是基于公钥密码学理论实现了对服务器身份认证、数据的私密性保护以及对数据完整性的校验等功能。</p><p>因为与本文主要内容关联性不大，关于更多 CSP 和 HTTPS 的内容可以自行谷歌。</p><p>本文到此结束，我也是涉猎前端安全这个方面不久，文章必然有所纰漏及错误，许多内容参考下面文章，都是精品文章，非常值得一读：</p><ul><li><a href="https://book.douban.com/subject/20451827/" target="_blank" rel="external">《web前端黑客技术揭秘》</a></li><li><a href="http://fex.baidu.com/blog/2014/06/xss-frontend-firewall-1/" target="_blank" rel="external">XSS 前端防火墙系列1~3</a></li><li><a href="http://www.cnblogs.com/kenkofox/p/4924088.html" target="_blank" rel="external">【HTTP劫持和DNS劫持】实际JS对抗</a></li><li><a href="https://www.cloudxns.net/Support/detail/id/1285.html" target="_blank" rel="external">浅谈DNS劫持</a></li><li><a href="https://www.skycure.com/blog/http-request-hijacking/" target="_blank" rel="external">HTTP Request Hijacking</a></li></ul><p>使用 Javascript 写的一个防劫持组件，已上传到 Github – <a href="https://github.com/chokcoco/httphijack" target="_blank" rel="external">httphijack.js</a>，欢迎感兴趣看看顺手点个 star ，本文示例代码，防范方法在组件源码中皆可找到。</p><p>另外组件处于测试修改阶段，未在生产环境使用，仅供学习。</p>
+  </section>
+
+  
+  
+
+</article>
+
+
+<!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key="post-httphijack" data-title="【前端安全】JavaScript防http劫持与XSS" data-url="http://sbco.cc/2016/08/16/httphijack/"></div>
+<!-- 多说评论框 end -->
+
+
+        <footer class="footer">
+	<div class="friendLink">友情链接：
+		<ul>
+			<li><a href="http://www.cnblogs.com/coco1s/">Coco</a></li>
+			<li><a href="http://www.chengfeilong.com/">Scott's Blog</a></li>
+			<li><a href="http://www.52cik.com/">楼教主</a></li>
+			<li><a href="http://blog.aisuso.com/">姚嘉鑫博客</a></li>
+		</ul>
+	</div>
+	<div class="copy_right"> &copy; chokcoco </div>
+	<span class="footer__copyright"> 2014-2016. | 由<a href="https://hexo.io/"> Hexo </a>强力驱动 | 主题<a href="https://github.com/someus/huno"> Huno </a></span>
+
+</footer>
+<!-- 多说公共JS代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"sbco"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- 多说公共JS代码 end -->
+<!-- cnzz统计 -->
+<script type="text/javascript">
+	var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- 文章阅读数统计 -->
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 百度爬虫推送 -->
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+      </div>
+    </div>
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+</body>
+</html>

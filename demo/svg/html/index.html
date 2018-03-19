@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type"content="text/html; charset=utf-8"/>
+	<meta content="SVGSecret,SVG解密,SVG奇淫巧计,SVG妙用,SVG图形" name="Keywords">
+	<meta content="使用SVG实现各类图形" name="description">
+	<title>SVG奇思妙想</title>
+	<link rel="stylesheet" type="text/css" href="../static/css/reset.css">
+	<link rel="stylesheet" type="text/css" href="../static/css/index.css"></head>
+	<style>
+	#cnzz_stat_icon_1259441963 {
+		display: block;
+		width: 0;
+		height: 0;
+		overflow: hidden;
+	}
+	</style>
+
+<body>
+	<h1 style="height: 0;overflow: hidden;">SVG奇思妙想，使用SVG实现各类图形</h1>
+	<a style="width:149px;height:149px;position:fixed;top:0;right:0;z-index:9999;" href="https://github.com/chokcoco/svg" target="_blank">
+		<img src="http://chokcoco.github.io/demo/curveJS/images/forkme.png"></a>
+	<div class="container">
+		<!-- circle-->
+		<section id="circle" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>圆形</summary>
+				<hgroup class="circle">
+					<!-- <svg class="circle-svg"></svg> -->
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true">
+      .circle {
+      	position: absolute;
+      	width: 200px;
+      	height: 200px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      	background-color: deeppink;
+      	-webkit-clip-path: circle(100px at 100px 100px);
+      }
+      .circle-svg {
+      	width: 0;
+      	height: 0;
+      }
+			</style>
+		</section>
+
+		<!-- polygon-->
+		<section id="polygon" class=" code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>SVG多边形</summary>
+				<summary>hover、active 可变换效果</summary>
+				<hgroup class="polygon">
+					<svg class="polygon-svg">
+						<defs>
+							<clipPath id="clip-svg-demo"clipPathUnits="objectBoundingBox">
+								<polygon points="0.25 0, 0.75 0, 1 0.5, 0.75 1, 0.25 1, 0 0.5"/>
+							</clipPath>
+						</defs>
+					</svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true" >
+      .polygon {
+      	position: absolute;
+      	width: 200px;
+      	height: 200px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      	background-color: darksalmon;
+      	transition:.3s;
+      	-webkit-clip-path: polygon(33% 0%, 66% 0%, 100% 50%, 66% 100%, 33% 100%, 0% 50%, 0% 50%, 0% 50%, 0% 50%);
+      	clip-path: polygon(33% 0%, 66% 0%, 100% 50%, 66% 100%, 33% 100%, 0% 50%, 0% 50%, 0% 50%, 0% 50%);
+      }
+      .polygon:hover{
+      	background-color: aquamarine;
+      	-webkit-clip-path: polygon(50% 0%, 83% 12%, 100% 43%, 94% 78%, 68% 100%, 32% 100%, 6% 78%, 0% 43%, 17% 12%);
+      	clip-path: polygon(50% 0%, 83% 12%, 100% 43%, 94% 78%, 68% 100%, 32% 100%, 6% 78%, 0% 43%, 17% 12%);
+      }
+      .polygon:active{
+      	background-color: darkmagenta;
+      	-webkit-clip-path: polygon(50% 0%,50% 0%,50% 0%,50% 0%,50% 0%,50% 0%,50% 0%, 0% 100%, 100% 100%);
+      	clip-path: polygon(50% 0%,50% 0%,50% 0%,50% 0%,50% 0%,50% 0%,50% 0%, 0% 100%, 100% 100%);
+      }
+      .polygon-svg {
+      	width: 0;
+      	height: 0;
+      }
+			</style>
+		</section>
+
+		<!-- polygon-animate -->
+		<section id="polygon-animate" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>SVG多边形自由切换动画</summary>
+				<summary>SVG动画的前提是，确定最终形状的点的数目，必须和初始形状的点的数目一样</summary>
+				<hgroup class="polygon-animate">
+					<svg class="polygon-animate-svg">
+						<defs>
+							<clipPath id="clip-svg-demo"clipPathUnits="objectBoundingBox">
+								<polygon-animate points="0.25 0, 0.75 0, 1 0.5, 0.75 1, 0.25 1, 0 0.5"/>
+							</clipPath>
+						</defs>
+					</svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true">
+      .polygon-animate {
+      	position: absolute;
+      	width: 200px;
+      	height: 200px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      	background-color: crimson;
+      	transition:.3s;
+      	-webkit-clip-path: polygon(50% 0%, 0% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%);
+      	clip-path: polygon(50% 0%, 0% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%);
+      	animation:polygon-ani 7s linear infinite;
+      	-webkit-animation:polygon-ani 7s linear infinite;
+      }
+      @keyframes polygon-ani{
+      	10%{
+      		background-color: darkorange;
+      		-webkit-clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50%);
+      		clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50%);
+      	}
+      	14%{
+      		-webkit-clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50%);
+      		clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50%, 0% 50%);
+      	}
+      	24%{
+      		background-color: lemonchiffon;
+      		-webkit-clip-path: polygon(100% 38%, 82% 100%, 82% 100%, 18% 100%, 0% 38%, 0% 38%, 0% 38%, 0% 38%, 50% 0%);
+      		clip-path: polygon(100% 38%, 82% 100%, 82% 100%, 18% 100%, 0% 38%, 0% 38%, 0% 38%, 0% 38%, 50% 0%);
+      	}
+      	28%{
+      		-webkit-clip-path: polygon(100% 38%, 82% 100%, 82% 100%, 18% 100%, 0% 38%, 0% 38%, 0% 38%, 0% 38%, 50% 0%);
+      		clip-path: polygon(100% 38%, 82% 100%, 82% 100%, 18% 100%, 0% 38%, 0% 38%, 0% 38%, 0% 38%, 50% 0%);
+      	}
+      	38%{
+      		background-color: darkturquoise;
+      		-webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%,100% 75%, 50% 100%, 0% 75%, 0% 75%, 0% 25%, 0% 25%);
+      		clip-path: polygon(50% 0%, 100% 25%, 100% 75%,100% 75%, 50% 100%, 0% 75%, 0% 75%, 0% 25%, 0% 25%);
+      	}
+      	42%{
+      		-webkit-clip-path: polygon(50% 0%, 100% 25%, 100% 75%,100% 75%, 50% 100%, 0% 75%, 0% 75%, 0% 25%, 0% 25%);
+      		clip-path: polygon(50% 0%, 100% 25%, 100% 75%,100% 75%, 50% 100%, 0% 75%, 0% 75%, 0% 25%, 0% 25%);
+      	}
+      	52%{
+      		background-color: darkcyan;
+      		-webkit-clip-path: polygon(50% 0%, 90% 20%, 100% 60%, 75% 100%, 25% 100%, 25% 100%, 0% 60%, 10% 20%, 50% 0%);
+      		clip-path: polygon(50% 0%, 90% 20%, 100% 60%, 75% 100%, 25% 100%, 25% 100%, 0% 60%, 10% 20%, 50% 0%);
+      	}
+      	56%{
+      		-webkit-clip-path: polygon(50% 0%, 90% 20%, 100% 60%, 75% 100%, 25% 100%, 25% 100%, 0% 60%, 10% 20%, 50% 0%);
+      		clip-path: polygon(50% 0%, 90% 20%, 100% 60%, 75% 100%, 25% 100%, 25% 100%, 0% 60%, 10% 20%, 50% 0%);
+      	}
+      	66%{
+      		background-color: deepskyblue;
+      		-webkit-clip-path: polygon(30% 0%, 70% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+      		clip-path: polygon(30% 0%, 70% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+      	}
+      	70%{
+      		-webkit-clip-path: polygon(30% 0%, 70% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+      		clip-path: polygon(30% 0%, 70% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+      	}
+      	80%{
+      		background-color: indigo;
+      		-webkit-clip-path: polygon(83% 12%, 100% 43%, 94% 78%, 68% 100%, 32% 100%, 6% 78%, 0% 43%, 17% 12%, 50% 0%);
+      		clip-path: polygon(83% 12%, 100% 43%, 94% 78%, 68% 100%, 32% 100%, 6% 78%, 0% 43%, 17% 12%, 50% 0%);
+      	}
+      	84%{
+      		-webkit-clip-path: polygon(83% 12%, 100% 43%, 94% 78%, 68% 100%, 32% 100%, 6% 78%, 0% 43%, 17% 12%, 50% 0%);
+      		clip-path: polygon(83% 12%, 100% 43%, 94% 78%, 68% 100%, 32% 100%, 6% 78%, 0% 43%, 17% 12%, 50% 0%);
+      	}94%{
+      		background-color: crimson;
+      		-webkit-clip-path: polygon(50% 0%, 0% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%);
+      		clip-path: polygon(50% 0%, 0% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%);
+      	}
+      }
+      .polygon-animate-svg {
+      	width: 0;
+      	height: 0;
+      }
+			</style>
+		</section>
+
+		<!-- arrow -->
+		<section id="arrow" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>气泡对话框</summary>
+				<hgroup class="arrow">
+					<svg class="arrow-svg"></svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true">
+      .arrow {
+      	position: absolute;
+      	width: 200px;
+      	height: 200px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      	background-color: darkorchid;
+      	-webkit-clip-path: polygon(0% 0%, 100% 0%, 100% 75%, 75% 75%, 75% 100%, 50% 75%, 0% 75%);
+      	clip-path: polygon(0% 0%, 100% 0%, 100% 75%, 75% 75%, 75% 100%, 50% 75%, 0% 75%);
+      }
+      .arrow-svg {
+      	width: 0;
+      	height: 0;
+      }
+			</style>
+		</section>
+
+		<!-- star -->
+		<section id="close" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>Close icon</summary>
+				<hgroup class="close">
+					<svg class="close-svg"></svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true">
+      .close {
+      	position: absolute;
+      	width: 200px;
+      	height: 200px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      	background-color: gainsboro;
+      	-webkit-clip-path: polygon(20% 0%, 0% 20%, 30% 50%, 0% 80%, 20% 100%, 50% 70%, 80% 100%, 100% 80%, 70% 50%, 100% 20%, 80% 0%, 50% 30%);
+      	clip-path: polygon(20% 0%, 0% 20%, 30% 50%, 0% 80%, 20% 100%, 50% 70%, 80% 100%, 100% 80%, 70% 50%, 100% 20%, 80% 0%, 50% 30%);
+      }
+      .close-svg {
+      	width: 0;
+      	height: 0;
+      }
+			</style>
+		</section>
+
+		<!-- star -->
+		<section id="star" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>star</summary>
+				<hgroup class="star">
+					<svg class="star-svg"></svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true">
+      .star {
+      	position: absolute;
+      	width: 200px;
+      	height: 200px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      	background-color: gold;
+      	-webkit-clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      	clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);			}
+      .star-svg {
+      	width: 0;
+      	height: 0;
+      }
+			</style>
+		</section>
+
+		<!-- star -->
+		<section id="triangle2rect" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>triangle2rect</summary>
+				<summary>clip-path 图形</summary>
+				<hgroup class="triangle2rect">
+					<div class="a"></div>
+					<div class="b"></div>
+					<div class="c"></div>
+					<div class="d"></div>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true">
+      .triangle2rect {
+      	position: absolute;
+      	width: 100px;
+      	height: 100px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      	-webkit-animation:aniContainer 2s infinite alternate;
+      }
+      .triangle2rect div{
+        position:absolute;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+      }
+      .a{
+        background:deeppink;
+        -webkit-clip-path: polygon(0% 0%, 0% 100%, 50% 50%);
+        animation:a 2s infinite alternate;
+        -webkit-animation:a 2s infinite alternate;
+      }
+      .b{
+        background:deeppink;
+        -webkit-clip-path: polygon(0% 0%, 100% 0%, 50% 50%);
+        animation:b 2s infinite alternate;
+        -webkit-animation:b 2s infinite alternate;
+      }
+      .c{
+        background:deeppink;
+        -webkit-clip-path: polygon(100% 0%, 100% 100%, 50% 50%);
+        animation:c 2s infinite alternate;
+        -webkit-animation:c 2s infinite alternate;
+      }
+      .d{
+        background:deeppink;
+        -webkit-clip-path: polygon(100% 100%, 0% 100%, 50% 50%);
+        animation:d 2s infinite alternate;
+        -webkit-animation:d 2s infinite alternate;
+      }
+      @-webkit-keyframes a{
+        0%,10%{
+          background:deeppink;
+          -webkit-clip-path: polygon(0% 0%, 0% 100%, 50% 50%);
+        }
+        90%,100%{
+          background:#069;
+          -webkit-clip-path: polygon(0% 100%, 25% 100%, 12.5% 0%);
+        }
+      }
+      @-webkit-keyframes b{
+        0%,10%{
+          background:deeppink;
+          -webkit-clip-path: polygon(0% 0%, 100% 0%, 50% 50%);
+        }
+        90%,100%{
+          background:#095;
+          -webkit-clip-path: polygon(25% 0%, 50%  0%,37.5% 100%);
+        }
+      }
+      @-webkit-keyframes c{
+        0%,10%{
+          background:deeppink;
+          -webkit-clip-path: polygon(100% 0%, 100% 100%, 50% 50%);
+        }
+        90%,100%{
+          background:#f80;
+          -webkit-clip-path: polygon(62.5% 0%,75% 100%,50% 100%);
+        }
+      }
+      @-webkit-keyframes d{
+        0%,10%{
+          background:deeppink;
+          -webkit-clip-path: polygon(100% 100%, 0% 100%, 50% 50%);
+        }
+        90%,100%{
+          background:#f69;
+          -webkit-clip-path: polygon(100% 0%,87.5% 100%, 75% 0%);
+        }
+      }
+      @-webkit-keyframes aniContainer{
+        0%,10%{
+          width:100px;
+          height:100px;
+        }
+        90%,100%{
+          width:250px;
+          height:60px;
+        }
+      }
+			</style>
+		</section>
+
+		<!-- 使用 SVG PATH 绘制的矩形 -->
+		<section id="circle-load-rect" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>使用 SVG PATH 绘制的矩形</summary>
+				<summary>使用审查元素看看 html 结构，绘画内容在 svg 标签内</summary>
+				<hgroup class="circle-load-rect">
+					<svg class="circle-load-rect-svg" width="200px" height="200px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+						<path d="M20 20 H 180 V 180 H 20 Z" fill="transparent" stroke="black"/>
+					</svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true">
+      .circle-load-rect {
+      	position: absolute;
+      	width: 200px;
+      	height: 200px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      }
+			</style>
+		</section>
+
+		<!-- 使用 SVG PATH 绘制平滑曲线 -->
+		<section id="circle-load-q" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>使用 SVG PATH 绘制平滑曲线</summary>
+				<summary>使用审查元素看看 html 结构，绘画内容在 svg 标签内</summary>
+				<summary>本曲线使用二次贝塞尔曲线生成</summary>
+				<hgroup class="circle-load-q">
+					<svg class="circle-load-q-svg" width="200px" height="200px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+						<path d="M20 100 Q 7 14, 171 190" fill="transparent" stroke="black"/>
+					</svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true">
+      .circle-load-q {
+      	position: absolute;
+      	width: 200px;
+      	height: 200px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      }
+			</style>
+		</section>
+
+		<!-- 使用 SVG PATH 绘制平滑曲线 -->
+		<section id="circle-load-s" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>使用 SVG PATH 绘制平滑曲线</summary>
+				<summary>使用审查元素看看 html 结构，绘画内容在 svg 标签内</summary>
+				<summary>本曲线使用三次贝塞尔曲线生成</summary>
+				<hgroup class="circle-load-s">
+					<svg class="circle-load-s-svg" width="200px" height="200px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+						<path d="M20 100 C 97 50, 98 155, 176 99" fill="transparent" stroke="black"/>
+					</svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true">
+      .circle-load-s {
+      	position: absolute;
+      	width: 200px;
+      	height: 200px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      }
+			</style>
+		</section>
+
+		<!-- 使用 SVG PATH 绘制平滑曲线，用于文字效果 -->
+		<section id="circle-word" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>使用 SVG PATH 绘制平滑曲线，用于文字效果</summary>
+				<summary>使用审查元素看看 html 结构，绘画内容在 svg 标签内</summary>
+				<summary>可以让文字跟随 SVG 路径做出各种形状</summary>
+				<hgroup class="circle-word">
+					<svg width="400px" height="300px" viewBox="0 0 400 200" version="1.1" xmlns="http://www.w3.org/2000/svg">
+						<defs>
+							<path id="textCircle" d="M 20 100 A 80 80 0 0 0 180 100 A 80 80 0 0 0 20 100" fill="none" stroke="#333" />
+							<path id="textCircle2" d="M220 100 C 353 9, 245 190, 389 86" fill="none" stroke="black"/>
+						</defs>
+						<text class="textCircle" fill="yellowgreen">
+							<textPath xlink:href="#textCircle">这是一段随着path路径绘制的文字</textPath>
+						</text>
+						<text class="textCircle2" fill="deeppink">
+							<textPath xlink:href="#textCircle2">这是另一段随path路径绘制的文字</textPath>
+						</text>
+					</svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true">
+      .circle-word {
+      	position: absolute;
+      	width: 400px;
+      	height: 200px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      }
+      .textCircle{
+      	font-size:20px;
+      	letter-spacing:4px;
+      }
+      .textCircle2{
+      	font-size:12px;
+      	letter-spacing:1px;
+      }
+			</style>
+		</section>
+
+    <!-- 使用 SVG 绘制的文字效果 -->
+    <section id="svg-word-filter" class="code-wrap cf">
+      <div class="css-live-wrap" >
+        <summary>使用 SVG 绘制的文字阴影效果</summary>
+        <summary>使用审查元素看看 html 结构，绘画内容及滤镜定义在 svg 标签内</summary>
+        <summary>运用了大量 SVG 滤镜</summary>
+        <hgroup class="svg-word-filter">
+        <svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+           width="600px" height="200px" viewBox="0 0 600 100">
+          <defs>
+            <pattern id="filter-pattern" width="1" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
+              <rect x="0" y="0" width="1" height=".8" fill="#333"/>
+            </pattern>
+
+            <text id="filter-text" x="50%" y="50%" dy=".3em" text-anchor="middle">SVG filter & mask</text>
+
+            <mask id="filter-mask">
+              <rect x="0" y="0" width="100%" height="100%" fill="#fff" />
+              <use x="-6" y="-6" stroke="#666" stroke-width="5" xlink:href="#filter-text" opacity="1" fill="#000"/>
+            </mask>
+          </defs>
+
+          <use x="6" y="6" xlink:href="#filter-text" opacity="1" fill="url(#filter-pattern)" mask="url(#filter-mask)"/>
+          <use x="0" y="0" xlink:href="#filter-text" fill="#000"/>
+        </svg>
+        </hgroup>
+      </div>
+      <style class="code" contenteditable="true">
+      .svg-word-filter {
+        position: absolute;
+        width: 600px;
+        height: 200px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      #filter-text{
+        font-family:Raleway, Verdana, sans-serif, 微軟正黑體, 微软雅黑, serif, 'Droid Serif', 'Helvetica Neue', Helvetica, Arial;
+        font-size:64px;
+      }
+      </style>
+    </section>
+
+		<!-- 使用 SVG 绘制的文字效果 -->
+		<section id="svg-word-glitch" class="code-wrap cf">
+			<div class="css-live-wrap" >
+				<summary>使用 SVG 绘制的文字故障效果</summary>
+				<summary>使用审查元素看看 html 结构，绘画内容及滤镜定义在 svg 标签内</summary>
+				<summary>运用了大量 SVG 滤镜</summary>
+				<hgroup class="svg-word-glitch">
+				<svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+					 width="600px" height="200px" viewBox="0 0 600 100">
+					<defs>
+						<filter id="filter">
+							<feFlood flood-color="white" result="white" />
+							<feFlood flood-color="red" result="flood1" />
+							<feFlood flood-color="limegreen" result="flood2" />
+							<feOffset in="SourceGraphic" dx="3" dy="0" result="off1a"/>
+							<feOffset in="SourceGraphic" dx="2" dy="0" result="off1b"/>
+							<feOffset in="SourceGraphic" dx="-3" dy="0" result="off2a"/>
+							<feOffset in="SourceGraphic" dx="-2" dy="0" result="off2b"/>
+							<feComposite in="flood1" in2="off1a" operator="in"  result="comp1" />
+							<feComposite in="flood2" in2="off2a" operator="in" result="comp2" />
+							<feMerge x="0" width="100%" result="merge1">
+							<feMergeNode in = "white" />
+							<feMergeNode in = "comp1" />
+							<feMergeNode in = "off1b" />
+							<animate
+								attributeName="y"
+					    	id = "y"
+					    	dur ="4s"
+					    	values = '104px; 104px; 30px; 105px; 30px; 2px; 2px; 50px; 40px; 105px; 105px; 20px; 6ßpx; 40px; 104px; 40px; 70px; 10px; 30px; 104px; 102px'
+					    	keyTimes = '0; 0.362; 0.368; 0.421; 0.440; 0.477; 0.518; 0.564; 0.593; 0.613; 0.644; 0.693; 0.721; 0.736; 0.772; 0.818; 0.844; 0.894; 0.925; 0.939; 1'
+					    	repeatCount = "indefinite" />
+							<animate attributeName="height"
+					    	id = "h"
+					    	dur ="4s"
+					    	values = '10px; 0px; 10px; 30px; 50px; 0px; 10px; 0px; 0px; 0px; 10px; 50px; 40px; 0px; 0px; 0px; 40px; 30px; 10px; 0px; 50px'
+					    	keyTimes = '0; 0.362; 0.368; 0.421; 0.440; 0.477; 0.518; 0.564; 0.593; 0.613; 0.644; 0.693; 0.721; 0.736; 0.772; 0.818; 0.844; 0.894; 0.925; 0.939; 1'
+					    	repeatCount = "indefinite" />
+							</feMerge>
+							<feMerge x="0" width="100%" y="60px" height="65px" result="merge2">
+							<feMergeNode in = "white" />
+							<feMergeNode in = "comp2" />
+							<feMergeNode in = "off2b" />
+							<animate attributeName="y"
+					    	id = "y"
+					    	dur ="4s"
+					    	values = '103px; 104px; 69px; 53px; 42px; 104px; 78px; 89px; 96px; 100px; 67px; 50px; 96px; 66px; 88px; 42px; 13px; 100px; 100px; 104px;'
+					    	keyTimes = '0; 0.055; 0.100; 0.125; 0.159; 0.182; 0.202; 0.236; 0.268; 0.326; 0.357; 0.400; 0.408; 0.461; 0.493; 0.513; 0.548; 0.577; 0.613; 1'
+			 		    	repeatCount = "indefinite" />
+							<animate attributeName="height"
+				    		id = "h"
+				    		dur = "4s"
+								values = '0px; 0px; 0px; 16px; 16px; 12px; 12px; 0px; 0px; 5px; 10px; 22px; 33px; 11px; 0px; 0px; 10px'
+				    		keyTimes = '0; 0.055; 0.100; 0.125; 0.159; 0.182; 0.202; 0.236; 0.268; 0.326; 0.357; 0.400; 0.408; 0.461; 0.493; 0.513;  1'
+				    		repeatCount = "indefinite" />
+							</feMerge>
+							<feMerge>
+							<feMergeNode in="SourceGraphic" />
+							<feMergeNode in="merge1" />
+							<feMergeNode in="merge2" />
+							</feMerge>
+						</filter>
+					</defs>
+					<g>
+						<text x="50%" y="50%" dy=".3em" text-anchor="middle" class="word-glitch">Amazing SVG</text>
+					</g>
+				</svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true">
+      .svg-word-glitch {
+      	position: absolute;
+      	width: 600px;
+      	height: 200px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      }
+      .word-glitch{
+      	fill: black;
+      	filter: url(#filter);
+      	font-family: Raleway, Verdana, sans-serif, 微軟正黑體, 微软雅黑, serif, 'Droid Serif', 'Helvetica Neue', Helvetica, Arial;
+      	font-size: 80px;
+      	-webkit-font-smoothing: antialiased;
+      }
+			</style>
+		</section>
+
+    <!-- 使用 SVG 绘制的文字效果 -->
+    <section id="svg-word-underwater" class="code-wrap cf">
+      <div class="css-live-wrap" >
+        <summary>使用 SVG 绘制的文字在水下的效果（textUnderWater）</summary>
+        <summary>使用审查元素看看 html 结构，绘画内容及滤镜定义在 svg 标签内</summary>
+        <summary>运用了大量 SVG 滤镜</summary>
+        <hgroup class="svg-word-underwater">
+        <svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+           width="600px" height="200px" viewBox="0 0 600 100">
+          <defs>
+            <filter id="textFilter">
+              <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="turbulence" data-filterId="5" />
+              <feDisplacementMap id="distortion" in="SourceGraphic" in2="turbulence" scale="20">
+                <animate attributeName="scale" values="10; 60; 10" dur="20s" repeatCount="indefinite"></animate>
+              </feDisplacementMap>
+            </filter>
+          </defs>
+          <g>
+            <text x="50%" y="50%" dy=".3em" text-anchor="middle" class="word-underwater">textUnderWater</text>
+          </g>
+        </svg>
+        </hgroup>
+      </div>
+      <style class="code" contenteditable="true">
+      .svg-word-underwater {
+        position: absolute;
+        width: 600px;
+        height: 200px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .word-underwater{
+        fill: #3d56ce;
+        filter: url(#textFilter);
+        font-family: Raleway, Verdana, sans-serif, 微軟正黑體, 微软雅黑, serif, 'Droid Serif', 'Helvetica Neue', Helvetica, Arial;;
+        font-size: 72px;
+      }
+      </style>
+    </section>
+
+    <!-- 使用 SVG stroke 虚线效果，用于绘制文字边框动画 -->
+    <section id="svg-border-animation" class="code-wrap cf">
+      <div class="css-live-wrap">
+        <summary>使用 SVG stroke 虚线效果，绘制文字边框动画</summary>
+        <summary>使用审查元素看看 html 结构，绘画内容在 svg 标签内</summary>
+        <summary>改变 SVG 元素的虚线效果生成补间动画</summary>
+        <hgroup class="svg-border-animation">
+          <svg viewBox="0 0 320 60" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <rect class="shape" height="60" width="320" />
+          </svg>
+            <div class="hover-text">HOVER ME</div>
+        </hgroup>
+      </div>
+      <style class="code" contenteditable="true">
+      .svg-border-animation {
+        position: absolute;
+        width: 320px;
+        height: 60px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .hover-text{
+        position:absolute;
+        line-height:60px;
+        width:320px;
+        top:0;
+        color:#333;
+        font-size:28px;
+        text-align:center;
+        cursor:pointer;
+      }
+      .shape{
+        fill: transparent;
+        stroke-width:4px;
+        stroke:#333;
+        stroke-dasharray: 160 520;
+        stroke-dashoffset: -460;
+      }
+      .svg-border-animation:hover .hover-text{
+        transition:0.5s;
+        color:#3F51B5;
+      }
+      .svg-border-animation:hover .shape{
+        -webkit-animation: draw 0.5s linear forwards;
+        animation: draw 0.5s linear forwards;
+      }
+
+      @keyframes draw {
+        0% {
+          stroke-dasharray: 160 520;
+          stroke-dashoffset: -460;
+          stroke-width: 4px;
+        }
+        100% {
+          stroke-dasharray: 760;
+          stroke-dashoffset: 0;
+          stroke-width: 2px;
+          stroke:#3F51B5;
+        }
+      }
+
+      </style>
+    </section>
+
+    <!-- 使用 SVG 绘制的线条动画 -->
+    <section id="line-animation" class="code-wrap cf">
+      <div class="css-live-wrap">
+        <summary>使用 SVG stroke 虚线效果，绘制的线条动画</summary>
+        <summary>使用审查元素看看 html 结构，绘画内容在 svg 标签内</summary>
+        <hgroup class="line-animation">
+          <svg class="l1" width="200px" height="200px">
+            <path d="M100,0L200 100L100 200L0 100Z"></path>
+          </svg>
+          <svg class="l2" width="200PX" height="200PX">
+            <path d="M100,25L175,100L100,175L25,100Z"></path>
+          </svg>
+          <svg class="l3" width="200PX" height="200PX">
+            <path d="M100,50L150,100L100,150L50,100Z"></path>
+          </svg>
+        </hgroup>
+      </div>
+      <style class="code" contenteditable="true">
+      .line-animation {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .line-animation svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: center center;
+        transition: all 0.3s;
+        transform: rotateY(0deg);
+      }
+      .line-animation path {
+        fill: none;
+        stroke: #000;
+        stroke-width: 1;
+        fill: none;
+        transition: all .3s;
+      }
+      .line-animation .l1 path {
+        stroke-width: 3;
+        stroke: #666;
+        stroke-dasharray: 282.84;
+        stroke-dashoffset: -565.69;
+        animation: LOADING1 5s linear 0s infinite;
+      }
+      .line-animation .l2 path {
+        stroke-width: 2;
+        stroke: #333;
+        stroke-dasharray: 212;
+        stroke-dashoffset: -424;
+        animation: LOADING2 4s linear 0s infinite;
+      }
+      .line-animation .l3 path {
+        stroke-dasharray: 141;
+        stroke-dashoffset: -282;
+        animation: LOADING3 3s linear 0s infinite;
+      }
+      @keyframes LOADING1 {
+        0% {
+          stroke-dashoffset: -565.69;
+        }
+        50% {
+          stroke-dashoffset: 0;
+          stroke-width: 1;
+        }
+        100% {
+          stroke-dashoffset: 565.69;
+
+        }
+      }
+      @keyframes LOADING2 {
+        0% {
+          stroke-dashoffset: 424;
+        }
+        50% {
+          stroke-dashoffset: 0;
+          stroke-width: 1;
+        }
+        100% {
+          stroke-dashoffset: -424;
+        }
+      }
+      @keyframes LOADING3 {
+        0% {
+          stroke-dashoffset: -282;
+        }
+        50% {
+          stroke-dashoffset: 0;
+          stroke-width: 2;
+        }
+        100% {
+          stroke-dashoffset: 282;
+        }
+      }
+      .line-animation .l1 {
+        animation: TURN 4s linear 0s infinite;
+      }
+      .line-animation .l2 {
+        animation: TURNBACK 3s linear 0s infinite;
+      }
+      .line-animation .l3 {
+        animation: TURN 1.5s linear 0s infinite;
+      }
+      @keyframes TURN {
+        0% {
+          transform: rotateY(0deg);
+          opacity: 1;
+        }
+        25% {
+          transform: rotateY(90deg);
+          opacity: .6;
+        }
+        50% {
+          transform: rotateY(180deg);
+          opacity: 1;
+        }
+        75% {
+          transform: rotateY(270deg);
+          opacity: .6;
+        }
+        100% {
+          transform: rotateY(360deg);
+          opacity: 1;
+        }
+      }
+
+      @keyframes TURNBACK {
+        0% {
+          transform: rotateY(360deg);
+          opacity: 1;
+        }
+        25% {
+          transform: rotateY(270deg);
+          opacity: .6;
+        }
+        50% {
+          transform: rotateY(180deg);
+          opacity: 1;
+        }
+        75% {
+          transform: rotateY(90deg);
+          opacity: .6;
+        }
+        100% {
+          transform: rotateY(0deg);
+          opacity: 1;
+        }
+      }
+      </style>
+    </section>
+
+    <!-- 使用 SVG 绘制的线条动画 -->
+    <section id="line-animation2" class="code-wrap cf">
+      <div class="css-live-wrap">
+        <summary>使用 SVG stroke 虚线效果，绘制的线条动画</summary>
+        <summary>绘画内容在 svg 标签内（刷新查看动画）</summary>
+        <hgroup class="line-animation2">
+          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200px" height="200px" >
+            <line x1="0" y1="0" x2="200" y2="200" class='la-line' />
+            <line x1="200" y1="0" x2="0" y2="200" class='la-line' />
+            <line x1="100" y1="10" x2="100" y2="190" class='la-line2' />
+            <line x1="10" y1="100" x2="190" y2="100" class='la-line2' />
+            <rect x="10" y="10" width="180" height="180" rx="20" ry="20" class="la-rect"></rect>
+            <circle cx="100" cy="100" r="80"  class="la-circle"></circle>
+            <rect x="50" y="50" width="100" height="100" rx="20" ry="20" class="la-rect2"></rect>
+            <circle cx="100" cy="100" r="40"  class="la-circle2"></circle>
+          </svg>
+        </hgroup>
+      </div>
+      <style class="code" contenteditable="true">
+        .line-animation2{
+          position: absolute;
+          width: 200px;
+          height: 200px;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+        .la-line{
+          stroke-width:1px;
+          stroke:#000;
+          stroke-dasharray: 282;
+          stroke-dashoffset: 282;
+          animation: dash 0.5s ease-in forwards;
+        }
+
+        .la-line2{
+          stroke-width:1px;
+          stroke:#000;
+          stroke-dasharray: 282;
+          stroke-dashoffset: 282;
+          animation: dash 0.5s ease-out 0.5s forwards;
+        }
+
+        .la-rect{
+          fill:none;
+          stroke:#000;
+          stroke-dasharray: 720;
+          stroke-dashoffset: 720;
+          animation: dash 0.5s linear 1s forwards;
+        }
+
+        .la-circle{
+          fill:none;
+          stroke:#000;
+          stroke-dasharray: 720;
+          stroke-dashoffset: 720;
+          animation: dash 0.5s ease-in 1s forwards;
+        }
+
+        .la-rect2{
+          fill:none;
+          stroke:#000;
+          stroke-dasharray: 720;
+          stroke-dashoffset: -720;
+          animation: dash 1s ease-out 1s forwards;
+        }
+
+        .la-circle2{
+          fill:none;
+          stroke:#000;
+          stroke-dasharray: 720;
+          stroke-dashoffset: -720;
+          animation: dash 1s linear 1s forwards;
+        }
+
+        @keyframes dash {
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
+      </style>
+    </section>
+
+		<!-- 使用 SVG 绘制 loading 图 -->
+		<section id="circle-load" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>使用 SVG stroke 虚线效果，绘制 loading 图</summary>
+				<summary>使用审查元素看看 html 结构，绘画内容在 svg 标签内</summary>
+			  <summary>改变 SVG 元素的虚线效果生成补间动画</summary>
+      	<hgroup class="circle-load">
+					<svg width="240px" height="240px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+						<circle cx="110" cy="110" r="90" stroke-width="20" stroke="gainsboro" fill="none"></circle>
+						<circle cx="110" cy="110" r="90" stroke-width="20" stroke="darkturquoise" fill="none" class='circle-load-svg'></circle>
+					</svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true">
+      .circle-load {
+      	position: absolute;
+      	width: 200px;
+      	height: 200px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      }
+      .circle-load-svg {
+      	stroke-dasharray: 0 570;
+      	animation:rot 8s linear infinite;
+      }
+
+      @keyframes rot{
+      	100%{
+      	  stroke-dasharray: 570 570;
+      	}
+      }
+			</style>
+		</section>
+
+		<!-- 使用 SVG PATH 绘制饼图 -->
+		<section id="circle-load-a" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>使用 SVG PATH 绘制饼图</summary>
+				<summary>使用审查元素看看 html 结构，绘画内容在 svg 标签内</summary>
+				<summary>点击饼图查看动画过渡效果！</summary>
+				<hgroup class="circle-load-a" id='pieCon' style="cursor:pointer">
+					<div id="pie-number">75%</div>
+					<svg width="200px" height="200px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+						<circle cx="100" cy="100" r="50" fill="#E7E9ED" ></circle>
+						<path d="M100 100,L100 150,A50 50 0 1 1 150 100,Z" fill="rgba(54, 162, 235, .8)" id="pie" stroke="#fff"; stroke-width"5";/>
+					</svg>
+				</hgroup>
+			</div>
+			<style class="" contenteditable="true">
+			.circle-load-a {
+				position: absolute;
+				width: 200px;
+				height: 200px;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%)  scale(2);
+			}
+			#pie-number{
+				font-size:24px;
+				color:#fff;
+				width:200px;
+				position:absolute;
+				top:0;
+				left:0;
+				line-height:200px;
+				text-align:center;
+				text-shadow:0 0 2px #999;
+			}
+			</style>
+			<script class="jscode" contenteditable="true">
+
+      var
+        randomDeg = 0,
+        // 动画时间
+        t = 2000,
+        // 每帧偏移量
+        eachDeg = 0,
+        // 初始值
+        startDeg = 0,
+        // 初始时间
+        startTime = null,
+        // 动画锁
+        isLock = 0,
+        // 饼图比例
+        numberElem = document.getElementById('pie-number');
+
+      // 逐帧动画
+      function pieMove() {
+        var pie = document.getElementById('pie'),
+          startAngle = 0,
+          cx = 100,
+          cy = 100,
+          r = 50,
+          isLarge = 0,
+          isOver180 = 0,
+          deg = startDeg,
+          x0 = cx + r * Math.cos(startAngle * Math.PI / 180),
+          y0 = cy - r * Math.sin(startAngle * Math.PI / 180),
+          x1 = cx + r * Math.cos(deg * Math.PI / 180),
+          y1 = cy - r * Math.sin(deg * Math.PI / 180);
+
+        // console.log('deg x0 y0 x1 y1 ',deg,x0,y0,x1,y1);
+
+        if (deg > 180) {
+          isOver180 = 1;
+          isLarge = 0;
+        }
+
+        pie.setAttribute("d", "M " + cx + "," + cy + " L " + x0 + "," + y0 + " A " + r + " " + r + " 0 " + isOver180 + " " + isLarge + " " + x1 + "," + y1 + " Z");
+
+        numberElem.innerText = (parseInt(deg / 360 * 10000) / 100) + "%";
+
+        startDeg += eachDeg;
+
+        if (new Date() - startTime <= t) {
+          requestAnimationFrame(pieMove);
+        } else {
+          isLock = 0;
+        }
+      }
+
+      function initClick() {
+        // 动画运行期间无法点击
+        if (!isLock) {
+          // 动画锁
+          isLock = 1;
+          // 随机角度
+          randomDeg = Math.random() * 360,
+            // 动画时间
+            t = 2000,
+            // 每帧偏移量 = 2000 / ( 1000 / 60 ) = 120
+            eachDeg = randomDeg / 120,
+            // 初始值
+            startDeg = eachDeg,
+            // 初始时间
+            startTime = new Date();
+
+          requestAnimationFrame(pieMove);
+        }
+      }
+
+      // 点击监听
+      document.getElementById('pieCon').addEventListener('click', initClick);
+
+      initClick();
+
+			</script>
+		</section>
+
+		<!-- 使用 SVG 绘制百分比图 -->
+		<section id="percentage-pie" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>使用 SVG 绘制百分比图</summary>
+				<summary>使用审查元素看看 html 结构，绘画内容在 svg 标签内</summary>
+				<summary>使用了 SVG 动画 animate</summary>
+				<hgroup class="percentage-pie">
+					<svg width="200px" height="200px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+						<text class="liquidFillGaugeText" text-anchor="middle" font-size="42px" transform="translate(100,120)" style="fill: #000">50.0%</text>
+						<!-- Wave -->
+						<g id="wave">
+							<path id="wave-2"
+										fill="rgba(255, 20, 147, .5)"
+										d="M0 100 C90 28, 92 179, 200 100 A95 95 0 0 1 0 100 Z" >
+							<animate dur="5s"
+										repeatCount="indefinite"
+										attributeName="d"
+										attributeType="XML"
+										values="M0 100 C90 28, 92 179, 200 100 A95 95 0 0 1 0 100 Z;
+														M0 100 C145 100, 41 100, 200 100 A95 95 0 0 1 0 100 Z;
+														M0 100 C90 28, 92 179, 200 100 A95 95 0 0 1 0 100 Z" />
+							</path>
+						</g>
+						<circle cx="100" cy="100" r="80" stroke-width="10" stroke="white" fill="transparent"></circle>
+						<circle cx="100" cy="100" r="90" stroke-width="20" stroke="deeppink" fill="none" class='percentage-pie-svg'></circle>
+					</svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true">
+      .percentage-pie {
+      	position: absolute;
+      	width: 200px;
+      	height: 200px;
+      	top: 50%;
+      	left: 50%;
+      	transform: translate(-50%, -50%);
+      }
+			</style>
+		</section>
+
+		<!-- 使用 SVG 绘制百分比图 -->
+		<section id="percentage-pie2" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>使用 SVG 绘制可调节数值百分比图</summary>
+				<summary>使用审查元素看看 html 结构，绘画内容在 svg 标签内</summary>
+				<summary>使用原生JS控制svg百分比，并生成动画，刷新页面观看动画</summary>
+				<hgroup class="percentage-pie2">
+					<svg width="200px" height="200px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+						<text id="liquidFillGaugeText" text-anchor="middle" font-size="42px" transform="translate(100,120)" style="fill: #000">50.0%</text>
+						<!-- Wave -->
+						<path id="waveMove"
+									fill="rgba(170, 125, 57, .8)"
+									d="M5 100 C90 28, 92 179, 195 100 A95 95 0 0 1 5 100 Z" transform="translate(0,0)">
+									<!-- d="M5 100 C90 28, 92 179, 195 100 A95 95 0 0 1 5 100 Z" > -->
+						</path>
+						<circle cx="100" cy="100" r="90" stroke-width="20" stroke="white" fill="transparent"></circle>
+						<circle cx="100" cy="100" r="90" stroke-width="10" stroke="rgb(212, 171, 106)" fill="none" class='percentage-pie2-svg'></circle>
+					</svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true" style="display:none">
+			.percentage-pie2 {
+				position: absolute;
+				width: 200px;
+				height: 200px;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+			}
+			</style>
+			<script class="jscode" contenteditable="true">
+      var
+      // 圆半径
+      	r = 90,
+      	// 圆心 x
+      	cx = 100,
+      	// 圆心 y
+      	cy = 100;
+
+      /**
+       * 圆的标准方程
+       * (x－a)²+(y－b)²=r²
+       * 已经 r 、y 求 x
+       * x1 = Math.sqrt(r^2 - (y - cy)^2) + 95
+       * x2 = Math.sqrt(r^2 - (y - cy)^2) - 95
+       * @return {[type]} [description]
+       */
+
+      var randomY = ~~(Math.random() * 19000) / 100,
+      	// 初始Y值
+      	startY = 100,
+      	// 与原距离差值
+      	offsetY = startY - randomY,
+      	// 运动时间
+      	duration = 3000,
+      	// 当前时间
+      	startTime = new Date(),
+      	// svg elem
+      	svgElem = document.getElementById('waveMove'),
+      	// 百分比
+      	svgText = document.getElementById('liquidFillGaugeText'),
+      	// 是否大于180度
+      	isOver180 = offsetY < 0 ? 1 : 0;
+
+      // console.log(svgElem);
+      // console.log('randomY', randomY);
+      // console.log('offsetY', offsetY);
+      requestAnimationFrame(function waveAni() {
+      	// 当前时间线
+      	var t = Math.min(1, (Date.now() - startTime) / duration);
+
+      	randomY = startY + (t * offsetY);
+
+      	var
+      	// 圆弧起始点 x 坐标
+      		x1 = Math.sqrt(r * r - (randomY - cy) * (randomY - cy)) + r,
+      		// 圆弧终点 x 坐标
+      		x2 = r - Math.sqrt(r * r - (randomY - cy) * (randomY - cy)),
+      		// 设定三次贝塞尔曲线参数
+      		xGap = (x1 - x2) / 3,
+      		// 波浪幅度
+      		yGap = 30;
+
+      	// console.log('t',t);
+      	// console.log('randomY',randomY);
+      	// console.log('x1 x2',x1,x2);
+      	// console.log('xGap',xGap);
+      	// console.log('yGap',yGap);
+
+      	// 动画移动路径
+      	// console.log('M',x2,randomY,'C',x2+xGap,randomY-yGap,',',x2+xGap+xGap,randomY+yGap,',',x1,randomY,'A',r,r,'0 0 1',x2,randomY,'Z');
+      	var path = 'M ' + x2 + ' ' + randomY + ' C ' + (x2 + xGap) + ' ' + (randomY - yGap) + ' , ' + (x2 + xGap + xGap) + ' ' + (randomY + yGap) + ' , ' + x1 + ' ' + randomY + ' A ' + r + ' ' + r + ' ' + '0 ' + isOver180 + ' 1' + ' ' + x2 + ' ' + randomY + ' Z';
+
+      	// 使用 setAttribute 动态添加移动路径
+      	svgElem.setAttribute('d', path);
+      	// 修改百分比值
+      	svgText.firstChild.nodeValue = ~~((190 - randomY) / 190 * 10000) / 100 + "%";
+      	if (t < 1.0) requestAnimationFrame(waveAni);
+      });
+			</script>
+		</section>
+
+		<!-- 使用 SVG 绘制莲花图 -->
+		<section id="lotus" class="code-wrap cf">
+			<div class="css-live-wrap">
+				<summary>使用 SVG 绘制莲花图</summary>
+				<summary>使用审查元素看看 html 结构，绘画内容在 svg 标签内</summary>
+				<hgroup class="lotus">
+					<svg  viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg">
+						<defs>
+						  <path d="M100 10Q150 50,100 100Q50 50,100 10Z" id="petal"/>
+            </defs>
+            <g class="svg-lotus">
+              <animateTransform dur="10s" attributeName="transform" repeatCount="indefinite" type="rotate" from="0,100,100" to="360,100,100"/>
+            </g>
+					</svg>
+				</hgroup>
+			</div>
+			<style class="code" contenteditable="true" style="display:none">
+			.lotus {
+				position: absolute;
+				width: 200px;
+				height: 200px;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+			}
+			</style>
+			<script class="jscode" contenteditable="true">
+      (function() {
+      	for (var i = 0; i < 360; i += 22.5) {
+          // 创建 <use> 标签
+      	  var useElement = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+
+          // 创建命名空间
+      	  useElement.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#petal');
+      	  useElement.setAttribute('fill', 'hsla(' + i + ', 62%, 80%, .35)');
+      	  useElement.setAttribute('transform', 'rotate(' + i + ' 100 100)');
+
+          // 插入 <use>
+      	  document.querySelector('.svg-lotus').appendChild(useElement);
+      	}
+      })();
+			</script>
+		</section>
+
+    <!-- 使用 SVG 绘制风车 -->
+    <section id="windmill" class="code-wrap cf">
+      <div class="css-live-wrap">
+        <summary>使用 SVG 绘制风车</summary>
+        <summary>使用审查元素看看 html 结构，绘画内容在 svg 标签内</summary>
+        <hgroup class="windmill">
+          <svg  viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <path d="M100 10Q150 50,100 100Z" id="windm"/>
+            </defs>
+            <g class="svg-windmill">
+              <animateTransform dur="10s" attributeName="transform" repeatCount="indefinite" type="rotate" from="0,100,100" to="360,100,100"/>
+            </g>
+          </svg>
+        </hgroup>
+      </div>
+      <style class="code" contenteditable="true" style="display:none">
+      .windmill {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      </style>
+      <script class="jscode" contenteditable="true">
+      (function() {
+        for (var i = 0; i < 360; i += 30) {
+          // 创建 <use> 标签
+          var useElement = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+
+          // 创建命名空间
+          useElement.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#windm');
+          useElement.setAttribute('fill', 'hsla(200, 30%, 60%, .5)');
+          useElement.setAttribute('transform', 'rotate(' + i + ' 100 100)');
+
+          // 插入 <use>
+          document.querySelector('.svg-windmill').appendChild(useElement);
+        }
+      })();
+      </script>
+    </section>
+
+    <!-- 使用 SVG 绘制 360 极速浏览器图标 -->
+    <section id="sixSpeed" class="code-wrap cf">
+      <div class="css-live-wrap">
+        <summary>使用 SVG 绘制 360 极速浏览器图标</summary>
+        <summary>使用审查元素看看 html 结构，绘画内容在 svg 标签内</summary>
+        <hgroup class="sixSpeed">
+          <svg class="svg-sixSpeed" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <path d="M120 10Q78 39,100 100C15 88, 19 3, 120 10Z" id="speed"/>
+              <circle cx="95" cy="95" r="10"  fill="white" id='icon-center'></circle>
+            </defs>d
+          </svg>
+        </hgroup>
+      </div>
+      <style class="code" contenteditable="true" style="display:none">
+      .sixSpeed {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      </style>
+      <script class="jscode" contenteditable="true">
+      (function() {
+        var color = ['#C538F5','#F44018','#F7EA09','#2BD067','#4192F4'],
+          j = 0;
+
+        for (var i = 40; i < 400; i += 72) {
+          // 创建 <use> 标签
+          var useElement = document.createElementNS('http://www.w3.org/2000/svg', 'use'),
+            centerElement = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+
+          // 创建命名空间
+          useElement.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#speed');
+          useElement.setAttribute('fill', color[j++]);
+          useElement.setAttribute('transform', 'rotate(' + i + ' 95 95)');
+
+          centerElement.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '#icon-center');
+
+          // 插入 <use>
+          document.querySelector('.svg-sixSpeed').appendChild(useElement);
+          document.querySelector('.svg-sixSpeed').appendChild(centerElement);
+        }
+      })();
+      </script>
+    </section>
+	</div>
+
+	<div id="tips">
+		因部分图案使用 clip-path，兼容性不佳，建议使用高版本 Chrome 内核浏览器观看。
+	</div>
+	<script type="text/javascript">
+		var cnzz_protocol = (("https: " == document.location.protocol) ? " https://":" http://");
+		document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963'type='text/javascript'%3E%3C/script%3E"));
+		// 低版本IE弹出层关闭
+		var
+			elem = document.getElementById('tips'),
+			ngua = navigator.userAgent,
+			reg = /webkit|chrome|safari/gi,
+			isW = reg.test(ngua);
+
+		if(!isW){
+			elem.style.display="block";
+
+			elem.addEventListener('click',function(){
+				this.style.display="none";
+			});
+		}
+	</script>
+
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    
+    <title>【CSS进阶】box-shadow 与 filter:drop-shadow 详解及奇技淫巧 | Coco ’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="author" content="Coco">
+    
+    
+    <meta name="keywords" content="box-shadow, filter:drop-shadow, img2div, img2css">
+    <meta name="description" content="box-shadow 在前端的 CSS 编写工作想必十分常见。但是 box-shadow 除去它的常规用法，其实还存在许多不为人知的奇技淫巧。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【CSS进阶】box-shadow 与 filter:drop-shadow 详解及奇技淫巧 | Coco ’s blog">
+<meta property="og:url" content="http://sbco.cc/2016/06/14/boxShadow/index.html">
+<meta property="og:site_name" content="Coco ’s blog">
+<meta property="og:description" content="box-shadow 在前端的 CSS 编写工作想必十分常见。但是 box-shadow 除去它的常规用法，其实还存在许多不为人知的奇技淫巧。">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/boxShadow/mask.png">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/boxShadow/cloudy.jpg">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/boxShadow/insetshadow.png">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/boxShadow/insetshadow2.png">
+<meta property="og:image" content="http://sbco.cc/../../../../images/post/boxShadow/img2div.jpg">
+<meta property="og:updated_time" content="2016-06-17T09:41:37.593Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【CSS进阶】box-shadow 与 filter:drop-shadow 详解及奇技淫巧 | Coco ’s blog">
+<meta name="twitter:description" content="box-shadow 在前端的 CSS 编写工作想必十分常见。但是 box-shadow 除去它的常规用法，其实还存在许多不为人知的奇技淫巧。">
+<meta name="twitter:image" content="http://sbco.cc/../../../../images/post/boxShadow/mask.png">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+</head>
+<body>
+    <span class="mobile btn-mobile-menu">
+      <i class="icon icon-list btn-mobile-menu__icon"></i>
+      <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+    
+<header class="panel-cover panel-cover--collapsed">
+
+  <div class="panel-main">
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+        
+        <img src="/images/logo.png" alt="Coco ’s blog logo" class="panel-cover__logo logo" title="Click Me!!!"/>
+        
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Coco ’s blog</a></h1>
+        <hr class="panel-cover__divider" />
+        
+        <p class="panel-cover__description">
+          少年不知愁滋味 为赋新词强说愁
+        </p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        <div class="navigation-wrapper">
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about/html/" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+              <a target="_blank" href="https://github.com/chokcoco"><li class='navigation__item github' title="To my Github"></li></a>
+              <a target="_blank" href="http://www.cnblogs.com/coco1s/"> <li class='navigation__item'><div class='navigation__item blog' title="To my cnblogs"></div></li></a>
+            </ul>
+          </nav>
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+-------------------------------->
+<!-- add social info here -->
+
+
+        </div>
+      </div>
+    </div>
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner entry">
+        
+<article class="post-container post-container--single">
+  <header class="post-header">
+    <h1 class="post-title">【CSS进阶】box-shadow 与 filter:drop-shadow 详解及奇技淫巧</h1>
+    
+    <div class="post-meta">
+      <time datetime="2016-06-14" class="post-meta__date date">2016-06-14</time>
+      <span id="busuanzi_container_page_pv">
+        • 阅读量（<span id="busuanzi_value_page_pv"></span>）
+      </span>
+      <span class="post-meta__tags tags">
+          
+          
+             &#8226; 标签:
+            <font class="tags">
+              <a class="tags-link" href="/tags/CSS/">CSS</a>
+            </font>
+          
+      </span>
+
+    </div>
+    
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>box-shadow 在前端的 CSS 编写工作想必十分常见。但是 box-shadow 除去它的常规用法，其实还存在许多不为人知的奇技淫巧。<a id="more"></a></p><h2 id="box-shadow-常规用法"><a href="#box-shadow-常规用法" class="headerlink" title="box-shadow 常规用法"></a>box-shadow 常规用法</h2><p>说到 box-shadow ，首先想到的必然是它能够生成阴影，所以称之为 shaodow ，简单看看它的语法：</p><h3 id="基础属性语法"><a href="#基础属性语法" class="headerlink" title="基础属性语法"></a>基础属性语法</h3><p><code>box-shadow</code> 属性向框添加一个或多个阴影。</p><p>box-shadow: h-shadow v-shadow blur spread color inset;</p><p>像这样 <code>box-shadow: 10px 10px 5px #888888;</code> 除此之外，我们要知道，box-shadow 是分外 shadow 和内 shadow 的，内阴影即是在属性上添加 inset 。</p><p>OK，本文已经假设你对 box-shadow 有了一定的了解，在此基础上，我们再看看 box-shadow 有什么其它妙用。</p><h2 id="box-shadow-模拟多边框"><a href="#box-shadow-模拟多边框" class="headerlink" title="box-shadow 模拟多边框"></a>box-shadow 模拟多边框</h2><p>通常而言，我们会给许多元素添加边框 <code>border</code>，但是当如果需要多重边框，这个时候，由于 <code>border</code> 单重的限制，box-shadow 就可以闪亮登场了。我们可以轻松的使用外阴影或者内阴影来模拟边框效果。</p><iframe height="265" scrolling="no" src="http://codepen.io/Chokcoco/embed/WxwYWo/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%"></iframe><p>可以看到，由内至外，这里利用 box-shadow ，设置了白色、黑色、灰色三层边框及最外层带模糊的阴影。</p><p>box-shadow 有一个参数是设置 blur 的，即是模糊的距离，在上面的例子中，即是第二重阴影 <code>0 0 0 10px #333,</code> 中的第三个 0 ，当 blur 的值为 0 ，那么阴影本身是不会模糊的，那么就很容易模拟出边框的效果。</p><p>而且，元素可以设置多重阴影，并且它们存在层叠关系，离 box-shadow 最近设置的层叠优先级最高，依次递减，这个对照代码很好理解。</p><p>当然，值得注意的是：</p><ul><li><p>阴影并不是边框，它们并不占有实际的空间，也不能归属于 <code>box-sizing</code> 的范围。不过，你可以通过使用内边距或外边距（取决于阴影是内部的还是外部的）占据额外的空间来模拟。</p></li><li><p>上述示例模拟的边框是位于元素外部的。它不能捕获类似悬停和点击的鼠标事件。如果事件很重要，那么可以通过添加 inset 关键字让阴影出现在元素的内部。注意，你可能需要添加额外的内边距来扩充空间。</p></li></ul><h2 id="box-shadow-模拟半透明遮罩层"><a href="#box-shadow-模拟半透明遮罩层" class="headerlink" title="box-shadow 模拟半透明遮罩层"></a>box-shadow 模拟半透明遮罩层</h2><p>很多时候，我们需要用到类似下图这样的遮罩层，通过半透明遮罩层把背景调暗，凸显某些 UI 组件，提升用户体验。</p><p><img src="../../../../images/post/boxShadow/mask.png" alt="半透明遮罩层"></p><p>常规的做法通常都会用到一个额外的元素，用作遮罩层，至少也是一个伪元素， <code>before</code> 或者 <code>after</code>。</p><p>不考虑低版本的兼容性的话，其实用 box-shadow 也可以模拟遮罩层这种效果。</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/pbbpNW/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%"></iframe><p>这里还有一个例子，hover 时利用配合 scale 放大元素， box-shadow 产生遮罩，聚焦用户关注视野。</p><p><a href="http://sbco.cc/magicCss/html/index.html#spectiveBlur">Demo–戳我看看</a>。</p><p>当然，值得注意的是：</p><ul><li><p>使用这种方法不可避免的需要考虑兼容性，IE9+、Firefox 4、Chrome、Opera 以及 Safari 5.1.1 支持 box-shadow 属性。</p></li><li><p>由于每个人的浏览器视口大小不一致，为了所有情况下 box-shadow 生成的阴影都能覆盖整个页面，可能需要将阴影的尺寸 <code>spread</code> 设置的很大。</p></li><li><p>如果你真的想尝试这个方法，box-shadow 从性能角度而言属于 <code>耗性能样式</code>，不同样式在消耗性能方面是不同的，box-shadow 从渲染角度来讲十分耗性能，原因就是与其他样式相比，它们的绘制代码执行时间过长。虽然有 GPU 的 3D 加速，但是具体使用的时候还是值得斟酌考虑。不过你要知道，没有不变的事情，在今天性能很差的样式，可能明天就被优化，并且浏览器之间也存在差异。</p></li></ul><p>下面再讲讲多重 box-shadow 能干啥：</p><h2 id="多重-box-shadow-之简单图形"><a href="#多重-box-shadow-之简单图形" class="headerlink" title="多重 box-shadow 之简单图形"></a>多重 box-shadow 之简单图形</h2><p>从本质上讲，box-shadow 是将自身投影到另一个地方，在很多情况下，我们是可以利用 box-shadow 来复制自身的！</p><p>利用这个特性，我们可以用 box-shadow 制作一些简单的图形，在我的单标签图形 <a href="http://sbco.cc/magicCss/html/index.html">Demo</a> 中，有这样一个图形：</p><p><img src="../../../../images/post/boxShadow/cloudy.jpg" alt="box-shadow生成的云层"></p><p>其中的云层，就是利用了 <code>多重box-shaodw</code> 在一个伪元素内生成的。下面我利用不同的颜色，直观的表达一下如何利用 box-shadow 绘制这个图形：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/VjjyqL/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%"></iframe><p>当所有阴影的颜色都是同色的时候，就很自然变成了一朵云朵：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/KMMZER/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%"></iframe><p>当然，脑洞够大的话，更复杂一点的也是可以的，来看看下面这个图形，也是由单个标签完成：</p><p><img src="../../../../images/post/boxShadow/insetshadow.png" alt="box-shadow生成的浏览器图标"></p><p>其中比较困难的是其中环绕字母 e 的那个圆以及那个切入的不规则角，看看用阴影怎么把它做出来，利用了两重 box-shadow：</p><p><img src="../../../../images/post/boxShadow/insetshadow2.png" alt="box-shadow生成的浏览器图标"></p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/JKKpBR/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%"></iframe><p>嗯，当然，你问我这些图形有什么用。我觉得实用性真的不强吧，我个人而言是兴趣，从中获取到了乐趣，同时也学到了很多东西，对属性本身印象也更加深刻，遇到许多 CSS 方面的问题的时候，思路更加开阔。</p><p>更多有趣的图形，可以 <a href="http://sbco.cc/magicCss/html/index.html">戳这里 – Demo</a></p><h2 id="多重-box-shadow-实现立体感"><a href="#多重-box-shadow-实现立体感" class="headerlink" title="多重 box-shadow 实现立体感"></a>多重 box-shadow 实现立体感</h2><p>这种方法运用在 text-shadow 上同样可以，可以实现文字的立体感。</p><p>运用多重 box-shadow ，不断偏移 1px ，就可以产生十分立体的感觉。</p><p>运用在按钮：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/oLLEVw/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%"></iframe><p>运用在文字：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/ezzVap/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%"></iframe><h2 id="多重-box-shadow-实现任意图片转换"><a href="#多重-box-shadow-实现任意图片转换" class="headerlink" title="多重 box-shadow 实现任意图片转换"></a>多重 box-shadow 实现任意图片转换</h2><p>嗯，讲真~~ 我觉得这个是最有趣的。</p><p>多重 box-shadow 还能做什么呢。由于 box-shadow 的多重性，也就是 <code>无论多少重都可以</code>，那么理论上任意一张图片，每一个像素点都可以由一重 1px*1px 的 box-shadow 来表示。</p><p>为了完成这个任务， <code>canvas</code> 刚好提供了一个方法 <code>CanvasRenderingContext2D.getImageData</code> 可以获取到图片每一个像素点的 rgba 值，那么图片转为一个完全由 box-shadow 表示的图片是完全可行的。</p><p>为此，我倒腾了许久，写了这么一个小插件，可以将任意图片转化为由 box-shadow 表示的单个 div 标签。</p><p><img src="../../../../images/post/boxShadow/img2div.jpg" alt="box-shadow生成的浏览器图标"></p><p><a href="http://sbco.cc/demo/img2div/html/">Demo–戳我体验一下</a>。</p><p>如果上面的几点还有用武之地，那么这个功能我觉得除了看似厉害之外真的是毫无实用之处，上面也说了，box-shadow 是比较耗性能的，因为即便是一个 <code>100px*100px</code> 的图形，转化之后都有 <code>10000</code> 重阴影，无论是对性能还是可读性而言，都是毁灭性的，但是讲真，还是挺有趣的。</p><p>box-shadow 就先说这些吧，box-shadow 肯定还要其它的一些妙用，细心之人可以继续挖掘之。</p><h2 id="filter-drop-shadow"><a href="#filter-drop-shadow" class="headerlink" title="filter:drop-shadow"></a>filter:drop-shadow</h2><p>其实说到 box-shadow，就不得不提到另一个和它极为相似的 CSS3 新属性 <code>filter:drop-shadow</code>，filter 即是 CSS 滤镜，可以在元素呈现之前，为元素的渲染提供一些效果，如模糊、颜色转移之类的。滤镜常用于调整图像、背景、边框的渲染。</p><p>当然这里我们只说 filter:drop-shadow。</p><p>filter:drop-shadow 也很好玩，本想继续长篇大论讨论下去，无奈发现 <code>张鑫旭</code>大神两篇文章已经把我想说的都囊括了，前人栽树，后人乘凉，我也就不再献丑了。</p><p>两篇非常值得一读的文章：</p><ul><li><p><a href="http://www.zhangxinxu.com/wordpress/2016/05/css3-filter-drop-shadow-vs-box-shadow/" target="_blank" rel="external">CSS3 filter:drop-shadow滤镜与box-shadow区别应用</a></p></li><li><p><a href="http://www.zhangxinxu.com/wordpress/2016/06/png-icon-change-color-by-css/" target="_blank" rel="external">PNG格式小图标的CSS任意颜色赋色技术</a></p></li></ul><p>另外 <a href="https://github.com/cssmagic/CSS-Secrets" target="_blank" rel="external">《CSS SECRET》</a>（CSS揭秘）这本大作也对 <code>filter:drop-shadow</code> 有详细的描述，可以去看看。</p><p>希望这篇文章对大家有所帮助，尤其是在对问题解决的思维层面上。</p><p>到此本文结束，如果还有什么疑问或者建议，可以多多交流，原创文章，文笔有限，才疏学浅，文中若有不正之处，万望告知。</p>
+  </section>
+
+  
+  
+
+</article>
+
+
+<!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key="post-boxShadow" data-title="【CSS进阶】box-shadow 与 filter:drop-shadow 详解及奇技淫巧" data-url="http://sbco.cc/2016/06/14/boxShadow/"></div>
+<!-- 多说评论框 end -->
+
+
+        <footer class="footer">
+	<div class="friendLink">友情链接：
+		<ul>
+			<li><a href="http://www.cnblogs.com/coco1s/">Coco</a></li>
+			<li><a href="http://www.chengfeilong.com/">Scott's Blog</a></li>
+			<li><a href="http://www.52cik.com/">楼教主</a></li>
+			<li><a href="http://blog.aisuso.com/">姚嘉鑫博客</a></li>
+		</ul>
+	</div>
+	<div class="copy_right"> &copy; chokcoco </div>
+	<span class="footer__copyright"> 2014-2016. | 由<a href="https://hexo.io/"> Hexo </a>强力驱动 | 主题<a href="https://github.com/someus/huno"> Huno </a></span>
+
+</footer>
+<!-- 多说公共JS代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"sbco"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- 多说公共JS代码 end -->
+<!-- cnzz统计 -->
+<script type="text/javascript">
+	var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- 文章阅读数统计 -->
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 百度爬虫推送 -->
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+      </div>
+    </div>
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+</body>
+</html>

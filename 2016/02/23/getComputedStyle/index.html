@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    
+    <title>【CSS进阶】原生JS getComputedStyle | Coco ’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="author" content="Coco">
+    
+    
+    <meta name="keywords" content="getComputedStyle, getPropertyValue, getAttribute, cssText, css(), setStyle, getStyle">
+    <meta name="description" content="最近一直在研读 jQuery 源码，初看源码一头雾水毫无头绪，真正静下心来细看写的真是精妙，让你感叹代码之美。其结构明晰，高内聚、低耦合，兼具优秀的性能与便利的扩展性，在浏览器的兼容性（功能缺陷、渐进增强）优雅的处理能力以及 Ajax 等方面周到而强大的定制功能无不令人惊叹。另外，阅读源码让我接触到了大量底层的知识。对原生JS 、框架设计、代码优化有了全新的认识，接下来将会写一系列关于 jQuer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【CSS进阶】原生JS getComputedStyle | Coco ’s blog">
+<meta property="og:url" content="http://sbco.cc/2016/02/23/getComputedStyle/index.html">
+<meta property="og:site_name" content="Coco ’s blog">
+<meta property="og:description" content="最近一直在研读 jQuery 源码，初看源码一头雾水毫无头绪，真正静下心来细看写的真是精妙，让你感叹代码之美。其结构明晰，高内聚、低耦合，兼具优秀的性能与便利的扩展性，在浏览器的兼容性（功能缺陷、渐进增强）优雅的处理能力以及 Ajax 等方面周到而强大的定制功能无不令人惊叹。另外，阅读源码让我接触到了大量底层的知识。对原生JS 、框架设计、代码优化有了全新的认识，接下来将会写一系列关于 jQuer">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201602/608782-20160223180051740-242127492.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201602/608782-20160223194555927-1671542584.jpg">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201602/608782-20160223194857161-884067652.png">
+<meta property="og:updated_time" content="2016-06-07T08:44:29.787Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【CSS进阶】原生JS getComputedStyle | Coco ’s blog">
+<meta name="twitter:description" content="最近一直在研读 jQuery 源码，初看源码一头雾水毫无头绪，真正静下心来细看写的真是精妙，让你感叹代码之美。其结构明晰，高内聚、低耦合，兼具优秀的性能与便利的扩展性，在浏览器的兼容性（功能缺陷、渐进增强）优雅的处理能力以及 Ajax 等方面周到而强大的定制功能无不令人惊叹。另外，阅读源码让我接触到了大量底层的知识。对原生JS 、框架设计、代码优化有了全新的认识，接下来将会写一系列关于 jQuer">
+<meta name="twitter:image" content="http://images2015.cnblogs.com/blog/608782/201602/608782-20160223180051740-242127492.png">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+</head>
+<body>
+    <span class="mobile btn-mobile-menu">
+      <i class="icon icon-list btn-mobile-menu__icon"></i>
+      <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+    
+<header class="panel-cover panel-cover--collapsed">
+
+  <div class="panel-main">
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+        
+        <img src="/images/logo.png" alt="Coco ’s blog logo" class="panel-cover__logo logo" title="Click Me!!!"/>
+        
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Coco ’s blog</a></h1>
+        <hr class="panel-cover__divider" />
+        
+        <p class="panel-cover__description">
+          少年不知愁滋味 为赋新词强说愁
+        </p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        <div class="navigation-wrapper">
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about/html/" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+              <a target="_blank" href="https://github.com/chokcoco"><li class='navigation__item github' title="To my Github"></li></a>
+              <a target="_blank" href="http://www.cnblogs.com/coco1s/"> <li class='navigation__item'><div class='navigation__item blog' title="To my cnblogs"></div></li></a>
+            </ul>
+          </nav>
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+-------------------------------->
+<!-- add social info here -->
+
+
+        </div>
+      </div>
+    </div>
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner entry">
+        
+<article class="post-container post-container--single">
+  <header class="post-header">
+    <h1 class="post-title">【CSS进阶】原生JS getComputedStyle</h1>
+    
+    <div class="post-meta">
+      <time datetime="2016-02-23" class="post-meta__date date">2016-02-23</time>
+      <span id="busuanzi_container_page_pv">
+        • 阅读量（<span id="busuanzi_value_page_pv"></span>）
+      </span>
+      <span class="post-meta__tags tags">
+          
+          
+             &#8226; 标签:
+            <font class="tags">
+              <a class="tags-link" href="/tags/jQuery源码分析/">jQuery源码分析</a>, <a class="tags-link" href="/tags/javascript/">javascript</a>
+            </font>
+          
+      </span>
+
+    </div>
+    
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>最近一直在研读 jQuery 源码，初看源码一头雾水毫无头绪，真正静下心来细看写的真是精妙，让你感叹代码之美。</p><p>其结构明晰，高内聚、低耦合，兼具优秀的性能与便利的扩展性，在浏览器的兼容性（功能缺陷、渐进增强）优雅的处理能力以及 Ajax 等方面周到而强大的定制功能无不令人惊叹。</p><p>另外，阅读源码让我接触到了大量底层的知识。对原生JS 、框架设计、代码优化有了全新的认识，接下来将会写一系列关于 jQuery 解析的文章。</p><p>我在 github 上关于 jQuery 源码的全文注解，感兴趣的可以围观一下。 <a href="https://github.com/chokcoco/jQuery-" target="_blank" rel="external">jQuery v1.10.2 源码注解 </a>。</p><p>言归正传，本文讲的是原生 JS 获取、设置元素最终样式的方法。可能平时框架使用习惯了，以 jQuery 为例，使用 .css() 接口就能便捷的满足我们的要求。再看看今天要讲的 window.getComputedStyle ，就像刚接触 JS 的时候，看到 document.getElementById 一样，名字都这么长，顿生怯意。不过莫慌，我觉得如果我们不是只想做一个混饭吃的前端，那么越是底层的东西，如果能够吃透它，越是能让人进步。<a id="more"></a></p><h2 id="getComputedStyle-与-getPropertyValue"><a href="#getComputedStyle-与-getPropertyValue" class="headerlink" title="getComputedStyle 与 getPropertyValue"></a>getComputedStyle 与 getPropertyValue</h2><p>getComputedStyle 为何物呢，DOM 中 getComputedStyle 方法可用来获取元素中所有可用的css属性列表，以数组形式返回，并且是只读的。IE678 中则用 currentStyle 代替 。</p><p>假设我们页面上存在一个 id 为 id 的元素，那么使用 getComputedStyle 获取元素样式就如下图所示：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201602/608782-20160223180051740-242127492.png" alt=""><br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// 语法：</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 在旧版本之前，第二个参数“伪类”是必需的，现代浏览器已经不是必需参数了</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 如果不是伪类，设置为null，</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="built_in">window</span>.getComputedStyle(
+              <span class="string">"元素"</span>,
+              <span class="string">"伪类"</span>);</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>尝试一下之后可以看到，window.getComputedStyle 获取的是所有的样式，如果我们只是要获取单一样式，该怎么做呢。这个时候就要介绍另一个方法 – getPropertyValue 。</p><p>用法也很简单：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// 语法：</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 使用 getPropertyValue 来指定获取的属性</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="built_in">window</span>.getComputedStyle(
+              <span class="string">"元素"</span>,
+              <span class="string">"伪类"</span>).getPropertyValue(style);</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><h2 id="IE-下的-currentStyle-与-getAttribute"><a href="#IE-下的-currentStyle-与-getAttribute" class="headerlink" title="IE 下的 currentStyle 与 getAttribute"></a>IE 下的 currentStyle 与 getAttribute</h2><p>说完常规浏览器，再来谈谈老朋友 IE ，与 getComputedStyle 对应，在 IE 中有自己特有的 currentStyle 属性，与 getPropertyValue 对应，IE 中使用 getAttribute 。</p><p>和 getComputedStyle 方法不同的是，currentStyle 要获得属性名的话必须采用驼峰式的写法。也就是如果我需要获取 font-size 属性，那么传入的参数应该是 fontSize。因此在IE 中要获得单个属性的值，就必须将属性名转为驼峰形式。<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// IE 下语法：</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// IE 下将 CSS 命名转换为驼峰表示法</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// font-size --&amp;gt; fontSize</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 利用正则处理一下就可以了</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">camelize</span>(
+                <span class="params">attr</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// /\-(\w)/g 正则内的 (\w) 是一个捕获，捕获的内容对应后面 function 的 letter</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 意思是将 匹配到的 -x 结构的 x 转换为大写的 X (x 这里代表任意字母)</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span> attr.replace(
+              <span class="regexp">/\-(\w)/g</span>,
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">all, letter</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span> letter.toUpperCase();</span>
+            <br>
+            <span class="line"> &#125;);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 使用 currentStyle.getAttribute 获取元素 element 的 style 属性样式</span>
+            </span>
+            <br>
+            <span class="line">element.currentStyle.getAttribute(camelize(style));</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><h2 id="style-与-getComputedStyle"><a href="#style-与-getComputedStyle" class="headerlink" title="style 与 getComputedStyle"></a>style 与 getComputedStyle</h2><p>必须要提出的是，我们使用 element.style 也可以获取元素的CSS样式声明对象，但是其与 getComputedStyle 方法还是有一些差异的。</p><p>首先，element.style 是可读可写的，而 getComputedStyle 为只读。</p><p>其次，element.style 只可以获取 style 样式上的属性值，而无法得到所有的 CSS 样式值，什么意思呢？回顾一下 CSS 基础，CSS 样式表的表现有三种方式，</p><ol><li><strong>内嵌样式（inline Style）</strong> ：是写在 HTML 标签里面的，内嵌样式只对该标签有效。</li><li><strong>内部样式（internal Style Sheet）</strong>：是写在 HTML 的</li><li><strong>外部样式表（External Style Sheet）</strong>：如果很多网页需要用到同样的样式(Styles)，将样式(Styles)写在一个以 .CSS 为后缀的 CSS 文件里，然后在每个需要用到这些样式(Styles)的网页里引用这个 CSS 文件。</li></ol><p>而 element.style 只能获取被这些样式表定义了的样式，而 getComputedStyle 能获取到所有样式的值（在不同浏览器结果不一样，chrome 中是 264，在 Firefox 中是238），不管是否定义在样式表中，譬如：<br></p><figure class="highlight"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">#id&#123;</span>
+            <br>
+            <span class="line"> width : 100px;</span>
+            <br>
+            <span class="line"> float:left;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">var elem = document.getElementById('id');</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">elem.style.length // 2</span>
+            <br>
+            <span class="line">window.getComputedStyle(elem, null).length // 264</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><h2 id="getComputedStyle-与-defaultView"><a href="#getComputedStyle-与-defaultView" class="headerlink" title="getComputedStyle 与 defaultView"></a>getComputedStyle 与 defaultView</h2><p>window.getComputedStyle 还有另一种写法，就是 document.defaultView.getComputedStyle 。</p><p>两者的用法完全一样，在 jQuery v1.10.2 中，使用的就是 window.getComputedStyle 。如下</p><p><img src="http://images2015.cnblogs.com/blog/608782/201602/608782-20160223194555927-1671542584.jpg" alt=""></p><p>也有特例，查看 <a href="http://stackoverflow.com/questions/8136501/whats-the-difference-bewteen-document-defaultview-getcomputedstyle-and-window-g" target="_blank" rel="external">stackoverflow</a> ，上面提及到在 Firefox 3.6 ，不使用 document.defaultView.getComputedStyle 会出错。不过毕竟 FF3.6 已经随历史远去，现在可以放心的使用 window.getComputedStyle。</p><p>用一张图总结一下：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201602/608782-20160223194857161-884067652.png" alt="原生JS获取CSS样式的方法" title="原生JS获取CSS样式的方法"></p><h2 id="原生-Javascript-实现-CSS-样式的-get-与-set"><a href="#原生-Javascript-实现-CSS-样式的-get-与-set" class="headerlink" title="原生 Javascript 实现 CSS 样式的 get 与 set"></a>原生 Javascript 实现 CSS 样式的 get 与 set</h2><p>说了这么多，接下来将用原生 Javascript 实现一个小组件，实现 CSS 的 get 与 set，兼容所有浏览器。</p><p>完整的组件代码在我的 github 上， <a href="https://github.com/chokcoco/cssControl/blob/master/cssControl.1.0.0.js" target="_blank" rel="external">戳我直接看代码</a>。</p><h4 id="getStyle-elem-style"><a href="#getStyle-elem-style" class="headerlink" title="getStyle(elem, style)"></a>getStyle(elem, style)</h4><p>对于 CSS 的 set ，对于支持 window.getComputedStyle 的浏览器而言十分简单，只需要直接调用。<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">getStyle:
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">elem, style</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 主流浏览器</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (win.getComputedStyle) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span> win.getComputedStyle(elem,
+              <span class="literal">null</span>).getPropertyValue(style);</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>反之，如果是 IE 浏览器，则有一些坑。</p><h4 id="opacity-透明度的设定"><a href="#opacity-透明度的设定" class="headerlink" title="opacity 透明度的设定"></a>opacity 透明度的设定</h4><p>在早期的 IE 中要设置透明度的话，有两个方法：</p><ol><li>alpha(opacity=0.5)</li><li>filter:progid:DXImageTransform.Microsoft.gradient( GradientType= 0 , startColorstr = ‘#ccccc’, endColorstr = ‘#ddddd’ );</li></ol><p>因此在 IE 环境下，我们需要针对透明度做一些处理。先写一个 IE 下获取透明度的方法：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+            <span class="line">19</span>
+            <br>
+            <span class="line">20</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// IE 下获取透明度</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="function">
+                <span class="keyword">function</span>
+                <span class="title">getIEOpacity</span>(
+                <span class="params">elem</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> filter =
+              <span class="literal">null</span>;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// 早期的 IE 中要设置透明度有两个方法：</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 1、alpha(opacity=0)</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 2、filter:progid:DXImageTransform.Microsoft.gradient( GradientType=
+                0 , startColorstr = ‘#ccccc’, endColorstr = ‘#ddddd’ );</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="comment">// 利用正则匹配</span>
+            </span>
+            <br>
+            <span class="line"> filter = elem.style.filter.match(
+              <span class="regexp">/progid:DXImageTransform.Microsoft.Alpha\(.?opacity=(.*).?\)/i</span>)
+              || elem.style.filter.match(
+              <span class="regexp">/alpha\(opacity=(.*)\)/i</span>);</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (filter) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> value =
+              <span class="built_in">parseFloat</span>(filter);</span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (!
+              <span class="built_in">isNaN</span>(value)) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 转化为标准结果</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span> value ? value /
+              <span class="number">100</span> :
+              <span class="number">0</span>;</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 透明度的值默认返回 1</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span>
+              <span class="number">1</span>;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><h4 id="float-样式的获取"><a href="#float-样式的获取" class="headerlink" title="float 样式的获取"></a>float 样式的获取</h4><p>float 属性是比较重要的一个属性，但是由于 float 是 ECMAScript 的一个保留字。（ <a href="http://www.w3school.com.cn/js/pro_js_reservedwords.asp" target="_blank" rel="external">ECMAScript保留字有哪些？戳这里</a>）</p><p>所以在各浏览器中都会有代替的写法，比如说在标准浏览器中为 cssFloat，而在 IE678 中为 styleFloat 。经测试，在标准浏览器中直接使用 getPropertyValue(“float”) 也可以获取到 float 的值。而 IE678 则不行，所以针对 float ，也需要一个 HACK。</p><h4 id="width-height-样式的获取"><a href="#width-height-样式的获取" class="headerlink" title="width | height 样式的获取"></a>width | height 样式的获取</h4><p>然后是元素的高宽，对于一个没有设定高宽的元素而言，在 IE678 下使用 getPropertyValue(“width|height”) 得到的是 auto 。而标准浏览器会直接返回它的 px 值，当然我们希望在 IE 下也返回 px 值。</p><p>这里的 HACK 方法是使用 element.getBoundingClientRect() 方法。</p><h5 id="element-getBoundingClientRect"><a href="#element-getBoundingClientRect" class="headerlink" title="element.getBoundingClientRect()"></a>element.getBoundingClientRect()</h5><p>可以获得元素四个点相对于文档视图左上角的值 top、left、bottom、right ，通过计算就可以容易地获得准确的元素大小。</p><h4 id="获取样式的驼峰表示法"><a href="#获取样式的驼峰表示法" class="headerlink" title="获取样式的驼峰表示法"></a>获取样式的驼峰表示法</h4><p>上文已经提及了，在IE下使用 currentStyle 要获得属性名的话必须采用驼峰式的写法。</p><p>OK，需要 HACK 的点已经提完了。那么在 IE 下，获取样式的写法：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+            <span class="line">19</span>
+            <br>
+            <span class="line">20</span>
+            <br>
+            <span class="line">21</span>
+            <br>
+            <span class="line">22</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">getStyle:
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">elem, style</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 主流浏览器</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (win.getComputedStyle) &#123;</span>
+            <br>
+            <span class="line"> ...</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 不支持 getComputedStyle</span>
+            </span>
+            <br>
+            <span class="line"> &#125;
+              <span class="keyword">else</span> &#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// IE 下获取透明度</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (style ==
+              <span class="string">"opacity"</span>) &#123;</span>
+            <br>
+            <span class="line"> getIEOpacity(elem);</span>
+            <br>
+            <span class="line">
+              <span class="comment">// IE687 下获取浮动使用 styleFloat</span>
+            </span>
+            <br>
+            <span class="line"> &#125;
+              <span class="keyword">else</span>
+              <span class="keyword">if</span> (style ==
+              <span class="string">"float"</span>) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span> elem.currentStyle.getAttribute(
+              <span class="string">"styleFloat"</span>);</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 取高宽使用 getBoundingClientRect</span>
+            </span>
+            <br>
+            <span class="line"> &#125;
+              <span class="keyword">else</span>
+              <span class="keyword">if</span> ((style ==
+              <span class="string">"width"</span> || style ==
+              <span class="string">"height"</span>) &amp;amp; (elem.currentStyle[style] ==
+              <span class="string">"auto"</span>)) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="keyword">var</span> clientRect = elem.getBoundingClientRect();</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span> (style ==
+              <span class="string">"width"</span> ? clientRect.right - clientRect.left : clientRect.bottom
+              - clientRect.top) +
+              <span class="string">"px"</span>;</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 其他样式，无需特殊处理</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">return</span> elem.currentStyle.getAttribute(camelize(style));</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><h2 id="setStyle-elem-style-value"><a href="#setStyle-elem-style-value" class="headerlink" title="setStyle(elem, style, value)"></a>setStyle(elem, style, value)</h2><p>说完 get ，再说说 setStyle ，相较于getStyle ，setStyle 则便捷很多，因为不管是标准浏览器还是 IE ，都可以使用 element.style.cssText 对元素进行样式的设置。</p><h4 id="cssText"><a href="#cssText" class="headerlink" title="cssText"></a>cssText</h4><p>一种设置 CSS 样式的方法，但是它是一个销毁原样式并重建的过程，这种销毁和重建，会增加浏览器的开销。而且在 IE 中，如果 cssText（假如不为空)，最后一个分号会被删掉，所以我们需要在其中添加的属性前加上一个 ”;” 。</p><p>只是在 IE 下的 opacity 需要额外的进行处理。明了易懂，直接贴代码：<br></p><figure class="highlight javascript"><table><tr><td class="gutter"><pre>
+            <span class="line">1</span>
+            <br>
+            <span class="line">2</span>
+            <br>
+            <span class="line">3</span>
+            <br>
+            <span class="line">4</span>
+            <br>
+            <span class="line">5</span>
+            <br>
+            <span class="line">6</span>
+            <br>
+            <span class="line">7</span>
+            <br>
+            <span class="line">8</span>
+            <br>
+            <span class="line">9</span>
+            <br>
+            <span class="line">10</span>
+            <br>
+            <span class="line">11</span>
+            <br>
+            <span class="line">12</span>
+            <br>
+            <span class="line">13</span>
+            <br>
+            <span class="line">14</span>
+            <br>
+            <span class="line">15</span>
+            <br>
+            <span class="line">16</span>
+            <br>
+            <span class="line">17</span>
+            <br>
+            <span class="line">18</span>
+            <br>
+            <span class="line">19</span>
+            <br>
+            <span class="line">20</span>
+            <br>
+            <span class="line">21</span>
+            <br>
+            <span class="line">22</span>
+            <br>
+          </pre></td><td class="code"><pre>
+            <span class="line">
+              <span class="comment">// 设置样式</span>
+            </span>
+            <br>
+            <span class="line">setStyle:
+              <span class="function">
+                <span class="keyword">function</span>(
+                <span class="params">elem, style, value</span>) </span>&#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 如果是设置 opacity ，需要特殊处理</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (style ==
+              <span class="string">"opacity"</span>) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">//IE7 bug:filter 滤镜要求 hasLayout=true 方可执行（否则没有效果）</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (!elem.currentStyle || !elem.currentStyle.hasLayout) &#123;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 设置 hasLayout=true 的一种方法</span>
+            </span>
+            <br>
+            <span class="line"> elem.style.zoom =
+              <span class="number">1</span>;</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// IE678 设置透明度叫 filter ，不是 opacity</span>
+            </span>
+            <br>
+            <span class="line"> style =
+              <span class="string">"filter"</span>;</span>
+            <br>
+            <span class="line"></span>
+            <br>
+            <span class="line">
+              <span class="comment">// !!转换为 boolean 类型进行判断</span>
+            </span>
+            <br>
+            <span class="line">
+              <span class="keyword">if</span> (!!
+              <span class="built_in">window</span>.XDomainRequest) &#123;</span>
+            <br>
+            <span class="line"> value =
+              <span class="string">"progid:DXImageTransform.Microsoft.Alpha(style=0,opacity="</span> +
+              value *
+              <span class="number">100</span> +
+              <span class="string">")"</span>;</span>
+            <br>
+            <span class="line"> &#125;
+              <span class="keyword">else</span> &#123;</span>
+            <br>
+            <span class="line"> value =
+              <span class="string">"alpha(opacity="</span> + value *
+              <span class="number">100</span> +
+              <span class="string">")"</span>
+            </span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line"> &#125;</span>
+            <br>
+            <span class="line">
+              <span class="comment">// 通用方法</span>
+            </span>
+            <br>
+            <span class="line"> elem.style.cssText +=
+              <span class="string">';'</span> + (style +
+              <span class="string">":"</span> + value);</span>
+            <br>
+            <span class="line">&#125;</span>
+            <br>
+          </pre></td></tr></table></figure><p></p><p>到这里，原生 JS 实现的 getStyle 与 setStyle 就实现了， <a href="https://github.com/chokcoco/cssControl/blob/master/cssControl.1.0.0.js" target="_blank" rel="external">完整的代码可以戳这里查看</a>。可以看到，一个简单接口的背后，都是有涉及了很多方面东西。虽然浏览器兼容性是一个坑，但是爬坑的过程却是我们沉淀自己的最好时机。</p><p>jQuery 这样的框架可以帮助我们走的更快，但是毫无疑问，去弄清底层实现，掌握原生 JS 的写法，可以让我们走得更远。</p><p>原创文章，文笔有限，才疏学浅，文中若有不正之处，万望告知。</p><p>最后，本文组件示例的代码贴在 <a href="https://github.com/chokcoco/cssControl" target="_blank" rel="external">我的github</a> 上。</p>
+  </section>
+
+  
+  
+
+</article>
+
+
+<!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key="post-getComputedStyle" data-title="【CSS进阶】原生JS getComputedStyle" data-url="http://sbco.cc/2016/02/23/getComputedStyle/"></div>
+<!-- 多说评论框 end -->
+
+
+        <footer class="footer">
+	<div class="friendLink">友情链接：
+		<ul>
+			<li><a href="http://www.cnblogs.com/coco1s/">Coco</a></li>
+			<li><a href="http://www.chengfeilong.com/">Scott's Blog</a></li>
+			<li><a href="http://www.52cik.com/">楼教主</a></li>
+			<li><a href="http://blog.aisuso.com/">姚嘉鑫博客</a></li>
+		</ul>
+	</div>
+	<div class="copy_right"> &copy; chokcoco </div>
+	<span class="footer__copyright"> 2014-2016. | 由<a href="https://hexo.io/"> Hexo </a>强力驱动 | 主题<a href="https://github.com/someus/huno"> Huno </a></span>
+
+</footer>
+<!-- 多说公共JS代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"sbco"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- 多说公共JS代码 end -->
+<!-- cnzz统计 -->
+<script type="text/javascript">
+	var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- 文章阅读数统计 -->
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 百度爬虫推送 -->
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+      </div>
+    </div>
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+</body>
+</html>

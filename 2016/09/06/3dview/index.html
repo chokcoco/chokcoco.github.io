@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    
+    <title>【CSS进阶】试试酷炫的 3D 视角 | Coco ’s blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    
+    <meta name="author" content="Coco">
+    
+    
+    <meta name="keywords" content="CSS3 3D, perspective,">
+    <meta name="description" content="写这篇文章的缘由是因为看到了这个页面：戳我看看（移动端页面，使用模拟器观看）运用 CSS3 完成的 3D 视角，虽然有一些晕3D，但是使人置身于其中的交互体验感觉非常棒，运用在移动端制作一些 H5 页面可谓十分博人眼球。并且掌握原理之后制作起来也并不算废力，好好的研究了一番后将一些学习过程共享给大家。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【CSS进阶】试试酷炫的 3D 视角 | Coco ’s blog">
+<meta property="og:url" content="http://sbco.cc/2016/09/06/3dview/index.html">
+<meta property="og:site_name" content="Coco ’s blog">
+<meta property="og:description" content="写这篇文章的缘由是因为看到了这个页面：戳我看看（移动端页面，使用模拟器观看）运用 CSS3 完成的 3D 视角，虽然有一些晕3D，但是使人置身于其中的交互体验感觉非常棒，运用在移动端制作一些 H5 页面可谓十分博人眼球。并且掌握原理之后制作起来也并不算废力，好好的研究了一番后将一些学习过程共享给大家。">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201609/608782-20160906203602910-872357369.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201609/608782-20160906203231144-1239156468.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201609/608782-20160906203100269-606257548.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201609/608782-20160906203817676-376329451.png">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201609/608782-20160906203304144-1233838773.gif">
+<meta property="og:image" content="http://images2015.cnblogs.com/blog/608782/201609/608782-20160906203317332-1486414378.gif">
+<meta property="og:updated_time" content="2016-09-06T13:01:00.399Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【CSS进阶】试试酷炫的 3D 视角 | Coco ’s blog">
+<meta name="twitter:description" content="写这篇文章的缘由是因为看到了这个页面：戳我看看（移动端页面，使用模拟器观看）运用 CSS3 完成的 3D 视角，虽然有一些晕3D，但是使人置身于其中的交互体验感觉非常棒，运用在移动端制作一些 H5 页面可谓十分博人眼球。并且掌握原理之后制作起来也并不算废力，好好的研究了一番后将一些学习过程共享给大家。">
+<meta name="twitter:image" content="http://images2015.cnblogs.com/blog/608782/201609/608782-20160906203602910-872357369.png">
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.png">
+    <link rel="stylesheet" href="/css/uno.css">
+    <link rel="stylesheet" href="/css/highlight.css">
+    <link rel="stylesheet" href="/css/archive.css">
+    <link rel="stylesheet" href="/css/china-social-icon.css">
+</head>
+<body>
+    <span class="mobile btn-mobile-menu">
+      <i class="icon icon-list btn-mobile-menu__icon"></i>
+      <i class="icon icon-x-circle btn-mobile-close__icon hidden"></i>
+    </span>
+    
+<header class="panel-cover panel-cover--collapsed">
+
+  <div class="panel-main">
+    <div class="panel-main__inner panel-inverted">
+    <div class="panel-main__content">
+        
+        <img src="/images/logo.png" alt="Coco ’s blog logo" class="panel-cover__logo logo" title="Click Me!!!"/>
+        
+        <h1 class="panel-cover__title panel-title"><a href="/" title="link to homepage">Coco ’s blog</a></h1>
+        <hr class="panel-cover__divider" />
+        
+        <p class="panel-cover__description">
+          少年不知愁滋味 为赋新词强说愁
+        </p>
+        <hr class="panel-cover__divider panel-cover__divider--secondary" />
+        
+        <div class="navigation-wrapper">
+          <nav class="cover-navigation cover-navigation--primary">
+            <ul class="navigation">
+              
+                
+                <li class="navigation__item"><a href="/#blog" title="" class="blog-button">首页</a></li>
+              
+                
+                <li class="navigation__item"><a href="/about/html/" title="" class="">关于</a></li>
+              
+                
+                <li class="navigation__item"><a href="/archive" title="" class="">归档</a></li>
+              
+              <a target="_blank" href="https://github.com/chokcoco"><li class='navigation__item github' title="To my Github"></li></a>
+              <a target="_blank" href="http://www.cnblogs.com/coco1s/"> <li class='navigation__item'><div class='navigation__item blog' title="To my cnblogs"></div></li></a>
+            </ul>
+          </nav>
+          <!-- ----------------------------
+To add a new social icon simply duplicate one of the list items from below
+and change the class in the <i> tag to match the desired social network
+and then add your link to the <a>. Here is a full list of social network
+classes that you can use:
+    icon-social-500px
+    icon-social-behance
+    icon-social-delicious
+    icon-social-designer-news
+    icon-social-deviant-art
+    icon-social-digg
+    icon-social-dribbble
+    icon-social-facebook
+    icon-social-flickr
+    icon-social-forrst
+    icon-social-foursquare
+    icon-social-github
+    icon-social-google-plus
+    icon-social-hi5
+    icon-social-instagram
+    icon-social-lastfm
+    icon-social-linkedin
+    icon-social-medium
+    icon-social-myspace
+    icon-social-path
+    icon-social-pinterest
+    icon-social-rdio
+    icon-social-reddit
+    icon-social-skype
+    icon-social-spotify
+    icon-social-stack-overflow
+    icon-social-steam
+    icon-social-stumbleupon
+    icon-social-treehouse
+    icon-social-tumblr
+    icon-social-twitter
+    icon-social-vimeo
+    icon-social-xbox
+    icon-social-yelp
+    icon-social-youtube
+    icon-social-zerply
+    icon-mail
+-------------------------------->
+<!-- add social info here -->
+
+
+        </div>
+      </div>
+    </div>
+    <div class="panel-cover--overlay"></div>
+  </div>
+</header>
+
+    <div class="content-wrapper">
+      <div class="content-wrapper__inner entry">
+        
+<article class="post-container post-container--single">
+  <header class="post-header">
+    <h1 class="post-title">【CSS进阶】试试酷炫的 3D 视角</h1>
+    
+    <div class="post-meta">
+      <time datetime="2016-09-06" class="post-meta__date date">2016-09-06</time>
+      <span id="busuanzi_container_page_pv">
+        • 阅读量（<span id="busuanzi_value_page_pv"></span>）
+      </span>
+      <span class="post-meta__tags tags">
+          
+          
+             &#8226; 标签:
+            <font class="tags">
+              <a class="tags-link" href="/tags/CSS/">CSS</a>
+            </font>
+          
+      </span>
+
+    </div>
+    
+  </header>
+
+  <section id="post-content" class="article-content post">
+    <p>写这篇文章的缘由是因为看到了这个页面：</p><p><a href="https://shakeduang.nuomi.com/campus/index.html?from=timeline&amp;isappinstalled=1" target="_blank" rel="external">戳我看看（移动端页面，使用模拟器观看）</a></p><p>运用 CSS3 完成的 3D 视角，虽然有一些晕3D，但是使人置身于其中的交互体验感觉非常棒，运用在移动端制作一些 H5 页面可谓十分博人眼球。</p><p>并且掌握原理之后制作起来也并不算废力，好好的研究了一番后将一些学习过程共享给大家。<a id="more"></a></p><p>下面进入正文：</p><h2 id="3D-效果示意"><a href="#3D-效果示意" class="headerlink" title="3D 效果示意"></a>3D 效果示意</h2><p>百闻不如一见，先直观感受一下上述我所说的效果：</p><iframe height="304" scrolling="no" src="//codepen.io/Chokcoco/embed/mAyRGv/?height=304&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="https://codepen.io/Chokcoco/pen/mAyRGv/" target="_blank" rel="external">3DView</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a><br></iframe><p>最好能点进去看看，这里我使用了带背景色的 div 作为示例，我们的视角处于一个正方体中，正方体的旋转动画让我们有了 3D 的感觉。</p><p>那么原本的图长什么样呢？我们把距离拉远，一探究竟：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/KgwqRd/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/KgwqRd/" target="_blank" rel="external">3DView2</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a><br></iframe><p>是长这样的：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201609/608782-20160906203602910-872357369.png" alt=""></p><p>相较于第一种效果，其实所做的只是将我们的视角推进到了正方体当中，有了一种身临其景的感觉。</p><p>而合理的运用 CSS3 所提供的一些 3D 属性，很容易就能达到上述的效果。</p><p>制作这样一个 3D 图形，我在之前的文章已经很详细的讲述了过程，感兴趣的可以戳进去看看：</p><p><a href="http://www.cnblogs.com/coco1s/p/5414153.html" target="_blank" rel="external">【CSS3进阶】酷炫的3D旋转透视</a></p><h2 id="transform-style-与-perspective"><a href="#transform-style-与-perspective" class="headerlink" title="transform-style 与 perspective"></a>transform-style 与 perspective</h2><p>再简单复述一下，主要是运用到了两个 CSS 属性：</p><h3 id="transform-style"><a href="#transform-style" class="headerlink" title="transform-style"></a>transform-style</h3><p>要利用 CSS3 实现 3D 的效果，最主要的就是借助 transform-style 属性。</p><p>transform-style 只有两个值可以选择：</p><figure class="highlight"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">// 语法：</span>
+          <br>
+          <span class="line">transform-style: flat|preserve-3d;</span>
+          <br>
+          <span class="line"></span>
+          <br>
+          <span class="line">transform-style: flat; // 默认，子元素将不保留其 3D 位置</span>
+          <br>
+          <span class="line">transform-style: preserve-3d; // 子元素将保留其 3D 位置。</span>
+          <br>
+        </pre></td></tr></table></figure><p>当我们指定一个容器的 transform-style 的属性值为 preserve-3d 时，容器的后代元素便会具有 3D 效果，这样说有点抽象，也就是当前父容器设置了 preserve-3d 值后，它的子元素就可以相对于父元素所在的平面，进行 3D 变形操作。</p><p>当父元素设置了 transform-style:preserve-3d 后，就可以对子元素进行 3D 变形操作了，3D 变形和 2D 变形一样可以，使用 transform 属性来设置，或者可以通过制定的函数或者通过三维矩阵来对元素变型操作：</p><ul><li><p>使用 translateX(length) 、translateY(length) 、 translateZ(length) 来进行 3D 位移操作，与 2D 操作一样，对元素进行位移操作，也可以合并为 translate3d(x,y,z) 这种写法；</p></li><li><p>使用 scaleX() 、scaleY() 、scaleY() 来进行3D 缩放操作，也可以合并为 scale3d(number,number,number) 这种写法；</p></li><li><p>使用 rotateX(angle) 、rotateY(angle) 、rotateZ(angle) 来进行 3D 旋转操作，也可以合并为 rotate3d(Xangle,Yangle,Zangle) 这种写法。</p></li></ul><h3 id="perspective"><a href="#perspective" class="headerlink" title="perspective"></a>perspective</h3><figure class="highlight"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">// 语法</span>
+          <br>
+          <span class="line">perspective: number|none;</span>
+          <br>
+        </pre></td></tr></table></figure><p>perspective 为一个元素设置三维透视的距离，仅作用于元素的后代，而不是其元素本身。</p><p>简单来说，当元素没有设置 perspective 时，也就是当 perspective:none/0 时所有后代元素被压缩在同一个二维平面上，不存在景深的效果。</p><p>而如果设置 perspective 后，将会看到三维的效果。</p><p>我们上面之所以能够在正方体外围看到正方体，以及深入正方体内，都是因为 <code>perspective</code> 这个属性。它让我们能够选择推进视角，还是远离视角，因此便有了 3D 的感觉。</p><h2 id="3D-View页面的布局结构"><a href="#3D-View页面的布局结构" class="headerlink" title="3D View页面的布局结构"></a>3D View页面的布局结构</h2><p>为了完成这样一个效果，需要一个灵活的布局，去控制整个 3D 效果的展示。</p><p>下面是我觉得比较好的一种方式：</p><figure class="highlight html"><table><tr><td class="gutter"><pre>
+          <span class="line">1</span>
+          <br>
+          <span class="line">2</span>
+          <br>
+          <span class="line">3</span>
+          <br>
+          <span class="line">4</span>
+          <br>
+          <span class="line">5</span>
+          <br>
+          <span class="line">6</span>
+          <br>
+          <span class="line">7</span>
+          <br>
+          <span class="line">8</span>
+          <br>
+          <span class="line">9</span>
+          <br>
+          <span class="line">10</span>
+          <br>
+          <span class="line">11</span>
+          <br>
+          <span class="line">12</span>
+          <br>
+          <span class="line">13</span>
+          <br>
+          <span class="line">14</span>
+          <br>
+          <span class="line">15</span>
+          <br>
+          <span class="line">16</span>
+          <br>
+        </pre></td><td class="code"><pre>
+          <span class="line">
+            <span class="comment">&lt;!-- 最外层容器，控制图形的位置及在整个页面上的布局--&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="tag">&lt;
+              <span class="name">div</span>
+              <span class="attr">class</span>=
+              <span class="string">"container"</span>&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="comment">&lt;!-- 舞台层，设置 preserve-3d 与 perspective 视距 --&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="tag">&lt;
+              <span class="name">div</span>
+              <span class="attr">class</span>=
+              <span class="string">"stage"</span>&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="comment">&lt;!-- 控制层，动画的控制层，通过这一层可以添加旋转动画或者触摸动画 --&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="tag">&lt;
+              <span class="name">div</span>
+              <span class="attr">class</span>=
+              <span class="string">"control"</span>&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="comment">&lt;!-- 图片层，装入我们要拼接的图片 --&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="tag">&lt;
+              <span class="name">div</span>
+              <span class="attr">class</span>=
+              <span class="string">"imgWrap"</span>&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="tag">&lt;
+              <span class="name">div</span>
+              <span class="attr">class</span>=
+              <span class="string">"img img1"</span>&gt;</span>
+            <span class="tag">&lt;/
+              <span class="name">div</span>&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="tag">&lt;
+              <span class="name">div</span>
+              <span class="attr">class</span>=
+              <span class="string">"img img2"</span>&gt;</span>
+            <span class="tag">&lt;/
+              <span class="name">div</span>&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="tag">&lt;
+              <span class="name">div</span>
+              <span class="attr">class</span>=
+              <span class="string">"img img3"</span>&gt;</span>
+            <span class="tag">&lt;/
+              <span class="name">div</span>&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="tag">&lt;
+              <span class="name">div</span>
+              <span class="attr">class</span>=
+              <span class="string">"img img4"</span>&gt;</span>
+            <span class="tag">&lt;/
+              <span class="name">div</span>&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="tag">&lt;/
+              <span class="name">div</span>&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="tag">&lt;/
+              <span class="name">div</span>&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="tag">&lt;/
+              <span class="name">div</span>&gt;</span>
+          </span>
+          <br>
+          <span class="line">
+            <span class="tag">&lt;/
+              <span class="name">div</span>&gt;</span>
+          </span>
+          <br>
+        </pre></td></tr></table></figure><ul><li>最外层 <code>container</code> ，控制图形的位置及在整个页面上的布局;</li><li><code>stage</code> 层，舞台层，从这里开始设置 3D 景深效果，添加 perspective 视距;</li><li><code>control</code> 层，动画的控制层，通过这一层可以添加旋转动画或者在移动端的触摸动画，通过更改 <code>translateZ</code> 属性也可以拉近拉远视角;</li><li><code>imgWrap</code> 层，图片层，装入我们要拼接的图片，下文会提及。</li></ul><h2 id="图片拼接"><a href="#图片拼接" class="headerlink" title="图片拼接"></a>图片拼接</h2><p>图片拼接其实才是个技术活，需要许多的计算。</p><p>以上述 Demo 中的正方体为例子，class 为 <code>img</code> 的 div 块的高宽为 400px*400px。那么要利用 4 个 这样的 div 拼接成一个正方体，需要分别将 4 个 div 绕 Y 轴旋转 [90°, 180°, 270°, 360°]，再 <code>translateY(200px)</code> 。</p><p>值得注意的是，一定是先旋转角度，再偏移距离，这个顺序很重要。</p><p>看看俯视图，也就是这个意思：<br><img src="http://images2015.cnblogs.com/blog/608782/201609/608782-20160906203231144-1239156468.png" alt=""></p><p>这是最简单的情况了，都是直角。</p><p>如果是一张图需要分割成八份，假设每张图分割出来的高宽为 400 <em>400 ， 8 张图需要做的操作是依次绕 Y 轴旋转 [45°, 90°, 135°, 180°, 225°, 270°, 315°, 360°] ，偏移的距离为 <code>translateY(482.84px)</code> ，也就是 （200 + 200 </em>√2）。</p><p>看看俯视图：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201609/608782-20160906203100269-606257548.png" alt=""></p><p>效果图：</p><iframe height="265" scrolling="no" src="//codepen.io/Chokcoco/embed/WGbERo/?height=265&theme-id=0&default-tab=css,result&embed-version=2" frameborder="no" allowtransparency="true" allowfullscreen style="width:100%">See the Pen <a href="http://codepen.io/Chokcoco/pen/WGbERo/" target="_blank" rel="external">3DView3</a> by Chokcoco ( <a href="http://codepen.io/Chokcoco" target="_blank" rel="external">@Chokcoco</a>) on <a href="http://codepen.io" target="_blank" rel="external">CodePen</a>.<br></iframe><h2 id="图片分割"><a href="#图片分割" class="headerlink" title="图片分割"></a>图片分割</h2><p>上面的示例都是使用的带背景色的 div 块，现在我们选取一张真正的图片，将其拼接成一个柱体。</p><p>下面这张图，大小为 <code>3480px * 2000px</code> :</p><p><img src="http://images2015.cnblogs.com/blog/608782/201609/608782-20160906203817676-376329451.png" alt=""></p><p>我们把它分割为 20 份，拼成一个正 20 边形，当然不用一块一块切图下来，利用 <code>background-position</code> 就可以完成了。而且分割的份数越多，最终做出来的效果越像一个圆柱，效果也更加真实。</p><p>正 20 边形，那么每块图片的宽度为 <code>174px</code>，依次需要递增的角度为 18° ，并且我们需要计算出需要偏移的距离为 <code>translateZ(543px)</code>。</p><p>看看效果： <a href="http://sbco.cc/demo/3dview/html/3dView2.html">Demo可以戳这里</a></p><p><img src="http://images2015.cnblogs.com/blog/608782/201609/608782-20160906203304144-1233838773.gif" alt=""></p><p>可以看到，图中近视为一个圆柱形，不过有一些小问题：</p><ul><li>选取的图片必须是左右首尾相连的的，不然圆柱结合处会有明显的不协调，这就要求要使用这种方式制作 H5 页面的时候，美术出的设计图必须左右相连无违和感。</li><li>另外一点就是分割的块术，图片分割越多块，越近视为为一个圆柱，效果更佳。</li></ul><h3 id="控制-control-层，进入到圆柱画面内"><a href="#控制-control-层，进入到圆柱画面内" class="headerlink" title="控制 control 层，进入到圆柱画面内"></a>控制 <code>control</code> 层，进入到圆柱画面内</h3><p>做到这一步，只剩下最后一步，就是推进我们的视角，进入到圆柱内部，产生 3D 视图的感觉。</p><p>我们通过 class 为 <code>control</code> 这个 div 控制这个效果，不过这里控制我们进入圆柱<br>内部的属性不是调整修改 <code>perspective</code> 属性，而是调整 <code>translateZ</code> 属性。通过控制 translateZ 得到的画面更加真实，可以自己尝试一下分别控制 <code>perspective</code> 与 <code>translateZ</code> 得到的效果，便会有深刻的感受。</p><p>最后的效果： <a href="http://sbco.cc/demo/3dview/html/index.html">Demo可以戳这里，由于是移动端效果，打开模拟器观看更佳</a></p><p>整个效果图太大，只截取了部分制作成 GIF：</p><p><img src="http://images2015.cnblogs.com/blog/608782/201609/608782-20160906203317332-1486414378.gif" alt="3d view"></p><p>还有一个小问题，那就是进入到圆柱内部之后，整个图片都反了过来，所以我们可能需要利用PS将原图进行一次左右翻转，这样进入内部之后，看到的就是原图效果。</p><p>至此，整个页面就算完工了，接下来的就是添加一些 touch 事件，增添一些细节。</p><p>整个效果的简单介绍就到此结束了，才疏学浅，文中难免有不对以及疏漏之处，若有什么建议或者意见，希望在评论可以大胆的提出指正。</p><p>本文示例 Demo 已上传在我的 Github 上：</p><p><a href="https://github.com/chokcoco/Css33DView" target="_blank" rel="external">Css33DView</a></p>
+  </section>
+
+  
+  
+
+</article>
+
+
+<!-- 多说评论框 start -->
+  <div class="ds-thread" data-thread-key="post-3dview" data-title="【CSS进阶】试试酷炫的 3D 视角" data-url="http://sbco.cc/2016/09/06/3dview/"></div>
+<!-- 多说评论框 end -->
+
+
+        <footer class="footer">
+	<div class="friendLink">友情链接：
+		<ul>
+			<li><a href="http://www.cnblogs.com/coco1s/">Coco</a></li>
+			<li><a href="http://www.chengfeilong.com/">Scott's Blog</a></li>
+			<li><a href="http://www.52cik.com/">楼教主</a></li>
+			<li><a href="http://blog.aisuso.com/">姚嘉鑫博客</a></li>
+		</ul>
+	</div>
+	<div class="copy_right"> &copy; chokcoco </div>
+	<span class="footer__copyright"> 2014-2016. | 由<a href="https://hexo.io/"> Hexo </a>强力驱动 | 主题<a href="https://github.com/someus/huno"> Huno </a></span>
+
+</footer>
+<!-- 多说公共JS代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"sbco"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0]
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+</script>
+<!-- 多说公共JS代码 end -->
+<!-- cnzz统计 -->
+<script type="text/javascript">
+	var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+	document.write(unescape("%3Cspan id='cnzz_stat_icon_1259441963'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s4.cnzz.com/z_stat.php%3Fid%3D1259441963' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<!-- 文章阅读数统计 -->
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 百度爬虫推送 -->
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+      </div>
+    </div>
+    <!-- js files -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/scale.fix.js"></script>
+    
+    
+
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript"> 
+        $(document).ready(function(){
+            MathJax.Hub.Config({ 
+                tex2jax: {inlineMath: [['[latex]','[/latex]'], ['\\(','\\)']]} 
+            });
+        });
+    </script>
+
+
+    
+
+    <script src="/js/awesome-toc.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $.awesome_toc({
+                overlay: true,
+                contentId: "post-content",
+            });
+        });
+    </script>
+
+
+    
+    
+    <!--kill ie6 -->
+<!--[if IE 6]>
+  <script src="//letskillie6.googlecode.com/svn/trunk/2/zh_CN.js"></script>
+<![endif]-->
+</body>
+</html>

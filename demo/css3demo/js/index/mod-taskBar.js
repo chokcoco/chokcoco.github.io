@@ -1,0 +1,1 @@
+define("index/mod-taskBar",["jquery"],function(n){return{init:function(){console.log(n)}}});
