@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta content="img2div" name="Keywords">
+	<meta content="img2div" name="description">
+	<title>Lottery</title>
+<style>
+body, html {
+  width: 100%;
+  height: 100%;
+  font-family: "Open Sans", sans-serif;
+  background: #282828;
+  color: white;
+  padding-top: 20px;
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  overflow: hidden;
+  -webkit-animation: Gradient 30s ease infinite;
+          animation: Gradient 30s ease infinite;
+}
+
+@-webkit-keyframes Gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes Gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.m-btn {
+  position: absolute;
+  width: 180px;
+  height: 64px;
+  line-height: 64px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 24px;
+  transition: .2s all;
+  box-sizing: border-box;
+  color: #fff;
+  margin-right: 160px;
+  margin-bottom: 20px;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  left: 50%;
+  top: 50%;
+}
+
+.g-btn-start {
+  color: #fff;
+  border: 1px solid #fff;
+}
+.g-btn-start:hover {
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.2);
+}
+.g-btn-start::after {
+  position: absolute;
+  content: "";
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  transition: .5s outline-color,  .5s outline,  .5s transform;
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.25, 0.8);
+  -webkit-transform: scale3d(1.1, 1.3, 0);
+          transform: scale3d(1.1, 1.3, 0);
+  outline: 0px solid;
+  outline-color: rgba(255, 255, 255, 0.05);
+  outline-offset: -10px;
+}
+.g-btn-start:hover::after {
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  -webkit-transform: scale(1);
+          transform: scale(1);
+  outline: 1px solid;
+  outline-color: rgba(255, 255, 255, 0.6);
+  outline-offset: 10px;
+  transition: 0.5s outline-offset cubic-bezier(0.2, 0.8, 0.25, 0.8), 0.5s outline-color cubic-bezier(0.2, 0.8, 0.25, 0.8), 0.5s outline cubic-bezier(0.2, 0.8, 0.25, 0.8);
+}
+.g-btn-start:active {
+  mix-blend-mode: overlay;
+}
+
+.s-move {
+  top: 80%;
+}
+
+.g-name {
+  display: none;
+  position: absolute;
+  font-size: 128px;
+  transition: .2s all;
+  color: #fff;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  left: 50%;
+  top: 50%;
+  transition: .1s all;
+}
+
+
+</style>
+</head>
+
+<body>
+<div class="m-btn g-btn-start">Start</div>
+<div class="g-name"></div>
+	<script type="text/javascript" src="https://cdn.bootcss.com/jquery/2.2.3/jquery.min.js"></script>
+	<script type="text/javascript" src="./js/jquery.js"></script>
+
+	<script>
+var nameArr = ["徐志颖", "谢涵文", "张展鹏", "杨伟旭", "袁建军", "袁智超", "李明政", "谢立杰", "刘湖明", "吴兆辉", "林恩腾", "刘惠荣", "刘晓阳", "苏健科", "刘巨力", "乔奇", "袁进秋", "梁校坤", "叶永溪", "袁添力", "冯庆裕", "古锦达", "车鸿峰", "王东海", "游畅", "王柳", "叶惠珊", "陈敏文", "袁雪芳", "许妍", "彭思林", "吴润佳", "盛楠", "刘妙红", "袁淑珊", "袁铭珺", "张美娟", "陈翰砚", "刘子瑜", "李恺璇", "刘瑞儿", "陈贲怡", "宋靖怡", "韩楚君", "钟彦卿", "夏凤平", "彭棒"];
+var nameArrLength = nameArr.length;
+
+var $start = $('.g-btn-start');
+var $randomName = $('.g-name');
+
+var timeout = null;
+
+$(document).on('click', '.g-btn-start', function (e) {
+    if ($start.text() !== 'Start') {
+        // $start.text('Start').removeClass('s-move');
+        randomNameHide();
+
+    } else {
+        randomNameShow();
+        // $start.text('Stop').addClass('s-move');
+    }
+});
+
+function randomNameShow() {
+    $start.text('Stop').addClass('s-move');
+
+    $randomName.show();
+
+    timeout = setInterval(function () {
+        var random = parseInt(Math.random() * nameArrLength);
+        var randomName = nameArr[random];
+
+        $randomName.text(randomName);
+    }, 10);
+}
+
+function randomNameHide() {
+    $start.text('Start');
+
+    // $randomName.hide();
+
+    clearInterval(timeout);
+
+    for (var i = 1; i <= 19; i++) {
+        (function (j) {
+            setTimeout(function () {
+                var random = parseInt(Math.random() * nameArrLength);
+                var randomName = nameArr[random];
+                $randomName.text(randomName);
+            }, j * j * 15);
+        })(i);
+    }
+}
+	</script>
+</body>
+</html>
