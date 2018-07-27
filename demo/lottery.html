@@ -138,7 +138,7 @@ var $randomName = $('.g-name');
 
 var timeout = null;
 
-$(document).on('click, tap', '.g-btn-start', function (e) {
+$(document).on('click', '.g-btn-start', function (e) {
     if ($start.text() !== 'Start') {
         // $start.text('Start').removeClass('s-move');
         randomNameHide();
