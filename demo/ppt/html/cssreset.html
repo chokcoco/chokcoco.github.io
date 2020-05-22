@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reset.css && font-family 知多少 </title>
+
+		<link rel="stylesheet" href="../css/reveal.css">
+		<link rel="stylesheet" href="../css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="../lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : '../css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+		<style>
+		::-webkit-scrollbar-track-piece{background-color:#141414;}
+		::-webkit-scrollbar{width:4px;height: 4px; cursor: pointer;background-color: transparent;}
+		::-webkit-scrollbar-thumb{background:#999;}
+		body {
+			background-color: #002b36;
+			font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+		}
+		.reveal pre {
+		    border-radius: .5em;
+		    border: .3em solid hsl(0, 0%, 33%);
+		    box-shadow: 1px 1px .5em black inset;
+		    margin: .5em 0;
+		    overflow: auto;
+		    padding: 1em;
+		    background: hsl(0, 0%, 8%);
+		}
+		.reveal pre code {
+			color: white;
+		    direction: ltr;
+		    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+		    text-align: left;
+		    text-shadow: 0 -.1em .2em black;
+		    white-space: pre;
+		    background: transparent;
+		}
+		.reveal h1,
+		.reveal h2,
+		.reveal h3,
+		.reveal h4,
+		.reveal h5,
+		.reveal h6,
+		ul,
+		p {
+			font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+			color: #eee8d5;
+			font-weight: normal;
+
+		}
+
+		.reveal ol,
+		.reveal ul,
+		.reveal ul li,
+		.reveal p {
+			font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+			color: #fff;
+			font-size: 90%;
+			color: #93a1a1;
+		}
+
+		strong {
+			color: #0c8;
+		}
+		</style>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<!-- Slides are separated by newline + three dashes + newline, vertical slides identical but two dashes -->
+				<section data-markdown data-separator="^\n---\n$" data-separator-vertical="^\n--\n$">
+					<script type="text/template">
+## reset.css && font-family 知多少
+<p style="color: #93a1a1"> Coco </p>
+
+
+---
+
+## 通常用到的 reset
+```CSS
+* {
+	-webkit-tap-highlight-color: transparent;
+	-webkit-appearance: none;
+	outline: 0
+}
+html {
+	overflow-x: hidden;
+	overflow-y: auto;
+	color: #333;
+	font-size: 62.5%;
+	font-family: Microsoft Yahei, simsun, Tahoma, Helvetica, Arial, SimHei, sans-serif
+}
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, button, textarea, p, blockquote {
+	margin: 0;
+	padding: 0
+}
+fieldset, img {
+	border: 0
+}
+address, caption, cite, code, dfn, em, th, var, optgroup {
+	font-style: normal;
+	font-weight: 400
+}
+del, ins {
+	text-decoration: none
+}
+li {
+	list-style: none
+}
+caption, th {
+	text-align: left
+}
+q:before, q:after {
+	content: ''
+}
+abbr, acronym {
+	border: 0;
+	font-variant: normal
+}
+sup {
+	vertical-align: baseline
+}
+sub {
+	vertical-align: baseline
+}
+legend {
+	color: #000
+}
+input, button, textarea, select, optgroup, option {
+	font-family: inherit;
+	font-size: inherit;
+	font-style: inherit;
+	font-weight: inherit
+}
+input, button, textarea, select {
+	outline: 0;
+	*font-size: 100%
+}
+textarea {
+	resize: none
+}
+a {
+	outline: 0;
+	text-decoration: none
+}
+a:hover {
+	outline: 0;
+	text-decoration: none
+}
+.clearfix, .cf {
+	zoom: 1
+}
+.clearfix:after, .cf:after {
+	content: "";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden
+}
+.hover {
+	pointer-events: none
+}
+```
+
+--
+
+#### 会设置默认 outline 的只有 a, input, button, textarea, select 的某些状态
+```CSS
+* {
+	outline: 0;
+}
+```
+
+--
+
+
+#### 最近 5 个项目下面的标签使用率
+```CSS
+fieldset, legend, blockquote,
+cite, dfn, optgroup,
+del, ins, abbr, acronym {
+
+}
+```
+
+
+--
+
+
++ 诸如 div 、dt、li 等标签是没有默认 padding 和 margin 的
++ h1, h2, h3, h4, h5, h6 是没有默认 padding 的
+
+```CSS
+body, div, dl, dt, dd, ul, ol, li,
+h1, h2, h3, h4, h5, h6,
+pre, code,
+form, fieldset, legend, input, button, textarea,
+p, blockquote{
+    margin: 0;
+    padding: 0
+}
+
+```
+
+
+
+--
+
+#### 正确的写法
+```CSS
+body, dl, dd, h1, h2, h3, h4, h5, h6, p, form{
+    margin:0;
+}
+
+ol, ul{
+    margin:0;
+    padding:0;
+}
+```
+
+
+--
+
+#### [生效的字体有几个？](http://www.yy.com/c/t2/index.htm)
+
+```CSS
+html {
+    font-family: Microsoft Yahei, simsun, Tahoma, Helvetica, Arial, SimHei, sans-serif;
+}
+```
+
+
+--
+
+
+#### 淘宝的 `font-family`
+```CSS
+body {
+    font-family: tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
+}
+```
+
+#### 我们设置的
+```CSS
+html {
+    font-family: Microsoft Yahei, simsun, Tahoma, Helvetica, Arial, SimHei, sans-serif;
+}
+```
+
+
+---
+
+## 我们为什么需要 reset ？
+
+消除**不同的浏览器**在默认样式上不同表现
+
+一张白纸
+
+
+---
+
+
+## `reset.css` 存在的问题
+
++ CSS 文件大小、标签冗余
++ 全局变量滥用
++ 渲染问题
++ 样式重置
+
+
+---
+
+## [Normalize.css](https://necolas.github.io/normalize.css/5.0.0/normalize.css)
+
+
+---
+
+#### 没有暴力一刀切
+
+
+--
+
+
++ 统一了一些元素在所有浏览器下的表现，保护有用的浏览器默认样式而不是完全清零它们，让它们在各个浏览器下表现一致；
+
+
+```CSS
+/**
+ * Remove the margin in all browsers
+ */
+
+body {
+  margin: 0;
+}
+```
+
+
+--
+
+
++ 为大部分元素提供一般化的表现；
+
+```CSS
+h1 {
+    font-size: 2em;
+    margin: 0.67em 0;
+}
+
+small {
+    font-size: 80%;
+}
+
+```
+不同浏览器下的small大小不一致，这里定为80%
+
+
+
+--
+
+
++ 修复了一些浏览器的 Bug ，并且让它们在所有浏览器下保持一致性；
+
+```CSS
+a {
+  background-color: transparent;
+}
+
+a:active,
+a:hover {
+  outline: 0;
+}
+```
+在IE10下，在点击超链接（active）的时候，会出现一个灰色背景，去掉。在active或hover时，把默认的outline样式去掉（针对所有浏览器）。
+
+
+
+--
+
+
++ 通过一些巧妙的细节提升了 CSS 的可用性；
+
+```CSS
+article, aside, details,
+figcaption, figure, footer,
+header, hgroup,
+main, menu,
+nav, section, summary {
+  display: block;
+}
+```
+
+
+--
+
+
++ 提供了详尽的文档让开发者知道，不同元素在不同浏览器下的渲染规则；
+
+
+---
+
+
+#### 永远没有银弹，拒绝拿来主义
+
+
+--
+
+
+不要随便否认其中任何一个
+
+
+--
+
+
+### 结合业务思考
++ 设计师会对所有元素设置样式吗（自我发挥的余地）
++ 项目是移动端项目还是 PC 端项目
++ CSS reset 相比浏览器默认样式的最大优势，就是“好记”
+
+
+---
+
+
+## font-family 知多少
+
+
+---
+
+
+## 五类字体
+
+```CSS
+/* 仅有通用的字体族名 */
+font-family: serif;
+font-family: sans-serif;
+font-family: monospace;
+font-family: cursive;
+font-family: fantasy;
+```
+
+--
+
+
++ serif(衬线)
++ sans-serif(无衬线)
++ monospace(等宽)
++ fantasy(梦幻)
++ cuisive(草体)
+
+
+--
+
+
++ 通用字体族名是一种备选（fallback）机制，用于在指定的字体不可用时。
++ 通用字体族名都是关键字，所以不可以加引号。
++ 在列表的末尾应该至少有一个通用字体族名。
+
+
+---
+
+
+#### serif && sans-serif
+衬线 && 无衬线
+
+
+--
+
+
+![衬线与无衬线字体比较](../images/font-compare.jpg)
++ 准确而言，serif 和 sans-serif 是针对西文的说法
++ 中文环境下，宋体对应衬线字体，黑体则是无衬线字体
+
+
+---
+
+
+### serif 衬线字体
+
+
+--
+
+
+### <code style="font-family:'SimSun'"> 宋体（SimSun）</code>
+<code style="font-family:'SimSun'"> Windows下大部分浏览器的默认中文字体 </code>
+
+<code style="font-family:'SimSun'"> 小字号下效果佳，不建议做标题字体 </code>
+
+
+--
+
+
+### <code style="font-family:'Times New Roman'"> Times New Roman </code>
+<code style="font-family:'Times New Roman'"> Mac 平台 Safari 下默认的英文字体 </code>
+
+<code style="font-family:'Times New Roman'"> 是最常见且广为人知的西文衬线字体之一 </code>
+
+
+---
+
+
+### sans-serif 非衬线字体
+
+
+--
+
+
+### <code style="font-family:'Microsoft Yahei'"> 微软雅黑（Microsoft Yahei）</code>
+<code style="font-family:'Microsoft Yahei'"> 始于 Windows Vista  </code>
+
+<code style="font-family:'Microsoft Yahei'"> Windows 浏览器最值得使用的中文字体 </code>
+
+
+--
+
+
+### <code style="font-family:'STHeiti'"> 华文黑体（STHeiti）</code>
+<code style="font-family:'STHeiti'"> OS X 10.6 前默认中文字体  </code>
+
+<code style="font-family:'STHeiti'"> 正常粗细是华文细黑，粗体下则是华文黑体 </code>
+
+
+--
+
+
+### <code style="font-family:'Heiti SC', STHeiti;"> 黑体-简（Heiti SC）</code>
+<code style="font-family:'Heiti SC', STHeiti;"> 从 MAC OS X 10.6 开始，黑体-简代替华文黑体用作简体中文系统界面默认字体  </code>
+
+
+
+--
+
+
+
+### <code style="font-family:'Hiragino Sans GB', STHeiti;"> 冬青黑体（Hiragino Sans GB）</code>
+<code style="font-family:'Hiragino Sans GB', STHeiti;"> 又叫苹果丽黑 </code>
+
+<code style="font-family:'Hiragino Sans GB', STHeiti;"> Mac OS X 10.6 开始自带，小字号时足够清晰 </code>
+
+
+--
+
+
+### <code style="font-family:Helvetica, 'Microsoft Yahei', sans-serif;"> Helvetica、Helvetica Neue</code>
+<code style="font-family:Helvetica, 'Microsoft Yahei', sans-serif;"> Helvetica 是苹果电脑的默认西文字体，微软常用的 Arial 字体也来自于它 </code>
+
+
+--
+
+
+### <code style="font-family:Arial, 'Microsoft Yahei', sans-serif;"> Arial</code>
+<code style="font-family:Arial, 'Microsoft Yahei', sans-serif;"> Windows 平台上默认的无衬线西文字体，有多种变体，比例及字重（weight）和 Helvetica 极为相近 </code>
+
+
+--
+
+
+### <code style="font-family:Tahoma, 'Microsoft Yahei', sans-serif;"> Tahoma </code>
+<code style="font-family:Tahoma, 'Microsoft Yahei', sans-serif;"> 对 Unicode 字集的支持范围较大 </code>
+
+<code style="font-family:Tahoma, 'Microsoft Yahei', sans-serif;"> Tahoma 没有一些 Arial 为人诟病的缺点，例如大写“I”与小写“l”难以分辨等 </code>
+
+
+---
+
+
+#### monosapce 等宽字体
+
+
+
+---
+
+
+#### fantasy 梦幻 && cuisive 草体
+
+
+--
+
+
+#### <code style="font-family: 'brush script mt', cursive, 'Microsoft Yahei';">cuisive 草体</code>
+<code style="font-family:'brush script mt', cursive, 'Microsoft Yahei';">草书字体。这种字体有的有连笔，有的还有特殊的斜体效果。因为一般这种字体都有一点连笔效果，所以会给人一种手写的感觉。</code>
+
+<code style="font-family:'brush script mt', cursive, 'Microsoft Yahei';">123456789, Cursive</code>
+
+
+--
+
+
+#### <code style="font-family: fantasy, 'Microsoft Yahei';">fantasy 梦幻</code>
+<code style="font-family:fantasy, 'Microsoft Yahei';">Fantasy字体主要是那些具有特殊艺术效果的字体</code>
+
+<code style="font-family:fantasy, 'Microsoft Yahei';">123456789, fantasy</code>
+
+
+---
+
+
+## 字体正确的书写顺序
+
+1. 兼顾中西
+2. 西文在前，中文在后
+3. 兼顾多操作系统，Windows、MAC OS、Android、iOS
+4. 兼顾旧操作系统，以字体族系列 serif 和 sans-serif 结尾
+
+
+---
+
+
+## 其他影响因素
+
++ 字体族 sans-serif 和 serif 并不总会生效，字体的 fallback 机制受到浏览器和操作系统的影响
++ lang, charset 和 font-family 都会对默认字体产生影响，规律很复杂
+
+
+---
+
+
+## 中文字体的兼容写法
+
+通常会转化成对应的英文写法或者是对应的 unicode 编码
+
+```CSS
+font-family:'宋体';
+font-family: '\5b8b\4f53';
+```
+
++ 黑体：\9ED1\4F53
++ 微软雅黑：\5FAE\8F6F\96C5\9ED1
++ 华文细黑：\534E\6587\7EC6\9ED1
++ 华文黑体：\534E\6587\9ED1\4F53
+
+
+---
+
+
+## 王者绝非偶然，细节决定成败
+
+
+--
+
+
+适用于我们网站比较好的字体体验：
+
+```CSS
+body {
+	font-family: tahoma, arial, 'Hiragino Sans GB', 'Mircosoft Yahei', sans-serif;
+}
+
+```
+
+
+---
+
+
++ [reset.css 知多少](http://www.cnblogs.com/coco1s/p/6249038.html)
++ [到底该不该用 CSS reset](https://www.zhihu.com/question/23554164)
++ [你该知道的字体 font-family](http://www.cnblogs.com/coco1s/p/6253154.html)
++ [浏览器如何渲染文本](http://blog.jjgod.org/2011/04/09/how-do-browsers-render-text/)
++ [Safe web fonts -- Web页面安全字体](http://web.mit.edu/jmorzins/www/fonts.html)
+
+
+---
+
+
+# THANK YOU
+
+
+
+
+
+
+					</script>
+				</section>
+			</div>
+		</div>
+
+		<script src="../lib/js/head.min.js"></script>
+		<script src="../js/reveal.js"></script>
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: '../plugin/markdown/marked.js' },
+					{ src: '../plugin/markdown/markdown.js' },
+					{ src: '../plugin/notes/notes.js', async: true },
+					{ src: '../plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
