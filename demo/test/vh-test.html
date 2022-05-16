@@ -3,19 +3,42 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>vh-test</title>
 <style>
 * {
   padding: 0;
   margin: 0;
 }
-body, html {
-  width: 100%;
+body {
+  width: 100vw;
   height: 100vh;
   background: #ddd;
+}
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.content {
+  width: 100vw;
+  height: 100px;
+  background: #0f0;
+}
+.footer {
+  margin-top: auto;
+  width: 100vw;
+  height: 100px;
+  background: #f00;
+  text-align: center;
+  color: #999;
 }
 </style>
 </head>
 <body>
+  <div class="container">
+    <div class="content">Content</div>
+    <div class="footer">Footer</div>
+  </div>
 </body>
 </html>
