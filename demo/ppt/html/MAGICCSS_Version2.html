@@ -1,0 +1,3026 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>CSS创意构想</title>
+
+		<link rel="stylesheet" href="../css/reveal.css">
+		<link rel="stylesheet" href="../css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="../lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : '../css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+		<style>
+		::-webkit-scrollbar-track-piece{background-color:#141414;}
+		::-webkit-scrollbar{width:4px;height: 4px; cursor: pointer;background-color: transparent;}
+		::-webkit-scrollbar-thumb{background:#999;}
+		body {
+			background: linear-gradient(45deg, #2d74ad, #24333a);
+			font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+		}
+		.reveal pre {
+		    border-radius: .5em;
+		    border: .3em solid hsl(0, 0%, 33%);
+		    box-shadow: 1px 1px .5em black inset;
+		    margin: .5em auto;
+		    overflow: auto;
+		    padding: 1em;
+		    background: hsl(0, 0%, 8%);
+		}
+		.reveal pre code {
+			color: white;
+		    direction: ltr;
+		    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+		    text-align: left;
+		    text-shadow: 0 -.1em .2em black;
+		    white-space: pre;
+		    background: transparent;
+		}
+		.reveal h1,
+		.reveal h2,
+		.reveal h3,
+		.reveal h4,
+		.reveal h5,
+		.reveal h6,
+		ul,
+		p {
+			font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+			color: #eee8d5;
+			font-weight: normal;
+
+		}
+
+		.reveal ol,
+		.reveal ul,
+		.reveal ul li,
+		.reveal p {
+			font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+			color: #fff;
+			font-size: 90%;
+			color: #ddd;
+		}
+
+		strong {
+			color: #0c8;
+		}
+		svg {
+			width: 0;
+			left: 0;
+			position: absolute;
+		}
+
+		.polygon {
+			width: 500px;
+			height: 320px;
+			margin: 0 auto!important;
+			background: #ffcc00;
+    		shape-outside: polygon(0 0, 400px 0, 500px 300px, 100px 300px);
+			clip-path: polygon(0 0, 400px 0, 500px 300px, 100px 300px);
+		}
+		.polygon2 {
+			margin: 50px auto!important;
+			width: 500px;
+			height: 300px;
+			background: #ffcc00;
+			font-size: 24px;
+			line-height: 42px;
+			clip-path: polygon(0 0, 400px 0, 500px 300px, 100px 300px);
+			text-align: left;
+		}
+
+		.polygon2 p {
+			color: #333;
+			padding: 10px;
+			font-size: 18px;
+		}
+
+		.polygon2 .left {
+			float: left;
+			shape-outside: polygon(0px 0px, 0px 300px, 100px 300px);
+			clip-path: polygon(0px 0px, 0px 300px, 100px 300px);
+		}
+
+		.polygon2 .right {
+			float: right;
+			shape-outside: polygon(0px 0px, 100px 0px, 100px 300px);
+			clip-path: polygon(0px 0px, 100px 0px, 100px 300px);
+
+		}
+
+		.polygon2 .left,
+		.polygon2 .right {
+			width: 100px;
+			height: 300px;
+		}
+
+		.iphonex {
+			width: 300px;
+			height: 491px;
+			background: url(../images/cssmagic/bg-shapeoutside.gif);
+			margin: 0 auto!important;
+			background-size: contain;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+		.borderWrap {
+			width: 940px;;
+			height:	444px;
+			background: url(../images/cssmagic/bg-shadow.png);
+			margin: 0 auto!important;
+			background-size: contain;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+		.bgMargin {
+			width: 1039px;
+			height:	95px;
+			background: url(../images/cssmagic/bg-margin.png);
+			margin: 0 auto!important;
+			background-size: contain;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+		.bgMarginFooter {
+			width: 800px;
+			height:	318px;
+			background: url(../images/cssmagic/bg-margin-footer.gif);
+			margin: 0 auto!important;
+			background-size: contain;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+		.bgShadow2 {
+			margin: 20px auto!important;
+			width: 80px;
+			height: 80px;
+			background: #fff;
+			box-shadow: 
+				80px 80px 0 0 yellow, 
+				-80px 80px 0 10px green;
+		}
+		div.bgShadow9 {
+		margin: 50px auto!important;
+				width: 120px;
+				height: 80px;
+				background: #fff;
+		box-shadow:  
+			0 0 0 2px red,
+			0 0 0 4px orange,
+			0 0 0 6px yellow,
+			0 0 0 8px green,
+			0 0 0 10px cyan;
+		}
+		div.bgShadow10 {
+		margin: 20px auto!important;
+				width: 120px;
+				height: 80px;
+				background: #fff;
+		box-shadow:  
+		0 0 0 4px orange,
+		0 0 0 6px transparent,
+		0 0 0 8px green,
+		0 0 0 10px transparent,
+		0 0 0 12px cyan;
+		}
+		.bgShadowInset {
+			width:200px;
+			height:200px;
+			margin:50px auto!important;
+			background:#fff;
+			border-radius:50%;
+			animation: insetShadowMove 7s infinite linear;
+		}
+		@keyframes insetShadowMove {
+			0% {
+				box-shadow: inset 0 0 0 0 ;
+				background:#fff;
+			}
+			40% {
+				box-shadow: inset -20px 0 0 0 deeppink;
+				background:#fff;
+			}
+			80% ,
+			100%{
+				box-shadow: inset -20px 0 0 0 deeppink;
+				background: transparent;
+			}
+		}
+		.bgShadowCloud{
+			width:100px;
+			height:100px;
+			margin:50px auto!important;
+			background:#fff;
+			border-radius:50%;
+			box-shadow:
+				120px 0px 0 -10px #795548,
+				95px 20px 0 0px #607D8B,
+				30px 30px 0 -10px green,
+				90px -20px 0 0px #FFC107,
+				40px -40px 0 0px #2196F3;
+			animation: change 6s infinite;
+		}
+
+		@keyframes change {
+			100% {
+				box-shadow:
+				120px 0px 0 -10px #fff,
+				95px 20px 0 0px #fff,
+				30px 30px 0 -10px #fff,
+				90px -20px 0 0px #fff,
+				40px -40px 0 0px #fff;
+			}
+		}
+		.bgCSSbattle {
+			width: 400px;
+			height:	300px;
+			background: url(../images/cssmagic/bg-cssbattle.png);
+			margin: 0 auto!important;
+			background-size: contain;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+
+		.bgCSSbattle2 {
+			margin: 0 auto!important;
+			width: 200px;
+			height: 200px;
+			border-radius: 50%;
+			background: #09042A;
+			animation: change2 10s forwards infinite;
+		}
+
+		@keyframes change2 {
+			30% {
+				box-shadow:140px 0 0 0 #E78481;
+			}
+			60% {
+				box-shadow:140px 0 0 0 #E78481, inset 140px 0 0 0 #7B3F61;
+			}
+			100% {
+				box-shadow:140px 0 0 0 #E78481, inset 140px 0 0 0 #7B3F61;
+			}
+		}
+		.bgLongShadow {
+			position: relative;
+			width: 268px;
+			height:	269px;
+			background: #fff;
+			margin: 20px auto!important;
+			background-size: contain;
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+		.bgLongShadow::before,
+		.bgLongShadow::after {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			z-index: -1;
+		}
+		.bgLongShadow::before {
+			transform-origin: 0 50%;
+			transform: translate(100%, 0) skewY(45deg) scaleX(.3);
+			background: linear-gradient(90deg, rgba(255, 255, 255, .3), transparent);
+			animation: shadowMoveY 5s infinite linear alternate;
+		}
+
+		.bgLongShadow::after {
+			transform-origin: 0 0;
+			transform: translate(0%, 100%) skewX(45deg) scaleY(.3);
+			background: linear-gradient(180deg, rgba(255, 255, 255, .3), transparent);
+			animation: shadowMoveX 5s infinite linear alternate;
+		}
+    div.bgSolidShadow,
+    div.bgSolidShadow2 {
+      position: relative;
+      width: 600px;
+      height: 100px;
+      margin: 50px auto;
+      background: hsl(48, 100%, 50%);
+      border-radius: 20px;
+      box-shadow: 0 0 5px 2px hsl(48, 100%, 45%);
+      cursor: pointer;
+    }
+    div.bgSolidShadow2 {
+      background: hsl(199, 98%, 48%);
+      box-shadow: 0 0 5px 2px hsl(199, 98%, 40%);
+    }
+
+    .bgSolidShadow2::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 5%;
+        right: 5%;
+        bottom: 15%;
+        border-radius: 10px;
+        transform: translate(0, -20%) rotate(-5deg);
+        transform-origin: center center;
+        box-shadow: 0 0 12px 12px hsl(0, 0%, 0%);
+        z-index: -1;
+    }
+
+    .bgSolidShadow2::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 5%;
+        right: 5%;
+        bottom: 15%;
+        border-radius: 10px;
+        transform: translate(0, -20%) rotate(5deg);
+        transform-origin: center center;
+        box-shadow: 0 0 12px 12px hsl(0, 0%, 0%);
+        z-index: -1;
+    }
+    .bgSolidShadow::before {
+        content: "";
+        position: absolute;
+        top: 40%;
+        left: 5%;
+        right: 5%;
+        bottom: 0;
+        border-radius: 10px;
+        transform: translate(0, -15%) rotate(-2deg);
+        transform-origin: center center;
+        box-shadow: 0 0 10px 12px hsl(0, 0%, 0%);
+        z-index: -1;
+    }
+    
+    div.bgSolidShadow:hover,
+    div.bgSolidShadow2:hover {
+      background: transparent;
+    }
+
+		.bgColorShadow {
+			position: relative;
+			width: 200px;
+			height: 200px;
+			border-radius: 50%;
+			margin: 20px auto!important;
+			background: url(https://avatars.githubusercontent.com/u/8554143?v=4) no-repeat center center;
+			background-size: 100% 100%;
+		}
+		.bgColorShadow::after {
+			content: "";
+			position: absolute;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: inherit;
+			background-size: 100% 100%;
+			border-radius: 50%;
+			filter: blur(10px) brightness(80%) opacity(.8);
+			transform: scale(.95);
+			z-index: -1;
+			animation: filterChange 15s infinite linear;
+		}
+
+		@keyframes filterChange {
+			0% {
+				top: 0;
+				left: 0;
+				filter: blur(0) brightness(100%) opacity(1);
+			}
+			25% {
+				top: 10%;
+				left: 4%;
+				filter: blur(0) brightness(100%) opacity(1);
+			}
+			50% {
+				top: 10%;
+				left: 4%;
+				filter: blur(5px) brightness(80%) opacity(.8);
+			}
+			100% {
+				top: 10%;
+				left: 4%;
+				filter: blur(5px) brightness(80%) opacity(.8);
+			}
+		}
+		.flecha {
+			position: relative;
+			margin: 50px auto!important;
+			width: 0;
+			height: 0;
+			border-top: 90px solid transparent!important;
+			border-right: 90px solid #FFC000!important;
+			transform: rotate(10deg);
+			box-shadow: 0px 0px 10px rgba(255, 220, 0, .8);
+		}
+		.flecha:after {
+			content: "";
+			position: absolute;
+			border: 0 solid transparent;
+			border-top: 30px solid #FFC000!important;
+			border-radius: 200px 0 0 0!important;
+			top: -119px;
+			left: -98px;
+			width: 120px;
+			height: 120px;
+			transform: rotate(45deg);
+			
+		}
+
+		.drop-shadow {
+			box-shadow: unset;
+			filter: drop-shadow(0px 0px 10px rgba(255, 220, 0, .8));
+		}
+
+		.tiktok {
+			position: relative;
+			width: 37px;
+			height: 218px;
+			margin: 30px auto!important;
+			z-index: 1;
+			background: #fff;
+			filter:drop-shadow(-10px -10px 0 #24f6f0) contrast(150%) brightness(110%);
+			box-shadow: 11.6px 10px 0 0 #fe2d52;
+			z-index: 10;
+			animation: TikTokmove 5s infinite ease-in;
+		}
+		.tiktok::before {
+			content: "";
+			position: absolute;
+			width: 100px;
+			height: 100px;
+			border: 37px solid #fff;
+			border-top: 37px solid transparent;
+			border-radius: 50%;
+			top: 123px;
+			left: -137px;
+			transform: rotate(45deg);
+			filter: drop-shadow(16px 0px 0 #fe2d52);
+		}
+    
+    .tiktok::after {
+			content: "";
+			position: absolute;
+			width: 140px;
+			height: 140px;
+			border: 30px solid #fff;
+			border-right: 30px solid transparent;
+			border-top: 30px solid transparent;
+			border-left: 30px solid transparent;
+			top: -100px;
+			right: -172px;
+			border-radius: 100%;
+			transform: rotate(45deg);
+			z-index: -10;
+			filter:drop-shadow(14px 0 0 #fe2d52);
+		}
+
+		@keyframes TikTokmove {
+			4% {
+				transform: skewX(7deg) translate(-30px);
+			}
+			7% {
+				transform: skewX(-6deg) translate(18px);
+			}
+			9% {
+				transform: skewX(5deg) translate(-8px);
+			}
+			10% {
+				transform: skewX(-4deg)translate(6px);
+			}
+			11% {
+				transform: skewX(3deg)translate(-4px);
+			}
+			12% {
+				transform: skewX(-2deg) translate(2px);
+			}
+			13% {
+				transform: skewX(1deg) translate(0px);
+				filter:drop-shadow(-10px -10px 0 #24f6f0) contrast(120%) brightness(110%) blur(3px);
+			}
+			30% {
+				filter:drop-shadow(-10px -10px 0 #24f6f0) contrast(150%) brightness(120%) blur(0px);
+			}
+		}
+		.chamfer {
+			position: relative;
+			margin: 50px auto!important;
+			width: 20vw;
+			height: 8vw;
+			border-radius: 1vmin;
+			overflow: hidden;
+			line-height: 8vw;
+			color: #fff;
+			text-align: center;
+		}
+		.chamfer::before {
+			position: absolute;
+			content: "";
+			top: -2vw;
+			left: -2vw;
+			width: 4vw;
+			height: 4vw;
+			border-radius: 50%;
+			box-shadow: 0 0 0 25vw #e91e63; 
+			z-index: -1;
+			/* animation: shadowmove 10s infinite; */
+		}
+
+		.chamfer:hover::before {
+			animation: shadowmove 10s infinite;
+		}
+
+		@keyframes shadowmove {
+			0%{
+				background: #e91e63; 
+				box-shadow: 0 0 0 0 #e91e63; 
+			}
+			
+			10% {
+				background: transparent; 
+				box-shadow: 0 0 0 0 #e91e63; 
+			}
+			
+			50% {
+				background: transparent; 
+				box-shadow: 0 0 0 25vw #e91e63; 
+			}
+		}
+
+		.g-first-page {
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 180vw;
+			height: 180vh;
+			background: repeating-radial-gradient(circle at 100% 100%, #fff 0%, #fff 130px, #000 130px, #000 260px);
+			z-index: -1;
+
+		}
+		.title-h1 {
+			color: #fff!important;
+			font-size: 64px!important;
+			mix-blend-mode: difference;
+		}
+		.title-h2 {
+			color: #fff!important;
+			font-size: 42px!important;
+			mix-blend-mode: difference;
+		}
+
+		.reveal .slides > section:first-child {
+			top: 38%!important;
+		}
+		.g-last-title {
+			padding: 40px;
+			font-size: 100px!important;
+			font-weight: bold;
+			background: linear-gradient(30deg, deeppink, #ffcc00);
+			background-clip: text;
+			-webkit-background-clip: text;
+			color: transparent;
+			animation: colorChange 3s infinite alternate linear
+			;
+		}
+
+		@keyframes colorChange {
+			100% {
+				filter: hue-rotate(360deg);
+			}
+		}
+		.g-linear-gradient {
+			margin: 50px auto!important;
+			width: 400px;
+			height: 50px;
+			background: linear-gradient(45deg, #fff, #ffcc00);
+		}
+		.g-linear-gradient-2 {
+			margin: 50px auto!important;
+			width: 400px;
+			height: 50px;
+			background: linear-gradient(45deg, #fff 50%, #ffcc00 50%);
+		}
+		.g-linear-gradient-3 {
+			margin: 50px auto!important;
+			width: 400px;
+			height: 50px;
+			background: linear-gradient(45deg, #fff 33%, transparent 33%, transparent 66%, #ffcc00 66%);
+		}
+		.g-linear-gradient-4 {
+			margin: 50px auto!important;
+			width: 400px;
+			height: 50px;
+			background: repeating-linear-gradient(45deg, #ffcc00, #ffcc00
+10px, transparent 11px, transparent 19px, #ffcc00 20px);
+		}
+		.g-linear-gradient-box {
+			margin: 50px auto!important;
+			display: flex;
+			flex-wrap: normal;
+			flex-direction: row;
+			justify-content: space-around;
+		}
+		.g-linear-gradient-5 {
+			width: 80px;
+			height: 80px;
+			border: 2px solid #fff!important;
+			position: relative;
+			/* overflow: hidden; */
+		}
+		.g-linear-gradient-5::before {
+			content: "";
+			position: absolute;
+			top: -100%;
+			left: -100%;
+			bottom: -100%;
+			right: -100%;
+			background: linear-gradient(45deg,  #ffc700 0%, #e91e1e 50%, #6f27b0 100%);
+			background-size: 100% 100%;
+			animation: bgposition 8s infinite linear alternate;
+			z-index: -1;
+		}
+		.overflow {
+			overflow: hidden;
+		}
+			
+		@keyframes bgposition {
+			0% {
+				transform: translate(30%, 30%);
+			}
+			25% {
+				transform: translate(30%, -30%);
+			}
+			50% {
+				transform: translate(-30%, -30%);
+			}
+			75% {
+				transform: translate(-30%, 30%);
+			}
+			100% {
+				transform: translate(30%, 30%);
+			}
+		}
+		.g-linear-gradient-6 {
+			position: relative;
+			width: 400px;
+			height: 30px;
+			margin: auto;
+			border-radius:20px;
+			background: #9b9dad;
+		}
+		.g-linear-gradient-6::before {
+			position: absolute;
+			content: "";
+			top: 0;
+			left: 0;
+			width: 400px;
+			height: 85px;
+			background: repeating-linear-gradient(45deg, #ffcc00, #ffcc00
+	10px, transparent 11px, transparent 19px, #ffcc00 20px);
+			background-position: 0 0;
+			background-repeat: no-repeat;
+			animation: barMove 1s linear infinite;
+		}
+		@keyframes barMove {
+			from { background-position: 0 0; }
+			to { background-position: 0 -56px; }
+		}
+		.g-linear-gradient-7 {
+			position: relative;
+			width: 300px;
+			height: 180px;
+			margin: auto!important;
+			background:
+				linear-gradient(135deg, transparent 15px, #ffcc00 0)
+				top left,
+				linear-gradient(-135deg, transparent 15px, #ffcc00 0)
+				top right,
+				linear-gradient(-45deg, transparent 15px, #ffcc00 0)
+				bottom right,
+				linear-gradient(45deg, transparent 15px, #ffcc00 0)
+				bottom left;
+				background-size: 60% 60%;
+				background-repeat: no-repeat;
+		}
+
+		div.g-linear-gradient-8 {
+			position: relative;
+			width: 400px;
+			height: 160px;
+			margin: 50px auto!important;
+			background-image: 
+				radial-gradient(circle at 1px 8px, transparent 6px, #ffcc00 6px, #ffcc00 0px),
+				radial-gradient(circle at 199px 8px, transparent 6px, #ffcc00 6px, #ffcc00 0px);
+			background-size: 200px 18px;
+			background-position: 0 0, 201px 0;
+			background-repeat-x: no-repeat;
+			font-size: 100px;
+			color: #fff;
+			font-weight: bold;
+			line-height: 160px;
+			padding-left: 60px;
+			box-sizing: border-box;
+			cursor: pointer;
+			text-align: initial;
+		}
+		.g-linear-gradient-8::before {
+			position: absolute;
+			content: "";
+			left: 240px;
+			top: 0;
+			bottom : 0;
+			width: 0;
+			border-left: 2px dashed rgb(12, 9, 46);
+		}
+		.g-linear-gradient-8::after {
+			position: absolute;
+			content: "立即领取";
+			font-size: 30px;
+			width: 70px;
+			top: 50%;
+			right: 2%;
+			transform: translate(-50%, -50%);
+			line-height: 40px;
+			letter-spacing: 5px;
+		}
+		div.gradient-wave {
+			position: relative;
+			margin: 50px auto;
+			width: 100px;
+			height: 24px;
+			font-size: 14px;
+			text-decoration: none;
+			cursor:pointer;
+			transform: scale(3);
+		}
+		.gradient-wave::before {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: radial-gradient(circle at 10px -7px, transparent 8px, deeppink 8px, deeppink 9px, transparent 9px) repeat-x;
+			background-size: 20px 20px;
+			background-position: -10px calc(100% + 16px); 
+
+		}
+		.gradient-wave:hover::before {
+			animation: moveTop 2s infinite alternate linear;
+		}
+		.gradient-wave::after {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: radial-gradient(circle at 10px 27px, transparent 8px, #ffcc00 8px, #ffcc00 9px, transparent 9px) repeat-x;
+			background-size: 20px 20px;
+			background-position: 0 calc(100% - 4px); 
+		}
+
+		.gradient-wave:hover::after {
+			animation: moveBottom 2s infinite alternate linear;
+		}
+		
+		div.flow-wave {
+			width: 100px;
+			font-size: 18px;
+			transform: scale(3);
+			text-decoration: none;
+			margin: 20px auto;
+			background: radial-gradient(circle at 10px -7px, transparent 8px, currentColor 8px, currentColor 9px, transparent 9px) repeat-x,
+				radial-gradient(circle at 10px 27px, transparent 8px, currentColor 8px, currentColor 9px, transparent 9px) repeat-x;
+			background-size: 20px 20px;
+			background-position: -10px calc(100% + 16px), 0 calc(100% - 4px);
+		}
+
+		.flow-wave {
+			padding: 5px 0;
+		}
+		.flow-wave:hover,
+		.flow-wave:focus {
+			background: radial-gradient(circle at 10px -7px, transparent 8px, currentColor 8px, currentColor 9px, transparent 9px) repeat-x,
+				radial-gradient(circle at 10px 27px, transparent 8px, currentColor 8px, currentColor 9px, transparent 9px) repeat-x;
+			background-size: 20px 20px;
+			background-position: -10px calc(100% + 16px), 0 calc(100% - 4px);
+			animation: waveFlow 1s infinite linear;
+		}
+		@keyframes waveFlow {
+			from { background-position-x: -10px, 0; }
+			to { background-position-x: -30px, -20px; }
+		}
+
+		@keyframes moveTop {
+			100% {
+				bottom: -5px;
+			}
+		}
+
+		@keyframes moveBottom {
+			100% {
+				bottom: 5px;
+			}
+		}
+
+		div.g-conic {
+			width: 200px;
+			height: 200px;
+			margin: 50px auto;
+			background: conic-gradient(deeppink, yellowgreen);
+		}
+		div.g-conic-4 {
+			position: relative;
+			margin: 50px auto;
+			display: flex;
+			justify-content: center;
+		}
+		
+		:root {
+		--color1: #332e6d;
+		--color2: #54e5ea;
+		--color3: #c252f2;
+		}
+
+		.circle {
+			--scale: 1;
+			width: 300px;
+			height: 300px;
+			margin: 20px;
+			border-radius: 50%;
+			background: conic-gradient(from 20deg, var(--color2) 40deg, var(--color2) 40deg, var(--color1) 120deg);
+			position: relative;
+			animation: rotate 2000ms ease-in-out infinite;
+		}
+		.circle::after, .circle::before {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			content: '';
+			display: block;
+			border-radius: 50%;
+			mix-blend-mode: color-dodge;
+			background: conic-gradient(from 20deg, var(--color3) 40deg, var(--color2) 40deg, var(--color1) 120deg);
+		}
+		.circle::before {
+			--scale: 0.8;
+			transform: scale(var(--scale));
+			animation: rotate 2500ms ease-in-out infinite;
+		}
+		.circle::after {
+			--scale: 0.6;
+			transform: scale(var(--scale));
+			animation: rotate 3000ms ease-in-out infinite;
+		}
+
+		.circle--multiply::before, .circle--multiply::after {
+			mix-blend-mode: multiply;
+		}
+
+		p.small {
+			font-size: 14px;
+			color: #301741;
+		}
+
+		@keyframes rotate {
+			0% {
+				transform: rotate(0deg) scale(var(--scale));
+			}
+			100% {
+				transform: rotate(360deg) scale(var(--scale));
+			}
+		}
+
+		div.g-btn-graidient {
+			width: 100px;
+			font-size: 1em;
+			padding: 15px 25px;
+			margin: 30px auto;
+			-webkit-appearance: none;
+			appearance: none;
+			background-color: #ff0081;
+			color: #fff;
+			border-radius: 4px;
+			border: none;
+			cursor: pointer;
+			position: relative;
+			transition: transform ease-in 0.1s, box-shadow ease-in 0.25s;
+			box-shadow: 0 2px 25px rgba(255, 0, 130, 0.5);
+		}
+		div.g-conic-2 {
+			width: 200px;
+			height: 200px;
+			margin: 50px auto;
+			background: conic-gradient(red, #ff4d00, #ff9900, #ffe600, #ccff00, #80ff00, #33ff00, #00ff1a, #00ff66, #00ffb3, cyan, #00b3ff, #0066ff, #001aff, #3300ff, #8000ff, #cc00ff, #ff00e6, #ff0099, #ff004d, red);
+  			border-radius: 50%;
+		}
+		div.g-conic-3 {
+			position: relative;
+			margin: 50px auto;
+			width: 400px;
+			height: 400px;
+			border-radius: 50%;
+			background: conic-gradient(
+				#f1462c 0%,
+				#fc5d2c 12.4%,
+				transparent 12.5%,
+				transparent 12.5%,
+				#fc5d2c 12.5%,
+				#fba73e 24.9%,
+				transparent 24.9%,
+				transparent 25%,
+				#fba73e 25%,
+				#e0fa4e 37.4%,
+				transparent 37.4%,
+				transparent 37.5%,
+				#e0fa4e 37.5%,
+				#12dd7e 49.9%,
+				transparent 49.9%,
+				transparent 50%,
+				#12dd7e 50%,
+				#0a6e3f 62.4%,
+				transparent 62.4%,
+				transparent 62.5%
+			);
+			transform: rotate(-112.5deg);
+			transform-origin: 50% 50%;
+		}
+		.g-conic-3::before {
+			content: "";
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 370px;
+			height: 370px;
+			border-radius: 50%;
+		}
+		.g-conic-3::after {
+			content: "";
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 320px;
+			height: 320px;
+			border-radius: 50%;
+			background: radial-gradient(
+					transparent 0%,
+					transparent 25%,
+					transparent 25%,
+					transparent 100%
+				),
+				conic-gradient(
+					#f1462c 0 12.5%,
+					#fba73e 0 25%,
+					#e0fa4e 0 37.5%,
+					#12dd7e 0 50%,
+					#0a6e3f 0 62.5%,
+					transparent 0 100%
+				);
+		}
+		.g-conic-3 .point {
+			position: absolute;
+			width: 30px;
+			height: 30px;
+			transform: translate(-50%, -50%);
+			left: 50%;
+			top: 50%;
+			background: radial-gradient(#467dc6 0%, #a4c6f3 100%);
+			border-radius: 50%;
+			z-index: 999;
+		}
+		.g-conic-3 .point::before {
+			content: "";
+			position: absolute;
+			width: 5px;
+			height: 350px;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%) rotate(0);
+			border-radius: 100% 100% 5% 5%;
+			background: linear-gradient(
+				180deg,
+				#9bc7f6 0,
+				#467dc6 50%,
+				transparent 50%,
+				transparent 100%
+			);
+			animation: pointRotate 3s cubic-bezier(.93, 1.32, .89, 1.15) infinite;
+		}
+
+		@keyframes pointRotate {
+			50% {
+				transform: translate(-50%, -50%) rotate(150deg);
+			}
+			100% {
+				transform: translate(-50%, -50%) rotate(150deg);
+			}
+		}
+
+		.g-btn-graidient:focus {
+			outline: 0;
+		}
+
+		.g-btn-graidient:before, .g-btn-graidient:after{
+			position: absolute;
+			content: '';
+			display: block;
+			width: 140%;
+			height: 100%;
+			left: -20%;
+			z-index: -1000;
+			transition: all ease-in-out 0.5s;
+			background-repeat: no-repeat;
+		}
+
+		.g-btn-graidient:before{
+			display: none;
+			top: -75%;
+			background-image:  
+				radial-gradient(circle, #ff0081 20%, transparent 20%),
+				radial-gradient(circle,  transparent 20%, #ff0081 20%, transparent 30%),
+				radial-gradient(circle, #ff0081 20%, transparent 20%), 
+				radial-gradient(circle, #ff0081 20%, transparent 20%),
+				radial-gradient(circle,  transparent 10%, #ff0081 15%, transparent 20%),
+				radial-gradient(circle, #ff0081 20%, transparent 20%),
+				radial-gradient(circle, #ff0081 20%, transparent 20%),
+				radial-gradient(circle, #ff0081 20%, transparent 20%),
+				radial-gradient(circle, #ff0081 20%, transparent 20%);
+			background-size: 10% 10%, 20% 20%, 15% 15%, 20% 20%, 18% 18%, 10% 10%, 15% 15%, 10% 10%, 18% 18%;
+		}
+
+		.g-btn-graidient:after{
+			display: none;
+			bottom: -75%;
+			background-image:  
+				radial-gradient(circle, #ff0081 20%, transparent 20%), 
+				radial-gradient(circle, #ff0081 20%, transparent 20%),
+				radial-gradient(circle,  transparent 10%, #ff0081 15%, transparent 20%),
+				radial-gradient(circle, #ff0081 20%, transparent 20%),
+				radial-gradient(circle, #ff0081 20%, transparent 20%),
+				radial-gradient(circle, #ff0081 20%, transparent 20%),
+				radial-gradient(circle, #ff0081 20%, transparent 20%);
+			background-size: 15% 15%, 20% 20%, 18% 18%, 20% 20%, 15% 15%, 10% 10%, 20% 20%;
+		}
+
+		.g-btn-graidient:active{
+			transform: scale(0.9);
+			background-color: darken(#ff0081, 5%);
+			box-shadow: 0 2px 25px rgba(255, 0, 130, 0.2);
+		}
+
+		.g-btn-graidient.animate:before {	
+			display: block;
+			animation: topBubbles ease-in-out 0.75s forwards;
+		}
+		.g-btn-graidient.animate:after{
+			display: block;
+			animation: bottomBubbles ease-in-out 0.75s forwards;
+		}
+		@keyframes topBubbles {
+			0%{
+				background-position: 5% 90%, 10% 90%, 10% 90%, 15% 90%, 25% 90%, 25% 90%, 40% 90%, 55% 90%, 70% 90%;
+			}
+			50% {
+				background-position: 0% 80%, 0% 20%, 10% 40%, 20% 0%, 30% 30%, 22% 50%, 50% 50%, 65% 20%, 90% 30%;}
+			100% {
+				background-position: 0% 70%, 0% 10%, 10% 30%, 20% -10%, 30% 20%, 22% 40%, 50% 40%, 65% 10%, 90% 20%;
+				background-size: 0% 0%, 0% 0%,  0% 0%,  0% 0%,  0% 0%,  0% 0%;
+			}
+		}
+
+		@keyframes bottomBubbles {
+			0%{
+				background-position: 10% -10%, 30% 10%, 55% -10%, 70% -10%, 85% -10%, 70% -10%, 70% 0%;
+			}
+			50% {
+				background-position: 0% 80%, 20% 80%, 45% 60%, 60% 100%, 75% 70%, 95% 60%, 105% 0%;}
+			100% {
+				background-position: 0% 90%, 20% 90%, 45% 70%, 60% 110%, 75% 80%, 95% 70%, 110% 10%;
+				background-size: 0% 0%, 0% 0%,  0% 0%,  0% 0%,  0% 0%,  0% 0%;
+			}
+		}
+		div.g-mix-diff {
+			position: absolute;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			top: 0;
+			height: 50vh;
+			background: linear-gradient(45deg, #fff 50%, #000 50%);
+		}
+
+		.g-mix-diff p {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			font-size: 24px;
+			color: #fff;
+			mix-blend-mode: difference;
+			
+		}
+		.g-mix-diff:hover p {
+			animation: move 10s infinite linear alternate;
+		}
+		@keyframes move {
+			0% {
+				transform: translate(-120%, -50%);
+			}
+			100% {
+				transform: translate(20%, -50%);
+			}
+		}
+		div.g-mix-tiktok {
+			position: relative;
+			width: 200px;
+			height: 400px;
+			margin: 20px auto;
+			filter: contrast(150%) brightness(110%);
+		}
+		.j {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 47px;
+			height: 218px;
+			z-index: 1;
+			background: #24f6f0;
+		}
+		.j::before {
+			content: "";
+			position: absolute;
+			width: 100px;
+			height: 100px;
+			border: 47px solid #24f6f0;
+			border-top: 47px solid transparent;
+			border-radius: 50%;
+			top: 120px;
+			left: -147px;
+			transform: rotate(45deg);
+		}
+			
+		.j::after {
+			content: "";
+			position: absolute;
+			width: 140px;
+			height: 140px;
+			border: 40px solid #24f6f0;
+			border-right: 40px solid transparent;
+			border-top: 40px solid transparent;
+			border-left: 40px solid transparent;
+			top: -110px;
+			right: -183px;
+			border-radius: 100%;
+			transform: rotate(45deg);
+			z-index: -10;
+		}
+		
+		.j:last-child {
+			left: 10px;
+			top: 10px;
+			background: #fe2d52;
+			z-index: 100;
+			mix-blend-mode: lighten;
+			animation: moveLeft 10s infinite;
+		}
+			
+		.j:last-child::before {
+			border: 47px solid #fe2d52;
+			border-top: 47px solid transparent;
+
+		}
+		.j:last-child::after {
+			border: 40px solid #fe2d52;
+			border-right: 40px solid transparent;
+			border-top: 40px solid transparent;
+			border-left: 40px solid transparent;
+		}
+		
+		@keyframes moveLeft {
+			0% {
+				transform: translate(200px);
+			}
+			50% {
+				transform: translate(0px);
+			}
+			100% {
+				transform: translate(0px);
+			}
+		}
+
+		div.g-gradient-bg {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 100vw;
+			height: 140vh;
+			background: linear-gradient(30deg, #ffcc00, deeppink, #9c27b0);
+			animation: hueRotate 20s infinite alternate;
+			background-color: white;
+			z-index: -1;
+		}
+		@keyframes hueRotate {
+			100% {
+				filter: hue-rotate(360deg);
+			}
+		}
+
+		div.g-mix {
+			position: relative;
+			width: 200px;
+			height: 200px;
+			margin: -300px auto;
+			filter: contrast(15);
+			background: #000;
+			padding: 350px;
+			z-index: -1;
+		}
+		.ball {
+			position: absolute;
+			width: 200px;
+			height: 200px;
+			border-radius: 50%;
+			background-color: #ff3c41;
+			filter: blur(8px);
+		}
+		.box {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%) rotate(0);
+			background-color: #ff3c41;
+			border-radius: 50%;
+			width: 100px;
+			height: 100px;
+			animation: turn 5s linear infinite;
+			transform-origin: -100% center;
+			filter: blur(8px);
+		}
+
+		@keyframes turn {
+			100% {
+				transform: translate(-50%, -50%) rotate(360deg);
+			}
+		}
+		p.dot {
+			position: relative;
+			color: #fff;
+			font-size: 36px;
+			line-height: 36px;
+			height: 64px;
+		}
+		.dot::after {
+			content: "加载中";
+			position: absolute;
+			top: 0%;
+			left: 40%;
+			animation: dot 3s infinite steps(3, start);
+			line-height: 28px;
+		}
+
+		@keyframes dot {
+			33.33% {
+				content: "加载中.";
+			}
+			66.67% {
+				content: "加载中..";
+			}
+			100% {
+				content: "加载中...";
+			}
+		}
+		div.g-border-1,
+		div.g-border-2{
+			width: 300px;
+			height: 300px;
+			line-height: 300px;
+			text-align: center;
+			border-radius: 45% 45% 47% 46%;
+			background: deeppink;
+			margin: 50px auto;
+			color: #fff;
+			font-size: 18px;
+			white-space: nowrap;
+		}
+		div.g-border-2 {
+			animation: waveRotate 5s infinite linear;
+		}
+		@keyframes waveRotate {
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+		h2.g-border-3 {
+			color: #333;
+		}
+		h2.g-border-3:before, 
+		h2.g-border-3:after {
+			content: "";
+			position: absolute;
+			left: 50%;
+			min-width: 300vw;
+			min-height: 300vw;
+			background-color: #fff;
+			animation-name: waveRotate2;
+			animation-iteration-count: infinite;
+			animation-timing-function: linear;
+			z-index: -1;
+		}
+		h2.g-border-3:before {
+			bottom: -10vh;
+			border-radius: 45%;
+			animation-duration: 10s;
+		}
+
+		h2.g-border-3:after {
+			bottom: -15vh;
+			opacity: .5;
+			border-radius: 47%;
+			animation-duration: 10s;
+		}
+		@keyframes waveRotate2 {
+			0% {
+				transform: translate(-50%, 0) rotateZ(0deg);
+			}
+			50% {
+				transform: translate(-50%, -2%) rotateZ(180deg);
+			}
+			100% {
+				transform: translate(-50%, 0%) rotateZ(360deg);
+			}
+		}
+		iframe.iframe-all-screen {
+			width: 100vw!important;
+			height: 100vh;
+			top: 50%;
+			position: fixed;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			max-width: unset;
+			max-height: unset;
+			z-index: -1;
+		}
+
+		.g-button-relief.g-button-relief {
+			width: 600px;
+			height: 200px;
+			line-height:200px;
+			margin: auto;
+			margin-top: 60px;
+			text-align: center;
+			border-radius: 20px;
+			font-size: 100px;
+			text-align: center;
+			box-shadow: 5px 5px 9px rgb(0 0 0 / 40%), -5px -5px 9px rgb(58 127 181);
+			cursor: pointer;
+			user-select: none;
+			transition: .2s all;
+			color: #2b5e87;
+			background: #2b5e87;
+			text-shadow: 1.5px 1.5px 1.5px #000, 
+        -1.5px -1.5px 1.5px #fff;
+		}
+		.g-button-relief:active {
+			box-shadow:
+				0 0 0 rgb(0 0 0 / 40%), 
+				0 0 0 rgb(58 127 181),
+				inset -5px -5px 9px rgb(58 127 181),
+				inset 5px 5px 9px rgb(0 0 0 / 40%);
+			text-shadow: 1.5px 1.5px 1.5px #fff, 
+					-1.5px -1.5px 1.5px #000;
+		}
+
+		.g-button-unregular-border.g-button-unregular-border {
+			position: relative;
+			margin: 50px auto;
+			width: 200px;
+			height: 80px;
+			filter: 
+        drop-shadow(0px 0px .5px #fff)
+        drop-shadow(0px 0px .5px #fff)
+        drop-shadow(0px 0px .5px #fff);
+		}
+		.g-button-unregular-border::after {
+			content: "";
+			position: absolute;
+			inset: 0;
+			clip-path: polygon(85% 0%, 100% 50%, 85% 100%, 0% 100%, 0% 0%);
+			background: #f44336;
+		}
+
+		.g-bg-svg-filter.g-bg-svg-filter {
+			margin: 50px auto;
+			width: 400px;
+			height: 200px;
+			display: flex;
+		}
+		.g-bg-svg-filter > div { 
+			width: 100px;
+			height: 100px;
+			background: #fff;
+			margin: auto;
+		}
+		.cssFilter {
+    	filter: blur(5px);
+		}
+		.svgFilter{
+			filter: url(#blur);
+		}
+		</style>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<!-- Slides are separated by newline + three dashes + newline, vertical slides identical but two dashes -->
+				<section data-markdown data-separator="^\n---\n$" data-separator-vertical="^\n--\n$">
+					<script type="text/template">
+
+<p class="title-h1"> CSS 创意构想 </p>
+<p class="title-h2"> Coco Qiao </p>
+<div class="g-first-page"></div>
+
+---
+
+## 自我介绍
+
++ 7年互联网经验，曾任职于**欢聚时代**，**腾讯**
++ 目前任职于某一线电商，负责前端技术管理
++ 在多个技术论坛，发表过**超三百篇**原创技术文章，全网浏览量超过 **1000W**
++ 活跃于开源社区，个人 Github 开源项目超 **3W** 个 Stars，同时个人 Github followers 超 **7200** 人，中国区前 **50** 名
+
+---
+
++ 布局
++ 阴影
++ 渐变
++ 混合模式
++ 滤镜
++ SVG 滤镜
++ 伪元素
++ 波浪效果
++ 滚动视差
++ 3D
+
+---
+
+## 布局
+
+
+--
+
+水平垂直居中？最快的水平垂直居中方法是什么？
+
+
+--
+
+
+大部分人都不太关注的 Grid 布局：
+
+```HTML
+<div class="g-container">
+    <div class="g-box"></div>
+</div>
+```
+```CSS
+.g-container {
+    display: grid;
+	place-content: center;
+}
+```
+
+--
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="Grid Template" src="https://codepen.io/Chokcoco/embed/rNKjLrY?default-tab=css%2Cresult" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href="https://codepen.io/Chokcoco/pen/rNKjLrY">
+	Grid Template</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+	on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+巧用自动 margin
+```HTML
+<div class="g-container">
+    <div class="g-box"></div>
+</div>
+```
+```CSS
+.g-container {
+    display: flex;
+}
+
+.g-box {
+    margin: auto;
+}
+```
+
+--
+
+在 flex 格式化上下文中，设置了 margin: auto 的元素，在通过 justify-content 和 align-self 进行对齐之前，任何正处于空闲的空间都会分配到该方向的自动 margin 中去
+
+<iframe height="303" style="width: 100%;" scrolling="no" title="最便捷的垂直居中方式" src="https://codepen.io/Chokcoco/embed/GarPev?height=303&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/GarPev'>最便捷的垂直居中方式</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+--
+
+<div class="bgMargin"></div>
+```
+<ul class="g-nav">
+    <li>导航A</li>
+    <li>导航B</li>
+    <li>导航C</li>
+    <li>导航D</li>
+    <li class="g-login">登陆</li>
+    <li>注册</li>
+</ul>
+```
+
+--
+
+```CSS
+.g-nav {
+    display: flex;
+}
+
+.g-login {
+    margin-left: auto;
+}
+```
+
+
+--
+
+<div class="bgMarginFooter"></div>
+
+
+--
+
+```HTML
+<div class="g-container">
+    <div class="g-real-box">
+        ...
+    </div>
+    <div class="g-footer"></div>
+</div>
+```
+```CSS
+.g-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.g-footer {
+    margin-top: auto;
+    flex-shrink: 0;
+    height: 30px;
+    background: deeppink;
+}
+```
+
+--
+
+如何实现平行四边形布局效果?
+
+transform？ 、叠加三角形？
+
+<div class="polygon"></div>
+
+
+--
+
+如果图形内部还有文字，需要正常排布，transform 、叠加三角形都不可行
+
+<div class="polygon2">
+    <span class="left"></span>
+    <span class="right"></span>
+    <p> 1. shape-outside 定义了一个可以是非矩形的形状，相邻的内联内容应围绕该形状进行排版。<br/>
+    2. shape-outside 属性指定使用下面列表的值来定义浮动元素的浮动区域。这个浮动区域决定了行内内容（浮动元素）所包裹的形状。<br/>
+	3. clip-path CSS 属性可以创建一个只有元素的部分区域可以显示的剪切区域。<br/>
+	4. Lorem ipsum dolor sit amet consectetur adipisicing elit. <br/> 
+	5. Lorem ipsum dolor sit amet consectetur adipisicing elit.<br/>
+	6. Lorem ipsum dolor sit amet consectetur adipisicing elit.<br/>
+    </p>
+</div>
+
+
+--
+
+
++ **shape-outside** 定义了一个可以是非矩形的形状，相邻的内联内容应围绕该形状进行排版
+
+<iframe height="500" style="width: 100%;" scrolling="no" title="shape-outside" src="http://codepen.io/Chokcoco/embed/XQWBeX/?height=265&theme-id=1&default-tab=css,result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='http://codepen.io/Chokcoco/pen/XQWBeX/'>shape-outside</a> by Chokcoco
+	(<a href='http://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='http://codepen.io'>CodePen</a>.
+  </iframe>
+
+
+--
+
+### [Syntax](https://bennettfeely.com/clippy/)
+
+```CSS
+{
+	shape-outside: circle();
+	shape-outside: ellipse();
+	shape-outside: inset(10px 10px 10px 10px);
+	shape-outside: polygon(10px 10px, 20px 20px, 30px 30px);
+	shape-outside: path(
+		"M0.5,1 C0.5,1,0,0.7,0,0.3 A0.25,0.25,1,1,1,0.5,0.3 A0.25,0.25,1,1,1,1,0.3 C1,0.7,0.5,1,0.5,1 Z"
+	);
+	
+	shape-outside: url(image.png);
+	
+	shape-outside: linear-gradient(45deg, rgba(255, 255, 255, 0) 150px, red 150px);
+}
+```
+
+--
+
+<iframe height="420" style="width: 100%;" scrolling="no" title="shape-outside diamond" src="https://codepen.io/Chokcoco/embed/ZyWRbQ/?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/ZyWRbQ/'>shape-outside diamond</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+--
+
+### 适配 iPhone X刘海头
+<div class="iphonex"></div>
+
+
+--
+
+<iframe class="iframe-all-screen" height="400" style="width: 100%;" scrolling="no" title="Hexagon Gradient Layout 2" src="https://codepen.io/Chokcoco/embed/mdKoYQx?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/mdKoYQx">
+  Hexagon Gradient Layout 2</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+```CSS
+{
+	shape-outside: repeating-linear-gradient(
+			transparent 0,
+			transparent 80px,
+			#000 80px,
+			#000 160px
+	);
+	float: left;
+}
+```
+<iframe height="400" style="width: 100%;" scrolling="no" title="Hexagon Gradient Layout 2" src="https://codepen.io/Chokcoco/embed/mdKoYQx?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/mdKoYQx">
+  Hexagon Gradient Layout 2</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+### 图文混排
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="Dynamic shape outside using ReactJS" src="http://codepen.io/netsi1964/embed/gLvyxj/?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='http://codepen.io/netsi1964/pen/gLvyxj/'>Dynamic shape outside using ReactJS</a> by Sten Hougaard
+	(<a href='http://codepen.io/netsi1964'>@netsi1964</a>) on <a href='http://codepen.io'>CodePen</a>.
+</iframe>
+
+
+---
+
+
+## 阴影
+
+
+--
+
+
+1. 阴影分为外阴影和内阴影（inset）
+2. 阴影可以是**多重阴影**
+3. 阴影可以进行动画
+
+
+--
+
+使用阴影可以轻松得到图片本身，并且**任意改变颜色及大小**
+
+```CSS
+div {
+    width: 80px;
+	height: 80px;
+	background: #fff;
+	box-shadow: 
+		80px 80px 0 0 yellow, 
+		-80px 80px 0 10px green;
+}
+```
+
+<div class="bgShadow2"></div>
+
+
+--
+
+使用阴影模拟多重边框
+
+```CSS
+{
+  background: #fff;
+  box-shadow:  
+    0 0 0 2px red,
+    0 0 0 4px orange,
+    0 0 0 6px yellow,
+    0 0 0 8px green,
+    0 0 0 10px cyan;
+}
+```
+<div class="bgShadow9"></div>
+
+--
+
+
+<div class="bgShadowCloud"></div>
+
+
+--
+
+内阴影
+
+
+<div class="bgShadowInset"></div>
+
+--
+
+<iframe height="265" style="width: 100%;" scrolling="no" title="Crimson Crescent Loading" src="https://codepen.io/Chokcoco/embed/eYpxjdp?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/eYpxjdp'>Crimson Crescent Loading</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+--
+
+[CSSBattle](https://cssbattle.dev/play/15)
+
+<div class="bgCSSbattle"></div>
+
+--
+
+
+<div class="bgCSSbattle2"></div>
+
+
+--
+
+使用 **box-shaodw** 可以实现任意图形
+
+[img2pureDiv](http://chokcoco.github.io/demo/img2div/html/)
+
+--
+
+有的时候，CSS 的 box-shadow 无法很好去实现一些特殊阴影，可以利用一些小技巧进行模拟
+
+
+--
+
+
+
+长阴影
+
++ 借助两个伪元素的 transform: skew() 变换
++ 伪元素背景从实色到透明色的背景色变化
+
+<div class="bgLongShadow"></div>
+
+--
+
+立体投影
+
+<div class="bgSolidShadow"></div>
+<div class="bgSolidShadow2"></div>
+
+--
+
+浮雕阴影
+
++ 使用两个相反的方向，使用两组对比明显的颜色值，来实现凹凸效果
+
+<div class="g-button-relief">浮雕阴影</div>
+
+--
+
+
+彩色阴影
+
++ 借助了高斯模糊滤镜
+
+```
+{
+	filter: blur(10px) brightness(90%) opacity(.85);
+}
+```
+
+<div class="bgColorShadow"></div>
+
+
+--
+
+
+整块的阴影，使用 box-shadow ?
+
+```
+{
+	box-shadow: 0px 0px 10px rgba(255, 220, 0, .8);
+}
+```
+
+<div class="flecha"></div>
+
+--
+
+整块的阴影，使用 drop-shadow
+
+```
+{
+	filter: drop-shadow(0px 0px 10px rgba(255, 220, 0, .8));
+}
+```
+
+<div class="flecha drop-shadow"></div>
+
+
+--
+
+实现不规则边框
+
+```CSS
+{
+	filter: 
+		drop-shadow(0px 0px .5px #fff)
+		drop-shadow(0px 0px .5px #fff)
+		drop-shadow(0px 0px .5px #fff);
+}
+```
+
+<div class="g-button-unregular-border"></div>
+
+--
+
+利用 **shadow / drop-shadow** 单标签实现抖音 LOGO
+
+<div class="tiktok"></div>
+
+
+--
+
+```
+div {
+    position: relative;
+    width: 37px;
+    height: 218px;
+    background: #fff;
+    filter:drop-shadow(-10px -10px 0 #24f6f0) contrast(150%) brightness(110%);
+    box-shadow: 11.6px 10px 0 0 #fe2d52;
+    
+    &::before {
+        ....
+        filter: drop-shadow(16px 0px 0 #fe2d52);
+    }
+    
+    &::after {
+        ....
+        filter: drop-shadow(14px 0 0 #fe2d52);
+    }
+}
+```
+
+--
+
+使用阴影的扩散半径实现内切圆角
+
+<div class="chamfer"></div>
+
+
+
+---
+
+## 渐变
+
+
+
+--
+
++ 渐变分为线性渐变、径向渐变、角向渐变（圆锥渐变）
++ 渐变可以控制各种角度
++ **渐变可以是多重渐变叠加**
++ 渐变不能进行动画 (animation/transtion)
+
+--
+
+线性渐变
+
+```
+{
+	background: linear-gradient(45deg, #fff, #ffcc00);
+}
+```
+
+<div class="g-linear-gradient"></div>
+
+--
+
+合理控制颜色百分比，可以让渐变颜色变成实色
+
+```
+{
+	background: linear-gradient(45deg, #fff 50%, #ffcc00 50%);
+}
+```
+
+<div class="g-linear-gradient-2"></div>
+
+--
+
+某一段的颜色可以是透明的
+
+```
+{
+	background: linear-gradient(45deg, 
+		#fff 33%, 
+		transparent 33%, transparent 66%, 
+		#ffcc00 66%
+	);
+}
+```
+
+<div class="g-linear-gradient-3"></div>
+
+--
+
++ 可以利用 repeating-linear-gradient、repeating-radial-gradient 进行重复
++ 也可以利用 background-size 和 background-repeat 进行重复控制
+
+```
+{
+	background: repeating-linear-gradient(45deg, #ffcc00, #ffcc00
+	10px, transparent 10px, transparent 19px, #ffcc00 20px);
+}
+```
+
+<div class="g-linear-gradient-4"></div>
+
+
+--
+
+
+可以不去改变颜色本身，而是利用其它元素进行动画
+
+transform、filter、mix-blend-mode 等等
+
+<div class="g-linear-gradient-box">
+	<div class="g-linear-gradient-5"></div>
+	<div class="g-linear-gradient-5 overflow"></div>
+</div>	
+
+
+--
+
+利用透明色，实现切角
+
+```CSS
+{
+	background:
+		linear-gradient(135deg, transparent 15px, #ffcc00 0)
+		top left,
+		linear-gradient(-135deg, transparent 15px, #ffcc00 0)
+		top right,
+		linear-gradient(-45deg, transparent 15px, #ffcc00 0)
+		bottom right,
+		linear-gradient(45deg, transparent 15px, #ffcc00 0)
+		bottom left;
+	background-size: 60% 60%;
+	background-repeat: no-repeat;
+}
+```
+
+<div class="g-linear-gradient-7"></div>
+
+
+
+--
+
+利用重复线性渐变 + transform 实现进度条效果
+
+<div class="g-linear-gradient-box">
+	<div class="g-linear-gradient-6"></div>
+	<div class="g-linear-gradient-6 overflow"></div>
+</div>
+
+
+--
+
+利用重复渐变，可以巧妙的实现优惠券的边纹
+
+```css
+{
+	background-image: 
+		radial-gradient(circle at 1px 8px, transparent 6px, #ffcc00 6px, #ffcc00 0px),
+		radial-gradient(circle at 199px 8px, transparent 6px, #ffcc00 6px, #ffcc00 0px);
+	background-size: 200px 18px;
+	background-position: 0 0, 200px 0;
+	background-repeat-x: no-repeat;
+}
+```
+
+<div class="g-linear-gradient-8">50</div>
+
+
+--
+
+多种渐变的组合，还能创造出各种有意思的图形
+
+<div class="gradient-wave">渐变实现波浪</div>
+<div class="flow-wave">Hover Me</div>
+
+--
+
+愿意折腾，使用渐变实现的动画也能很酷炫
+
+使用了 **background-position** + **background-size**
+
+<div class="g-btn-graidient">Click</div>
+
+
+--
+
+角向渐变（圆锥渐变）
+
++ linear-gradient 线性渐变的方向是一条直线，可以是任何角度
++ radial-gradient 径向渐变是从圆心点以椭圆形状向外扩散
+
+
+--
+
+
+起始点是图形中心，然后以顺时针方向绕中心实现渐变效果
+
+```CSS
+{
+	background: conic-gradient(deeppink, yellowgreen);
+}
+```
+
+<div class="g-conic"></div>
+
+
+--
+
+实现颜色表盘
+
+```
+{
+	  background: conic-gradient(red, #ff4d00, #ff9900, #ffe600, #ccff00, #80ff00, #33ff00, #00ff1a, #00ff66, #00ffb3, cyan, #00b3ff, #0066ff, #001aff, #3300ff, #8000ff, #cc00ff, #ff00e6, #ff0099, #ff004d, red);
+}
+```
+
+<div class="g-conic-2"></div>
+
+
+--
+
+又或者是这种积分表盘
+
+<iframe height="320" style="width: 100%;" scrolling="no" title="Gauge (No SVG)" src="https://codepen.io/alphardex/embed/BaydVvQ?height=320&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/alphardex/pen/BaydVvQ'>Gauge (No SVG)</a> by alphardex
+	(<a href='https://codepen.io/alphardex'>@alphardex</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+--
+
+多层叠加（这个效果还用了混合模式）
+
+<div class="g-conic-4">
+	<div class="circle"></div>
+	<div class="circle circle--multiply"></div>
+</div>
+
+--
+
+利用角向渐变实现边框效果
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="Rotating border" src="https://codepen.io/Chokcoco/embed/YzGdEMZ?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/YzGdEMZ">
+  Rotating border</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="Rotating border 3" src="https://codepen.io/Chokcoco/embed/dypaobm?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/dypaobm">
+  Rotating border 3</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+---
+
+## 混合模式
+
+
+--
+
+
++ mix-blend-mode
++ background-blend-mode
+
+将两个或者多个图片/图层利用混合模式叠加在一起，产生新的效果
+
+--
+
+<div class="g-mix-diff">
+	<p>mix-blend-mode: difference</p>
+</div>
+
+--
+
+
+<iframe height="405" style="width: 100%;" scrolling="no" title="混合模式实现文字的适配展现" src="http://codepen.io/Chokcoco/embed/OGPyBB/?height=265&theme-id=1&default-tab=css,result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/OGPyBB/'>混合模式实现文字的适配展现</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+--
+
+<iframe height="320" style="width: 100%;" scrolling="no" title="mix-blend-mode:difference实现文字颜色自适应底色" src="https://codepen.io/Chokcoco/embed/EJgEzL/?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/EJgEzL/'>mix-blend-mode:difference实现文字颜色自适应底色</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+--
+
+### Syntax
+
+```CSS
+{
+	mix-blend-mode: normal;
+	mix-blend-mode: multiply;
+	mix-blend-mode: screen;
+	mix-blend-mode: overlay;
+	mix-blend-mode: darken;
+	mix-blend-mode: lighten;
+	mix-blend-mode: color-dodge;
+	mix-blend-mode: color-burn;
+	mix-blend-mode: hard-light;
+	mix-blend-mode: soft-light;
+	mix-blend-mode: difference;
+	mix-blend-mode: exclusion;
+	mix-blend-mode: hue;
+	mix-blend-mode: saturation;
+	mix-blend-mode: color;
+	mix-blend-mode: luminosity;
+
+	mix-blend-mode: initial;
+	mix-blend-mode: inherit;
+	mix-blend-mode: unset;
+}
+```
+
+--
+
+
+![](https://cloud.githubusercontent.com/assets/8554143/25795589/9c58a612-3408-11e7-8b91-eb08c831be8b.png)
+
+
+--
+
+
+使用 **background-blend-mode: lighten** 改变图片颜色
+
+<iframe height="280" style="width: 100%;" scrolling="no" title="纯色图片赋色技术尝试" src="http://codepen.io/Chokcoco/embed/rpLryX/?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/rpLryX/'>纯色图片赋色技术尝试</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+  </iframe>
+
+
+--
+
+给不规则图片/ICON上色
+
+<iframe height="220" style="width: 100%;" scrolling="no" title="bg-blend-mode &amp;&amp; hover" src="https://codepen.io/Chokcoco/embed/KZapjq?height=220&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href='https://codepen.io/Chokcoco/pen/KZapjq'>bg-blend-mode &amp;&amp; hover</a> by Chokcoco
+  (<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+<iframe height="220" style="width: 100%;" scrolling="no" title="mix-blend-mode &amp;&amp; hover" src="https://codepen.io/Chokcoco/embed/opBLKx?height=220&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href='https://codepen.io/Chokcoco/pen/opBLKx'>mix-blend-mode &amp;&amp; hover</a> by Chokcoco
+  (<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+--
+
+
+使用 **mix-blend-mode: lighten** 实现抖音 LOGO
+
+<div class="g-mix-tiktok">
+	<div class="j"></div>
+    <div class="j"></div>
+</div>
+
+
+--
+
+深入挖掘，制作一些有意思的效果，给网站增色
+
+
+--
+
+Loading
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="mix-blend-mode: screen" src="https://codepen.io/Chokcoco/embed/zwPyWj?height=300&theme-id=dark&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href='https://codepen.io/Chokcoco/pen/zwPyWj'>mix-blend-mode: screen</a> by Chokcoco
+  (<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+--
+
+<iframe class="iframe-all-screen" height="265" style="width: 100%;" scrolling="no" title="404故障效果" src="https://codepen.io/Chokcoco/embed/QWwXqra?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href='https://codepen.io/Chokcoco/pen/QWwXqra'>404故障效果</a> by Chokcoco
+  (<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+--
+
+
+混合模式 **mix-blend-mode: overlay**
+
+叠加角向渐变 **conic-gradient**
+
+<iframe class="iframe-all-screen" height="400" style="width: 100%;" scrolling="no" title="animation conic-gradient" src="https://codepen.io/Chokcoco/embed/gRRdQq?height=265&theme-id=dark&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href='https://codepen.io/Chokcoco/pen/gRRdQq'>animation conic-gradient</a> by Chokcoco
+  (<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+<p class="small">好看，但是没什么卵用</p>
+
+--
+
+混合模式 **mix-blend-mode: hard-light**
+
+配合**滤镜** & `background-clip: text` 实现的动画效果
+
+<iframe height="500" style="width: 100%;" scrolling="no" title="iKUN Animation" src="https://codepen.io/Chokcoco/embed/ZERXMOz?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/ZERXMOz">
+  iKUN Animation</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+
+---
+
+
+## 滤镜
+
+
+--
+
+
+
+<iframe height="405" style="width: 100%;" scrolling="no" title="CSS3 filter (cancle filter by hover)" src="https://codepen.io/Chokcoco/embed/wrwbvG/?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/wrwbvG/'>CSS3 filter (cancle filter by hover)</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+  </iframe>
+
+
+
+--
+
+
+```CSS
+{
+    filter: blur(5px);
+    filter: brightness(0.4);
+    filter: contrast(200%);
+	filter: drop-shadow(16px 16px 20px blue);
+	...
+
+    /* Apply multiple filters */
+    filter: contrast(175%) brightness(3%);
+}
+```
+
++ 滤镜可以叠加
++ 多个滤镜叠加，顺序不同，效果不同
+
+
+--
+
+增亮图片
+
+```CSS
+:hover {
+    filter: brightness(1.1) contrast(110%);
+}
+```
+
+<iframe height="265" style="width: 100%;" scrolling="no" title="CSS3 filter hover IMG" src="https://codepen.io/Chokcoco/embed/RLwbyr/?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/RLwbyr/'>CSS3 filter hover IMG</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+--
+
+彩色阴影
+
+```CSS
+{
+	filter: blur(10px) brightness(80%) opacity(.8);
+}
+```
+<iframe height="300" style="width: 100%;" scrolling="no" title="使用 filter:blur 生成彩色阴影" src="https://codepen.io/Chokcoco/embed/eGYYpo/?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/eGYYpo/'>使用 filter:blur 生成彩色阴影</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+--
+
+
+hue-rotate() 实现渐变背景
+
+```CSS
+div {
+	background: linear-gradient(30deg, #ffcc00, deeppink, #9c27b0,);
+	animation: hueRotate 20s infinite alternate;
+}
+
+@keyframes hueRotate {
+	100% {
+		filter: hue-rotate(360deg);
+	}
+}
+```
+
+<div class="g-gradient-bg"></div>
+
+--
+
+CSS filter 最神奇之处，滤镜融合效果
+
+<div class="g-mix">
+	<div class="ball"></div>
+	<div class="box"></div>
+</div>
+
+--
+
+
+```HTML
+<div class="g-mix">
+	<div class="g-ball ball1"></div>
+	<div class="g-ball ball2"></div>
+</div>
+```
+```CSS
+.g-mix {
+	filter: contrast(15);
+}
+.g-ball {
+	filter: blur(8px);
+}
+```
++ filter: blur()： 给图像设置高斯模糊效果。
++ filter: contrast()： 调整图像的对比度。
+
+当他们“合体”的时候，产生了奇妙的融合现象，通过对比度滤镜把高斯模糊的模糊边缘给干掉，利用高斯模糊实现融合效果
+
+
+--
+
+<iframe height="265" style="width: 100%;" scrolling="no" title="loading animation" src="https://codepen.io/Chokcoco/embed/BaaQEab?height=265&theme-id=dark&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/BaaQEab'>loading animation</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+  </iframe>
+
+--
+
+
+<iframe class="iframe-all-screen" height="320" style="width: 100%;" scrolling="no" title="Snow Scratch" src="https://codepen.io/Chokcoco/embed/yLyXqrL?height=320&theme-id=dark&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/yLyXqrL'>Snow Scratch</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+  </iframe>
+
+
+--
+
+
+<iframe class="iframe-all-screen" height="450" style="width: 100%;" scrolling="no" title="CSS Candle" src="https://codepen.io/Chokcoco/embed/jJJbmz?height=450&theme-id=dark&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/jJJbmz'>CSS Candle</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+  </iframe>
+
+--
+
+<iframe class="iframe-all-screen" height="450" style="width: 100%;" scrolling="no" title="HuaWei Battery Charging Animation" src="https://codepen.io/Chokcoco/embed/vYExwvm?height=450&theme-id=dark&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/vYExwvm'>HuaWei Battery Charging Animation</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+  </iframe>
+
+--
+
+制作高级背景动画效果
+
+<iframe class="iframe-all-screen" height="200" style="width: 100%;" scrolling="no" title="Bubble Rises" src="https://codepen.io/Chokcoco/embed/eYKXwVW?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/eYKXwVW">
+  Bubble Rises</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+毛玻璃？
+
+使用 backdrop-filter！
+
+![](https://user-images.githubusercontent.com/8554143/123500602-d8178280-d671-11eb-9d38-fe843855fefb.png)
+
+--
+
+彩色毛玻璃背景
+
+![](https://user-images.githubusercontent.com/8554143/148383905-36e2a3d9-8ffa-42f2-9e12-2d95fa6ff8dd.gif)
+
+--
+
+动画也不在话下！
+
+<iframe height="500" style="width: 100%;" scrolling="no" title="CSS-doodle Pure CSS Background Effect  2" src="https://codepen.io/Chokcoco/embed/gOGKNMm?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/gOGKNMm">
+  CSS-doodle Pure CSS Background Effect  2</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+---
+
+## SVG 滤镜
+
+--
+
++ SVG 滤镜与 CSS 滤镜类似，是 SVG 中用于创建复杂效果的一种机制。
++ SVG 有着比 CSS 滤镜更为强大的功能
+
+--
+
+语法介绍
+
+```HTML
+<div class="cssFilter"></div>
+<div class="svgFilter"></div>
+<svg>
+    <defs>
+        <filter id="blur">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" />
+        </filter>
+    </defs>
+</svg>
+```
+```CSS
+div {
+	background: #fff;
+}
+.cssFilter {
+	filter: blur(5px);
+}
+.svgFilter{
+	filter: url(#blur);
+}
+```
+
+--
+
+<div class="g-bg-svg-filter">
+	<div class="cssFilter"></div>
+	<div class="svgFilter"></div>
+</div>
+
+--
+
+以为 SVG 仅仅是这样？
+
+--
+
+### feMorphology 形态滤镜
+
+它的两个操作可以使源图形腐蚀（变薄）或扩张（加粗）。
+
++ operator：erode 腐蚀模式，dilate 为扩张模式，默认为 erode
++ radius：笔触的大小，接受一个数字，表示该模式下的效果程度，默认为 0
+
+```HTML
+<svg width="0" height="0">
+	<filter id="dilate">
+			<feMorphology in="SourceAlpha" result="DILATED" operator="dilate" radius="3"></feMorphology>
+	</filter>
+	<filter id="erode">
+			<feMorphology in="SourceAlpha" result="ERODE" operator="erode" radius="1"></feMorphology>
+	</filter>
+</svg>
+```
+
+--
+
+![](https://user-images.githubusercontent.com/8554143/111949927-83b5b180-8b1c-11eb-97ad-39269195a6e1.png)
+
+--
+
+![](https://user-images.githubusercontent.com/8554143/111952448-23c10a00-8b20-11eb-9c8c-b133e4261623.gif)
+
+
+--
+
+
+利用这个滤镜的特性，快速实现内容的马赛克化
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="SVG Pixel Filter Avator" src="https://codepen.io/Chokcoco/embed/JjZBYXK?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/JjZBYXK">
+  SVG Pixel Filter Avator</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+
+### feTurbulence 湍流滤镜
+
+该滤镜能够实现半透明的烟熏或波状图像。 通常用于实现一些特殊的纹理。
+
++ `type`：实现的滤镜的类型，可选 fractalNoise 分形噪声，或者是 turbulence 湍流噪声。
+  - fractalNoise：分形噪声更加的平滑，它产生的噪声质感更接近云雾
+  - turbulence：湍流噪声
++ `baseFrequency`： 表示噪声函数的基本频率的参数，频率越小，产生的图形越大，频率越大，产生的噪声越复杂其图形也越小越精细，通常的取值范围在 0.02 ~ 0.2
++ `numOctaves`：表示噪声函数的精细度，数值越高，产生的噪声更详细。 默认值为1
+
+[Link - feTurbulence (SVG Filter Effect)](https://apike.ca/prog_svg_filter_feTurbulence.html)
+
+--
+
+```HTML
+<svg>
+	<filter id="fractal" filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">
+		<feTurbulence id="turbulence" type="fractalNoise" baseFrequency="0.1 0.1" numOctaves="1" >
+				<animate
+					attributeName="baseFrequency"
+					from="0.1 0.1"
+					to="0.08 0.01"
+					dur="3.5s"
+					repeatCount="indefinite"/>
+		</feTurbulence>
+		<feDisplacementMap in="SourceGraphic" scale="15"></feDisplacementMap>
+	</filter>
+</svg>
+```
+
+![](https://user-images.githubusercontent.com/8554143/112721686-4730ee00-8f40-11eb-92a6-78e6f06a6804.png)
+
+--
+
+![](https://user-images.githubusercontent.com/8554143/112725701-8c5f1b00-8f54-11eb-96e7-ad5a5b83b9f3.gif)
+
+--
+
+
+<iframe class="iframe-all-screen" height="300" style="width: 100%;" scrolling="no" title="CSS + SVG Text Smoke Effect" src="https://codepen.io/Chokcoco/embed/XWYGvPO?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/XWYGvPO">
+  CSS + SVG Text Smoke Effect</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+<iframe class="iframe-all-screen" height="300" style="width: 100%;" scrolling="no" title="CSS + SVG Text Smoke Hover Effect" src="https://codepen.io/Chokcoco/embed/qBKveQW?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/qBKveQW">
+  CSS + SVG Text Smoke Hover Effect</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+---
+
+## 伪元素与伪类
+
+
+--
+
++ 区分伪元素和伪类，理解使用 : 与 :: 的异同
++ 有一些特定的标签是不支持伪元素 before 和 after 的（`<img>` 、`<input>`、`<iframe>`）
++ `::before`,`::after` 伪元素能实现的，真实子元素都可以做到。伪元素在原先的元素基础上插入额外的元素且这个元素不充当HTML的标签的行为，能很好的保持HTML结构的整洁
+
+--
+
+有了伪元素，其实任意一个元素，都近似于等于 3 个元素
+
+--
+
+
+扩大点击区域
+
+伪元素是可以代表其宿主元素来响应的鼠标交互事件
+
+```CSS
+.btn::before{
+	content:"";
+	position:absolute;
+	top:-10px;right:-10px;bottom:-10px;left:-10px;
+}
+```
+
+<iframe height="200" style="width: 100%;" scrolling="no" title="伪元素实现扩大点击区域" src="https://codepen.io/Chokcoco/embed/mgExya/?height=265&theme-id=1&default-tab=css,result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/mgExya/'>伪元素实现扩大点击区域</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+--
+
+
+<p class="dot"></p>
+```
+p::after  {
+	content: "加载中";
+	animation: dot 3s infinite steps(3, start);
+}
+@keyframes dot {
+	33.33% {
+		content: "加载中.";
+	}
+	66.67% {
+		content: "加载中..";
+	}
+	100% {
+		content: "加载中...";
+	}
+}
+```
+
+
+--
+
+埋点与统计
+
+```CSS
+.button-1:active::after {
+    content: url(./report.gif?action=click&id=button1);
+    display: none;
+}
+.button-2:active::after {
+    content: url(./report.gif?action=click&id=button2);
+    display: none;
+}
+```
+
+---
+
+## 波浪效果
+
+
+--
+
+使用下划线实现
+```CSS
+{
+	color: transparent;
+    text-decoration-line: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: deeppink;
+}
+
+```
+
+<iframe height="265" style="width: 100%;" scrolling="no" title="下划线实现波浪" src="http://codepen.io/Chokcoco/embed/YMWavM/?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/YMWavM/'>下划线实现波浪</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+--
+
+使用径向渐变实现
+
+
+<iframe height="265" style="width: 100%;" scrolling="no" title="波浪边框(优惠券边框)" src="https://codepen.io/Chokcoco/embed/MzwxBm/?height=265&theme-id=1&default-tab=css,result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/MzwxBm/'>波浪边框(优惠券边框)</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+--
+
+<iframe height="265" style="width: 100%;" scrolling="no" title="优惠券波浪造型(coupon)2" src="https://codepen.io/Chokcoco/embed/JjYwaOz?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href='https://codepen.io/Chokcoco/pen/JjYwaOz'>优惠券波浪造型(coupon)2</a> by Chokcoco
+  (<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+--
+
+
+使用 border-radius 实现
+
+<div class="g-border-1">border-radius:45% 45% 47% 46%</div>
+
+
+--
+
+旋转起来
+
+<div class="g-border-1 g-border-2"></div>
+
+--
+
+
+![](https://user-images.githubusercontent.com/8554143/28265844-61b7a690-6b24-11e7-91c7-c5b8501487ab.gif)
+
+
+--
+
+<h2 class="g-border-3">利用 border-radius 产生的不规则边放大切割产生波浪效果</h2>
+
+--
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="Pure Css Wave Loading" src="https://codepen.io/Chokcoco/embed/EXJrdB/?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/EXJrdB/'>Pure Css Wave Loading</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+--
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="Battery Animation Two" src="https://codepen.io/Chokcoco/embed/qBErGoO?height=400&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href='https://codepen.io/Chokcoco/pen/qBErGoO'>Battery Animation Two</a> by Chokcoco
+  (<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+--
+
+还有一种非常有意思的波浪生成方式。
+
+假设，我们有这样一张图：
+
+![](https://user-images.githubusercontent.com/8554143/178268916-2220ee78-799e-44bd-b07b-e91b8a55f68e.png)
+
+--
+
+同样，借助滤镜，会发生一些神奇的事情：
+
+```Css
+.g-container {
+	filter: contrast(20);
+	background-color: #fff;
+	overflow: hidden;
+}
+.g-inner {
+	background: radial-gradient(circle at 20px 0, transparent, transparent 20px, #000 21px, #000 40px);
+	background-size: 80px 100%;
+	filter: blur(10px)
+}
+```
+
+--
+
+能将锐利的直角转化成圆角
+
+![](https://user-images.githubusercontent.com/8554143/178271113-63899544-7c44-46b6-ba1c-92ab2bfca180.png)
+
+--
+
+边界的问题，可以运用 `backdrop-filter` 优化一下：
+
+```CSS
+.g-container {
+	position: relative;
+	filter: contrast(20);
+	background-color: #fff;
+	overflow: hidden;
+	
+	&::before {
+			content: "";
+			position: absolute;
+			inset: 0;
+			backdrop-filter: blur(10px);
+	}
+}
+.g-inner {
+	background: radial-gradient(circle at 20px 0, transparent, transparent 20px, #000 21px, #000 40px);
+}
+```
+
+--
+
+得到一个完美的波浪图形：
+
+![](https://user-images.githubusercontent.com/8554143/178273119-8077e4ac-d31c-4e32-b52b-6f7973f3f5a6.png)
+
+--
+
+动起来：
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="Pure CSS Wave" src="https://codepen.io/Chokcoco/embed/PoRzeav?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/PoRzeav">
+  Pure CSS Wave</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+---
+
+## 滚动视差
+
+
+--
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="Pure CSS Parallax!" src="https://codepen.io/bennettfeely/embed/GEpso/?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/bennettfeely/pen/GEpso/'>Pure CSS Parallax!</a> by Bennett Feely
+	(<a href='https://codepen.io/bennettfeely'>@bennettfeely</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+--
+
+
+![](https://image.zhangxinxu.com/image/blog/201503/css3d-edited.png)
+
+
+--
+
+父元素设置 transform-style: preserve-3d 和 perspective: 1px，子元素设置不同的 transform: translateZ
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="CSS 3D parallax" src="https://codepen.io/Chokcoco/embed/EpOeRm/?height=265&theme-id=1&default-tab=css,result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/EpOeRm/'>CSS 3D parallax</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+--
+
+<iframe class="iframe-all-screen" height="400" style="width: 100%;" scrolling="no" title="CSS 视差" src="https://codepen.io/Chokcoco/embed/PBXwdX/?height=265&theme-id=1&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href='https://codepen.io/Chokcoco/pen/PBXwdX/'>CSS 视差</a> by Chokcoco
+	(<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+---
+
+## 3D 
+
+--
+
+CSS 3D 也可以实现一些非常有意思的效果
+
+--
+
+通过立方体来入门 CSS 3D
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="Webpack logo" src="https://codepen.io/Chokcoco/embed/gOWyeXX?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/gOWyeXX">
+  Webpack logo</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+核心原理：
+
++ 掌握 `ransform-style`
++ 理解 `perspective`
+
+![](https://images2015.cnblogs.com/blog/608782/201609/608782-20160906203231144-1239156468.png)
+
+--
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="3DView2" src="https://codepen.io/Chokcoco/embed/KgwqRd?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/KgwqRd">
+  3DView2</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+3D 进度条
+
+<iframe height="500" style="width: 100%;" scrolling="no" title="Pure CSS 3D Progress Bar" src="https://codepen.io/Chokcoco/embed/gORYybM?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/gORYybM">
+  Pure CSS 3D Progress Bar</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+3D 视图下的 404
+
+<iframe class="iframe-all-screen" height="300" style="width: 100%;" scrolling="no" title="Only CSS: 404 Rolling Box" src="https://codepen.io/Chokcoco/embed/MdGYbX?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/MdGYbX">
+  Only CSS: 404 Rolling Box</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+任意多边形的无限延伸运动
+
+<iframe class="iframe-all-screen" height="300" style="width: 100%;" scrolling="no" title="Rollers! (infinitely unwrapping prisms; 3D, pure CSS)" src="https://codepen.io/Chokcoco/embed/OJErdXa?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/OJErdXa">
+  Rollers! (infinitely unwrapping prisms; 3D, pure CSS)</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+打开脑洞，这就是 CSS 的魅力
+
+<iframe class="iframe-all-screen" height="300" style="width: 100%;" scrolling="no" title="Pure CSS Galaxy  Shuttle" src="https://codepen.io/Chokcoco/embed/abWeNEV?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/abWeNEV">
+  Pure CSS Galaxy  Shuttle</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+---
+
+
+## 如何学习 CSS
+
+
+--
+
++ 多看，多写
++ 《CSS Secrets》、[CodePen](https://codepen.io/)、[CSS-Tricks](https://css-tricks.com/)
++ [CSS Battle](https://cssbattle.dev/)
++ [张鑫旭](https://www.zhangxinxu.com/wordpress/category/css/)、[大漠老师-w3cplus](https://www.w3cplus.com/)、[iCSS](https://github.com/chokcoco/iCSS)、[CSS-inspiration](https://chokcoco.github.io/CSS-Inspiration/#/)
+
+
+---
+
+<div class="g-last-title"> THANK YOU </div>
+
+<svg>
+	<defs>
+			<filter id="blur">
+					<feGaussianBlur in="SourceGraphic" stdDeviation="5" />
+			</filter>
+	</defs>
+</svg>
+      </script>
+    </section>
+  </div>
+</div>
+<script src="../lib/js/head.min.js"></script>
+<script src="../js/reveal.js"></script>
+<script>
+  window.addEventListener('click', (e) => {
+    if (e.target.className === 'g-btn-graidient') {
+      e.preventDefault;
+      //reset animation
+      e.target.classList.remove('animate');
+      
+      e.target.classList.add('animate');
+      setTimeout(function(){
+        e.target.classList.remove('animate');
+      },700);
+    }
+  });
+
+  // More info http://github.com/hakimel/reveal.js#configuration
+  Reveal.initialize({
+    history: true,
+
+    // More info https://github.com/hakimel/reveal.js#dependencies
+    dependencies: [
+      { src: '../plugin/markdown/marked.js' },
+      { src: '../plugin/markdown/markdown.js' },
+      { src: '../plugin/notes/notes.js', async: true },
+      { src: '../plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+    ]
+  });
+</script>
+</body>
+</html>
