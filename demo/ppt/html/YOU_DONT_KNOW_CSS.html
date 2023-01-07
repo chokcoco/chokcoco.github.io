@@ -1,0 +1,1557 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>你所不知道的CSS</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="../css/reveal.css">
+	<link rel="stylesheet" href="../css/theme/black.css">
+
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="../lib/css/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement('link');
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : '../css/print/paper.css';
+		document.getElementsByTagName('head')[0].appendChild(link);
+	</script>
+	<style>
+		::-webkit-scrollbar-track-piece {
+			background-color: #141414;
+		}
+
+		::-webkit-scrollbar {
+			width: 4px;
+			height: 4px;
+			cursor: pointer;
+			background-color: transparent;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background: #999;
+		}
+
+		@import url('https://fonts.googleapis.com/css2?family=Space+Mono&display=swap');
+
+		body {
+			background: linear-gradient(-135deg, #379aea, #32166a);
+			font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+		}
+		.reveal pre {
+			border-radius: .5em;
+			border: .3em solid hsl(0, 0%, 33%);
+			box-shadow: 1px 1px .5em black inset;
+			margin: .5em auto;
+			overflow: auto;
+			padding: 1em;
+			background: hsl(0, 0%, 8%);
+			font-family: 'Space Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+		}
+
+		.reveal code {
+			font-family: 'Space Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+			background: #000508;
+			border-radius: 6px;
+			padding: 0px 4px;
+			font-size: 22px;
+			color: #e91e63;
+			font-weight: bold;
+		}
+
+		.reveal pre code {
+			color: white;
+			direction: ltr;
+			font-family: 'Space Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+			text-align: left;
+			text-shadow: 0 -.1em .2em black;
+			white-space: pre;
+			background: transparent;
+		}
+
+		.reveal h1,
+		.reveal h2,
+		.reveal h3,
+		.reveal h4,
+		.reveal h5,
+		.reveal h6,
+		ul,
+		p {
+			font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+			color: #eee8d5;
+			font-weight: normal;
+
+		}
+
+		.reveal ol,
+		.reveal ul,
+		.reveal ul li,
+		.reveal p {
+			font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+			color: #fff;
+			font-size: 90%;
+			color: #ddd;
+		}
+
+		.reveal ol li,
+		.reveal ul li {
+			font-size: 28px;
+		}
+
+		strong {
+			color: #0c8;
+		}
+
+		svg {
+			width: 0;
+			left: 0;
+			position: absolute;
+		}
+		.g-thankyou {
+			width: max-content;
+			user-select: none;
+			-moz-user-select: none;
+			-webkit-user-select: none;
+			pointer-events: none;
+			padding: 0 10px;
+			width: 100%;
+    		text-align: center;
+		}
+		.g-thankyou > div {
+			font: bolder 9rem/9rem "EB Garamond";
+			font-family: 'Righteous', cursive;
+			background-image: url(https://images.unsplash.com/flagged/photo-1579268351234-073f85929562?w=200&q=80);
+			/* background-image: url(https://gimg2.baidu.com/image_search/src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20180815%2Ff26de16c9dfa40c1ba0bfe9ae81be3ee.gif&refer=http%3A%2F%2F5b0988e595225.cdn.sohucs.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1673678016&t=47dde8d78f9d5064f9a9c4764422facf); */
+			-webkit-background-clip: text;
+			color: transparent;
+			overflow: hidden;
+		}
+		.g-thankyou > :last-child {
+			--gradient: 
+				repeating-linear-gradient(
+					transparent,
+					transparent 3px,
+					white 3px,
+					white 4px
+				),
+				linear-gradient(transparent 50%, #000 80%);
+			-webkit-mask-image: var(--gradient);
+			mask-image: var(--gradient);
+			transform: rotatex(180deg) translatey(34px) skewX(30deg) translateX(-32px);
+			opacity: 1;
+			filter: blur(3px) contrast(1.5);
+		}
+		.slides > section:last-child {
+			background-color: #000;
+			box-shadow: 0 0 0 50vw #000;
+		}
+		.g-css-content {
+			display: block;
+			border-radius: 0.5em;
+			border: 0.3em solid hsl(0, 0%, 33%);
+			box-shadow: 1px 1px 0.5em black inset;
+			overflow: auto;
+			padding: 1em;
+			background: hsl(0, 0%, 8%);
+			font-size: 22px;
+			padding: 0 10px 10px;
+			white-space: break-spaces;
+			text-align: initial;
+		}
+
+		/**/
+		css-doodle {
+			--color: @p(#51eaea, #fffde1, #ff9d76, #FB3569);
+
+			--rule: (:doodle {
+					@grid: 30x1 / 18vmin;
+					--deg: @p(-180deg, 180deg);
+				}
+
+				:container {
+					perspective: 100vmin;
+				}
+
+				:after, :before {
+					content: '';
+					background: var(--color);
+					@place-cell: @r(100%) @r(100%);
+					@size: @r(6px);
+					@shape: hypocycloid @r(20);
+				}
+
+				@place-cell: center;
+				@size: 100%;
+				border-radius: @r(40%, 50%);
+				box-shadow: @m2(0 0 50px var(--color));
+				background: @m100(radial-gradient(var(--color) 50%, transparent 0) @r(-20%, 120%) @r(-20%, 100%) / 1px 1px no-repeat);
+
+				will-change: transform, opacity;
+				animation: scale-up 120s linear infinite;
+				animation-delay: calc(-120s / @I * @i);
+
+				@keyframes scale-up {
+					0%, 95.01%, 100% {
+						transform: translateZ(0) rotate(0);
+						opacity: 0;
+					}
+
+					10% {
+						opacity: 1;
+					}
+
+					95% {
+						transform: translateZ(90vmin) rotateZ(@var(--deg));
+					}
+				})
+		}
+
+		iframe.iframe-all-screen {
+			width: 100vw !important;
+			height: 100vh;
+			top: 50%;
+			position: fixed;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			max-width: unset;
+			max-height: unset;
+			z-index: -1;
+		}
+
+		.g-first-page {
+			position: fixed;
+			inset: -40vw;
+			overflow: hidden;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			contain: content;
+			overflow: clip;
+		}
+
+		.reveal .g-currentColor {
+			color: #f00;
+		}
+
+		.reveal .g-currentColor.on {
+			color: #f00;
+			border: 1px solid;
+			box-shadow: 2px 2px 10px 2px;
+			text-shadow: 2px 2px 5px;
+		}
+
+		.g-reflect.g-reflect {
+			position: relative;
+			margin: 0 auto;
+			width: 200px;
+			height: 200px;
+			background-image: url('http://images2015.cnblogs.com/blog/608782/201609/608782-20160926101029078-1479229145.jpg');
+
+		}
+
+		.g-reflect::before {
+			content: "";
+			position: absolute;
+			top: 100%;
+			left: 0;
+			right: 0;
+			bottom: -100%;
+			background-image: inherit;
+			background-repeat: no-repeat;
+			transform: rotateX(180deg);
+			mask: linear-gradient(transparent, #000);
+			-webkit-mask: linear-gradient(transparent, #000);
+		}
+
+		.g-demo-cube {
+			margin: auto;
+		}
+
+		.perspective {
+			transform-style: preserve-3d;
+			perspective: 200px;
+			transform: rotateX(10deg);
+		}
+
+		ul {
+			padding: 0;
+			list-style: none;
+		}
+
+		.g-demo-cube {
+			position: relative;
+			width: 100%;
+			height: 200px;
+		}
+
+		.g-demo-cube .cube-inner {
+			display: block;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			margin: -25px 0 0 -25px;
+			transform-style: preserve-3d;
+			transform-origin: 25px 25px;
+			transform: rotateX(-33.5deg) rotateY(45deg);
+			-webkit-animation: fastspin 6s ease-in-out infinite 2s;
+			animation: fastspin 6s ease-in-out infinite 2s;
+		}
+
+		.g-demo-cube .cube-inner li {
+			position: absolute;
+			display: block;
+			width: 50px;
+			height: 50px;
+			background: #175d96;
+			border: 1px solid #fff;
+		}
+
+		.g-demo-cube .cube-inner .top {
+			transform: rotateX(90deg) translateZ(25px);
+		}
+
+		.g-demo-cube .cube-inner .bottom {
+			transform: rotateX(-90deg) translateZ(25px);
+		}
+
+		.g-demo-cube .cube-inner .front {
+			transform: translateZ(25px);
+		}
+
+		.g-demo-cube .cube-inner .back {
+			transform: rotateX(-180deg) translateZ(25px);
+		}
+
+		.g-demo-cube .cube-inner .left {
+			transform: rotateY(-90deg) translateZ(25px);
+		}
+
+		.g-demo-cube .cube-inner .right {
+			transform: rotateY(90deg) translateZ(25px);
+		}
+
+		.g-demo-cube .cube {
+			display: block;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			margin: -50px 0 0 -50px;
+			transform-style: preserve-3d;
+			transform-origin: 50px 50px;
+			transform: rotateX(-33.5deg) rotateY(45deg);
+			-webkit-animation: slowspin 6s ease-in-out infinite 2s;
+			animation: slowspin 6s ease-in-out infinite 2s;
+		}
+
+		.g-demo-cube .cube li {
+			position: absolute;
+			display: block;
+			width: 100px;
+			height: 100px;
+			background: rgba(141, 214, 249, 0.5);
+			border: 1px solid #fff;
+		}
+
+		.g-demo-cube .cube .top {
+			transform: rotateX(90deg) translateZ(50px);
+		}
+
+		.g-demo-cube .cube .bottom {
+			transform: rotateX(-90deg) translateZ(50px);
+		}
+
+		.g-demo-cube .cube .front {
+			transform: translateZ(50px);
+		}
+
+		.g-demo-cube .cube .back {
+			transform: rotateX(-180deg) translateZ(50px);
+		}
+
+		.g-demo-cube .cube .left {
+			transform: rotateY(-90deg) translateZ(50px);
+		}
+
+		.g-demo-cube .cube .right {
+			transform: rotateY(90deg) translateZ(50px);
+		}
+		@keyframes fastspin {
+			0% {
+				transform: rotateX(-33.5deg) rotateY(45deg);
+			}
+
+			40%,
+			to {
+				transform: rotateX(-33.5deg) rotateY(-315deg);
+			}
+		}
+		@keyframes slowspin {
+			0% {
+				transform: rotateX(-33.5deg) rotateY(45deg);
+			}
+
+			40%,
+			to {
+				transform: rotateX(-33.5deg) rotateY(315deg);
+			}
+		}
+		.g-vh-demo.g-vh-demo {
+			width: 260px;
+			height: 260px;
+			margin: 0 auto;
+		}
+		.g-img-pesudo[class] {
+			position: relative;
+			overflow: unset;
+			border: unset
+		}
+		.g-img-pesudo::before {
+			content: "before";
+			position: absolute;
+			top:0;
+			left: 0;
+			width: 100px;
+			height: 20px;
+			color: #fff;
+			background-color: #000;
+			font-size: 12px;
+		}
+		.g-img-wrapper[class] {
+			margin: 0 auto;
+			position: relative;
+			width: 200px;
+			height: 100px;
+		}
+		.g-img-wrapper.g-img-wrapper img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			object-position: 50% 100%;
+			border: 0 solid #fff;
+		}
+
+		.g-img-wrapper img.error::before {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			right: 0;
+			background: #999;
+			background: url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBw8QEA8PERAPEA4PEA0OEA8PDw8NDw8QFREWFhURFRUYHSggGBolGxUVITEhJSkrLi4uFx8zODMsNygtLisBCgoKBQUFDgUFDisZExkrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrK//AABEIAP0AyAMBIgACEQEDEQH/xAAZAAEBAQEBAQAAAAAAAAAAAAAAAgEDBwT/xAAnEAEBAAIBBAICAgMBAQAAAAAAAQIRIQMxQVESgWFxE5EisdHhof/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwD2CKTFAAAAAAAAAAy2TuDRz+dvb+63p5XmXvAWAAAAyxoDn0749Jyu7+ldTjlzxxt/9BVp3/6qdP3yuQEfx3zlR0ATFJigAAAAAAGZZSMz3q6T08J3A+Vvaa/NbOnPPP7Mc5vR1M9agK0nLHmWE6k1tHq23nxAdhy5x87n+nUAAAAAAAAAAExSYoAAAAAABzw4uvuOiOpPPmA2Y+XPe7b9Lyz4/bnAVZxVXVjn8vXK50/q/gGZXjXmuqccNKAAAAAAAAAABKb1PXLcsdqkBzsy77+ovGqRhNcAsAAAAAHDLG9l49L3/ToAyTTQAAAAAAAAAE5ZyJ3b24B0HLLH46vf2wHSuc6t+m9S8ftkgKyu+Pupxxl8cxt4u/bbed/2Dene89Lc+nzbfqOgAAAAAAAAAAAAAAIy6kn7Z/lfxGY8W/23q52a4BWGEikdS6icMqDpl25HPW93+oA3Pwj5Lyx2rHGTwCMZfpU6c9LAAAAAAAAAAZaDRkrQAAAAR1J59KlKjC63PXIM6l3deiJxvn2bt7QFY3V57eGLxxvnkBsUmKAAAAAAABmWUncGst0j5W9uPzWzp++QZ87e0+z+Pffn/ToA59Pi2fcdHLLKb87npeOUoKAAAAR1MN9lgOePSn7XGgAAJikxQAAAAAACepNxQCcLuJ6dvknF17VndS0HPO7vdtt1+7pOKrNwG5TWvXZmXFlLnxq72Sb16n/0HUIAAAAAAAAAmKSy9T1yC0/Odk/G3vfqGWHHHcHQThltQAAAAI6mO5+ZyjPLep912cv4uQT8lTC3v/UdJJGgyYtAAAAAAAAAAAEXHapIjOW9jO6x/PYFzTMspHLCLx5t/AMxy14sjpKnC+KzpeZ+QdAAAAAAAAAAAAAABOWcn/EfO+tQHUAAAEued3ZPS7lrX25S+fYKb53O/mMmFv4/26Y4SAjd7/G7X08dKAAAAAAAAAAAAcst22b49ArLOfu/hlmV78Q4i/lxsGY4yNym4jHqxueXifdBvTvHKnKS95d/teGWwUACMptuOMhFAAAAAAAAAAAAAAAOfUna+nRlgMuMqepxNHT449Jyu7+gbI3Dvf7Tts/y8X9g2XVs8dzp97fdP477q5AaACYpMUAAAAACcspAUy5SI3b24jZ05+77Bnyt7T7phbuyrkTnjzLAWAAAAADn1PbnjjX0AOePTn7dIAAAAAJikxQAAAAJz7VnTxndbljxdfcBWPUlujqZ6b8Z3ct7toL/AJOL+E2dt757RtnFbvcBl487jq45dpPNdYDQAAAAAAAAAAATFOef+l43YNAAAAR1Z58xYDnllx+0TsZYXsrHp+wTMvU2uYfV/C5NNBOOEigAAAAAAAAAAAABLMOPTM52ZhhLvgHUR0r3nqrAAAAAAAAAAAAAAAGZXTlM7lfQOmWcif8AK/iKmEigcssfjq/26lm04zXAKAB//9k=);
+		}
+
+		.g-img-wrapper img.error::after {
+			content: attr(alt);
+			position: absolute;
+			left: 0;
+			bottom: 0;
+			right: 0;
+			padding: 5px 10px;
+			background: #000;
+			color: #eee;
+			font-size: 12px;
+			text-align: center;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		
+		.g-overflow-container .person-card {
+			width: 300px;
+			margin: 50px auto;
+			padding: 10px;
+			border-radius: 5px;
+			background-color: #fff;
+			display: flex;
+			background: #fff;
+			box-shadow: 0px 0px 4px 0px #fff;
+		}
+		.g-overflow-container .info {
+			margin-left: 8px;
+			white-space: nowrap;
+		}
+		.g-overflow-container .info .person-card__name {
+			margin: 16px 0 8px;
+			font-size: 18px;
+			text-align: left;
+			color: #333;
+		}
+		.g-overflow-container .info .person-card__desc {
+			font-size: 14px;
+			line-height: 24px;
+			color: #8f8f92;
+			margin: unset;
+		}
+		.g-overflow-container .info .person-card__desc.single-line {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			width: 210px;
+		}
+		.g-overflow-container .info .person-card__desc.inlineblock span {
+			display: inline-block;
+		}
+		.g-overflow-container .info .person-card__desc.text-front {
+			direction: rtl;
+		}
+		.g-overflow-container .info .person-card__desc.multiple-line {
+			width: 200px;
+			white-space: normal;
+			overflow : hidden;
+			text-overflow: ellipsis;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			line-height: 1.25;
+		}
+		.g-overflow-container .info span {
+			background: #673ab7;
+			border-radius: 5px;
+			color: #fff;
+			padding: 2px 6px;
+			margin-right: 6px;
+		}
+		.g-overflow-container .avatar {
+			width: 80px;
+			height: 80px;
+			background-image: url("https://avatars.githubusercontent.com/u/8554143?s=460&u=c322501aeb96b3f90f504512d501830b70894eae&v=4");
+			background-size: cover;
+			background-position: center;
+			display: block;
+			border-radius: 50%;
+			flex-shrink: 0;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<!-- Slides are separated by newline + three dashes + newline, vertical slides identical but two dashes -->
+			<section data-markdown data-separator="^\n---\n$" data-separator-vertical="^\n--\n$">
+				<script type="text/template">
+
+<p class="title-h1" style="z-index: 4;position: relative;"> 你所不知道的CSS  </p>
+<p class="title-h2" style="z-index: 4;position: relative;"> Coco Qiao </p>
+<div class="g-first-page">
+	<css-doodle use="var(--rule)"></css-doodle>
+</div>
+
+
+---
+
+## 自我介绍
+
++ 7年互联网经验，曾任职于**欢聚时代**，**腾讯**
++ 目前任职于某一线电商，负责前端技术管理
++ 在多个技术论坛，发表过**超三百篇**原创技术文章，全网浏览量超过 **1000W**
++ 活跃于开源社区，个人 Github 开源项目超 **3W** 个 Stars，同时个人 Github followers 超 **7300** 人，中国区前 **50** 名
+
+---
+
++ 字体的奥妙
++ 选择器趣事
++ currentColor
++ inherit 与 unset
++ fixed 失效
++ 3D 坍缩
++ 100vh 失效
++ 替换元素的伪元素
++ overflow:hidden
++ 超长打点省略
+
+---
+
+## 字体的奥妙
+
+
+--
+
+这两个字体有什么不一样?
+
+<div style="font-family: serif;font-size: 80px;">N 王</div>
+
+<div style="font-family: sans-serif;font-size: 80px;">N 王</div>
+
+
+--
+
+```HTML
+<div style="font-family: serif;">N 王</div>
+<div style="font-family: sans-serif;">N 王</div>
+```
+
+![](https://img2020.cnblogs.com/blog/608782/202109/608782-20210926103514614-1235625518.png)
+
+
+--
+
+> 为什么我这行文案在开发的时候是没问题的，在他的手机上却换行了？
+> PM：前端，为什么两个系统上的字体不一样？
+
+
+--
+
+不同操作系统下，预装的字体是不一样的！
+
+即便使用相同的 font-family 规则不代表前端展示上的相同！
+
++ Web 页面的 lang, charset 和浏览器设置都会对默认字体产生影响
++ 不同操作系统、不同浏览器的默认中文、英文字体的设置都有区别
+
+--
+
+> 为什么我给这个字体设置从 font-weight: 400 变化到 font-weight: 500 没有变粗？
+
+常见的字重数值大致对应的字重描述词语：
+
++ 100 - Thin
++ 200 - Extra Light (Ultra Light)
++ 300 - Light
++ 400 - Regular (Normal、Book、Roman)
++ 500 - Medium
++ 600 - Semi Bold (Demi Bold)
++ 700 - Bold
++ 800 - Extra Bold (Ultra Bold)
++ 900 - Black (Heavy)
+
+--
+
+实际上，很少存在满足有 9 重粗细的字体
+
+通常而言，字体拥有的字重数量为 4 至 6 个
+
+> 只有 400(normal) 和 700(bold) 对应的字重是每种字体必备的
+
+---
+
+
+## 选择器趣事
+
+
+--
+
+如何让 `background: red` 生效?
+
+```
+<div class="foo"></div>
+```
+```CSS
+// a.css
+body > .foo {
+    background: #000;
+}
+// b.css
+.foo {
+    background: red;
+}
+```
+
+
+
+
+--
+
+通过自己叠加自己的方式，提升选择器的权重
+
+```CSS
+// a.css
+body > .foo {
+    background: #000;
+}
+// b.css
+.foo.foo {
+    background: red;
+}
+```
+
+--
+
+当然，也可以叠加属性选择器
+
+```CSS
+// a.css
+body > .foo {
+    background: #000;
+}
+// b.css
+.foo[class] {
+    background: red;
+}
+```
+
+
+---
+
+## 理解 currentColor 与 color
+
+
+--
+
+
+currentColor = color
+
+
+--
+
+
+```CSS
+.g-currentColor {
+	color: #f00;
+}
+```
+
+<p class="g-currentColor">currentColor Test</p>
+
+--
+
+
+```CSS
+.g-currentColor {
+	color: #f00;
+	border: 1px solid;
+	box-shadow: 2px 2px 10px 2px;
+	text-shadow: 2px 2px 5px;
+}
+```
+
+<p class="g-currentColor on">currentColor Test</p>
+
+
+--
+
+
+在 CSS 变量出现之前的一种封装的思想
+
+--
+
+```border: 1px solid``` 等价于 `border: 1px solid currentColor`
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="currentColor &amp; Button" src="https://codepen.io/Chokcoco/embed/YzjpvmP?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href="https://codepen.io/Chokcoco/pen/YzjpvmP">
+	currentColor &amp; Button</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+	on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+```box-shadow: 30px 0``` 等价于 `box-shadow: 30px 0 currentColor`
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="currentColor &amp; Button" src="https://codepen.io/Chokcoco/embed/VwBmBww?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href="https://codepen.io/Chokcoco/pen/VwBmBww">
+	currentColor &amp; Button</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+	on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+---
+
+## inherit 与 unset
+
+
+--
+
+> inherit
+
+每个 CSS 属性定义的概述都指出了这个属性是
+
+1. 默认继承的 ("Inherited: Yes") 
+2. 还是默认不继承的 ("Inherited: no")
+
+
+```CSS
+{
+    position: inherit;
+    position: initial;
+    position: unset;
+}
+```
+
+
+--
+
+实现一个倒影效果：
+
+<div class="g-reflect"></div>
+
+--
+
+巧妙的利用 inherit，从父元素继承图像资源
+
+```CSS
+.g-reflect {
+	width: 200px;
+	height: 200px;
+	background-image: url('image.jpg');
+}
+.g-reflect::before {
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	bottom: -100%;
++   background-image: inherit;
+	transform: rotateX(180deg);
+	mask: linear-gradient(transparent, #000);
+}
+```
+
+--
+
+> unset
+
+如果设置一个属性为 `unset`
+
+1. 如果这个属性本来有从父级继承的值（这个属性默认可以继承，且父级有定义），则将该属性重新设置为继承的值，
+2. 如果没有继承父级样式，则将该属性重新设置为初始值
+
+
+```CSS
+{
+    position: inherit;
+    position: initial;
+    position: unset;
+}
+```
+
+--
+
+很多 CSS Reset 中会存在这样的代码：
+
+```CSS
+* {
+	box-sizing: border-box;
+}
+```
+
+--
+
+如果对于一些元素，你不希望它设置成 `border-box`:
+
+```HTML
+<div class="you-dont-want-borderbox"></div>
+```
+```CSS
+.you-dont-want-borderbox {
+    box-sizing: unset;
+}
+```
+
+> 相当于设置成了 `box-sizing: content-box`
+
+
+--
+
+有一些特殊场景，`unset` 是更好的选择
+
+<iframe height="500" style="width: 100%;" scrolling="no" title="unset DEMO" src="https://codepen.io/Chokcoco/embed/bGjBjzK?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href="https://codepen.io/Chokcoco/pen/bGjBjzK">
+	unset DEMO</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+	on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+---
+
+## fixed 失效
+
+--
+
+```HTML
+<div class="container"> 
+	<div class="fixed"></div>
+</div>
+```
+```CSS
+.container {
+	width:10vw;
+    height: 10vw;
+    background: rgba(255, 100, 100, .8);
+}
+.fixed {
+    position: fixed;
+    top: 1vw;
+    left: 1vw;
+    right: 1vw;
+    bottom: 1vw;
+    background: rgba(100, 100, 255, .8);
+}
+```
+
+--
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="层叠上下文对 fixed 定位的影响（基于不同浏览器内核结果不同）" src="https://codepen.io/Chokcoco/embed/wqXZXd?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href="https://codepen.io/Chokcoco/pen/wqXZXd">
+	层叠上下文对 fixed 定位的影响（基于不同浏览器内核结果不同）</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+	on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+当元素祖先的 transform 属性非 none 时，容器由视口改为该祖先
+
+
+--
+
+### 根因 - 堆叠上下文（Stacking Context）
+
+堆叠上下文是 HTML 元素的三维概念，这些 HTML 元素在一条假想的相对于面向（电脑屏幕的）视窗或者网页的用户的 z 轴上延伸，HTML 元素依据其自身属性按照优先级顺序占用层叠上下文的空间。
+
+> 生成了 Stacking Context 的元素会影响该元素的层叠关系与定位关系
+
+
+--
+
+下述 7 种方式目前都会使得 position:fixed 的基准元素改变：
+
+1. `transform` 属性值不为 none 的元素
+2. 设置了 `transform-style: preserve-3d` 的元素
+3. `perspective` 值不为 none 的元素
+4. 在 `will-change` 中指定了任意 CSS 属性
+5. 设置了 `contain: paint`
+6. `filter` 值不为 none 的元素
+7. `backdrop-filter` 值不为 none 的元素
+
+--
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="层叠上下文对 fixed 定位的影响（基于不同浏览器内核结果不同）" src="https://codepen.io/Chokcoco/embed/wqXZXd?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href="https://codepen.io/Chokcoco/pen/wqXZXd">
+	层叠上下文对 fixed 定位的影响（基于不同浏览器内核结果不同）</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+	on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+---
+
+
+## 3D 坍缩
+
+--
+
+<iframe class="iframe-all-screen" height="300" style="width: 100%;" scrolling="no" title="3D ball" src="https://codepen.io/Chokcoco/embed/JwdvmJ?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/JwdvmJ">
+  3D ball</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+给这个效果的父容器添加一个 `filter: contrast(1)`
+
+<iframe class="iframe-all-screen" height="300" style="width: 100%;" scrolling="no" title="3D ball" src="https://codepen.io/Chokcoco/embed/vYaGeRg?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href="https://codepen.io/Chokcoco/pen/vYaGeRg">
+	3D ball</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+	on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+<iframe class="iframe-all-screen" height="300" style="width: 100%;" scrolling="no" title="Only CSS: COCO Rolling Box" src="https://codepen.io/Chokcoco/embed/mdKJNYd?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href="https://codepen.io/Chokcoco/pen/mdKJNYd">
+	Only CSS: COCO Rolling Box</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+	on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+同样的，给立方体的容器添加一个 `mix-blend-mode: color`
+
+<iframe class="iframe-all-screen" height="300" style="width: 100%;" scrolling="no" title="Only CSS: COCO Rolling Box" src="https://codepen.io/Chokcoco/embed/abjNLaz?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+	See the Pen <a href="https://codepen.io/Chokcoco/pen/abjNLaz">
+	Only CSS: COCO Rolling Box</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+	on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+当我们使用 CSS 混合模式（滤镜同理）的时候，堆叠上下文会重新对这个使用了混合模式的元素的根节点处创建一个独立的渲染平面，但是很可惜，这个渲染平面是不支持 preserve-3d 的，所以我们看到是一个 2D 的平面效果。
+
+--
+
++ 黄色代表 CSS 渲染时候的 GraphicsLayer 层
++ 蓝色网格表示瓦片(tile)，你可以把它们当作是层的单元，Chrome 内核可以将它们作为一个大层的部分上传给 GPU 进行渲染加速
+
+<div class="g-demo-cube perspective">
+	<ul class="cube-inner">
+	  <li class="top"></li>
+	  <li class="bottom"></li>
+	  <li class="front"></li>
+	  <li class="back"></li>
+	  <li class="right"></li>
+	  <li class="left"></li>
+	</ul>
+	<ul class="cube">
+	  <li class="top"></li>
+	  <li class="bottom"></li>
+	  <li class="front"></li>
+	  <li class="back"></li>
+	  <li class="right"></li>
+	  <li class="left"></li>
+	</ul>
+</div>
+
+--
+
++ [Link - bugs.chromium - mix-blend-mode not interacting with all elements behind as expected.](https://bugs.chromium.org/p/chromium/issues/detail?id=575099)
++ [探究 CSS 混合模式\滤镜导致 CSS 3D 失效问题](https://github.com/chokcoco/iCSS/issues/41)
+
+
+---
+
+## 100vh 失效问题
+
+--
+
++ vw：1vw 等于 1/100 的视口宽度 （Viewport Width）
++ vh：1vh 等于1/100的视口高度 （Viewport Height）
+
+--
+
+
+使用 Chrome 手机浏览器扫描下面二维码：
+
+<div class="g-vh-demo">
+	<img src="../images/dontkown/vh_qrcode.png" alt="">
+</div>
+
+
+--
+
+在移动端 chrome 浏览器中， 100vh 高度会出现滚动条
+
+> 根因在于很多浏览器，会把地址栏计算在内 
+
+这会导致一系列预料之外的 BUG，慎用 `100vh`
+
+
+--
+
+当我们仍旧需要占满一屏的时候，更好的选择是：
+
+```HTML
+<div></div>
+```
+```CSS
+html,
+body {
+	width: 100%;
+	height: 100%;
+}
+div {
+	height: 100%;
+}
+```
+
+--
+
+开始学习新的更酷的容器查询单位：
+
++ `cqw`：表示容器查询宽度（Container Query Width）占比。1cqw等于容器宽度的1%。假设容器宽度是1000px，则此时1cqw对应的计算值就是10px
++ `cqh`：	表示容器查询高度（Container Query Height）占比。1cqh等于容器高度的1%
+
+> 容器查询：它给予了 CSS，在不改变浏览器视口宽度的前提下，只是根据容器的宽度变化，对布局做成调整的能力。
+
+
+---
+
+## 替换元素的伪元素
+
+--
+
+> 灵魂发问：所有元素都有 `::before` 和 `::after` 伪元素吗？
+
+
+--
+
+```HTML
+<img src="image.png">
+```
+```CSS
+img {
+	position: relative;
+}
+img::before {
+	content: "before";
+	position: absolute;
+	top:0; left: 0;
+	width: 100px; height: 20px;
+	color: #fff;
+}
+```
+
+<img class="g-img-pesudo" src="https://i1.hdslb.com/bfs/face/73a941fb8cd66b73c35f639af3a4337b7a107ebc.jpg@240w_240h_1c_1s.webp"></img>
+
+--
+
+无法将 CSS 伪元素 `::before` 和 `::after` 添加到文本输入框和图片，因为这些元素是**替换元素**
+
+这是HTML标准 “Rendering section” 中定义的特殊类别：
+
++ `<audio>`
++ `<canvas>`
++ `<embed>`
++ `<iframe>`
++ `<img>`
++ `<input>`
++ `<object>`
++ `<video>`
+
+
+--
+
+
+> 替换元素将替换元素的所有内容，包括 `::before` 和 `::after`。这就是为什么伪元素对他们不起作用的原因。
+
+
+--
+
+> 特例：`<img>` 元素不一定总是替换元素。
+
+例如，如果图像无法加载，则在 Chrome 和 Firefox 中可以将 `::before` 和 `::after` 添加到 `<img>` 中
+
+--
+
+```HTML
+<img src="">
+```
+```CSS
+img {
+	position: relative;
+}
+img::before {
+	content: "before";
+	position: absolute;
+	top:0; left: 0;
+	width: 100px; height: 20px;
+	color: #fff;
+}
+```
+
+<img class="g-img-pesudo" src=""></img>
+
+--
+
+正常情况如下
+
+```HTML
+<div class="g-img-wrapper">
+	<img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/74321/paris-cafe-terrace.jpg" alt="Description">
+</div>
+```
+
+<div class="g-img-wrapper">
+	<img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/74321/paris-cafe-terrace.jpg" alt="Description">
+</div>
+
+--
+
+万一图片链接出现了错误：
+
+1. 能够展示默认兜底图
+2. 同时希望展示 `<img>` 标签的 alt 信息
+
+--
+
+```HTML
+<img src="image.png" onerror="this.classList.add('error');" alt="Alt Info">
+```
+```CSS
+img.error {
+	position: relative;
+}
+img.error::before {
+	content: "";
+	/** 定位代码 **/
+	background: url(error-default.png);
+}
+img.error::after {
+	content: attr(alt);
+	/** 定位代码 **/
+}
+```
+
+<div class="g-img-wrapper">
+	<img src="xxx.jpg"  alt="Alt Info" onerror="this.classList.add('error');">
+</div>
+
+
+--
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="图片处理" src="https://codepen.io/Chokcoco/embed/WNGgNqv?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/WNGgNqv">
+  图片处理</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+---
+
+## overflow:hidden
+
+--
+
+> 灵魂发问：父元素设置了 `overflow: hidden`，任意子元素超出父元素边界后都将不可见吗？
+
+
+--
+
+```HTML
+<div class="father">
+	<div class="inner"></div>
+</div>
+```
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="overflow: hidden Invalid" src="https://codepen.io/Chokcoco/embed/eYjBGKM?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/eYjBGKM">
+  overflow: hidden Invalid</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+```HTML
+<div class="father">
+	<div class="inner"></div>
+</div>
+```
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="overflow: hidden Invalid" src="https://codepen.io/Chokcoco/embed/Yzjprvm?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/Yzjprvm">
+  overflow: hidden Invalid</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+如果子元素是 `position: fixed` 呢？
+
+--
+
+如果希望 `position: fixed` 的父容器的 `overflow: hidden` 生效，需要生成一个 Stacking Context
+
+--
+
+> 灵魂发问：除了 `overflow: hidden`，CSS 还能如何让溢出容器的元素隐藏？
+
+
+--
+
+#### 利用 `clip-path` 进行裁剪
+
+```CSS
+.g-container {
+	width: 200px;
+	height: 200px;
+	clip-path: polygon(-1000% 0, 1000% 0, 1000% 100%, -1000% 100%);
+}
+```
+
+<iframe height="400" style="width: 100%;" scrolling="no" title="Clip-path overflow" src="https://codepen.io/Chokcoco/embed/ZEpRqME?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/ZEpRqME">
+  Clip-path overflow</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+#### 利用 `contain: paint` 进行裁剪
+
+```
+.g-container {
+	contain: paint;
+}
+```
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="contain: paint Demo" src="https://codepen.io/Chokcoco/embed/KKwmgmN?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/KKwmgmN">
+  contain: paint Demo</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+> `contain: paint` 属性诞生的目的，即是为加快页面的渲染，在非必要区域，不渲染元素。因此，如果元素不在屏幕上或以其他方式设定为不可见，则其后代不可见不被渲染。
+
+也就是说，此元素的子元素不会在此元素的边界之外被展示。
+
+--
+
+3 种可以实现超出容器范围裁剪的方法：
+
++ `overflow: hidden`
++ `clip-path` 可控制的，灵活的裁切区域
++ `contain: paint` 不绘制元素范围外的内容
+
+> Link - [如何不使用 overflow: hidden 实现 overflow: hidden？](https://github.com/chokcoco/iCSS/issues/90)
+
+---
+
+## 超长打点省略
+
+
+--
+
+正常而言：
+
+<div class="g-overflow-container">
+	<div class="person-card">
+		<a href="/" class="avatar"></a>
+		<div class="info">
+			<p class="person-card__name">Sb Coco</p>
+			<p class="person-card__desc">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloribus, repellat sunt sint quos labore, temporibus rem minima aperiam, earum aliquid ea asperiores modi quam ipsa dolores porro eos distinctio quo?</p>
+		</div>
+	</div>
+</div>
+
+--
+
+> 单行省略
+
+```CSS
+.single-line {
+	width: 200px;
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+```
+
+<div class="g-overflow-container">
+	<div class="person-card">
+		<a href="/" class="avatar"></a>
+		<div class="info">
+			<p class="person-card__name">Sb Coco</p>
+			<p class="person-card__desc single-line">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloribus, repellat sunt sint quos labore, temporibus rem minima aperiam, earum aliquid ea asperiores modi quam ipsa dolores porro eos distinctio quo?</p>
+		</div>
+	</div>
+</div>
+
+--
+
+> 多行省略
+
+```CSS
+.multiple-line {
+    width: 200px;
+    white-space: normal;
+    overflow : hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+```
+
+<div class="g-overflow-container">
+	<div class="person-card">
+		<a href="/" class="avatar"></a>
+		<div class="info">
+			<p class="person-card__name">Sb Coco</p>
+			<p class="person-card__desc multiple-line">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloribus, repellat sunt sint quos labore, temporibus rem minima aperiam, earum aliquid ea asperiores modi quam ipsa dolores porro eos distinctio quo?</p>
+		</div>
+	</div>
+</div>
+
+
+--
+
+> 灵魂发问：如果要将省略的部分放在内容前面？该如何做呢？
+
+<div class="g-overflow-container">
+	<div class="person-card">
+		<a href="/" class="avatar"></a>
+		<div class="info">
+			<p class="person-card__name">Sb Coco</p>
+			<p class="person-card__desc single-line text-front">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Doloribus, repellat sunt sint quos labore, temporibus rem minima aperiam, earum aliquid ea asperiores modi quam ipsa dolores porro eos distinctio quo?</p>
+		</div>
+	</div>
+</div>
+
+--
+
+```
+{
+	width: 200px;
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  + direction: rtl;
+
+}
+```
+
+`direction`：设置文本排列的方向。 rtl 表示从右到左 (类似希伯来语或阿拉伯语)， ltr 表示从左到右。
+
+
+--
+
+
+在 CSS 世界中，有 3 个属性与排版顺序相关，互有关联但作用各异。
+
++ `writing-mode`：定义了文本水平或垂直排布以及在块级元素中文本的行进方向。
++ `direction`：设置文本排列的方向。 rtl 表示从右到左 (类似希伯来语或阿拉伯语)， ltr 表示从左到右。
++ `unicode-bidi`：它与 direction 非常类似，两个会经常一起出现。在现代计算机应用中，最常用来处理双向文字的算法是 Unicode 双向算法。而 unicode-bidi 这个属性是用来重写这个算法的。
+
+Link - [CSS 世界中的方位与顺序](https://github.com/chokcoco/iCSS/issues/127)
+
+
+--
+
+
+下述布局，添加单行溢出会发生什么？
+
+```HTML
+<p class="person-card__desc">
+	<span>FE</span>
+	<span>BE</span>
+	<span>UX Designer</span>
+	<span>前端工程师</span>
+</p>
+```
+
+<div class="g-overflow-container">
+	<div class="person-card">
+		<a href="/" class="avatar"></a>
+		<div class="info">
+			<p class="person-card__name">Sb Coco</p>
+			<p class="person-card__desc"><span>FE</span><span>BE</span><span>UX Designer</span><span>前端工程师</span></p>
+		</div>
+	</div>
+</div>
+
+--
+
+> 灵魂发问：如何实现整块的溢出隐藏？
+
+
+```HTML
+<p class="person-card__desc single-line">
+	<span>FE</span>
+	<span>BE</span>
+	<span>UX Designer</span>
+	<span>前端工程师</span>
+</p>
+```
+```CSS
+.single-line {
+	width: 200px;
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+```
+
+<div class="g-overflow-container">
+	<div class="person-card">
+		<a href="/" class="avatar"></a>
+		<div class="info">
+			<p class="person-card__name">Sb Coco</p>
+			<p class="person-card__desc single-line"><span>FE</span><span>BE</span><span>UX Designer</span><span>前端工程师</span></p>
+		</div>
+	</div>
+</div>
+
+
+--
+
+将 `display: inline` 改为 `display: inline-block` 实现整块省略
+
+```HTML
+<p class="person-card__desc single-line inlineblock">
+	<span>FE</span>
+	<span>BE</span>
+	<span>UX Designer</span>
+	<span>前端工程师</span>
+</p>
+```
+```
+.inlineblock span {
+    display: inline-block;
+}
+```
+
+<div class="g-overflow-container">
+	<div class="person-card">
+		<a href="/" class="avatar"></a>
+		<div class="info">
+			<p class="person-card__name">Sb Coco</p>
+			<p class="person-card__desc single-line inlineblock"><span>FE</span><span>BE</span><span>UX Designer</span><span>前端工程师</span></p>
+		</div>
+	</div>
+</div>
+
+---
+
+## 如何学习 CSS
+
+
+--
+
++ 多看，多写
++ 《CSS Secrets》、[CodePen](https://codepen.io/)、[CSS-Tricks](https://css-tricks.com/)
++ [CSS Battle](https://cssbattle.dev/)
++ [张鑫旭](https://www.zhangxinxu.com/wordpress/category/css/)、[大漠老师-w3cplus](https://www.w3cplus.com/)、[iCSS](https://github.com/chokcoco/iCSS)、[CSS-inspiration](https://chokcoco.github.io/CSS-Inspiration/#/)
+
+
+---
+
+<div class="g-thankyou">
+	<div>Thank You</div>
+	<div>Thank You</div>
+</div>
+
+<svg>
+	<defs>
+			<filter id="blur">
+					<feGaussianBlur in="SourceGraphic" stdDeviation="5" />
+			</filter>
+	</defs>
+</svg>
+      </script>
+			</section>
+		</div>
+	</div>
+	<script src="../lib/js/head.min.js"></script>
+	<script src="../js/reveal.js"></script>
+	<script src="https://unpkg.com/css-doodle@0.15.3/css-doodle.min.js"></script>
+	<script>
+		window.addEventListener('click', (e) => {
+			if (e.target.className === 'g-btn-graidient') {
+				e.preventDefault;
+				//reset animation
+				e.target.classList.remove('animate');
+
+				e.target.classList.add('animate');
+				setTimeout(function () {
+					e.target.classList.remove('animate');
+				}, 700);
+			}
+		});
+
+		// More info http://github.com/hakimel/reveal.js#configuration
+		Reveal.initialize({
+			history: true,
+
+			// More info https://github.com/hakimel/reveal.js#dependencies
+			dependencies: [
+				{ src: '../plugin/markdown/marked.js' },
+				{ src: '../plugin/markdown/markdown.js' },
+				{ src: '../plugin/notes/notes.js', async: true },
+				{ src: '../plugin/highlight/highlight.js', async: true, callback: function () { hljs.initHighlightingOnLoad(); } }
+			]
+		});
+	</script>
+</body>
+
+</html>
