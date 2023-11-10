@@ -1,0 +1,2038 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Web 动画利器 -- SVG 从入门到进阶 </title>
+
+		<link rel="stylesheet" href="../css/reveal.css">
+		<link rel="stylesheet" href="../css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="../lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : '../css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+		<style>
+		@import url("https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Darumadrop+One&display=swap");
+		::-webkit-scrollbar-track-piece{background-color:#141414;}
+		::-webkit-scrollbar{width:4px;height: 4px; cursor: pointer;background-color: transparent;}
+		::-webkit-scrollbar-thumb{background:#999;}
+		body {
+			background: linear-gradient(-135deg, #379aea, #32166a);
+			font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+		}
+		.reveal pre {
+			border-radius: .5em;
+			border: .3em solid hsl(0, 0%, 33%);
+			box-shadow: 1px 1px .5em black inset;
+			margin: .5em auto;
+			overflow: auto;
+			padding: 1em;
+			background: hsl(0, 0%, 8%);
+			font-family: 'Space Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+		}
+
+		.reveal code {
+			font-family: 'Space Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+			background: #000508;
+			border-radius: 6px;
+			padding: 0px 4px;
+			font-size: 22px;
+			color: #e91e63;
+			font-weight: bold;
+		}
+
+		.reveal pre code {
+			color: white;
+			direction: ltr;
+			font-family: 'Space Mono', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+			text-align: left;
+			text-shadow: 0 -.1em .2em black;
+			white-space: pre;
+			background: transparent;
+		}
+		.reveal h1,
+		.reveal h2,
+		.reveal h3,
+		.reveal h4,
+		.reveal h5,
+		.reveal h6,
+		ul,
+		p {
+			font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+			color: #eee8d5;
+			font-weight: normal;
+
+		}
+
+		.reveal ol,
+		.reveal ul,
+		.reveal ul li,
+		.reveal p,
+		.reveal a {
+			font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+			color: #fff;
+			font-size: 90%;
+		}
+
+		strong {
+			color: #0c8;
+		}
+
+		.coco {
+			stroke-width:1;
+			stroke:#fff;
+			animation: lineMove 5s ease-out infinite;
+		}
+
+		.slides {
+			width: 1200px!important;
+		}
+
+		@keyframes lineMove {
+			0% {
+				stroke-dasharray: 0, 1000;
+				fill: rgba(0, 0, 0, 0);
+			}
+			50% {
+				stroke-dasharray: 1000, 1000;
+				fill: rgba(0, 0, 0, 0);
+			}
+			100% {
+				stroke-dasharray: 1000, 1000;
+				fill: rgba(193, 148, 13, .8);
+			}
+		}
+
+		.textCircle{
+			font-size:20px;
+			letter-spacing:4px;
+		}
+		.textCircle2{
+			font-size:12px;
+			letter-spacing:1px;
+		}
+		.g-wave {
+			display: none;
+			position: absolute;
+			top: 0;
+			left: 0;
+		    width: 100%;
+		    height: 100%;
+			box-sizing: border-box;
+		}
+		.m-btn {
+		    position: relative;
+		    width: 180px;
+		    height: 64px;
+		    line-height: 64px!important;
+		    text-align: center;
+		    cursor: pointer;
+		    font-size: 24px!important;
+		    margin: 0 auto!important;
+		    transition: .2s all;
+		    box-sizing: border-box;
+		    color: #c1940d;
+		}
+
+	    .shape {
+	        fill: transparent;
+	        stroke-width:4px;
+	        stroke:#c1940d;
+	        stroke-dasharray: 140 488;
+	        stroke-dashoffset: 365;
+	        transition: all .5s;
+	    }   
+	    
+	    .g-text {
+	        position:absolute;
+	        line-height:64px;
+	        width:180px;
+	        top:0;
+	        left: 0;
+	        transition: all .5s;
+	    }
+	    
+	    .s-svgline:hover .g-text {
+            color: #fff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+	    }
+	        
+	        
+	    .s-svgline:hover .shape {
+            stroke: #fff;
+            stroke-dasharray: 488;
+            stroke-dashoffset: 0;
+            stroke-width: 2px;
+	        
+	    }
+
+	    .g-icon-qq {
+			stroke-width:2;
+			stroke:#c1940d;
+			animation: lineMove 1.8s ease-out infinite;
+			transition-timing-function: ease-in;
+		}
+
+		@keyframes lineMove {
+			0% {
+				stroke-dasharray: 0, 1260;
+			}
+			80% {
+				stroke-dasharray: 1260, 1260;
+			}
+			100% {
+				stroke-dasharray: 1260, 1260;
+			}
+		}
+
+		.widget {
+		    margin: -100px auto!important;
+		    width:350px;
+		    background-color: #222D3A;
+		    border-radius: 5px;
+		    box-shadow: 0px 0px 1px 0px #06060d;
+
+		}
+
+		.header{
+		    background-color: #29384D;
+		    height:40px;
+		    color:#929DAF;
+		    text-align: center;
+		    line-height: 40px;
+		    border-top-left-radius: 7px;
+		    border-top-right-radius: 7px;
+		    font-weight: 400;
+		    font-size: 1.5em;
+		    text-shadow: 1px 1px #06060d;
+		}
+
+		.chart-container{
+		    padding:25px;
+		}
+
+		.shadow {
+		    -webkit-filter: drop-shadow( 0px 3px 3px rgba(0,0,0,.5) );
+		    filter: drop-shadow( 0px 3px 3px rgba(0,0,0,.5) );
+		}
+
+		.zoomContainer {
+			transform: scale(.4);
+		}
+
+		.reveal iframe {
+			width: 1200px;
+		}
+
+		#g-svg-thankyou {
+		  width: 600px;
+		  margin: 0 auto;
+		  position: relative;
+		  display: block;
+		  z-index: 0;
+		}
+		#g-svg-thankyou text {
+		  fill: #fff;
+		  font-family: 'Oswald';
+		  font-weight: 700;
+		}
+		#g-svg-thankyou text tspan {
+		  padding: 0;
+		  margin: 0;
+		  opacity: 0;
+		}
+		#g-svg-thankyou line, #g-svg-thankyou polyline, #g-svg-thankyou ellipse, #g-svg-thankyou path {
+		  stroke: #fff;
+		  fill: none;
+		  stroke-linecap: round;
+		  stroke-linejoin: round;
+		  stroke-width: 6;
+		  opacity: 0;
+		  stroke-miterlimit: 10;
+		}
+		#g-svg-thankyou .dec {
+		  stroke-width: 3;
+		}
+		#g-svg-thankyou .underline {
+		  stroke-width: 6;
+		  stroke-linecap: butt;
+		  opacity: 1;
+		}
+		#g-svg-thankyou .dot {
+		  opacity: 1;
+		}
+		#g-svg-thankyou .purple {
+		  stroke: #B191FF;
+		}
+		#g-svg-thankyou .lime {
+		  stroke: #DCE2AA;
+		}
+		#g-svg-thankyou .plum {
+		  stroke: #843B62;
+		}
+		#g-svg-thankyou .blue {
+		  stroke: #241E4E;
+		}
+
+		#play {
+		  font-size: 10px;
+		  color: #fff;
+		  display: block;
+		  position: 'relative';
+		  margin: 0 auto;
+		  width: 200px;
+		  text-align: center;
+		  background: none;
+		  border: none;
+		  outline: none;
+		  opacity: 0;
+		}
+
+		.g-none {
+			display: none;
+		}
+
+		.spot {
+		  position: absolute;
+		  width: 100%;
+		  height: 100%;
+		  top: 0;
+		  left: 0;
+		  font-size: 18px;
+		}
+
+		.svg-wrapper {
+		  margin-top: 50px!important;
+		  position: relative;
+		  width: 150px;
+		  height: 40px;
+		  display: inline-block;
+		  border-radius: 3px;
+		  margin-left: 5px;
+		  margin-right: 5px
+		}
+
+		#shape {
+		  stroke-width: 6px;
+		  fill: transparent;
+		  stroke: #009FFD;
+		  stroke-dasharray: 90 400;
+		  stroke-dashoffset: -220;
+		  transition: 1s all ease;
+		}
+
+		#text {
+		    text-align: center;
+		    position: absolute;
+		    top: 0;
+		    left: 0;
+		    right: 0;
+		    bottom: 0;
+		    line-height: 40px;
+		    font-size: 18px!important;
+		    cursor: pointer;
+		    color: #009FFD;
+		    transition: 1s all ease;
+		}
+
+		#text:hover {
+			color: #fff;
+		}
+
+		.svg-wrapper:hover #shape {
+		  stroke-dasharray: 50 0;
+		  stroke-width: 3px;
+		  stroke-dashoffset: 0;
+		  stroke: #fff;
+		}
+
+		.g-svg-pic.g-svg-pic  {
+			width: 1000px;
+			height: 525px;
+			margin: 50px auto;
+			background: url(../images/cssmagic/bitevssvg.png);
+			background-size: cover;
+		}
+		.g-svg-dasharray.g-svg-dasharray {
+			width: 760px;
+			height: 400px;
+			margin: 50px auto;
+			background: url(../images/cssmagic/svg-dash-array.png);
+			margin: 0 auto!important;
+			background-size: cover;
+		}
+		.g-svg-dashoffset.g-svg-dashoffset {
+			width: 760px;
+			height: 420px;
+			margin: 50px auto;
+			background: url(../images/cssmagic/bg-svg-offset.png);
+			margin: 0 auto!important;
+			background-size: cover;
+		}
+
+		.g-svg-line-container {
+			display: flex;
+			flex-direction: column;
+			position: relative;
+			width: 250px;
+			height: 250px;
+			margin: 0 auto !important;
+			cursor: pointer;
+		}
+
+		.g-svg-line-container svg {
+			width: 250px;
+			height: 50px;
+			margin-bottom: 30px;
+		}
+
+		.g-svg-line-container .rect {
+			width: 100%;
+			height: 100%;
+			stroke: #d1ef0b;
+			stroke-width: 2;
+			fill: transparent;
+		}
+
+		.g-svg-line-container .rect1 {
+			stroke-dasharray: 10 20 30 40 50 60;
+			stroke-dashoffset: 0;
+		}
+		.g-svg-line-container .rect2 {
+			stroke-dasharray: 10 20 30 40 50 60;
+			stroke-dashoffset: -20px;
+		}
+		.g-svg-line-container .rect3 {
+			stroke-dasharray: 10 20 30 40 50 60;
+			stroke-dashoffset: -40px;
+		}
+		.g-border-container {
+			width: 200px;
+			margin: 50px auto!important;
+		}
+		.arrow {
+			position: relative;
+			width: 180px;
+			height: 64px;
+			filter: url(#outline);
+		}
+		.g-border-container .arrow::before {
+			content: "";
+			position: absolute;
+			inset: 2px;
+			background: #f49714;
+			clip-path: polygon(0 0, 80% 0, 100% 50%, 80% 100%, 0 100%);    
+		}
+		.g-svg-text-bold.g-svg-text-bold  {
+			width: 500px;
+			height: 142px;
+			margin: 50px auto;
+			background: url(../images/cssmagic/svg-text-bold.png);
+			background-size: cover;
+		}
+		.g-svg-text-bold-demo.g-svg-text-bold-demo {
+			margin-top: 50px;
+			font-size: 120px;
+			color: #e98b00;
+			-webkit-text-stroke: 5px #f3e8c9;
+		}
+		.s-svg-text-bold.s-svg-text-bold {
+			position: relative;
+			-webkit-text-stroke: 0px;
+		}
+		.s-svg-text-bold::before {
+			content: "にほんご";
+			position: absolute;
+			inset: 0;
+			filter: url(#text-bold);
+			z-index: 0;
+		}
+		.g-svg-turbulence.g-svg-turbulence {
+			width: 574px;
+			height: 235px;
+			margin: 50px auto;
+			background: url(../images/cssmagic/svg-turbulence.gif);
+			background-size: cover;
+		}
+		.g-svg-fedis.g-svg-fedis {
+			width: 500px;
+			height: 190px;
+			margin: 20px auto;
+			background: url(../images/cssmagic/svg-demo-fedis.png);
+			background-size: cover;
+		}
+		.g-demo-flex {
+			position: fixed;
+			width: 100vw;
+			height: 100vh;
+			left: 50%!important;
+			top: 50%!important;
+			transform: translate(-50%, -50%);
+			inset: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		.g-demo-flex iframe {
+			margin: 20px;
+		}
+		.g-demo-flex h3 {
+			font-size: 24px;
+			position: absolute;
+			top: 20%;
+		}
+		</style>
+	</head>
+	<body>
+		<div class="g-wave" id="g-wave">
+	<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="100%" height="100%" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+		<defs>
+			<linearGradient id="bg">
+				<stop offset="0%" style="stop-color:rgba(130, 158, 249, 0.06)"></stop>
+				<stop offset="50%" style="stop-color:rgba(76, 190, 255, 0.6)"></stop>
+				<stop offset="100%" style="stop-color:rgba(115, 209, 72, 0.2)"></stop>
+			</linearGradient>
+			<path id="wave" fill="url(#bg)" d="M-363.852,502.589c0,0,236.988-41.997,505.475,0
+	s371.981,38.998,575.971,0s293.985-39.278,505.474,5.859s493.475,48.368,716.963-4.995v560.106H-363.852V502.589z" />
+		</defs>
+		<g>
+			<use xlink:href='#wave' opacity=".3">
+				<animateTransform
+	      attributeName="transform"
+	      attributeType="XML"
+	      type="translate"
+	      dur="10s"
+	      calcMode="spline"
+	      values="270 230; -334 180; 270 230"
+	      keyTimes="0; .5; 1"
+	      keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0"
+	      repeatCount="indefinite" />
+			</use>
+			<use xlink:href='#wave' opacity=".6">
+				<animateTransform
+	      attributeName="transform"
+	      attributeType="XML"
+	      type="translate"
+	      dur="8s"
+	      calcMode="spline"
+	      values="-270 230;243 220;-270 230"
+	      keyTimes="0; .6; 1"
+	      keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0"
+	      repeatCount="indefinite" />
+			</use>
+			<use xlink:href='#wave' opacty=".9">
+				<animateTransform
+	      attributeName="transform"
+	      attributeType="XML"
+	      type="translate"
+	      dur="6s"
+	      calcMode="spline"
+	      values="0 230;-140 200;0 230"
+	      keyTimes="0; .4; 1"
+	      keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0"
+	      repeatCount="indefinite" />
+			</use>
+		</g>
+	</svg>
+</div>
+		<div class="reveal">
+			<div class="slides">
+				<!-- Slides are separated by newline + three dashes + newline, vertical slides identical but two dashes -->
+				<section data-markdown data-separator="^\n---\n$" data-separator-vertical="^\n--\n$">
+					<script type="text/template">
+
+## Web 动画利器 - SVG 从入门到进阶
+
+---
+
+
+<div class="g-demo-flex">
+	<h3>下图哪一个是使用 SVG 绘制的动画？（CSS 无能为力）</h3>
+	<iframe height="400" style="width: 400px" scrolling="no" title="Ripple (SVG filter + CSS)" src="https://codepen.io/yuanchuan/embed/NLRxvN?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+		See the Pen <a href="https://codepen.io/yuanchuan/pen/NLRxvN">
+		Ripple (SVG filter + CSS)</a> by yuanchuan (<a href="https://codepen.io/yuanchuan">@yuanchuan</a>)
+		on <a href="https://codepen.io">CodePen</a>.
+	</iframe>
+
+	<iframe height="400" style="width: 400px;" scrolling="no" title="Elastic stroke CSS + SVG" src="https://codepen.io/yoksel/embed/XJbzrO?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+		See the Pen <a href="https://codepen.io/yoksel/pen/XJbzrO">
+		Elastic stroke CSS + SVG</a> by yoksel (<a href="https://codepen.io/yoksel">@yoksel</a>)
+		on <a href="https://codepen.io">CodePen</a>.
+	</iframe>
+
+	<iframe height="400" style="width: 400px" scrolling="no" title="SVG: Fractal Noise / Image Reveal" src="https://codepen.io/Chokcoco/embed/QWYpdyN?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+		See the Pen <a href="https://codepen.io/Chokcoco/pen/QWYpdyN">
+		SVG: Fractal Noise / Image Reveal</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+		on <a href="https://codepen.io">CodePen</a>.
+	</iframe>
+</div>
+
+---
+
+## Web 动画的简单分类
+
++ CSS3 动画
++ JavaScript 动画	
+	+ setInterval / requestAnimationFrame
+	+ canvas2D / canvas3D
++ SVG
+
+--
+
+SVG 是可缩放矢量图形，是 W3C XML 的分枝语言之一，用于标记可缩放的矢量图形。
+
+--
+
+
+#### 结构展示
+
+```XML
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" class="circle-load-rect-svg" width="800" height="200">
+	<line x1="20" y1="100" x2="100" y2="100" stroke-width="2" stroke="black" transform="rotate(-45 20 100)"/>
+	<rect x="10" y="10" width="100" height="100"/>
+	<circle cx="270" cy="50" r="50" stroke-width="2" stroke="#fff" fill="transparent"/>
+	<polygon points="400 0, 350 50, 400 100, 450 100, 500 50, 450 0" style="fill:white;" />
+	<ellipse cx="200" cy="80" rx="100" ry="50" style="fill:yellow" />
+	<polyline fill="none" stroke="white" points="700 100, 700 40, 760 70, 780 20, 720 0"/>
+</svg>
+
+```
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" class="circle-load-rect-svg" width="800" height="200">
+	<line x1="0" y1="100" x2="100" y2="100" stroke-width="2" stroke="white" />
+	<rect x="120" y="0" width="100" height="100" fill="#fff"/>
+	<circle cx="290" cy="50" r="50" stroke-width="2" stroke="#fff" fill="transparent"/>
+	<polygon points="400 0, 350 50, 400 100, 450 100, 500 50, 450 0" style="fill:white;" />
+	<ellipse cx="600" cy="50" rx="80" ry="50" style="fill:white" />
+	<polyline fill="none" stroke="white" points="700 100, 700 40, 760 70, 780 20, 720 0"/>
+</svg>
+
+--
+
+图形太复杂？简单几何图形无法拼凑？
+
+```HTML
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" class="loadsvg" width="300" height="400" viewbox="-150 0 600 400">
+	<path d="M139.8,0c71.9-1.1,100,36.6,114.8,90.6c2.6,9.7,1.9,20.3,4,30.9c0,7.3,0,14.5,0,21.8
+	c5.7,13.6,11.5,27.2,17.2,40.8c6.8,16.2,11.7,33.2,16.7,51.1c1.1,6.1,2.2,12.1,3.2,18.2c1.5,6.9,1.9,25.7-5.1,25.7
+	c-1.7-1.1-3.4-2.3-5.1-3.4c-5.9-4.4-10.9-12.9-15.3-19c-2.7-3.6-6.8-7.7-8.3-12.2c-0.1,0-0.2,0-0.3,0c0,1.6,0,3.3,0,4.9
+	c-0.8,4.4-1.6,8.8-2.4,13.2c-2.4,8-5.3,15.8-9.4,22.3c-4.1,6.6-9,12.3-13.7,18.2c-2.2,2.7-7.8,5.7-8.9,8.3c2.4,0.8,4.8,1.6,7.3,2.3
+	c8.7,3.4,27.7,9.3,23.4,21.3c-13.1,6.4-39.1,4.7-58.6,4.7c-12.4-0.4-24.7-0.9-37.1-1.3c-4.9-0.4-9.9-0.9-14.8-1.3
+	c-16.6,2.6-35.4,2.6-53.8,2.6c-14.6,0-30.4,0.9-43-1.6c-4.2-0.8-10.6-0.6-12.1-3.9c-2.9-3.6,1.1-8.2,3-9.9c4.8-4.4,12-7.2,18.6-9.9
+	c2.1-0.8,8.4-2,9.4-3.4c-16.6-11.4-34-39.5-34.7-66.5c-0.1,0-0.2,0-0.3,0c0,0.2,0,0.3,0,0.5c-2.3,3.5-4.7,6.9-7,10.4
+	c-3.9,5.4-8.5,10.4-12.6,15.6c-2.6,3.2-5.7,7.8-11.6,7.8c-4.3-6.7-3.7-22.8-1.6-31.9C7.5,222,13.9,200,23.1,178.6
+	c3.1-7.8,6.3-15.6,9.4-23.4c1.8-4.1,3.6-8.1,5.4-12.2c-0.1-4.4-0.2-8.8-0.3-13.2c0-8.9,0.1-18.4,1.9-26.5c1.3-6.6,2.7-13.2,4-19.7
+	c5.9-18.5,12.9-33.4,23.4-47c3.8-4.9,8-10.1,12.9-13.8c10.3-7.8,21.2-14.3,35.2-18.7c5.5-1.1,10.9-2.3,16.4-3.4
+	C134.3,0.5,137,0.3,139.8,0z" fill="transparent" stroke="#c1940d"/>                
+</svg>
+```
+
+
+--
+
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" class="loadsvg" width="300" height="400" viewbox="-150 0 600 400">
+	<path d="M139.8,0c71.9-1.1,100,36.6,114.8,90.6c2.6,9.7,1.9,20.3,4,30.9c0,7.3,0,14.5,0,21.8
+	c5.7,13.6,11.5,27.2,17.2,40.8c6.8,16.2,11.7,33.2,16.7,51.1c1.1,6.1,2.2,12.1,3.2,18.2c1.5,6.9,1.9,25.7-5.1,25.7
+	c-1.7-1.1-3.4-2.3-5.1-3.4c-5.9-4.4-10.9-12.9-15.3-19c-2.7-3.6-6.8-7.7-8.3-12.2c-0.1,0-0.2,0-0.3,0c0,1.6,0,3.3,0,4.9
+	c-0.8,4.4-1.6,8.8-2.4,13.2c-2.4,8-5.3,15.8-9.4,22.3c-4.1,6.6-9,12.3-13.7,18.2c-2.2,2.7-7.8,5.7-8.9,8.3c2.4,0.8,4.8,1.6,7.3,2.3
+	c8.7,3.4,27.7,9.3,23.4,21.3c-13.1,6.4-39.1,4.7-58.6,4.7c-12.4-0.4-24.7-0.9-37.1-1.3c-4.9-0.4-9.9-0.9-14.8-1.3
+	c-16.6,2.6-35.4,2.6-53.8,2.6c-14.6,0-30.4,0.9-43-1.6c-4.2-0.8-10.6-0.6-12.1-3.9c-2.9-3.6,1.1-8.2,3-9.9c4.8-4.4,12-7.2,18.6-9.9
+	c2.1-0.8,8.4-2,9.4-3.4c-16.6-11.4-34-39.5-34.7-66.5c-0.1,0-0.2,0-0.3,0c0,0.2,0,0.3,0,0.5c-2.3,3.5-4.7,6.9-7,10.4
+	c-3.9,5.4-8.5,10.4-12.6,15.6c-2.6,3.2-5.7,7.8-11.6,7.8c-4.3-6.7-3.7-22.8-1.6-31.9C7.5,222,13.9,200,23.1,178.6
+	c3.1-7.8,6.3-15.6,9.4-23.4c1.8-4.1,3.6-8.1,5.4-12.2c-0.1-4.4-0.2-8.8-0.3-13.2c0-8.9,0.1-18.4,1.9-26.5c1.3-6.6,2.7-13.2,4-19.7
+	c5.9-18.5,12.9-33.4,23.4-47c3.8-4.9,8-10.1,12.9-13.8c10.3-7.8,21.2-14.3,35.2-18.7c5.5-1.1,10.9-2.3,16.4-3.4
+	C134.3,0.5,137,0.3,139.8,0z" fill="transparent" stroke="#c1940d" stroke-width="2"/>                
+</svg>
+
+
+--
+
++ 基本形状元素
+	- `<circle>, <ellipse>, <line>, <path>, <polygon>, <polyline>, <rect>`
++ 动画元素
+	- `<animate>, <animateColor>, <animateMotion>, <animateTransform>, <set>`
++ 滤镜元素
+	- `<feBlend>, <feColorMatrix>, <feComponentTransfer>, <feComposite>`
++ 渐变元素
+	- `<linearGradient>, <radialGradient>`
++ 结构元素
+	- `<defs>, <g>, <svg>, <symbol>, <use>`
++ 文本内容元素
+	- `<altGlyph>, <textPath>, <text>, <tref>, <tspan>`
+
+---
+
+## 我们为什么需要 SVG ？
+
+
+--
+
++ 矢量，不失真，且可以是各种不规则图形
++ 支持脚本和 CSS 控制
++ 功能丰富、支持滤镜、动画
++ 兼容性佳
++ 使用方便，设计软件可以直接导出
+
+--
+
+SVG 生成的矢量图与传统位图的区别
+
+<div class="g-svg-pic"></div>
+
+---
+
+
+## SVG 相比 CSS 而言的一大优势
+
+能够绘制**贝塞尔**曲线
+
+![](https://user-images.githubusercontent.com/8554143/28254807-e89e59ca-6ae2-11e7-90a2-95fc45177fb6.png)
+
+
+--
+
+
+### 二次贝塞尔曲线
+
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/B%C3%A9zier_2_big.gif/240px-B%C3%A9zier_2_big.gif)
+
+
+
+--
+
+
+### 三次贝塞尔曲线
+
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/B%C3%A9zier_3_big.gif/240px-B%C3%A9zier_3_big.gif)
+
+
+--
+
+```XML
+<svg class="circle-load-s-svg" width="600px" height="200px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+	<path d="M20 120 C 10 10, 120 10, 200 120" fill="transparent" stroke="white"></path>
+	<path d="M20 100 C 97 50, 98 155, 176 99" fill="transparent" stroke="white"></path>
+</svg>
+```
+<svg class="circle-load-s-svg" width="600px" height="200px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+	<path d="M20 120 C 10 10, 120 10, 200 120" fill="transparent" stroke="white"></path>
+	<path d="M320 100 C 397 50, 398 155, 476 99" fill="transparent" stroke="white"></path>
+</svg>
+
+
+--
+
+
+<svg width="400px" height="300px" viewBox="0 0 400 200" version="1.1" xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<path id="textCircle" d="M 20 100 A 80 80 0 0 0 180 100 A 80 80 0 0 0 20 100" fill="none" stroke="#333"></path>
+		<path id="textCircle2" d="M220 100 C 353 9, 245 190, 389 86" fill="none" stroke="black"></path>
+	</defs>
+	<text class="textCircle" fill="yellowgreen">
+		<textPath xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#textCircle">这是一段随着path路径绘制的文字</textPath>
+	</text>
+	<text class="textCircle2" fill="deeppink">
+		<textPath xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#textCircle2">这是另一段随path路径绘制的文字</textPath>
+	</text>
+</svg>
+
+
+--
+
+
+### [SVG波浪](https://codepen.io/Chokcoco/pen/PerevE)
+
+
+
+
+
+---
+
+## 线条动画
+
+利用线条的从无到有实现一些动画效果
+
+是一种很好的动画的表演及呈现方式
+
+--
+
+SVG 中，非常有趣的两个属性，可控制用来描边的点划线的图案范式
+
+
++ `stroke-dasharray`：值是一组数组，没数量上限，每个数字交替表示边框与间隔的宽度；
++ `stroke-dashoffset`：表示的是边框线的偏移量
+
+--
+
+<div class="g-svg-line-container">
+	<svg xmlns="http://www.w3.org/2000/svg">
+		<rect class="rect rect1"/>
+	</svg>
+	<svg xmlns="http://www.w3.org/2000/svg">
+		<rect class="rect rect2"/>
+	</svg>
+	<svg xmlns="http://www.w3.org/2000/svg">
+		<rect class="rect rect3"/>
+	</svg>
+</div>
+
+--
+
+<div class="g-svg-dasharray"></div>
+
+--
+
+<div class="g-svg-dashoffset"></div>
+
+--
+
+
+<div class="m-btn s-svgline">
+    <svg viewBox="0 0 180 64" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <rect class="shape" height="64" width="180"></rect>
+    </svg>
+    <div class="g-text">Hover Me</div>
+</div>
+
+<div class="svg-wrapper">
+  <svg height="40" width="150" xmlns="http://www.w3.org/2000/svg">
+    <rect id="shape" height="40" width="150" />
+    <div id="text">
+      Button
+    </div>
+  </svg>
+</div>
+
+--
+
+<iframe height="500" style="width: 100%;" scrolling="no" title="Alipay RedPacket Scan Animation" src="https://codepen.io/Chokcoco/embed/YzPjaXp?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/YzPjaXp">
+  Alipay RedPacket Scan Animation</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+<iframe height="500" style="width: 100%;" scrolling="no" title="Linear loading" src="https://codepen.io/Chokcoco/embed/jOGQGJP?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/jOGQGJP">
+  Linear loading</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+
+--
+
+
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" class="loadsvg" width="300" height="400" viewbox="-150 0 600 400">
+	<path class="g-icon-qq" d="M139.8,0c71.9-1.1,100,36.6,114.8,90.6c2.6,9.7,1.9,20.3,4,30.9c0,7.3,0,14.5,0,21.8
+	c5.7,13.6,11.5,27.2,17.2,40.8c6.8,16.2,11.7,33.2,16.7,51.1c1.1,6.1,2.2,12.1,3.2,18.2c1.5,6.9,1.9,25.7-5.1,25.7
+	c-1.7-1.1-3.4-2.3-5.1-3.4c-5.9-4.4-10.9-12.9-15.3-19c-2.7-3.6-6.8-7.7-8.3-12.2c-0.1,0-0.2,0-0.3,0c0,1.6,0,3.3,0,4.9
+	c-0.8,4.4-1.6,8.8-2.4,13.2c-2.4,8-5.3,15.8-9.4,22.3c-4.1,6.6-9,12.3-13.7,18.2c-2.2,2.7-7.8,5.7-8.9,8.3c2.4,0.8,4.8,1.6,7.3,2.3
+	c8.7,3.4,27.7,9.3,23.4,21.3c-13.1,6.4-39.1,4.7-58.6,4.7c-12.4-0.4-24.7-0.9-37.1-1.3c-4.9-0.4-9.9-0.9-14.8-1.3
+	c-16.6,2.6-35.4,2.6-53.8,2.6c-14.6,0-30.4,0.9-43-1.6c-4.2-0.8-10.6-0.6-12.1-3.9c-2.9-3.6,1.1-8.2,3-9.9c4.8-4.4,12-7.2,18.6-9.9
+	c2.1-0.8,8.4-2,9.4-3.4c-16.6-11.4-34-39.5-34.7-66.5c-0.1,0-0.2,0-0.3,0c0,0.2,0,0.3,0,0.5c-2.3,3.5-4.7,6.9-7,10.4
+	c-3.9,5.4-8.5,10.4-12.6,15.6c-2.6,3.2-5.7,7.8-11.6,7.8c-4.3-6.7-3.7-22.8-1.6-31.9C7.5,222,13.9,200,23.1,178.6
+	c3.1-7.8,6.3-15.6,9.4-23.4c1.8-4.1,3.6-8.1,5.4-12.2c-0.1-4.4-0.2-8.8-0.3-13.2c0-8.9,0.1-18.4,1.9-26.5c1.3-6.6,2.7-13.2,4-19.7
+	c5.9-18.5,12.9-33.4,23.4-47c3.8-4.9,8-10.1,12.9-13.8c10.3-7.8,21.2-14.3,35.2-18.7c5.5-1.1,10.9-2.3,16.4-3.4
+	C134.3,0.5,137,0.3,139.8,0z" fill="transparent" stroke="#c1940d" stroke-width="2"/>                
+</svg>
+
+
+--
+
+
+<iframe height="500" style="width: 100%;" scrolling="no" title="SVG Heart Line Neon Animation" src="https://codepen.io/Chokcoco/embed/VwWgKWK?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/VwWgKWK">
+  SVG Heart Line Neon Animation</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+SVG 路径绘制工具：
+
+1. 简单路径绘制工具 —— [SVGPathEditor](https://yqnn.github.io/svg-path-editor/)
+2. Adobe Photoshop 和 AI，导出复杂路径
+
+
+---
+
+SVG 滤镜动画
+
+在 SVG 中，除去矢量图形，勾勒曼妙线条外，还有一类非常强大的、CSS 难与之媲美的功能，那就是 SVG 滤镜。
+
+--
+
+有了 CSS 滤镜，为什么还需要 SVG 滤镜？
+
+
+--
+
+简单来说，SVG 滤镜基本上能够实现 CSS 滤镜的所有功能，同时，它又具备一些 CSS 滤镜无法实现的能力。
+
+
+--
+
+```html 
+<div class="cssFilter"></div>
+<div class="svgFilter"></div>
+<svg>
+  <defs>
+    <filter id="blur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" />
+    </filter>
+  </defs>
+</svg>
+```
+```Css
+.cssblur {
+	filter: blur(5px);
+}
+.svgFilter{
+	filter: url(#blur);
+}
+```
+
+
+--
+
+<iframe height="500" style="width: 100%;" scrolling="no" title="SVG 滤镜" src="https://codepen.io/Chokcoco/embed/MWZNxgQ?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/MWZNxgQ">
+  SVG 滤镜</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+
+### 滤镜的种类：
+
+```HTML 
++ feBlend
++ feColorMatrix
++ feComponentTransfer
++ feComposite
++ feConvolveMatrix
++ feDiffuseLighting
++ feDisplacementMap
++ feFlood
++ feGaussianBlur
++ feImage
++ feMerge
++ feMorphology
++ feOffset
++ feSpecularLighting
++ feTile
++ feTurbulence
++ feDistantLight
++ fePointLight
++ feSpotLight
+```
+
+--
+
+滤镜的使用方式
+
+1. 定义一个 SVG 滤镜，需要使用 `<defs>` 和 `<filter>` 标签；
+2. 所有的 SVG 滤镜元素都需要定义在 `<defs>` 标记内；
+3. 其次，使用 `<filter>` 标记用来定义 SVG 滤镜。 `<filter>` 标签需要一个 id 属性，它是这个滤镜的标志。SVG 图形使用这个 id 来引用滤镜。
+4. 在 `<filter>` 标签内，利用上面提到的 SVG 滤镜标签，书写实际的滤镜效果。
+5. 在具体的 SVG 图形，或者 HTML 元素中使用该滤镜。
+
+
+--
+
+## feMorphology 滤镜
+
+feMorphology 为形态滤镜，它的两个操作可以使源图形腐蚀（变薄）或扩张（加粗）。
+
+
+--
+
+```html 
+<div class="g-text">
+	<p>Normal Text</p>
+	<p class="dilate">Normal Text</p>
+	<p class="erode">Normal Text</p>
+</div>
+
+<svg width="0" height="0">
+	<filter id="dilate">
+			<feMorphology in="SourceAlpha" result="DILATED" operator="dilate" radius="3"></feMorphology>
+	</filter>
+	<filter id="erode">
+			<feMorphology in="SourceAlpha" result="ERODE" operator="erode" radius="1"></feMorphology>
+	</filter>
+</svg>
+```
+```Css
+p {
+	font-size: 64px;
+}
+.dilate {
+	filter: url(#dilate);
+}
+.erode {
+	filter: url(#erode);
+}
+```
+
+--
+
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="SVG feMorphology DEMO" src="https://codepen.io/Chokcoco/embed/dyNbXJw?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/dyNbXJw">
+  SVG feMorphology DEMO</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+feMorphology 滤镜实战 —— 生成不规则元素的边框
+
+
+<div class="g-border-container">
+	<div class="arrow"></div>
+</div>
+
+<svg>
+	<filter id="outline">
+		<feMorphology in="SourceAlpha" result="DILATED" operator="dilate" radius="1"></feMorphology>
+
+		<feFlood flood-color="white" flood-opacity="1" result="flood"></feFlood>
+		<feComposite in="flood" in2="DILATED" operator="in" result="OUTLINE"></feComposite>
+
+		<feMerge>
+				<feMergeNode in="OUTLINE" />
+				<feMergeNode in="SourceGraphic" />
+		</feMerge>
+	</filter>	
+</svg>
+
+
+--
+
+<iframe height="600" style="width: 100%;" scrolling="no" title="transparent 配合 SVG feMorphology 滤镜生成不规则边框 " src="https://codepen.io/Chokcoco/embed/ExZPpQq?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/ExZPpQq">
+  transparent 配合 SVG feMorphology 滤镜生成不规则边框 </a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+思考一下，如何实现文字的极致加粗效果？
+
+<div class="g-svg-text-bold"></div>
+
+--
+
+```HTML 
+<p>にほんご</p>
+```
+```CSS 
+p {
+	font-size: 120px;
+	color: #e98b00;
+	-webkit-text-stroke: 5px #f3e8c9;
+}
+```
+
+<div class="g-svg-text-bold-demo">にほんご</div>
+
+
+--
+
+
+```HTML 
+<p>にほんご</p>
+
+<svg width="0" height="0">
+    <filter id="outline">
+        <feMorphology in="SourceAlpha" result="DILATED" operator="dilate" radius="10"></feMorphology>
+
+        <feFlood flood-color="#f3e8c9" flood-opacity="1" result="flood"></feFlood>
+        <feComposite in="flood" in2="DILATED" operator="in" result="OUTLINE"></feComposite>
+
+        <feMerge>
+            <feMergeNode in="OUTLINE" />
+            <feMergeNode in="SourceGraphic" />
+        </feMerge>
+    </filter>
+</svg>
+```
+
+<div class="g-svg-text-bold-demo s-svg-text-bold">にほんご</div>
+
+<svg width="0" height="0">
+    <filter id="text-bold">
+        <feMorphology in="SourceAlpha" result="DILATED" operator="dilate" radius="10"></feMorphology>
+
+        <feFlood flood-color="#f3e8c9" flood-opacity="1" result="flood"></feFlood>
+        <feComposite in="flood" in2="DILATED" operator="in" result="OUTLINE"></feComposite>
+
+        <feMerge>
+            <feMergeNode in="OUTLINE" />
+            <feMergeNode in="SourceGraphic" />
+        </feMerge>
+    </filter>
+</svg>
+
+
+--
+
+## feTurbulence 滤镜
+
+turbulence 意为湍流，不稳定气流，而 SVG `<feTurbulence>` 滤镜能够实现半透明的烟熏或波状图像。 通常用于实现一些特殊的纹理。
+
+
+--
+
+```HTML 
+<filter id="fractal" >
+  <feTurbulence id="fe-turb-fractal" type="fractalNoise" baseFrequency="0.00025" numOctaves="1"/>
+</filter>
+
+<filter id="turbu">
+  <feTurbulence id="fe-turb-turbulence" type="turbulence" baseFrequency="0.00025" numOctaves="1"/>
+</filter>
+```
+
+<div class="g-svg-turbulence"></div>
+
+--
+
+feTurbulence 有三个属性是我们特别需要注意的：type、baseFrequency、numOctaves：
+- type：实现的滤镜的类型，可选fractalNoise 分形噪声，或者是 turbulence 湍流噪声。
+  - fractalNoise：分形噪声更加的平滑，它产生的噪声质感更接近云雾
+  - turbulence：湍流噪声
+- baseFrequency： 表示噪声函数的基本频率的参数，频率越小，产生的图形越大，频率越大，产生的噪声越复杂其图形也越小越精细，通常的取值范围在 0.02 ~ 0.2
+- numOctaves：表示噪声函数的精细度，数值越高，产生的噪声更详细。 默认值为1
+
+
+--
+
+通过 feTurbulence 噪声得到了噪声图形，然后通过 feDisplacementMap 滤镜根据 feTurbulence 所产生的噪声图形进行形变扭曲液化
+
+> feDisplacementMap 为映射置换滤镜，用于改变元素和图形的像素位置的。该滤镜通过遍历原图形的所有像素点，重新映射到一个新的位置，形成一个新的图形。
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="feTurbulence text demo" src="https://codepen.io/Chokcoco/embed/dyNbedP?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/dyNbedP">
+  feTurbulence text demo</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+--
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="使用 SVG 滤镜 feTurbulence 让图片动起来" src="https://codepen.io/Chokcoco/embed/eYgJbmO?default-tab=css%2Cresult&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/eYgJbmO">
+  使用 SVG 滤镜 feTurbulence 让图片动起来</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+## feDisplacementMap 置换滤镜
+
+上述的 feTurbulence 滤镜与文字的结合使用中，通过 feTurbulence 噪声得到了噪声图形，然后通过 feDisplacementMap 滤镜根据 feTurbulence 所产生的噪声图形进行形变扭曲液化，得到最终的效果。
+
+而 feDisplacementMap 滤镜中的 scale 参数表示新得到的图像的扭曲程度，这个值越大，图像越加扭曲不可识别。
+
+
+--
+
+```HTML 
+<div></div>
+<div class="fractal"></div>
+<svg viewBox="0 0 200 200" width="200px" height="200px">
+  <defs>
+    <filter id="fractal" filterUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
+      <feTurbulence type="fractalNoise" baseFrequency="0.995" numOctaves="10" seed="1" stitchTiles="noStitch" result="img" />
+      <feDisplacementMap in="SourceGraphic" in2="img" xChannelSelector="R" yChannelSelector="G" scale="600" />
+    </filter>
+  </defs>
+</svg>
+```
+```CSS 
+.fractal { filter: url(#fractal) }
+```
+
+<div class="g-svg-fedis"></div>
+
+--
+
+让滤镜的 `scale="600"` 动态变化回 `scale="1"`
+
+> 当此参数为 1 时，图像表示为正常状态，也就能实现一个图形从粒子化到正常化的转变：
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="SVG Filter feTurbulence &amp; feDisplacementMap 实现图片粒子化复原动画" src="https://codepen.io/Chokcoco/embed/OJWXjWz?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/OJWXjWz">
+  SVG Filter feTurbulence &amp; feDisplacementMap 实现图片粒子化复原动画</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe
+
+
+--
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="SVG Filter Button Effects" src="https://codepen.io/Chokcoco/embed/KKaMNZz?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/KKaMNZz">
+  SVG Filter Button Effects</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+---
+
+## 数据可视化([D3.js](https://d3js.org/))
+
+
+--
+
+
+### [可视化地图](https://observablehq.com/@d3/zoom-to-bounding-box?intent=fork)
+
+
+--
+
+<div class="widget">
+	<div id="chart" class="chart-container">
+	</div>
+</div>
+
+--
+
+<svg id="fillgauge1" width="97%" height="250" onclick="gauge1.update(NewValue());"></svg>
+<svg id="fillgauge2" width="19%" height="200" onclick="gauge2.update(NewValue());"></svg>
+<svg id="fillgauge3" width="19%" height="200" onclick="gauge3.update(NewValue());"></svg>
+<svg id="fillgauge4" width="19%" height="200" onclick="gauge4.update(NewValue());"></svg>
+<svg id="fillgauge5" width="19%" height="200" onclick="gauge5.update(NewValue());"></svg>
+<svg id="fillgauge6" width="19%" height="200" onclick="gauge6.update(NewValue());"></svg>
+
+
+--
+
+
+<iframe height='405' scrolling='no' title='D3JS力向导图示意' src='http://codepen.io/Chokcoco/embed/pEoJmv/?height=265&theme-id=0&default-tab=js,result&embed-version=2' frameborder='no' allowtransparency='true' allowfullscreen='true' style='width: 100%;'>See the Pen <a href='https://codepen.io/Chokcoco/pen/pEoJmv/'>D3JS力向导图示意</a> by Chokcoco (<a href='https://codepen.io/Chokcoco'>@Chokcoco</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+
+---
+
+SVG 离 Web 开发并不遥远，CSS 中与 SVG 相关联的属性有：
+
+1. filter - 引入 SVG 滤镜
+2. clip-path - 不规则裁剪
+3. motion-path（offset-path） - 路径动画
+4. shape-outside - 不规则布局
+
+--
+
+思考一下，这个动画你会如何实现？
+
+![](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4418f01052cc4650b40b924ca3d3dae6~tplv-k3u1fbpfcp-jj-mark:1512:0:0:0:q75.awebp)
+
+
+--
+
+本质就是裁剪区域的变化，利用 clip-path 的路径变化，可以轻松实现：
+
+```HTML 
+<div></div>
+```
+```CSS 
+.g-container {
+	position: relative;
+	width: 400px;
+	height: 300px;
+	overflow: hidden;
+	transition: clip-path .3s linear;
+	clip-path: circle(20px at 44px 44px);
+	background: #fff;
+	
+	&:hover {
+			clip-path: circle(460px at 44px 44px);
+	}
+}
+```
+
+[DEMO](https://codepen.io/Chokcoco/pen/yLorrRm)
+
+
+--
+
+思考一下，这个动画你会如何实现？
+
+<iframe height="500" style="width: 100%;" scrolling="no" title="CSS Motion Path offset-path animation" src="https://codepen.io/Chokcoco/embed/dyNaZea?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/dyNaZea">
+  CSS Motion Path offset-path animation</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+利用 offset-path，实现特定不规则路线的动画行进
+
+```CSS 
+div {
+  offset-path: path("M1 260C65.034 260.999 102.054 253.632 130.069 241.15C158.083 228.668 177.093 244.645 211.612 258.125C246.13 271.606 296.157 293.574 342.181 258.125C388.206 222.677 405.715 140.297 479.754 139.798C553.793 139.298 591.313 207.699 667.854 258.125C744.395 308.552 782.416 287.783 802.425 269.608C846.949 229.167 924.49 109.841 943 1");
+  offset-distance: 0%;
+	animation: ride-hills 10s ease-in infinite;
+}
+
+@keyframes ride-hills {
+  to {
+    offset-distance: 100%;
+  }
+}
+```
+[DEMO](https://codepen.io/Chokcoco/pen/dyNaZea)
+
+--
+
+再思考一下，这个布局是纯 CSS 能实现的吗？
+
+<iframe height="450" style="width: 80%;" scrolling="no" title="shape-outside animation" src="https://codepen.io/Chokcoco/embed/RwpgmaK?default-tab=result&editable=true" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/Chokcoco/pen/RwpgmaK">
+  shape-outside animation</a> by Chokcoco (<a href="https://codepen.io/Chokcoco">@Chokcoco</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+--
+
+利用 shape-outside，实现不规则布局及不规则布局动画
+
+```HTML 
+<div id="container">
+	<div id="left"></div>
+	<div id="right"></div>
+	<p>Lorem ipsum ... </p>
+</div>
+```
+```CSS 
+#left {
+  float: left;
+  shape-outside: polygon(51.33% 12px, 100.03% 2.17%, 97.87% 19.59%, 92.11% 16.84%, 83.26% 12.61%, 72.27% 12.33%, 59.8% 17.47%, 53.86% 27.8%, 52.21% 37.23%, 58.14% 52.53%, 68.47% 64.73%, 99% 87%, 217px 86.93%);
+  animation: morph1 10s linear infinite;
+}
+#right {
+  float: right;
+  shape-outside: polygon(70.33% 13px, 0.92% 2.68%, 0.92% 19.57%, 5.42% 18.47%, 9.85% 15.59%, 23.11% 11.65%, 32.26% 13.97%, 38.67% 16.73%, 43.4% 23.07%, 47.06% 29.8%, 46.41% 44.23%, 38.14% 57.33%, 26.67% 68.73%, 0.4% 87%, 353px 84.73%);
+  animation: morph2 6s linear infinite;
+
+}
+@keyframes morph1 {
+  50% {
+   shape-outside: polygon(45.93% 11px, 100.03% 2.17%, 95.87% 19.19%, 92.11% 16.84%, 83.26% 12.61%, 72.27% 12.33%, 53% 16.47%, 52.26% 27.8%, 52.21% 37.23%, 51.74% 52.93%, 51.27% 66.33%, 51.6% 87.6%, 217px 86.93%);
+  }
+}
+@keyframes morph2 {
+  50% {
+   shape-outside: polygon(70.33% 13px, 0.92% 2.68%, 0.92% 19.77%, 5.82% 19.67%, 10.85% 16.59%, 23.11% 11.65%, 40.26% 16.17%, 47.87% 17.53%, 48% 22.27%, 47.86% 29.8%, 48.01% 44.43%, 48.34% 57.93%, 48.47% 68.33%, 48.8% 84%, 353px 84.73%);
+  }
+}
+```
+[DEMO](https://codepen.io/Chokcoco/pen/RwpgmaK)
+
+--
+
+掌握基本的 SVG 知识，将其延伸至对上述 CSS 属性的掌握，能极大提升我们的武器库，增加我们解决问题的途径，增强竞争力。
+
+---
+
+
+<svg id="g-svg-thankyou" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 800 280" enable-background="new 0 0 800 280" xml:space="preserve">
+  
+  <!-- underlines -->
+  <line id="underline1" class="underline plum" x1="146" y1="176" x2="146" y2="176"/>
+  <line id="underline2" class="underline blue" x1="146" y1="184" x2="146" y2="184"/>
+  <line id="underline3" class="underline purple" x1="146" y1="192" x2="146" y2="192"/>
+  <line id="underline4" class="underline lime" x1="146" y1="200" x2="146" y2="200"/>
+  
+  <!-- T -->
+  <line id="t1" x1="151.6" y1="68.4" x2="151.6" y2="68.4"/>
+  <line id="t1d1" class="dec blue" x1="159" y1="70" x2="159" y2="70" />
+  <line id="t1d2" class="dec lime" x1="165" y1="70" x2="165" y2="70" />
+  <line id="t2" x1="113.6" y1="70.6" x2="113.6" y2="70.6"/>
+  <line id="t2d1" class="dec purple" x1="106" y1="62" x2="106" y2="62" />
+  <line id="t2d2" class="dec lime" x1="102" y1="55" x2="102" y2="55" />
+  <line id="t2d3" class="dec plum" x1="98" y1="50" x2="98" y2="50" />
+  
+  <!-- H -->
+  <line id="h1" x1="214.6" y1="51.4" x2="214.6" y2="51.4"/>
+  <line id="h2" x1="267.6" y1="86.6" x2="267.6" y2="86.6"/>
+  <line id="h2d1" class="dec purple" x1="220" y1="109" x2="220" y2="109" />
+  <line id="h2d2" class="dec plum" x1="220" y1="115" x2="220" y2="115" />
+  <line id="h2d3" class="dec lime" x1="220" y1="121" x2="220" y2="121" />
+  <line id="h3" x1="264.6" y1="47.4" x2="264.6" y2="47.4"/>
+  <ellipse id="h3d1" class="dec dot blue" cx="256" cy="51" rx="0" ry="0"/>
+  <ellipse id="h3d2" class="dec dot plum" cx="256" cy="61" rx="0" ry="0"/>
+  <ellipse id="h3d3" class="dec dot purple" cx="256" cy="71" rx="0" ry="0"/>
+  <ellipse id="h3d4" class="dec dot lime" cx="256" cy="81" rx="0" ry="0"/>
+  
+  <!-- A -->
+  <polyline id="a1" points="305.6,51.6 305.6,51.6 305.6,51.6 "/>
+  <line id="a2" x1="293.6" y1="101.4" x2="293.6" y2="101.4"/>
+  <line id="a2d1" class="dec blue" x1="307" y1="120" x2="307" y2="120" />
+  <line id="a2d2" class="dec lime" x1="307" y1="127" x2="307" y2="127" />
+  <line id="a2d3" class="dec plum" x1="307" y1="134" x2="307" y2="134" />
+  
+  <!-- N -->
+  <line id="n1d1" class="dec purple" x1="352" y1="147" x2="352" y2="147" />
+  <line id="n1d2" class="dec blue" x1="358" y1="147" x2="358" y2="147" />
+  <line id="n1d3" class="dec plum" x1="363" y1="147" x2="363" y2="147" />
+  <line id="n1d4" class="dec lime" x1="369" y1="80" x2="369" y2="80" />
+  <line id="n1d5" class="dec plum" x1="365" y1="74" x2="365" y2="74" />
+  <polyline id="n1" points="345.6,145.4 345.6,145.4 345.6,145.4 
+  345.6,145.4 "/>
+  
+  <!-- K -->
+  <line id="k1d1" class="dec blue" x1="419" y1="60" x2="419" y2="60" />
+  <line id="k1" x1="411.6" y1="56.4" x2="411.6" y2="56.4"/>
+  <polyline id="k2" points="414.1,97.6 414.1,97.6 414.1,97.6 "/>
+  <ellipse id="k2d1" class="dec dot blue" cx="430" cy="103" rx="0" ry="0"/>
+  <ellipse id="k2d2" class="dec dot plum" cx="439" cy="112" rx="0" ry="0"/>
+  <ellipse id="k2d3" class="dec dot purple" cx="447" cy="121" rx="0" ry="0"/>
+  <ellipse id="k2d4" class="dec dot lime" cx="455" cy="130" rx="0" ry="0"/>
+  
+  <!-- Y -->
+  <line id="y1d1" class="dec plum" x1="510" y1="56" x2="510" y2="56" />
+  <line id="y1d2" class="dec blue" x1="502" y1="60" x2="502" y2="60" />
+  <line id="y1" x1="463.6" y1="62.6" x2="463.6" y2="62.6"/>
+  <line id="y2" x1="517.6" y1="56.6" x2="517.6" y2="56.6"/>
+  <ellipse id="y2d1" class="dec dot purple" cx="459" cy="75" rx="0" ry="0"/>
+  <ellipse id="y2d2" class="dec dot lime" cx="465" cy="84" rx="0" ry="0"/>
+  
+  <!-- O -->
+  <ellipse id="o1d1" class="dec dot purple" cx="544.6" cy="110.1" rx="0" ry="0"/>
+  <ellipse id="o1d2" class="dec dot plum" cx="544.6" cy="110.1" rx="0" ry="0"/>
+  <ellipse id="o1d3" class="dec dot blue" cx="544.6" cy="110.1" rx="0" ry="0"/>
+  <ellipse id="o1d4" class="dec dot lime" cx="544.6" cy="110.1" rx="0" ry="0"/>
+  <ellipse id="o1" cx="544.6" cy="110.1" rx="0" ry="0"/>
+  
+  <!-- U -->
+  <path id="u1" d="M580.6,63.4v43.1c0,0,3.2,42,26.2,44
+    s26.8-43.5,26.8-43.5V63.4"/>
+  <line id="u1d1" class="dec purple" x1="626" y1="114" x2="626" y2="114" />
+  <line id="u1d2" class="dec plum" x1="620" y1="106" x2="620" y2="106" />
+  
+  <!-- ! -->
+  <line id="e1" x1="669.6" y1="56.6" x2="669.6" y2="56.6"/>
+  <line id="e1d1" class="dec lime" x1="662" y1="56" x2="662" y2="56" />
+  <line id="e1d2" class="dec blue" x1="658" y1="56" x2="658" y2="56" />
+  <line id="e1d3" class="dec plum" x1="677" y1="56" x2="677" y2="56" />
+  <ellipse id="e2" cx="655" cy="150" rx="0" ry="0"/>
+  
+   <!-- you're awesome -->
+  <text class="g-none" x="150" y="203" font-size="30" id="text"><tspan dx="-380" dy="20">Y</tspan><tspan dy="-0.7">O</tspan><tspan dy="-0.7">U</tspan><tspan dy="-0.7">'</tspan><tspan dy="-0.7">R</tspan><tspan dy="-0.7">E</tspan><tspan dy="-0.7">&nbsp;</tspan><tspan dy="-0.7">A</tspan><tspan dy="-0.7">W</tspan><tspan dy="-0.7">E</tspan><tspan dy="-0.7">S</tspan><tspan dy="-0.7">O</tspan><tspan dy="-0.7">M</tspan><tspan dy="-0.7">E</tspan></text>
+</svg>
+
+
+					</script>
+				</section>
+			</div>
+		</div>
+		<script src="../lib/js/head.min.js"></script>
+		<script src="../js/reveal.js"></script>
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+		<script src="../js/liquidFillGauge.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+		<!-- <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/d3/4.9.1/d3.min.js"></script> -->
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: '../plugin/markdown/marked.js' },
+					{ src: '../plugin/markdown/markdown.js' },
+					{ src: '../plugin/notes/notes.js', async: true },
+					{ src: '../plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+		<script>
+			// 键盘事件
+
+			let wave = document.getElementById('g-wave');
+			let isOnlyOnePie = 0;
+			let isOnlyOneLiquid= 0;
+			let isOnlyOneThank= 0;
+
+			window.addEventListener('keydown', function(e){
+				switch(e.keyCode) {
+					case 37:
+					case 38:
+					case 39:
+					case 40:
+						stageChange();
+				}
+			});
+
+			function stageChange() {
+				let reg = /\/4\/5/;
+				let pieReg = /\/7\/2/;
+				let liquidReg = /\/7\/3/;
+				let thankyouReg = /\/9/;
+
+				if(reg.test(location.href)) {
+					wave.style.display = "block";
+				} else {
+					wave.style.display = "none";
+				}
+
+				if(pieReg.test(location.href) && !isOnlyOnePie) {
+					isOnlyOnePie = !isOnlyOnePie;
+					pieChart();
+				}
+
+				if(liquidReg.test(location.href) && !isOnlyOneLiquid) {
+					isOnlyOneLiquid = !isOnlyOneLiquid;
+					liquidChart();
+				}
+
+				if(thankyouReg.test(location.href) && !isOnlyOneThank) {
+					isOnlyOneThank = !isOnlyOneThank;
+					thankyou();
+				}
+			}
+
+			function pieChart() {
+				var dataset = [
+				  { name: "IE", percent: 9.1 },
+				  { name: "Chrome", percent: 62.51 },
+				  { name: "Safari", percent: 13.68 },
+				  { name: "Firefox", percent: 8.71 },
+				  { name: "Others", percent: 6.01 }
+				];
+
+				var pie = d3.layout
+				  .pie()
+				  .value(function(d) {
+				    return d.percent;
+				  })
+				  .sort(null)
+				  .padAngle(0.03);
+
+				var w = 300,
+				  h = 300;
+
+				var outerRadius = w / 2;
+				var innerRadius = 100;
+
+				var color = d3.scale.category10();
+
+				var arc = d3.svg
+				  .arc()
+				  .outerRadius(outerRadius)
+				  .innerRadius(innerRadius);
+
+				  console.log(d3.select("#chart"));
+
+				var svg = d3
+				  .select("#chart")
+				  .append("svg")
+				  .attr({
+				    width: w,
+				    height: h,
+				    class: "shadow"
+				  })
+				  .append("g")
+				  .attr({
+				    transform: "translate(" + w / 2 + "," + h / 2 + ")"
+				  });
+				var path = svg
+				  .selectAll("path")
+				  .data(pie(dataset))
+				  .enter()
+				  .append("path")
+				  .attr({
+				    d: arc,
+				    fill: function(d, i) {
+				      return color(d.data.name);
+				    }
+				  });
+
+				path
+				  .transition()
+				  .duration(1000)
+				  .attrTween("d", function(d) {
+				    var interpolate = d3.interpolate({ startAngle: 0, endAngle: 0 }, d);
+				    return function(t) {
+				      return arc(interpolate(t));
+				    };
+				  });
+
+				var restOfTheData = function() {
+				  var text = svg
+				    .selectAll("text")
+				    .data(pie(dataset))
+				    .enter()
+				    .append("text")
+				    .transition()
+				    .duration(200)
+				    .attr("transform", function(d) {
+				      return "translate(" + arc.centroid(d) + ")";
+				    })
+				    .attr("dy", ".4em")
+				    .attr("text-anchor", "middle")
+				    .text(function(d) {
+				      return d.data.percent + "%";
+				    })
+				    .style({
+				      fill: "#fff",
+				      "font-size": "10px"
+				    });
+
+				  var legendRectSize = 20;
+				  var legendSpacing = 7;
+				  var legendHeight = legendRectSize + legendSpacing;
+
+				  var legend = svg
+				    .selectAll(".legend")
+				    .data(color.domain())
+				    .enter()
+				    .append("g")
+				    .attr({
+				      class: "legend",
+				      transform: function(d, i) {
+				        //Just a calculation for x & y position
+				        return "translate(-35," + (i * legendHeight - 65) + ")";
+				      }
+				    });
+				  legend
+				    .append("rect")
+				    .attr({
+				      width: legendRectSize,
+				      height: legendRectSize,
+				      rx: 20,
+				      ry: 20
+				    })
+				    .style({
+				      fill: color,
+				      stroke: color
+				    });
+
+				  legend
+				    .append("text")
+				    .attr({
+				      x: 30,
+				      y: 15
+				    })
+				    .text(function(d) {
+				      return d;
+				    })
+				    .style({
+				      fill: "#929DAF",
+				      "font-size": "14px"
+				    });
+				};
+
+				setTimeout(restOfTheData, 1000);
+			}
+
+			function thankyou(){
+			  // SELECTING...
+			  // T
+			  var t1 = document.getElementById('t1');
+			  var t2 = document.getElementById('t2');
+			  var t2d = [document.getElementById('t2d1'), document.getElementById('t2d2'), document.getElementById('t2d3')];
+			  var t1d = [document.getElementById('t1d1'), document.getElementById('t1d2')]; 
+
+			  // H
+			  var h1 = document.getElementById('h1');
+			  var h2 = document.getElementById('h2');
+			  var h2d = [document.getElementById('h2d1'), document.getElementById('h2d2'), document.getElementById('h2d3')];
+			  var h3 = document.getElementById('h3');
+			  var h3d = [document.getElementById('h3d1'), document.getElementById('h3d2'), document.getElementById('h3d3'), document.getElementById('h3d4')];
+
+			  // A
+			  var a1 = document.getElementById('a1');
+			  var a2 = document.getElementById('a2');
+			  var a2d = [document.getElementById('a2d1'), document.getElementById('a2d2'), document.getElementById('a2d3')];
+
+			  // N
+			  var n1 = document.getElementById('n1');
+			  var n1d = [document.getElementById('n1d1'), document.getElementById('n1d2'), document.getElementById('n1d3'),
+			  document.getElementById('n1d4'), document.getElementById('n1d5')];
+
+			  // K
+			  var k1 = document.getElementById('k1');
+			  var k1d = document.getElementById('k1d1');
+			  var k2 = document.getElementById('k2');
+			  var k2d = [document.getElementById('k2d1'), document.getElementById('k2d2'), document.getElementById('k2d3'),
+			  document.getElementById('k2d4')];
+
+			  // Y
+			  var y1 = document.getElementById('y1');
+			  var y1d = [document.getElementById('y1d1'), document.getElementById('y1d2')];
+			  var y2 = document.getElementById('y2');
+			  var y2d = [document.getElementById('y2d1'), document.getElementById('y2d2')];
+
+			  // O
+			  var o1 = document.getElementById('o1');
+			  var o1d = [document.getElementById('o1d1'), document.getElementById('o1d2'), document.getElementById('o1d3'), document.getElementById('o1d4')];
+
+			  // U
+			  var u1 = document.getElementById('u1');
+			  var u1d = [document.getElementById('u1d1'), document.getElementById('u1d2')];
+
+			  // E
+			  var e1 = document.getElementById('e1');
+			  var e2 = document.getElementById('e2');
+			  var e1d = [document.getElementById('e1d1'), document.getElementById('e1d2'), document.getElementById('e1d3')];
+
+			  // text
+			  var text = document.getElementById('text');
+			  var tspans = document.getElementsByTagName('tspan');
+			  // underline
+			  var underlines = [document.getElementById('underline1'), document.getElementById('underline2'), document.getElementById('underline3'), document.getElementById('underline4')];
+
+			  // MAIN TIMELINE
+			  var mainTimeline = new TimelineLite({onComplete: showReplay});
+
+			  // T TIMELINE
+			  var tline = new TimelineLite();
+			  tline
+			    .to(t2.x2.baseVal, 0.4, {value: 200.6, ease: Back.easeInOut}, 0)
+			    .to(t2.y2.baseVal, 0.4, {value: 58.6, ease: Back.easeInOut}, 0)
+			    .to(t1.y2.baseVal, 0.5, {value: 156.4, ease: Back.easeInOut}, 0.1)
+			    .to(t2, 0.01, {opacity: 1}, 0)
+			    .to(t1, 0.01, {opacity: 1}, 0.3);
+			    addLineDecTween(tline, t2d[0], 0.2, 200, 51, 0.1);
+			    addLineDecTween(tline, t2d[1], 0.2, 170, 48, 0.2);
+			    addLineDecTween(tline, t2d[2], 0.2, 150, 44, 0.3);
+			    addLineDecTween(tline, t1d[0], 0.2, 160, 159, 0.2);
+			    addLineDecTween(tline, t1d[1], 0.2, 165, 130, 0.3);
+			  mainTimeline.add(tline, 0.5);
+
+			  // H TIMELINE
+			  var hline = new TimelineLite();
+			  hline
+			    .to(h1.y2.baseVal, 0.5, {value: 145.4, ease: Back.easeInOut}, 0)
+			    .to(h2.x2.baseVal, 0.4, {value: 217.1, ease: Back.easeInOut}, 0.2)
+			    .to(h2.y2.baseVal, 0.4, {value: 102.6, ease: Back.easeInOut}, 0.2)
+			    .to(h3.y2.baseVal, 0.5, {value: 130.4, ease: Back.easeInOut}, 0.3)
+			    .to(h1, 0.01, {opacity: 1}, 0)
+			    .to(h2, 0.01, {opacity: 1}, 0.2)
+			    .to(h3, 0.01, {opacity: 1}, 0.3);
+			    addDotDecTween(hline, h3d[0], 0.25, 2, 0.2);
+			    addDotDecTween(hline, h3d[1], 0.25, 2, 0.4);
+			    addDotDecTween(hline, h3d[2], 0.25, 2, 0.6);
+			    addDotDecTween(hline, h3d[3], 0.25, 2, 0.8);
+			    addLineDecTween(hline, h2d[0], 0.3, 270, 93, 0.1);
+			    addLineDecTween(hline, h2d[1], 0.3, 256, 104, 0.2);
+			    addLineDecTween(hline, h2d[2], 0.3, 242, 114, 0.3);
+			  mainTimeline.add(hline, 0.9);
+
+			  // A TIMELINE
+			  var aline = new TimelineLite();
+			  if(a1.points[0]) {
+			    aline
+			    .to(a1.points[0], 0.2, {x: 305.6, y: 138.6, ease: Quad.easeIn}, 0)
+			    .to(a1.points[0], 0.5, {x: 282.6, ease: Back.easeOut}, 'a1')
+			    .to(a1.points[2], 0.2, {x: 305.6, y: 138.6, ease: Quad.easeIn}, 0)
+			    .to(a1.points[2], 0.5, {x: 330.6, ease: Back.easeOut}, 'a1');
+			  } else {
+			    var apoly = {x0: 305.6, y0: 51.6, x1: 305.6, y1: 51.6, x2: 305.6, y2: 51.6};
+			    aline
+			      .to(apoly, 0.2, {x0: 305.6, y0: 138.6, x2: 305.6, y2: 138.6, ease: Quad.easeIn, onUpdate: function() {
+			        updatePolyline(a1, apoly);
+			  }}, 0)
+			      .to(apoly, 0.5, {x0: 282.6, x2: 330.6, ease: Back.easeOut, onUpdate: function() {
+			        updatePolyline(a1, apoly);
+			      }}, 'a1');
+			  }
+			  aline
+			    .to(a2.x1.baseVal, 0.4, {value: 319.6, ease: Back.easeInOut}, 0.2)
+			    .to(a1, 0.01, {opacity: 1}, 0)
+			    .to(a2, 0.01, {opacity: 1}, 0.2);
+			    addLineDecOutTween(aline, a2d[0], 0.2, 295, 120, 319, 120, 0.2);
+			  addLineDecOutTween(aline, a2d[1], 0.2, 293, 127, 321, 127, 0.3);
+			  addLineDecOutTween(aline, a2d[2], 0.2, 291, 134, 322, 134, 0.4);
+			  mainTimeline.add(aline, 1.2);
+
+			  // N TIMELINE
+			  var nline = new TimelineLite();
+			  if(n1.points[1]) {
+			    nline
+			    .to(n1.points[1], 0.2, {y: 51.6, ease: Quad.easeOut}, 0)
+			    .to(n1.points[3], 0.2, {y: 51.6, ease: Quad.easeOut}, 0)
+			    .to(n1.points[2], 0.2, {x: 391.6, y: 138.6}, 'n1')
+			    .to(n1.points[3], 0.2, {x: 391.6, y: 62.4, ease: Quad.easeOut}, 0.4)
+			  } else {
+			    var npoly = {x0: 352, y0: 147, x1: 358, y1: 147, x2: 363, y2: 147, x3: 365, y3: 74};
+			    nline
+			      .to(npoly, 0.2, {y1: 51.6, y3: 51.6, ease: Quad.easeOut, onUpdate: function() {
+			        updatePolyline(n1, npoly);
+			  }}, 0)
+			      .to(npoly, 0.2, {x2: 391.6, x3: 391.6, y2: 138.6, y3: 62.4, ease: Quad.easeOut, onUpdate: function() {
+			        updatePolyline(n1, npoly);
+			      }}, 0.2);
+			  }
+			  nline
+			    .to(n1, 0.01, {opacity: 1}, 0);
+			    addLineDecTween(nline, n1d[0], 0.3, 352, 70, 0.1);
+			    addLineDecTween(nline, n1d[1], 0.3, 358, 102, 0.2);
+			    addLineDecTween(nline, n1d[2], 0.3, 363, 124, 0.3);
+			    addLineDecTween(nline, n1d[3], 0.3, 385, 80, 0.4);
+			    addLineDecTween(nline, n1d[4], 0.3, 385, 74, 0.5);
+			  mainTimeline.add(nline, 1.5);
+
+			  // K TIMELINE
+			  var kline = new TimelineLite();
+			  if (k2.points[0]) {
+			    kline
+			      .to(k2.points[0], 0.2, {x: 452.6, y: 51.6, ease: Back.easeOut}, 0.2)
+			      .to(k2.points[2], 0.2, {x: 452.6, y: 145.6, ease: Back.easeOut}, 0.3)
+			  } else {
+			    var kpoly = {x0: 414.1, y0: 97.6, x1: 414.1, y1: 97.6, x2: 414.1, y2: 97.6};
+			    kline
+			      .to(kpoly, 0.2, {x0: 452.6, y0: 51.6, x2: 452.6, y2: 145.6, ease: Back.easeOut, onUpdate: function() {
+			        updatePolyline(k2, kpoly);
+			  }}, 0.2)
+			  }
+			  
+			  kline
+			    .to(k1.y2.baseVal, 0.4, {value: 138.4, ease: Back.easeInOut}, 0)
+			    .to(k1, 0.01, {opacity: 1}, 0)
+			    .to(k2, 0.01, {opacity: 1}, 0.2);
+			    addLineDecTween(kline, k1d1, 0.3, 419, 139, 0.1);
+			    addDotDecTween(kline, k2d[0], 0.25, 2, 0.2);
+			    addDotDecTween(kline, k2d[1], 0.25, 2, 0.4);
+			    addDotDecTween(kline, k2d[2], 0.25, 2, 0.6);
+			    addDotDecTween(kline, k2d[3], 0.25, 2, 0.8);
+			  mainTimeline.add(kline, 1.7);
+
+			  // Y TIMELINE
+			  var yline = new TimelineLite();
+			  yline
+			    .to(y1.x2.baseVal, 0.3, {value: 493.6, ease: Back.easeOut}, 0)
+			    .to(y1.y2.baseVal, 0.3, {value: 112.6, ease: Back.easeOut}, 0)
+			    .to(y2.x2.baseVal, 0.4, {value: 472.6, ease: Back.easeOut}, 0.15)
+			    .to(y2.y2.baseVal, 0.4, {value: 168.6, ease: Back.easeOut}, 0.15)
+			    .to(y1, 0.01, {opacity: 1}, 0)
+			    .to(y2, 0.01, {opacity: 1}, 0.15);
+			    addLineDecTween(yline, y1d[0], 0.3, 470, 155, 0.3);
+			    addLineDecTween(yline, y1d[1], 0.3, 478, 120, 0.4);
+			    addDotDecTween(yline, y2d[0], 0.25, 2, 0.1);
+			    addDotDecTween(yline, y2d[1], 0.25, 2, 0.2);
+			  mainTimeline.add(yline, 2);
+
+			  // O TIMELINE
+			  var oline = new TimelineLite();
+			  o1.style.opacity = 1;
+			  oline
+			    .to(o1.rx.baseVal, 0.5, {value: 27, ease: Back.easeOut}, 0)
+			    .to(o1.ry.baseVal, 0.5, {value: 40.5, ease: Back.easeOut}, 0)
+			    .to(o1d[0].rx.baseVal, 0.6, {value: 27, ease: Back.easeOut}, 0.1)
+			    .to(o1d[0].ry.baseVal, 0.6, {value: 40.5, ease: Back.easeOut}, 0.1)
+			    .to(o1d[1].rx.baseVal, 0.6, {value: 27, ease: Quad.easeOut}, 0.2)
+			    .to(o1d[1].ry.baseVal, 0.6, {value: 40.5, ease: Quad.easeOut}, 0.2)
+			    .to(o1d[2].rx.baseVal, 0.6, {value: 27, ease: Quad.easeOut}, 0.3)
+			    .to(o1d[2].ry.baseVal, 0.6, {value: 40.5, ease: Quad.easeOut}, 0.3)
+			    .to(o1d[3].rx.baseVal, 0.6, {value: 27, ease: Quad.easeOut}, 0.4)
+			    .to(o1d[3].ry.baseVal, 0.6, {value: 40.5, ease: Quad.easeOut}, 0.4);
+			  mainTimeline.add(oline, 2.2);
+
+			  // U TIMELINE
+			  var uline = new TimelineLite();
+			  var length = u1.getTotalLength();
+			  u1.style.opacity = 1;
+			  u1.style.strokeDasharray = length;
+			  u1.style.strokeDashoffset = length;
+			  uline
+			    .to(u1, 0.5, {strokeDashoffset: 0, ease: Quad.easeInOut}, 0);
+			  addLineDecTween(uline, u1d[0], 0.3, 626, 60, 0.3);
+			    addLineDecTween(uline, u1d[1], 0.3, 620, 60, 0.4);
+			  mainTimeline.add(uline, 2.4);
+
+			  // ! TIMELINE
+			  var eline = new TimelineLite();
+			  e2.style.opacity = 1;
+			  eline
+			    .to(e2.rx.baseVal, 0.3, {value: 6, ease: Back.easeOut}, 0.3)
+			    .to(e2.ry.baseVal, 0.3, {value: 6, ease: Back.easeOut}, 0.3)
+			    .to(e1.x2.baseVal, 0.3, {value: 658.6, ease: Back.easeInOut}, 0)
+			    .to(e1.y2.baseVal, 0.3, {value: 130.6, ease: Back.easeInOut}, 0)
+			    .to(e1, 0.01, {opacity: 1}, 0);
+			  addLineDecTween(eline, e1d[0], 0.3, 653, 118, 0.1);
+			  addLineDecTween(eline, e1d[1], 0.3, 650, 110, 0.2);
+			  addLineDecTween(eline, e1d[2], 0.3, 673, 86, 0.3);
+			  mainTimeline.add(eline, 2.6);
+
+			  // TEXT TIMELINE
+			  
+			  var textTl = new TimelineLite();
+			  if(tspans[0].dx.baseVal[0]) {
+			    textTl.to(tspans[0].dx.baseVal[0], 0.6, {value: 0, ease: Cubic.easeOut}, 1);
+			    textTl.to(tspans[0].dy.baseVal[0], 0.6, {value: -1, ease: Cubic.easeOut}, 1);
+			  } else {
+			    tspans[0].setAttribute('dx', '0');
+			    tspans[0].setAttribute('dy', '0');
+			  }
+			  for (var i = tspans.length-1; i >= 0; i--) {
+			      textTl.to(tspans[i], 0.3, {opacity: 1}, 1 + (tspans.length-1-i)*0.05);
+			    }
+			  addUnderlineTween(textTl, underlines[0], 0.5, 664, 153, 370, 167, 0.2);
+			  addUnderlineTween(textTl, underlines[1], 0.51, 670, 160, 370, 175, 0.3);
+			  addUnderlineTween(textTl, underlines[2], 0.52, 678, 168, 370, 183, 0.4);
+			  addUnderlineTween(textTl, underlines[3], 0.53, 686, 176, 370, 191, 0.5);
+
+			  mainTimeline.add(textTl, 2); 
+			  
+			  
+
+			  mainTimeline.timescale = 0.6;
+			  mainTimeline.play();
+
+			  function addLineDecTween(tl, line, duration, x, y, delay) {
+			      tl.to(line.x2.baseVal, duration, {value: x, ease: Quart.easeInOut}, delay);
+			      tl.to(line.y2.baseVal, duration, {value: y, ease: Quart.easeInOut}, delay);
+			      tl.to(line.x1.baseVal, duration, {value: x, ease: Quart.easeInOut}, delay+duration);
+			      tl.to(line.y1.baseVal, duration, {value: y, ease: Quart.easeInOut}, delay+duration);
+			      tl.to(line, 0.01, {opacity: 1}, delay);
+			      tl.to(line, 0.01, {opacity: 0}, delay+(duration*2));
+			  }
+
+			  function addLineDecOutTween(tl, line, duration, x1, y1, x2, y2, delay) {
+			    tl.to(line.x1.baseVal, duration, {value: x1, ease: Quart.easeInOut}, delay);
+			    tl.to(line.y1.baseVal, duration, {value: y1, ease: Quart.easeInOut}, delay);
+			    tl.to(line.x2.baseVal, duration, {value: x2, ease: Quart.easeInOut}, delay);
+			    tl.to(line.y2.baseVal, duration, {value: y2, ease: Quart.easeInOut}, delay);
+			    tl.to(line.x1.baseVal, duration, {value: x2, ease: Quart.easeInOut}, delay+duration);
+			    tl.to(line.y1.baseVal, duration, {value: y2, ease: Quart.easeInOut}, delay+duration);
+			    tl.to(line, 0.01, {opacity: 1}, delay);
+			    tl.to(line, 0.01, {opacity: 0}, delay+(duration*2));
+			  }
+
+			  function addDotDecTween(tl, dot, duration, r, delay) {
+			      tl.to(dot.rx.baseVal, duration, {value: r, ease: Quart.easeOut}, delay);
+			      tl.to(dot.ry.baseVal, duration, {value: r, ease: Quart.easeOut}, delay);
+			      tl.to(dot.rx.baseVal, duration, {value: 0, ease: Quart.easeIn}, delay+duration);
+			      tl.to(dot.ry.baseVal, duration, {value: 0, ease: Quart.easeIn}, delay+duration);
+			  }
+
+			  function addUnderlineTween(tl, ul, duration, x2, y2, x1, y1, delay) {
+			    tl.to(ul.x2.baseVal, duration, {value: x2, ease: Quad.easeInOut}, delay);
+			    tl.to(ul.y2.baseVal, duration, {value: y2, ease: Quad.easeInOut}, delay);
+			    tl.to(ul.x1.baseVal, duration, {value: x1, ease: Quad.easeInOut}, delay+duration);
+			    tl.to(ul.y1.baseVal, duration, {value: y1, ease: Quad.easeInOut}, delay+duration);
+			  }
+			  
+			  // for Safari
+			  function updatePolyline(line, points) {
+			    if (points.x3) {
+			      line.setAttribute('points', points.x0+','+points.y0+' '+points.x1+','+points.y1+' '+points.x2+','+points.y2+' '+points.x3+','+points.y3);
+			    } else {
+			      line.setAttribute('points', points.x0+','+points.y0+' '+points.x1+','+points.y1+' '+points.x2+','+points.y2);
+			    }
+			  }
+
+			  var play = document.getElementById('play');
+			  play.onclick = function() {
+			    mainTimeline.restart();
+			  }
+
+			  function showReplay() {
+			    TweenLite.to(play, 0.4, {opacity: 1});
+			  }
+
+			  var svg = document.getElementById('svg');
+			  if (window.innerWidth < 600) {
+			    svg.style.width = window.innerWidth+'px';
+			  }
+			}
+
+			function liquidChart(){
+				var gauge1 = loadLiquidFillGauge("fillgauge1", 55);
+				var config1 = liquidFillGaugeDefaultSettings();
+				config1.circleColor = "#FF7777";
+				config1.textColor = "#FF4444";
+				config1.waveTextColor = "#FFAAAA";
+				config1.waveColor = "#FFDDDD";
+				config1.circleThickness = 0.2;
+				config1.textVertPosition = 0.2;
+				config1.waveAnimateTime = 1000;
+				var gauge2= loadLiquidFillGauge("fillgauge2", 28, config1);
+				var config2 = liquidFillGaugeDefaultSettings();
+				config2.circleColor = "#D4AB6A";
+				config2.textColor = "#553300";
+				config2.waveTextColor = "#805615";
+				config2.waveColor = "#AA7D39";
+				config2.circleThickness = 0.1;
+				config2.circleFillGap = 0.2;
+				config2.textVertPosition = 0.8;
+				config2.waveAnimateTime = 2000;
+				config2.waveHeight = 0.3;
+				config2.waveCount = 1;
+				var gauge3 = loadLiquidFillGauge("fillgauge3", 60.1, config2);
+				var config3 = liquidFillGaugeDefaultSettings();
+				config3.textVertPosition = 0.8;
+				config3.waveAnimateTime = 5000;
+				config3.waveHeight = 0.15;
+				config3.waveAnimate = false;
+				config3.waveOffset = 0.25;
+				config3.valueCountUp = false;
+				config3.displayPercent = false;
+				var gauge4 = loadLiquidFillGauge("fillgauge4", 50, config3);
+				var config4 = liquidFillGaugeDefaultSettings();
+				config4.circleThickness = 0.15;
+				config4.circleColor = "#808015";
+				config4.textColor = "#555500";
+				config4.waveTextColor = "#FFFFAA";
+				config4.waveColor = "#AAAA39";
+				config4.textVertPosition = 0.8;
+				config4.waveAnimateTime = 1000;
+				config4.waveHeight = 0.05;
+				config4.waveAnimate = true;
+				config4.waveRise = false;
+				config4.waveHeightScaling = false;
+				config4.waveOffset = 0.25;
+				config4.textSize = 0.75;
+				config4.waveCount = 3;
+				var gauge5 = loadLiquidFillGauge("fillgauge5", 60.44, config4);
+				var config5 = liquidFillGaugeDefaultSettings();
+				config5.circleThickness = 0.4;
+				config5.circleColor = "#6DA398";
+				config5.textColor = "#0E5144";
+				config5.waveTextColor = "#6DA398";
+				config5.waveColor = "#246D5F";
+				config5.textVertPosition = 0.52;
+				config5.waveAnimateTime = 5000;
+				config5.waveHeight = 0;
+				config5.waveAnimate = false;
+				config5.waveCount = 2;
+				config5.waveOffset = 0.25;
+				config5.textSize = 1.2;
+				config5.minValue = 30;
+				config5.maxValue = 150
+				config5.displayPercent = false;
+				var gauge6 = loadLiquidFillGauge("fillgauge6", 120, config5);
+
+				function NewValue(){
+					if(Math.random() > .5){
+						return Math.round(Math.random()*100);
+					} else {
+						return (Math.random()*100).toFixed(1);
+					}
+				}
+			}
+
+		</script>
+	</body>
+</html>
