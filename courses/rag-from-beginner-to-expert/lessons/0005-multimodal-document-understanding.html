@@ -1,0 +1,45 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多模态文档理解：PDF、表格、图片和截图如何进入 RAG</title><link rel="stylesheet" href="../assets/course.css"></head><body><main class="page"><header class="topbar"><a href="../../../index.html">AI Course Studio</a><nav><a href="../index.html">RAG 从入门到精通</a><a href="../reference/0002-rag-glossary.html">术语表</a><a href="../markdown/course.md">Markdown</a></nav></header><section class="hero"><div class="eyebrow">0005 · 索引构建与优化</div><h1>多模态文档理解：PDF、表格、图片和截图如何进入 RAG</h1></section><section class="lesson-layout"><article>
+    <p class="summary">真实企业资料很少是干净 Markdown。它可能是一份扫描 PDF、一张流程图、一个产品截图、一张接口表格，甚至是一段带注释的代码截图。如果系统只会读纯文本，就会漏掉很多关键知识。</p>
+    <div class="meta"><span class="pill">索引构建与优化</span><span class="pill">60 分钟</span><span class="pill">4 个学习目标</span></div>
+    <h2 id="goals">本章目标</h2><section class="card"><ul><li>能解释<span class="term" tabindex="0" data-tip="不仅检索文本，也检索图片、表格、视频帧等多模态内容。">多模态 RAG</span>为什么重要。</li><li>能区分文本、表格、图片、截图的处理方式。</li><li>能理解 OCR、版面解析、图片描述和表格结构保留。</li><li>能设计一个文档理解入库流程。</li></ul></section>
+    <h2 id="diagram">本章图解</h2><pre class="mermaid">flowchart TD
+  A[&quot;复杂文档&quot;] --&gt; B{&quot;内容类型识别&quot;}
+  B --&gt; C[&quot;正文段落&quot;]
+  B --&gt; D[&quot;表格&quot;]
+  B --&gt; E[&quot;图片/流程图&quot;]
+  B --&gt; F[&quot;截图/OCR&quot;]
+  C --&gt; G[&quot;文本 chunk&quot;]
+  D --&gt; H[&quot;结构化表格 chunk&quot;]
+  E --&gt; I[&quot;图片描述 + 原图引用&quot;]
+  F --&gt; J[&quot;OCR 文本 + 坐标&quot;]
+  G --&gt; K[&quot;统一知识物料&quot;]
+  H --&gt; K
+  I --&gt; K
+  J --&gt; K</pre>
+    <h2 id="points">核心知识点</h2><section class="narrative-point">
+    <h3>1. 多模态不是炫技，而是避免资料缺页</h3>
+    <p>很多关键规则藏在表格、截图和流程图里。只抽正文会让知识库看起来很大，实际缺少最重要的部分。</p>
+    <div class="what-why-how"><article><p>比如接口错误码表、审批流程图、登录异常截图、测试用例 Excel，这些资料如果被简单转成散乱文本，字段关系和视觉含义都会丢失。</p></article><article><p>入库时先识别内容类型：正文用文本解析，表格保留行列和表头，图片生成可引用的说明，扫描件先 OCR，复杂版面保留页码和坐标。</p></article></div>
+    <p><strong>放到真实场景里：</strong>生成测试用例时，错误码表决定异常场景；如果表格列关系丢了，模型可能把错误码、提示文案和处理动作拼错。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>不要只看解析后有没有文字。要检查文字是否保留了原来的结构关系。</p>
+  </section><section class="narrative-point">
+    <h3>2. 表格要保留关系，不要压成一坨话</h3>
+    <p>表格的价值在行列关系。字段名、枚举值、错误码、适用条件，往往靠列头才能解释清楚。</p>
+    <div class="what-why-how"><article><p>如果把表格直接按行拼成自然语言，检索时可能还能召回，但生成时容易把不同列的含义混在一起。更好的做法是让每个表格 chunk 保留表头、行号、标题和来源。</p></article><article><p>可以把表格转成 Markdown 表格、JSON 行对象，或者“表头 + 当前行 + 说明”的结构。关键是让模型能看懂每个单元格属于哪一列。</p></article></div>
+    <p><strong>放到真实场景里：</strong>接口文档里的 required、type、default、description 如果丢了列名，模型很容易编造字段约束。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>不要为了追求纯文本统一，把表格结构洗掉。RAG 不是只能吃自然语言。</p>
+  </section><section class="narrative-point">
+    <h3>3. 图片和截图要同时保留描述与原始位置</h3>
+    <p>图片可以生成文字说明，但说明不应替代原图。复杂流程图、界面截图、架构图，都需要保留原始文件位置以便核验。</p>
+    <div class="what-why-how"><article><p>图片描述解决检索问题：用户问“审批流程怎么走”，系统能召回流程图说明。原图位置解决核验问题：用户可以点回来源确认节点和箭头。</p></article><article><p>常见做法是：给图片生成 caption 或 summary；记录 page、bbox、image_id；必要时把图中 OCR 文本、视觉描述和上下文标题合并成知识物料。</p></article></div>
+    <p><strong>放到真实场景里：</strong>产品截图中“账号锁定提示文案”可能没有出现在正文里，但 OCR 能抽出提示文案，图片描述能说明它出现在哪个页面状态。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>不要让视觉模型的描述变成唯一事实。图片描述也可能漏看或误读，必须保留原始引用。</p>
+  </section>
+    <div id="deep"><section class="focus-section"><h2>一份 PDF 进入知识库前，最好先过一次“体检”</h2><p>PDF 是 RAG 里最容易制造假象的资料：文件看起来完整，解析后却可能少表格、乱顺序、漏页眉、把两栏文字串错。一个可靠流程会先做版面识别，再按内容类型分别处理。</p><table><thead><tr><th>检查项</th><th>常见问题</th><th>处理方式</th></tr></thead><tbody><tr><td>文字层</td><td>扫描件没有可选中文本</td><td>OCR 并记录置信度</td></tr><tr><td>阅读顺序</td><td>多栏排版串行错误</td><td>版面解析后按区块排序</td></tr><tr><td>表格</td><td>行列被打散</td><td>保留表头和行对象</td></tr><tr><td>图片</td><td>流程图被忽略</td><td>生成描述并保留原图引用</td></tr><tr><td>页码</td><td>引用无法定位</td><td>记录 page 和 bbox</td></tr></tbody></table><article class="focus-subsection"><h3>复杂资料要分类型处理</h3><p>正文、表格、图片、代码块的最佳处理方式不同。统一入口可以有，但处理策略不能只有一种。</p></article><article class="focus-subsection"><h3>质量抽检比工具选择更重要</h3><p>工具再好也会解析错。每批复杂文档入库后，都应该抽几页核对：正文顺序、表格结构、图片说明、引用位置是否可信。</p></article><p class="takeaway"><strong>Takeaway：</strong>多模态 RAG 的目标不是“什么都能读”，而是让复杂资料变成可检索、可引用、可核验的知识物料。</p></section></div>
+    <section class="callout warn"><strong>常见误区</strong><ul><li>OCR 出文字不代表理解正确。</li><li>图片描述不能替代原始图片引用。</li><li>表格不要无脑转成普通段落。</li><li>多模态不是第一天就必须上，但复杂企业文档迟早会遇到。</li></ul></section>
+    <section class="chapter-summary"><h2>把文档当成一个小系统来读</h2><p>第五章补齐了纯文本之外的世界。企业资料里，正文、表格、图片、截图和代码块各自承载不同信息，入库时要尊重它们的结构。</p><ul><li>表格保留行列关系。</li><li>图片生成描述，也保留原图引用。</li><li>扫描件需要 OCR 和置信度检查。</li><li>复杂 PDF 要抽检阅读顺序和页码定位。</li></ul><p class="summary-note">资料终于能较完整地进入索引了。下一章，我们开始讨论用户提问时怎么把正确资料找回来。</p></section>
+    <section class="quiz"><h2 id="quiz">快速自测</h2><div class="quiz-question" data-correct="行列关系"><p>表格入库最该保留什么？</p><button data-answer="行列关系">行列关系</button><button data-answer="背景颜色">背景颜色</button><button data-answer="文件图标">文件图标</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="原图引用"><p>图片描述之外还要保留什么？</p><button data-answer="原图引用">原图引用</button><button data-answer="随机摘要">随机摘要</button><button data-answer="按钮颜色">按钮颜色</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="OCR 处理"><p>扫描 PDF 通常先需要什么？</p><button data-answer="OCR 处理">OCR 处理</button><button data-answer="直接删除">直接删除</button><button data-answer="微调模型">微调模型</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="阅读顺序错"><p>PDF 多栏排版容易出什么问题？</p><button data-answer="阅读顺序错">阅读顺序错</button><button data-answer="引用更准">引用更准</button><button data-answer="成本归零">成本归零</button><div class="quiz-result" aria-live="polite"></div></div></section>
+    <h2 id="practice">练一下</h2><section class="card"><p>找一份包含正文、表格、截图的产品文档，设计入库字段：每类内容怎样解析、怎样生成 chunk、怎样保留引用位置。</p></section>
+    <p class="source">主要参考：<a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter3/07_multimodal_embedding.md">Datawhale RAG 多模态嵌入</a> · <a href="../../../assets/大模型生码的原理与%20RAG%20工程实践.pdf">内部 PDF：大模型生码的原理与 RAG 工程实践</a> · <a href="https://rag.deeptoai.com/docs">RAG 从入门到实战完整教程</a></p>
+    <nav class="nav-links"><a href="./0004-embedding-vector-database-and-index.html">上一章：向量嵌入与向量数据库：让资料可以被语义找到</a><a href="./0006-retrieval-foundation-hybrid-rerank.html">下一章：检索基础：关键词、语义、混合检索与重排</a></nav>
+  </article><aside class="side"><div class="toc"><strong>本章导航</strong><a href="#goals">目标</a><a href="#diagram">图解</a><a href="#points">知识点</a><a href="#deep">重点专题</a><a href="#quiz">自测</a><a href="#practice">练习</a></div></aside></section></main><script src="../assets/quiz.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script><script src="../assets/code-highlight.js"></script><script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({ startOnLoad: true, theme: "neutral" });</script></body></html>

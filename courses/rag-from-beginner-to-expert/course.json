@@ -1,0 +1,143 @@
+{
+  "slug": "rag-from-beginner-to-expert",
+  "title": "RAG 从入门到精通",
+  "status": "published",
+  "level": "beginner",
+  "audience": "0 基础或轻编程经验学习者",
+  "lessons": [
+    {
+      "id": "0001",
+      "order": 1,
+      "title": "RAG 的第一性问题：让模型从闭卷回答走向有据可查",
+      "slug": "rag-foundation-and-system-thinking",
+      "module": "基础与全局视角",
+      "time": "60 分钟",
+      "href": "./lessons/0001-rag-foundation-and-system-thinking.html"
+    },
+    {
+      "id": "0002",
+      "order": 2,
+      "title": "数据进入系统之前：从原始资料到可检索知识物料",
+      "slug": "data-loading-cleaning-and-structure",
+      "module": "数据处理全流程",
+      "time": "60 分钟",
+      "href": "./lessons/0002-data-loading-cleaning-and-structure.html"
+    },
+    {
+      "id": "0003",
+      "order": 3,
+      "title": "文本分块：别让好资料输在切法上",
+      "slug": "text-chunking-deep-dive",
+      "module": "数据处理全流程",
+      "time": "60 分钟",
+      "href": "./lessons/0003-text-chunking-deep-dive.html"
+    },
+    {
+      "id": "0004",
+      "order": 4,
+      "title": "向量嵌入与向量数据库：让资料可以被语义找到",
+      "slug": "embedding-vector-database-and-index",
+      "module": "索引构建与优化",
+      "time": "60 分钟",
+      "href": "./lessons/0004-embedding-vector-database-and-index.html"
+    },
+    {
+      "id": "0005",
+      "order": 5,
+      "title": "多模态文档理解：PDF、表格、图片和截图如何进入 RAG",
+      "slug": "multimodal-document-understanding",
+      "module": "索引构建与优化",
+      "time": "60 分钟",
+      "href": "./lessons/0005-multimodal-document-understanding.html"
+    },
+    {
+      "id": "0006",
+      "order": 6,
+      "title": "检索基础：关键词、语义、混合检索与重排",
+      "slug": "retrieval-foundation-hybrid-rerank",
+      "module": "检索技术进阶",
+      "time": "60 分钟",
+      "href": "./lessons/0006-retrieval-foundation-hybrid-rerank.html"
+    },
+    {
+      "id": "0007",
+      "order": 7,
+      "title": "查询构建：把用户的话翻译成系统能执行的检索计划",
+      "slug": "query-construction-routing-text2sql",
+      "module": "检索技术进阶",
+      "time": "60 分钟",
+      "href": "./lessons/0007-query-construction-routing-text2sql.html"
+    },
+    {
+      "id": "0008",
+      "order": 8,
+      "title": "查询重写与进阶检索：让系统会追问、会拆题、会多跳查资料",
+      "slug": "query-rewriting-agentic-retrieval",
+      "module": "检索技术进阶",
+      "time": "60 分钟",
+      "href": "./lessons/0008-query-rewriting-agentic-retrieval.html"
+    },
+    {
+      "id": "0009",
+      "order": 9,
+      "title": "生成阶段：上下文组装、引用、拒答与结构化输出",
+      "slug": "generation-citation-structured-output",
+      "module": "生成集成与评估",
+      "time": "60 分钟",
+      "href": "./lessons/0009-generation-citation-structured-output.html"
+    },
+    {
+      "id": "0010",
+      "order": 10,
+      "title": "评测与可观测性：不要凭感觉优化 RAG",
+      "slug": "evaluation-observability-optimization",
+      "module": "生成集成与评估",
+      "time": "60 分钟",
+      "href": "./lessons/0010-evaluation-observability-optimization.html"
+    },
+    {
+      "id": "0011",
+      "order": 11,
+      "title": "企业级 RAG 架构：权限、更新、服务化与安全边界",
+      "slug": "enterprise-rag-architecture",
+      "module": "企业项目实战",
+      "time": "60 分钟",
+      "href": "./lessons/0011-enterprise-rag-architecture.html"
+    },
+    {
+      "id": "0012",
+      "order": 12,
+      "title": "毕业项目：搭建一个可解释的企业知识库",
+      "slug": "capstone-rag-knowledge-base-project",
+      "module": "企业项目实战",
+      "time": "90 分钟 + 1-2 天实践",
+      "href": "./lessons/0012-capstone-rag-knowledge-base-project.html"
+    }
+  ],
+  "references": [
+    {
+      "title": "RAG 全链路系统图",
+      "href": "./reference/0001-rag-system-map.html"
+    },
+    {
+      "title": "RAG 术语速查表",
+      "href": "./reference/0002-rag-glossary.html"
+    },
+    {
+      "title": "数据治理与分块检查表",
+      "href": "./reference/0003-data-and-chunking-checklist.html"
+    },
+    {
+      "title": "检索策略选择手册",
+      "href": "./reference/0004-retrieval-strategy-playbook.html"
+    },
+    {
+      "title": "RAG 评测模板",
+      "href": "./reference/0005-evaluation-template.html"
+    },
+    {
+      "title": "毕业项目评分 Rubric",
+      "href": "./reference/0006-project-rubric.html"
+    }
+  ]
+}

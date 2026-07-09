@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "generatedBy": "scripts/build-course.mjs",
+  "courses": [
+    {
+      "slug": "rag-from-beginner-to-expert",
+      "title": "RAG 从入门到精通",
+      "status": "published",
+      "href": "./rag-from-beginner-to-expert/index.html",
+      "lessons": 12,
+      "references": 6
+    }
+  ]
+}

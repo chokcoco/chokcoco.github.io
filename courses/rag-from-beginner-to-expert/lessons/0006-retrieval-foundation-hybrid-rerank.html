@@ -1,0 +1,45 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>检索基础：关键词、语义、混合检索与重排</title><link rel="stylesheet" href="../assets/course.css"></head><body><main class="page"><header class="topbar"><a href="../../../index.html">AI Course Studio</a><nav><a href="../index.html">RAG 从入门到精通</a><a href="../reference/0002-rag-glossary.html">术语表</a><a href="../markdown/course.md">Markdown</a></nav></header><section class="hero"><div class="eyebrow">0006 · 检索技术进阶</div><h1>检索基础：关键词、语义、混合检索与重排</h1></section><section class="lesson-layout"><article>
+    <p class="summary">资料已经入库，下一步就是把问题和资料连起来。检索不是“搜一下”这么简单：有些问题靠关键词更准，有些问题靠语义更稳，还有些问题需要先召回一批候选，再用重排挑出最适合放进上下文的片段。</p>
+    <div class="meta"><span class="pill">检索技术进阶</span><span class="pill">60 分钟</span><span class="pill">4 个学习目标</span></div>
+    <h2 id="goals">本章目标</h2><section class="card"><ul><li>能区分<span class="term" tabindex="0" data-tip="关键词或倒排索引检索，适合专有名词、错误码、订单号等精确匹配。">稀疏检索</span>和<span class="term" tabindex="0" data-tip="基于 embedding 的语义检索，适合同义问法和自然语言表达。">密集检索</span>。</li><li>能解释为什么企业 RAG 常用<span class="term" tabindex="0" data-tip="结合稀疏检索和密集检索，兼顾精确匹配和语义匹配。">混合检索</span>。</li><li>能理解 <span class="term" tabindex="0" data-tip="检索时返回前 k 个候选结果。k 太小可能漏召回，k 太大可能带来噪声。">top_k</span> 和 <span class="term" tabindex="0" data-tip="重排。对初次召回的候选结果进行二次排序，提高最终上下文质量。">rerank</span> 的作用。</li><li>能设计一条基础检索链路。</li></ul></section>
+    <h2 id="diagram">本章图解</h2><pre class="mermaid">flowchart LR
+  A[&quot;用户问题&quot;] --&gt; B[&quot;关键词检索&quot;]
+  A --&gt; C[&quot;语义检索&quot;]
+  B --&gt; D[&quot;候选合并&quot;]
+  C --&gt; D
+  D --&gt; E[&quot;去重与元数据过滤&quot;]
+  E --&gt; F[&quot;rerank 重排&quot;]
+  F --&gt; G[&quot;最终上下文片段&quot;]</pre>
+    <h2 id="points">核心知识点</h2><section class="narrative-point">
+    <h3>1. 关键词检索擅长精确，语义检索擅长变体</h3>
+    <p><span class="term" tabindex="0" data-tip="关键词或倒排索引检索，适合专有名词、错误码、订单号等精确匹配。">稀疏检索</span>通常依赖关键词或倒排索引，适合错误码、订单号、接口名、字段名。<span class="term" tabindex="0" data-tip="基于 embedding 的语义检索，适合同义问法和自然语言表达。">密集检索</span>依赖 embedding，适合自然语言表达变化。</p>
+    <div class="what-why-how"><article><p>用户问“退款多久到账”时，语义检索能匹配“退款到账时效”；用户问“ERR_LOGIN_403”时，关键词检索通常更可靠，因为错误码不能被语义猜测。</p></article><article><p>基础做法是两路召回：关键词拿精确命中，向量拿语义相似，再合并去重。不同业务可以调整两路权重。</p></article></div>
+    <p><strong>放到真实场景里：</strong>代码库助手里，组件名、方法名、错误码要靠关键词；“如何禁用按钮”这种自然语言问题更适合向量。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>不要因为向量检索听起来更先进就放弃关键词。企业知识里有大量专有名词和编号。</p>
+  </section><section class="narrative-point">
+    <h3>2. 混合检索是为了降低单一路线的盲区</h3>
+    <p><span class="term" tabindex="0" data-tip="结合稀疏检索和密集检索，兼顾精确匹配和语义匹配。">混合检索</span>把关键词和语义检索结合起来，让系统既能抓住精确词，又能理解不同问法。</p>
+    <div class="what-why-how"><article><p>单靠关键词会漏掉同义表达，单靠向量会误伤专有名词。混合检索的目标不是复杂，而是让召回更稳。</p></article><article><p>可以先分别取两路 top_k，再合并、去重、按分数归一化或规则加权，最后交给重排模型或规则排序。</p></article></div>
+    <p><strong>放到真实场景里：</strong>测试用例生成里，“验证码错误不计入密码错误次数”可能同时需要关键词“验证码”和语义“错误次数统计规则”。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>合并候选不是简单拼列表。重复片段、旧版本、权限不符都要先处理。</p>
+  </section><section class="narrative-point">
+    <h3>3. 重排让候选结果从“可能相关”变成“更该使用”</h3>
+    <p><span class="term" tabindex="0" data-tip="重排。对初次召回的候选结果进行二次排序，提高最终上下文质量。">rerank</span> 是对初次召回的候选片段做二次排序。初次检索常常追求多找一点，重排则更关注当前问题到底需要哪几段。</p>
+    <div class="what-why-how"><article><p>向量检索的 top 结果不一定最适合生成。重排模型可以同时看问题和候选文本，判断哪段更直接回答问题。</p></article><article><p>常见链路是先召回 20-50 个候选，再重排取前 5-8 个进入上下文。这样既避免漏召回，也控制最终上下文噪声。</p></article></div>
+    <p><strong>放到真实场景里：</strong>用户问“登录失败多久会锁定”，候选里可能有登录页说明、密码规则、账号冻结规则。重排应该把直接讲锁定条件的片段排前面。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong><span class="term" tabindex="0" data-tip="检索时返回前 k 个候选结果。k 太小可能漏召回，k 太大可能带来噪声。">top_k</span> 开很大不等于更好。太多候选会增加成本，也可能让重排和上下文组装压力变大。</p>
+  </section>
+    <div id="deep"><section class="focus-section"><h2>一个更稳的企业检索链路长什么样</h2><p>企业检索通常不是单步完成，而是先过滤可见范围，再做多路召回，然后去重、重排、截断。每一步都在减少错误资料进入上下文的概率。</p><table><thead><tr><th>步骤</th><th>它解决什么</th><th>常见检查</th></tr></thead><tbody><tr><td>权限/版本过滤</td><td>先排除不能用的资料</td><td>用户角色、业务域、版本</td></tr><tr><td>关键词召回</td><td>抓住错误码、字段名、专有名词</td><td>BM25 或倒排索引</td></tr><tr><td>向量召回</td><td>理解自然语言变体</td><td>embedding 相似度</td></tr><tr><td>候选去重</td><td>减少重复片段挤占上下文</td><td>source + chunk_path</td></tr><tr><td>重排</td><td>挑出最能回答当前问题的片段</td><td>cross-encoder 或 LLM rerank</td></tr></tbody></table><article class="focus-subsection"><h3>先召回，再挑选，不要一步到位</h3><p>初次召回可以稍微宽一点，给正确资料进入候选的机会；最终进入上下文要收紧，只留下最能支撑答案的片段。</p></article><article class="focus-subsection"><h3>检索链路也要有日志</h3><p>记录每一路召回了什么、分数是多少、为什么被过滤或重排。没有日志，检索优化会变成猜谜。</p></article><section class="card"><h3>混合检索 + 重排伪代码</h3><div class="code-grid"><div><h3>JavaScript</h3><pre><code class="language-javascript">async function retrieve(question, user) {
+  const filter = buildPermissionFilter(user);
+  const keywordHits = await keyword.search(question, { filter, topK: 20 });
+  const vectorHits = await vector.search(await embed(question), { filter, topK: 20 });
+  const merged = dedupe([...keywordHits, ...vectorHits]);
+  return reranker.rank(question, merged).then(items =&gt; items.slice(0, 8));
+}</code></pre></div></div></section><p class="takeaway"><strong>Takeaway：</strong>检索链路的目标不是返回最多资料，而是让正确、可用、足够支撑答案的资料排在前面。</p></section></div>
+    <section class="callout warn"><strong>常见误区</strong><ul><li>向量检索不能替代所有关键词检索。</li><li>top_k 越大不等于越好，它会带来噪声和成本。</li><li>rerank 不是魔法，候选里没有正确资料时它也救不了。</li><li>检索阶段就要做权限过滤。</li></ul></section>
+    <section class="chapter-summary"><h2>检索这章，核心是别赌单一路线</h2><p>关键词、向量、过滤、重排各自解决不同问题。企业 RAG 更像一个分层筛选系统：先保证资料可用，再扩大召回，最后精挑细选。</p><ul><li>关键词适合精确项，向量适合同义问法。</li><li>混合检索降低盲区。</li><li>重排把候选从“像”排成“更能回答”。</li></ul><p class="summary-note">下一章会继续往前看：用户的问题本身也需要处理。很多时候检索不准，不是资料不行，而是问题没有被构造成适合检索的形状。</p></section>
+    <section class="quiz"><h2 id="quiz">快速自测</h2><div class="quiz-question" data-correct="关键词检索"><p>错误码更适合优先用什么检索？</p><button data-answer="关键词检索">关键词检索</button><button data-answer="随机检索">随机检索</button><button data-answer="图片检索">图片检索</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="二次排序"><p>rerank 的作用是什么？</p><button data-answer="二次排序">二次排序</button><button data-answer="删除权限">删除权限</button><button data-answer="训练模型">训练模型</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="关键词和语义"><p>混合检索结合了什么？</p><button data-answer="关键词和语义">关键词和语义</button><button data-answer="字体和颜色">字体和颜色</button><button data-answer="登录和注册">登录和注册</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="噪声增加"><p>top_k 太大可能带来什么？</p><button data-answer="噪声增加">噪声增加</button><button data-answer="事实变新">事实变新</button><button data-answer="权限消失">权限消失</button><div class="quiz-result" aria-live="polite"></div></div></section>
+    <h2 id="practice">练一下</h2><section class="card"><p>为“代码库助手”设计一条检索链路：哪些问题走关键词，哪些问题走向量，怎样合并候选，什么时候重排，记录哪些日志。</p></section>
+    <p class="source">主要参考：<a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter4/11_hybrid_search.md">Datawhale RAG 混合检索</a> · <a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter4/15_advanced_retrieval_techniques.md">Datawhale RAG 检索进阶</a> · <a href="https://zhuanlan.zhihu.com/p/703182970">RAG 优化方案与实践</a></p>
+    <nav class="nav-links"><a href="./0005-multimodal-document-understanding.html">上一章：多模态文档理解：PDF、表格、图片和截图如何进入 RAG</a><a href="./0007-query-construction-routing-text2sql.html">下一章：查询构建：把用户的话翻译成系统能执行的检索计划</a></nav>
+  </article><aside class="side"><div class="toc"><strong>本章导航</strong><a href="#goals">目标</a><a href="#diagram">图解</a><a href="#points">知识点</a><a href="#deep">重点专题</a><a href="#quiz">自测</a><a href="#practice">练习</a></div></aside></section></main><script src="../assets/quiz.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script><script src="../assets/code-highlight.js"></script><script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({ startOnLoad: true, theme: "neutral" });</script></body></html>

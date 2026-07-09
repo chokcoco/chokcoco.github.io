@@ -1,0 +1,50 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>企业级 RAG 架构：权限、更新、服务化与安全边界</title><link rel="stylesheet" href="../assets/course.css"></head><body><main class="page"><header class="topbar"><a href="../../../index.html">AI Course Studio</a><nav><a href="../index.html">RAG 从入门到精通</a><a href="../reference/0002-rag-glossary.html">术语表</a><a href="../markdown/course.md">Markdown</a></nav></header><section class="hero"><div class="eyebrow">0011 · 企业项目实战</div><h1>企业级 RAG 架构：权限、更新、服务化与安全边界</h1></section><section class="lesson-layout"><article>
+    <p class="summary">到这里，我们已经学过数据、分块、向量、检索、生成和评测。第十一章把它们拼成一个企业系统。注意，这不是把所有高级词堆在一起，而是回答一个朴素问题：如果明天要给团队上线一个知识库，哪些模块不能少，哪些可以后补？</p>
+    <div class="meta"><span class="pill">企业项目实战</span><span class="pill">60 分钟</span><span class="pill">4 个学习目标</span></div>
+    <h2 id="goals">本章目标</h2><section class="card"><ul><li>能画出企业知识库的端到端架构。</li><li>能说明权限、版本、审计、更新在架构中的位置。</li><li>能理解 GraphRAG、Workflow RAG、Agentic RAG 的适用场景。</li><li>能设计一个企业 RAG MVP 的服务边界。</li></ul></section>
+    <h2 id="diagram">本章图解</h2><pre class="mermaid">flowchart TD
+  A[&quot;资料源&quot;] --&gt; B[&quot;数据接入与治理&quot;]
+  B --&gt; C[&quot;分块/多模态解析&quot;]
+  C --&gt; D[&quot;Embedding 与索引&quot;]
+  D --&gt; E[&quot;检索服务&quot;]
+  E --&gt; F[&quot;重排与上下文服务&quot;]
+  F --&gt; G[&quot;生成服务&quot;]
+  G --&gt; H[&quot;业务应用：客服/测试/代码助手&quot;]
+  I[&quot;权限系统&quot;] --&gt; B
+  I --&gt; E
+  J[&quot;评测与日志&quot;] --&gt; E
+  J --&gt; G
+  K[&quot;发布与回滚&quot;] --&gt; D</pre>
+    <h2 id="points">核心知识点</h2><section class="narrative-point">
+    <h3>1. 企业 RAG 要把离线链路和在线链路分开</h3>
+    <p>离线链路负责资料治理、分块、嵌入、索引；在线链路负责接收问题、检索、重排、生成、记录日志。</p>
+    <div class="what-why-how"><article><p>两条链路的节奏不同。资料更新可以批处理、审核、发布；用户问答需要低延迟、可用性和权限控制。混在一起会让系统难维护。</p></article><article><p>把数据管道、索引服务、检索服务、生成服务、评测服务拆成边界清晰的模块。MVP 可以部署简单，但逻辑边界要清楚。</p></article></div>
+    <p><strong>放到真实场景里：</strong>客服政策每天更新一次，离线链路夜间重建索引；在线客服问答白天稳定服务，并能回滚到上一版索引。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>不要让用户查询触发随意入库和重建索引。在线链路要稳定，数据更新要可审核。</p>
+  </section><section class="narrative-point">
+    <h3>2. 权限和审计必须进入核心链路</h3>
+    <p>企业知识库里的资料不是人人可见。权限不是 UI 功能，而是检索和生成的基础约束。</p>
+    <div class="what-why-how"><article><p>如果不可见资料进入候选片段，即使最终答案没有直接引用，也可能影响模型生成。审计则保证出了问题能追到人、资料和版本。</p></article><article><p>权限字段在入库时写入元数据，检索时按用户身份过滤，上下文组装时再次校验，日志记录用户、资料、答案和引用。</p></article></div>
+    <p><strong>放到真实场景里：</strong>内部客服手册可以给客服坐席看，但不能给普通用户看；研发代码规范可以给内部工程师看，但不能进入公开问答。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>不要等答案生成后再脱敏。模型已经看过不可见资料，风险就已经发生。</p>
+  </section><section class="narrative-point">
+    <h3>3. 企业 RAG 需要发布、回滚和版本治理</h3>
+    <p>知识库不是一次性上传完就结束。资料会更新，索引会重建，评测会发现回归，业务也会要求回滚。</p>
+    <div class="what-why-how"><article><p>没有版本治理，今天的知识库和昨天有什么差异没人知道；答案变差也无法回到上一版。企业系统必须把知识库当成可发布的软件资产。</p></article><article><p>每次发布记录资料批次、清洗规则、分块参数、embedding 模型、索引版本、评测结果。上线后监控反馈，必要时回滚索引版本。</p></article></div>
+    <p><strong>放到真实场景里：</strong>新赔付规则上线后，评测发现特殊商品例外条款召回失败，可以先回滚索引，再修复分块和元数据。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>不要只版本化原始文件。清洗规则、分块参数和 embedding 模型同样影响结果。</p>
+  </section><section class="narrative-point">
+    <h3>4. GraphRAG 和 Agentic RAG 是进阶选项，不是 MVP 必需品</h3>
+    <p><span class="term" tabindex="0" data-tip="基于知识图谱的 RAG。将实体和关系组织成图，用于跨文档关系问题。">GraphRAG</span> 用实体和关系组织知识，适合跨文档关系问题；Agentic RAG 让系统能规划多步检索和工具调用。</p>
+    <div class="what-why-how"><article><p>它们解决的是复杂推理、关系追踪、多源协作，不是所有知识库第一天都要上。MVP 先把资料、检索、引用、评测跑稳，再逐步引入。</p></article><article><p>当问题经常涉及“某客户、某产品、某缺陷、某版本之间的关系”时，可以考虑知识图谱；当问题需要查文档、查数据库、查代码多步协作时，可以考虑 Agentic RAG。</p></article></div>
+    <p><strong>放到真实场景里：</strong>客户成功系统要回答“这个客户过去三个月的投诉、补偿和合同条款有什么关系”，GraphRAG 可能有价值。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>不要用高级架构掩盖基础数据治理不足。脏数据上建图，只会得到更复杂的脏结果。</p>
+  </section>
+    <div id="deep"><section class="focus-section"><h2>一个企业 RAG MVP 应该先保住哪些能力</h2><p>第一版不需要把所有高级功能做满，但必须保住业务可信度。最低要求是：资料可控、权限可控、答案可引用、错误可复盘、版本可回滚。</p><table><thead><tr><th>能力</th><th>MVP 做到什么</th><th>后续增强</th></tr></thead><tbody><tr><td>资料治理</td><td>来源、版本、权限、抽检</td><td>自动质量评分和血缘图</td></tr><tr><td>检索</td><td>混合检索 + 重排</td><td>多跳、Agentic、GraphRAG</td></tr><tr><td>生成</td><td>引用、拒答、结构化输出</td><td>多模板、多角色答案</td></tr><tr><td>评测</td><td>固定评测集 + 请求日志</td><td>自动回归和线上 A/B</td></tr><tr><td>发布</td><td>索引版本和回滚</td><td>灰度、审批流、变更影响分析</td></tr></tbody></table><article class="focus-subsection"><h3>MVP 不是粗糙版，而是边界清楚版</h3><p>可以先少做功能，但不能少做引用、权限和日志。否则系统看似能回答，却无法被业务信任。</p></article><article class="focus-subsection"><h3>先服务一个场景，再扩成平台</h3><p>客诉答疑、测试用例生成、代码库助手三者都能做，但第一版最好选一个主场景打穿，再抽象共同能力。</p></article><p class="takeaway"><strong>Takeaway：</strong>企业级不是功能堆满，而是关键风险被控制住：资料、权限、引用、评测、发布。</p></section></div>
+    <section class="callout warn"><strong>常见误区</strong><ul><li>企业 RAG 不是把 Demo 接到生产环境就完事。</li><li>权限不是前端展示问题，而是检索链路问题。</li><li>GraphRAG 和 Agentic RAG 不应替代基础治理。</li><li>版本化只管文件是不够的，还要管索引和参数。</li></ul></section>
+    <section class="chapter-summary"><h2>这一章把零件装成系统</h2><p>第十一章的重点是架构边界。企业 RAG 至少要分清离线数据链路和在线问答链路，并把权限、审计、评测、发布放进核心流程。</p><ul><li>离线负责治理和索引，在线负责检索和生成。</li><li>权限过滤要发生在检索阶段。</li><li>知识库要像软件一样发布、评测和回滚。</li><li>高级 RAG 能力应建立在基础链路稳定之后。</li></ul><p class="summary-note">最后一章，我们会把所有知识落到一个毕业项目：从一个业务场景出发，搭一个可以演示、可以评测、可以解释的企业知识库。</p></section>
+    <section class="quiz"><h2 id="quiz">快速自测</h2><div class="quiz-question" data-correct="检索生成"><p>企业 RAG 在线链路主要负责什么？</p><button data-answer="检索生成">检索生成</button><button data-answer="清洗文件">清洗文件</button><button data-answer="购买域名">购买域名</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="检索阶段"><p>权限过滤应该进入哪里？</p><button data-answer="检索阶段">检索阶段</button><button data-answer="答案之后">答案之后</button><button data-answer="页面底部">页面底部</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="索引参数"><p>知识库版本不只包括文件，还包括什么？</p><button data-answer="索引参数">索引参数</button><button data-answer="背景图片">背景图片</button><button data-answer="用户头像">用户头像</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="引用和日志"><p>MVP 必须保住什么？</p><button data-answer="引用和日志">引用和日志</button><button data-answer="复杂动画">复杂动画</button><button data-answer="社交分享">社交分享</button><div class="quiz-result" aria-live="polite"></div></div></section>
+    <h2 id="practice">练一下</h2><section class="card"><p>为“客诉答疑知识库”画一张企业 RAG MVP 架构图，标出离线链路、在线链路、权限、评测、发布和回滚位置。</p></section>
+    <p class="source">主要参考：<a href="../../../assets/RAG%20方案对比.pdf">内部 PDF：RAG 方案对比</a> · <a href="../../../assets/大模型生码的原理与%20RAG%20工程实践.pdf">内部 PDF：大模型生码的原理与 RAG 工程实践</a> · <a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter7/20_kg_rag.md">Datawhale 知识图谱 RAG</a></p>
+    <nav class="nav-links"><a href="./0010-evaluation-observability-optimization.html">上一章：评测与可观测性：不要凭感觉优化 RAG</a><a href="./0012-capstone-rag-knowledge-base-project.html">下一章：毕业项目：搭建一个可解释的企业知识库</a></nav>
+  </article><aside class="side"><div class="toc"><strong>本章导航</strong><a href="#goals">目标</a><a href="#diagram">图解</a><a href="#points">知识点</a><a href="#deep">重点专题</a><a href="#quiz">自测</a><a href="#practice">练习</a></div></aside></section></main><script src="../assets/quiz.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script><script src="../assets/code-highlight.js"></script><script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({ startOnLoad: true, theme: "neutral" });</script></body></html>

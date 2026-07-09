@@ -1,0 +1,46 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>评测与可观测性：不要凭感觉优化 RAG</title><link rel="stylesheet" href="../assets/course.css"></head><body><main class="page"><header class="topbar"><a href="../../../index.html">AI Course Studio</a><nav><a href="../index.html">RAG 从入门到精通</a><a href="../reference/0002-rag-glossary.html">术语表</a><a href="../markdown/course.md">Markdown</a></nav></header><section class="hero"><div class="eyebrow">0010 · 生成集成与评估</div><h1>评测与可观测性：不要凭感觉优化 RAG</h1></section><section class="lesson-layout"><article>
+    <p class="summary">RAG 系统最容易陷入一种假进步：改了一个参数，挑几个问题试试，感觉好像更准了。企业系统不能靠感觉上线。评测和可观测性的作用，就是把“我觉得好”变成“在哪类问题上、因为什么变好或变差”。</p>
+    <div class="meta"><span class="pill">生成集成与评估</span><span class="pill">60 分钟</span><span class="pill">4 个学习目标</span></div>
+    <h2 id="goals">本章目标</h2><section class="card"><ul><li>能解释为什么 RAG 必须有<span class="term" tabindex="0" data-tip="固定问题、标准答案、期望引用和评分规则的集合，用于判断系统是否变好。">评测集</span>。</li><li>能区分检索指标、生成指标和业务指标。</li><li>能设计一条 RAG 请求日志。</li><li>能用错误分类指导优化。</li></ul></section>
+    <h2 id="diagram">本章图解</h2><pre class="mermaid">flowchart TD
+  A[&quot;固定评测集&quot;] --&gt; B[&quot;运行 RAG&quot;]
+  B --&gt; C[&quot;记录检索候选&quot;]
+  B --&gt; D[&quot;记录最终答案&quot;]
+  C --&gt; E[&quot;检索指标&quot;]
+  D --&gt; F[&quot;生成指标&quot;]
+  E --&gt; G[&quot;错误分类&quot;]
+  F --&gt; G
+  G --&gt; H[&quot;针对性优化&quot;]
+  H --&gt; B</pre>
+    <h2 id="points">核心知识点</h2><section class="narrative-point">
+    <h3>1. 评测集让优化有同一把尺</h3>
+    <p><span class="term" tabindex="0" data-tip="固定问题、标准答案、期望引用和评分规则的集合，用于判断系统是否变好。">评测集</span> 是一组固定问题、期望答案、期望引用和评分规则。没有评测集，每次改动都像换题考试，无法比较。</p>
+    <div class="what-why-how"><article><p>RAG 优化常常有副作用：chunk 变大可能提升某些综合问题，却降低精确引用；top_k 增大可能提高召回，却引入噪声。固定评测集能看出取舍。</p></article><article><p>从真实业务问题开始收集：高频问题、容易错的问题、权限敏感问题、跨文档问题、拒答问题。每题写出标准答案或评分标准，以及应该引用哪些资料。</p></article></div>
+    <p><strong>放到真实场景里：</strong>客诉答疑可以准备 50 个问题：退款、赔付、物流、特殊商品、超范围问题、旧规则干扰问题。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>不要只放简单题。评测集太简单，系统会在演示中很好看，上线后很脆。</p>
+  </section><section class="narrative-point">
+    <h3>2. 检索指标和生成指标要分开看</h3>
+    <p>答案错了，不一定是模型生成错。可能是正确资料没召回，也可能召回了但没放进上下文，还可能放进去了但模型没用。</p>
+    <div class="what-why-how"><article><p>检索指标看正确资料是否进入候选、排名是否靠前；生成指标看答案是否忠实、引用是否支撑结论、格式是否合规。</p></article><article><p>常见检索指标包括 hit@k、MRR、召回来源覆盖；生成指标包括 faithfulness、answer correctness、citation quality、format validity。</p></article></div>
+    <p><strong>放到真实场景里：</strong>如果正确资料没有进 top 20，先修检索；如果进了 top 5 但答案没引用，修上下文和提示词；如果答案格式不对，修结构化输出。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>不要用一个总分掩盖问题。总分下降 2 分，可能来自完全不同的根因。</p>
+  </section><section class="narrative-point">
+    <h3>3. 可观测性让每次回答都能回放</h3>
+    <p><span class="term" tabindex="0" data-tip="记录一次 RAG 请求的检索、重排、生成、引用、成本等中间过程。">可观测性</span> 是记录一次请求的输入、检索、重排、上下文、生成、引用、成本、耗时和用户反馈。</p>
+    <div class="what-why-how"><article><p>上线后用户报错时，你需要重放当时系统看到了什么资料、为什么选了这些片段、模型生成了什么、引用来自哪里。</p></article><article><p>日志至少记录 query、query_plan、retrieved_chunks、reranked_chunks、context_ids、answer、citations、latency、cost、model、error_type。</p></article></div>
+    <p><strong>放到真实场景里：</strong>测试同学说“漏了验证码错误场景”，你可以查日志确认是资料没召回、被重排挤掉，还是生成时没覆盖。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>不要只记录最终答案。最终答案无法帮助定位检索链路的问题。</p>
+  </section>
+    <div id="deep"><section class="focus-section"><h2>错误分类比盲目调参更有用</h2><p>RAG 错误通常可以分成资料缺失、解析清洗错误、分块错误、检索漏召回、重排排序错、上下文过长、生成不忠实、引用错误、权限错误。分类之后，优化才有方向。</p><table><thead><tr><th>错误类型</th><th>症状</th><th>优先修哪里</th></tr></thead><tbody><tr><td>资料缺失</td><td>知识库根本没有依据</td><td>补资料和数据血缘</td></tr><tr><td>分块错误</td><td>答案跨块断裂</td><td>调整 chunk 边界</td></tr><tr><td>检索漏召回</td><td>正确资料没进候选</td><td>混合检索/查询重写</td></tr><tr><td>重排错误</td><td>正确资料候选中但排名低</td><td>rerank 和特征</td></tr><tr><td>生成不忠实</td><td>资料在上下文里但答案乱说</td><td>提示词/引用校验</td></tr><tr><td>权限错误</td><td>召回不可见资料</td><td>检索阶段权限过滤</td></tr></tbody></table><article class="focus-subsection"><h3>先定位，再优化</h3><p>很多团队一出错就调 prompt 或换模型，但如果正确资料没有召回，换再好的模型也只是更流畅地猜。错误分类能防止你修错层。</p></article><article class="focus-subsection"><h3>评测要包含回归</h3><p>每次修复一个错误，都把它加入评测集。否则下次优化别的地方时，很可能把旧问题重新改坏。</p></article><section class="card"><h3>评测样例结构</h3><div class="code-grid"><div><h3>JavaScript</h3><pre><code class="language-javascript">const evalCase = {
+  question: &quot;验证码错误是否计入密码错误次数？&quot;,
+  expectedAnswer: &quot;不计入。&quot;,
+  expectedSources: [&quot;login-rule-2026q1#captcha&quot;],
+  checks: [&quot;retrieval_hit&quot;, &quot;faithfulness&quot;, &quot;citation_quality&quot;]
+};</code></pre></div></div></section><p class="takeaway"><strong>Takeaway：</strong>RAG 优化不是玄学调参，而是基于日志和评测集的错误定位。</p></section></div>
+    <section class="callout warn"><strong>常见误区</strong><ul><li>只看最终答案无法定位问题。</li><li>评测集不能只放简单题和成功样例。</li><li>换模型不一定能解决检索错误。</li><li>用户反馈要进入评测回归，而不是只看一次。</li></ul></section>
+    <section class="chapter-summary"><h2>从“感觉不错”走到“证据不错”</h2><p>第十章是工程分水岭。没有评测和日志，RAG 只是一个会聊天的演示；有了评测和可观测性，它才开始像一个可以迭代的系统。</p><ul><li>评测集提供固定尺子。</li><li>检索指标和生成指标要分开看。</li><li>请求日志要能回放每次回答。</li><li>错误分类决定优化顺序。</li></ul><p class="summary-note">下一章会把前面所有组件合到企业架构里，看一个知识库从数据、服务、权限到发布到底怎么设计。</p></section>
+    <section class="quiz"><h2 id="quiz">快速自测</h2><div class="quiz-question" data-correct="固定尺子"><p>评测集的作用是什么？</p><button data-answer="固定尺子">固定尺子</button><button data-answer="美化页面">美化页面</button><button data-answer="删除引用">删除引用</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="检索链路"><p>正确资料没召回应先修什么？</p><button data-answer="检索链路">检索链路</button><button data-answer="按钮颜色">按钮颜色</button><button data-answer="头像尺寸">头像尺寸</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="最终答案"><p>可观测性不只记录什么？</p><button data-answer="最终答案">最终答案</button><button data-answer="检索候选">检索候选</button><button data-answer="模型耗时">模型耗时</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="定位优化方向"><p>错误分类的价值是什么？</p><button data-answer="定位优化方向">定位优化方向</button><button data-answer="替代资料">替代资料</button><button data-answer="隐藏问题">隐藏问题</button><div class="quiz-result" aria-live="polite"></div></div></section>
+    <h2 id="practice">练一下</h2><section class="card"><p>为“客诉答疑 RAG”设计 10 条评测题，覆盖高频问题、旧版政策干扰、权限问题、拒答问题，并写出每题期望引用。</p></section>
+    <p class="source">主要参考：<a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter6/18_system_evaluation.md">Datawhale RAG 系统评估</a> · <a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter6/19_common_tools.md">Datawhale RAG 评估工具</a> · <a href="../../../assets/关于%20RAG%20优化的思考记录.pdf">内部 PDF：关于 RAG 优化的思考记录</a></p>
+    <nav class="nav-links"><a href="./0009-generation-citation-structured-output.html">上一章：生成阶段：上下文组装、引用、拒答与结构化输出</a><a href="./0011-enterprise-rag-architecture.html">下一章：企业级 RAG 架构：权限、更新、服务化与安全边界</a></nav>
+  </article><aside class="side"><div class="toc"><strong>本章导航</strong><a href="#goals">目标</a><a href="#diagram">图解</a><a href="#points">知识点</a><a href="#deep">重点专题</a><a href="#quiz">自测</a><a href="#practice">练习</a></div></aside></section></main><script src="../assets/quiz.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script><script src="../assets/code-highlight.js"></script><script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({ startOnLoad: true, theme: "neutral" });</script></body></html>

@@ -1,0 +1,55 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>向量嵌入与向量数据库：让资料可以被语义找到</title><link rel="stylesheet" href="../assets/course.css"></head><body><main class="page"><header class="topbar"><a href="../../../index.html">AI Course Studio</a><nav><a href="../index.html">RAG 从入门到精通</a><a href="../reference/0002-rag-glossary.html">术语表</a><a href="../markdown/course.md">Markdown</a></nav></header><section class="hero"><div class="eyebrow">0004 · 索引构建与优化</div><h1>向量嵌入与向量数据库：让资料可以被语义找到</h1></section><section class="lesson-layout"><article>
+    <p class="summary">分块之后，我们得到很多知识小片段。但用户不会按片段标题提问，他们会用自然语言问：“退款多久到账？”“这个组件怎么禁用？”embedding 的作用，就是把问题和资料都转成可比较的数字表示，让系统能找到语义接近的内容。</p>
+    <div class="meta"><span class="pill">索引构建与优化</span><span class="pill">60 分钟</span><span class="pill">4 个学习目标</span></div>
+    <h2 id="goals">本章目标</h2><section class="card"><ul><li>能解释 <span class="term" tabindex="0" data-tip="向量嵌入。把文本、图片或其他内容转成数字向量，用于计算相似度。">embedding</span> 在 RAG 里的作用。</li><li>能说明<span class="term" tabindex="0" data-tip="存储向量和元数据，并支持相似度检索的数据库或索引系统。">向量数据库</span>保存的不只是向量。</li><li>能理解相似度、索引、过滤、更新的基本关系。</li><li>能判断语义相似为什么不等于业务正确。</li></ul></section>
+    <h2 id="diagram">本章图解</h2><pre class="mermaid">flowchart LR
+  A[&quot;chunk + 元数据&quot;] --&gt; B[&quot;嵌入模型&quot;]
+  B --&gt; C[&quot;向量&quot;]
+  C --&gt; D[&quot;向量数据库&quot;]
+  E[&quot;用户问题&quot;] --&gt; F[&quot;同一个嵌入模型&quot;]
+  F --&gt; G[&quot;问题向量&quot;]
+  G --&gt; D
+  D --&gt; H[&quot;相似片段 + 原文 + 元数据&quot;]</pre>
+    <h2 id="points">核心知识点</h2><section class="narrative-point">
+    <h3>1. embedding 像语义坐标，但不是业务判断</h3>
+    <p><span class="term" tabindex="0" data-tip="向量嵌入。把文本、图片或其他内容转成数字向量，用于计算相似度。">embedding</span> 会把文本映射成向量。语义相近的句子，向量距离通常更近，比如“退款多久到账”和“退钱几天到”关键词不同，但意思接近。</p>
+    <div class="what-why-how"><article><p>这个能力让 RAG 不必完全依赖关键词。用户问法可以变化，系统仍然有机会找到相关资料。它解决的是“自然语言表达不一致”的问题。</p></article><article><p>入库时，每个 chunk 生成一个向量；查询时，用户问题也生成一个向量；系统计算问题向量与资料向量的距离，返回最相似的候选片段。</p></article></div>
+    <p><strong>放到真实场景里：</strong>客服知识库里，用户说“退钱什么时候到”，制度写的是“退款到账时效”，embedding 能把两者联系起来。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>语义相似不等于业务适用。旧版政策和新版政策也很像，内部手册和公开文档也很像，这些必须靠元数据过滤。</p>
+  </section><section class="narrative-point">
+    <h3>2. 向量数据库保存向量，也保存可追溯的上下文</h3>
+    <p>很多人听到向量数据库，以为里面只有一串数字。实际 RAG 需要保存向量、原文、来源、页码、标题、版本、权限、业务域等信息。</p>
+    <div class="what-why-how"><article><p>向量负责找相似，原文负责生成答案，元数据负责过滤、引用、权限和评测。只保存向量，系统无法回答“这个答案来自哪里”。</p></article><article><p>常见记录结构是 id、vector、content、metadata。metadata 里至少包含 source、title、version、domain、permission、updated_at、chunk_path。</p></article></div>
+    <p><strong>放到真实场景里：</strong>生成测试用例时，系统可以先过滤 domain=login 和 doc_type=test_case，再做向量检索，避免召回无关客服政策。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>不要把向量库当成普通文件夹。没有更新、删除、版本替换策略，知识库很快就会堆满旧资料。</p>
+  </section><section class="narrative-point">
+    <h3>3. 索引优化是在召回、延迟、成本、更新之间做平衡</h3>
+    <p>索引让向量搜索更快，但不同索引策略会影响速度、召回率和资源成本。数据量小的时候简单方案够用，数据量大时才需要复杂优化。</p>
+    <div class="what-why-how"><article><p>企业 RAG 通常同时关心四件事：正确资料能不能找到，用户等多久，存储和计算花多少钱，资料更新后能不能快速生效。</p></article><article><p>可以从小规模精确搜索开始，再根据数据量引入近似索引；用元数据过滤减少候选范围；用批量入库降低成本；用增量更新替代全量重建。</p></article></div>
+    <p><strong>放到真实场景里：</strong>一个 500 篇 FAQ 的知识库不需要复杂索引；一个跨产品、跨权限、上百万片段的企业库，就要认真设计索引和过滤策略。</p>
+    <p class="mistake"><strong>容易踩的坑：</strong>不要只追求速度。检索很快但找不对资料，业务上等于没用。</p>
+  </section>
+    <div id="deep"><section class="focus-section"><h2>语义相似为什么会骗过你</h2><p>向量检索擅长找意思像的内容，但企业问答关心的是“这个内容对当前用户、当前版本、当前场景是否可用”。相似度只是候选依据，不是最终答案。</p><table><thead><tr><th>看起来相似的资料</th><th>潜在问题</th><th>应该加的控制</th></tr></thead><tbody><tr><td>2025 退款规则 vs 2026 退款规则</td><td>旧规则污染答案</td><td>version / effective_from</td></tr><tr><td>客服内部手册 vs 用户公开帮助</td><td>权限越界</td><td>permission / audience</td></tr><tr><td>移动端登录 vs 管理后台登录</td><td>场景错配</td><td>domain / product</td></tr><tr><td>历史缺陷 vs 当前修复说明</td><td>状态不明</td><td>status / fixed_version</td></tr></tbody></table><article class="focus-subsection"><h3>先过滤，再相似度检索</h3><p>更稳的顺序通常是：先用权限、版本、业务域缩小范围，再在范围内做向量或关键词检索。这样系统不是在整个知识海里捞针，而是在正确的池子里找鱼。</p></article><article class="focus-subsection"><h3>相似度分数不是质量分数</h3><p>分数高只说明文本表达相近，不说明资料新、权威、可见、完整。上线前要用评测集观察命中率和引用质量，不能只看单次分数。</p></article><section class="card"><h3>带过滤条件的向量检索</h3><div class="code-grid"><div><h3>JavaScript</h3><pre><code class="language-javascript">const results = await vectorDb.search({
+  vector: await embed(question),
+  topK: 12,
+  filter: {
+    domain: &quot;login&quot;,
+    version: &quot;2026Q1&quot;,
+    permission: { in: user.permissions }
+  }
+});</code></pre></div><div><h3>Java</h3><pre><code class="language-java">SearchRequest request = SearchRequest.builder()
+  .vector(embed(question))
+  .topK(12)
+  .filter(Map.of(
+    &quot;domain&quot;, &quot;login&quot;,
+    &quot;version&quot;, &quot;2026Q1&quot;,
+    &quot;permission&quot;, user.permissions()
+  ))
+  .build();</code></pre></div></div></section><p class="takeaway"><strong>Takeaway：</strong>embedding 帮你找到“像”的资料，元数据帮你判断“该不该用”。企业 RAG 两者缺一不可。</p></section></div>
+    <section class="callout warn"><strong>常见误区</strong><ul><li>embedding 不是理解万物，它只是语义表示。</li><li>向量数据库不只存向量，还要存原文和元数据。</li><li>相似度高不代表资料适用于当前用户。</li><li>索引优化不只是提速，也要关注召回和更新。</li></ul></section>
+    <section class="chapter-summary"><h2>把向量想成一张语义地图</h2><p>第四章解决的是“机器怎么按意思找资料”。chunk 被转成向量后，系统可以用相似度找到候选片段；但企业场景还必须叠加版本、权限、业务域这些硬条件。</p><ul><li>embedding 让自然语言问法可以和资料语义对齐。</li><li>向量数据库要同时保存 vector、content、metadata。</li><li>语义检索必须和元数据过滤配合使用。</li></ul><p class="summary-note">下一章会把这张地图扩展到图片、表格、截图和多模态资料，因为企业知识从来不只躺在纯文本里。</p></section>
+    <section class="quiz"><h2 id="quiz">快速自测</h2><div class="quiz-question" data-correct="语义匹配"><p>embedding 主要解决什么？</p><button data-answer="语义匹配">语义匹配</button><button data-answer="页面配色">页面配色</button><button data-answer="用户登录">用户登录</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="生成上下文"><p>向量库中 content 用来做什么？</p><button data-answer="生成上下文">生成上下文</button><button data-answer="压缩图片">压缩图片</button><button data-answer="重启服务">重启服务</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="版本元数据"><p>旧版和新版政策应靠什么区分？</p><button data-answer="版本元数据">版本元数据</button><button data-answer="字体大小">字体大小</button><button data-answer="随机排序">随机排序</button><div class="quiz-result" aria-live="polite"></div></div><div class="quiz-question" data-correct="质量仍不够"><p>检索很快但找错资料说明什么？</p><button data-answer="质量仍不够">质量仍不够</button><button data-answer="系统已完美">系统已完美</button><button data-answer="无需评测">无需评测</button><div class="quiz-result" aria-live="polite"></div></div></section>
+    <h2 id="practice">练一下</h2><section class="card"><p>设计一条向量库记录结构，包含 id、content、vector、metadata。metadata 至少写出 8 个字段，并说明哪个字段用于权限、哪个用于版本、哪个用于引用。</p></section>
+    <p class="source">主要参考：<a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter3/06_vector_embedding.md">Datawhale RAG 向量嵌入</a> · <a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter3/08_vector_db.md">Datawhale RAG 向量数据库</a> · <a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter3/10_index_optimization.md">Datawhale RAG 索引优化</a> · <a href="https://developers.openai.com/api/docs/guides/embeddings">OpenAI Embeddings 文档</a></p>
+    <nav class="nav-links"><a href="./0003-text-chunking-deep-dive.html">上一章：文本分块：别让好资料输在切法上</a><a href="./0005-multimodal-document-understanding.html">下一章：多模态文档理解：PDF、表格、图片和截图如何进入 RAG</a></nav>
+  </article><aside class="side"><div class="toc"><strong>本章导航</strong><a href="#goals">目标</a><a href="#diagram">图解</a><a href="#points">知识点</a><a href="#deep">重点专题</a><a href="#quiz">自测</a><a href="#practice">练习</a></div></aside></section></main><script src="../assets/quiz.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script><script src="../assets/code-highlight.js"></script><script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({ startOnLoad: true, theme: "neutral" });</script></body></html>

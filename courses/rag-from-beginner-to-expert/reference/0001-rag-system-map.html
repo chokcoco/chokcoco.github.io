@@ -1,0 +1,11 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RAG 全链路系统图</title><link rel="stylesheet" href="../assets/course.css"></head><body><main class="page"><header class="topbar"><a href="../../../index.html">AI Course Studio</a><nav><a href="../index.html">RAG 从入门到精通</a><a href="../reference/0002-rag-glossary.html">术语表</a><a href="../markdown/course.md">Markdown</a></nav></header><section class="hero"><div class="eyebrow">Reference</div><h1>RAG 全链路系统图</h1></section><p class="summary">这份材料用于复习和快速查阅。建议打印或和 lesson 并排打开。</p><pre class="mermaid">flowchart LR
+  A[&quot;资料源&quot;] --&gt; B[&quot;加载与治理&quot;]
+  B --&gt; C[&quot;分块与多模态解析&quot;]
+  C --&gt; D[&quot;Embedding 与索引&quot;]
+  D --&gt; E[&quot;检索 / 混合检索&quot;]
+  E --&gt; F[&quot;Rerank 重排&quot;]
+  F --&gt; G[&quot;上下文包&quot;]
+  G --&gt; H[&quot;LLM 生成&quot;]
+  H --&gt; I[&quot;引用 / 拒答 / 结构化输出&quot;]
+  I --&gt; J[&quot;评测与日志&quot;]
+  J --&gt; B</pre></main><script src="../assets/quiz.js"></script><script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.11.1/build/highlight.min.js"></script><script src="../assets/code-highlight.js"></script><script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({ startOnLoad: true, theme: "neutral" });</script></body></html>
