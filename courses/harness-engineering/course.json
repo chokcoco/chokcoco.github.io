@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "slug": "harness-engineering",
+  "title": "Harness Engineering",
+  "subtitle": "驭缰工程：为 AI 智能体设计可靠的工作系统",
+  "description": "理解智能体如何在意图、环境、工具、边界与反馈的共同作用下完成真实工程，并分别掌握存量仓库改造和新仓库建设的方法。",
+  "duration": "12–15 小时",
+  "status": "complete-draft",
+  "lessons": [
+    {
+      "number": 1,
+      "title": "Harness Engineering 到底改变了什么？",
+      "time": "50–65 分钟",
+      "summary": "从一次常见失败出发，理解工程关注点为什么会从单次生成转向完整工作系统。",
+      "status": "available",
+      "href": "lessons/01-what-harness-engineering-changes.html",
+      "markdown": "lessons/01-what-harness-engineering-changes.md"
+    },
+    {
+      "number": 2,
+      "title": "模型、agent loop 与 harness 是什么关系？",
+      "time": "55–70 分钟",
+      "summary": "拆开模型、智能体循环和运行支架的职责，看清一项任务如何真正行动起来。",
+      "status": "available",
+      "href": "lessons/02-model-agent-loop-and-harness.html",
+      "markdown": "lessons/02-model-agent-loop-and-harness.md"
+    },
+    {
+      "number": 3,
+      "title": "怎样把“帮我做完”写成可验证意图？",
+      "time": "55–70 分钟",
+      "summary": "把模糊需求改写成有范围、有约束、有停止条件的任务契约。",
+      "status": "available",
+      "href": "lessons/03-verifiable-intent-contract.html",
+      "markdown": "lessons/03-verifiable-intent-contract.md"
+    },
+    {
+      "number": 4,
+      "title": "智能体怎样读懂项目？",
+      "time": "60–75 分钟",
+      "summary": "建立可发现、可追溯、不会挤爆上下文的项目知识入口。",
+      "status": "available",
+      "href": "lessons/04-agent-legible-repository.html",
+      "markdown": "lessons/04-agent-legible-repository.md"
+    },
+    {
+      "number": 5,
+      "title": "怎样改造一个已有企业仓库？",
+      "time": "65–80 分钟",
+      "summary": "在历史规则和共享依赖中找到真实边界，为任务准备最小有效上下文。",
+      "status": "available",
+      "href": "lessons/05-retrofit-existing-enterprise-repository.html",
+      "markdown": "lessons/05-retrofit-existing-enterprise-repository.md"
+    },
+    {
+      "number": 6,
+      "title": "怎样从零建设 agent-first 新仓库？",
+      "time": "65–85 分钟",
+      "summary": "从第一天安排目录、架构、命令、文档和验证，而不是等仓库失控后补救。",
+      "status": "available",
+      "href": "lessons/06-build-agent-first-repository.html",
+      "markdown": "lessons/06-build-agent-first-repository.md"
+    },
+    {
+      "number": 7,
+      "title": "什么工具能让智能体真正行动？",
+      "time": "55–70 分钟",
+      "summary": "设计接口清楚、结果可读、失败可恢复的智能体工具。",
+      "status": "available",
+      "href": "lessons/07-tools-for-reliable-action.html",
+      "markdown": "lessons/07-tools-for-reliable-action.md"
+    },
+    {
+      "number": 8,
+      "title": "怎样让智能体有自由但不越界？",
+      "time": "60–75 分钟",
+      "summary": "把架构规则、沙箱、权限和审批变成可执行的工作边界。",
+      "status": "available",
+      "href": "lessons/08-guardrails-permissions-and-approval.html",
+      "markdown": "lessons/08-guardrails-permissions-and-approval.md"
+    },
+    {
+      "number": 9,
+      "title": "如何知道它真的做对了？",
+      "time": "65–80 分钟",
+      "summary": "用测试、评测、日志和独立审校组成能够自我修正的反馈回路。",
+      "status": "available",
+      "href": "lessons/09-evals-feedback-and-observability.html",
+      "markdown": "lessons/09-evals-feedback-and-observability.md"
+    },
+    {
+      "number": 10,
+      "title": "任务跑几小时，怎样不失忆？",
+      "time": "55–70 分钟",
+      "summary": "管理上下文、持久状态、交接和恢复，让长任务不必反复从头开始。",
+      "status": "available",
+      "href": "lessons/10-long-running-state-and-recovery.html",
+      "markdown": "lessons/10-long-running-state-and-recovery.md"
+    },
+    {
+      "number": 11,
+      "title": "何时提高自治，何时交给人？",
+      "time": "55–75 分钟",
+      "summary": "根据风险选择自治等级，并理解状态机、隔离和多智能体编排。",
+      "status": "available",
+      "href": "lessons/11-autonomy-and-orchestration.html",
+      "markdown": "lessons/11-autonomy-and-orchestration.md"
+    },
+    {
+      "number": 12,
+      "title": "速度提高后，怎样控制漂移和风险？",
+      "time": "60–75 分钟",
+      "summary": "处理坏模式复制、技术债、安全、审计、成本与组织变化。",
+      "status": "available",
+      "href": "lessons/12-governance-drift-security-and-cost.html",
+      "markdown": "lessons/12-governance-drift-security-and-cost.md"
+    },
+    {
+      "number": 13,
+      "title": "怎样把 Harness 用到自己的仓库？",
+      "time": "90–120 分钟",
+      "summary": "完成存量仓库改造或新仓库建设，并用运行证据复盘整套工作系统。",
+      "status": "available",
+      "href": "lessons/13-capstone-apply-harness.html",
+      "markdown": "lessons/13-capstone-apply-harness.md"
+    }
+  ],
+  "references": [
+    {
+      "title": "Harness Engineering 术语表",
+      "href": "reference/glossary.html",
+      "markdown": "reference/glossary.md"
+    }
+  ]
+}

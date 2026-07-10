@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>星桥商城 Harness 实验仓库 | Harness Engineering</title>
+  <link rel="stylesheet" href="../../assets/course.css">
+  <script defer src="../../assets/course.js"></script>
+</head>
+<body>
+  <div class="course-shell">
+    <header class="topbar"><a class="brand" href="../../index.html">Harness Engineering</a><nav><a href="../../index.html">课程目录</a><a href="../../reference/glossary.html">术语表</a><a href="../../../../index.html">全部课程</a></nav></header>
+    <section class="lesson-header"><div class="eyebrow">Course Lab</div><h1>星桥商城 Harness 实验仓库</h1><p class="lesson-summary">使用完全虚构的电商仓库练习任务契约、仓库知识、边界、反馈和恢复。</p></section>
+    <div class="lesson-layout"><main class="lesson-content"><p>这是 Harness Engineering 课程使用的虚构电商仓库。商品、订单、员工、运行记录和故障均为教学数据，不对应真实企业。</p>
+<h2 id="目录">目录</h2>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">commerce-harness-lab/
+├── case/                 # 业务需求与失败轨迹
+├── starter/              # 未完成 Harness 改造的存量仓库
+├── harness-overlay/      # 存量仓库的参考 Harness 覆盖层
+└── greenfield/           # 从零建设时的最小仓库蓝图</code></pre></figure>
+<p>两条业务线贯穿课程：</p>
+<ol><li>优惠叠加与价格解释：统一会员折扣、订单券和运费优惠的组合规则。</li><li>库存预占与超时释放：处理幂等重试、支付确认、取消和超时释放。</li></ol>
+<h2 id="环境">环境</h2>
+<ul><li>Node.js 22</li><li>React 19.2</li><li>Vite 8.1</li><li>Java 21</li><li>Spring Boot 4.1</li><li>Maven 3.9+</li></ul>
+<p>概念路径无需安装依赖。工程路径可以先运行不依赖第三方包的检查：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">node starter/scripts/audit-baseline.mjs
+node harness-overlay/scripts/verify-overlay.mjs
+node --test starter/packages/promotion-engine/test/*.test.js</code></pre></figure>
+<p>Windows PowerShell 使用相同的 <code>node</code> 命令。React 和 Java 的完整构建命令见第 6 章。</p>
+<h2 id="使用顺序">使用顺序</h2>
+<ul><li>第 3–4 章先读 <code>case/</code>，把业务请求写成任务契约并建立仓库地图。</li><li>第 5 章在 <code>starter/</code> 上做存量改造。</li><li>第 6 章用 <code>greenfield/</code> 观察新仓库的起步方式。</li><li>第 7–12 章逐步加入工具、边界、评测、状态和治理。</li><li>第 13 章选择设计路径或工程路径完成综合实践。</li></ul>
+<p>不要把 <code>harness-overlay/</code> 一次性复制进真实仓库。先找到当前任务的高频失败，再决定哪些文件和检查值得长期维护。</p></main><aside class="toc"><strong>本章目录</strong><a class="" href="#目录">目录</a><a class="" href="#环境">环境</a><a class="" href="#使用顺序">使用顺序</a></aside></div>
+    <footer class="site-footer">Harness Engineering · 星桥商城实验仓库</footer>
+  </div>
+</body>
+</html>

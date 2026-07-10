@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="综合实践要求你用任务契约、仓库知识、边界、验证、状态和复盘证明一项工作可执行、可检查、可恢复，而不只是交出一份代码 diff。">
+  <title>怎样把 Harness 用到自己的仓库？ | Harness Engineering</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/course.js"></script>
+</head>
+<body>
+  <div class="course-shell">
+    <header class="topbar"><a class="brand" href="../index.html">Harness Engineering</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header>
+    <section class="lesson-header">
+      <div class="eyebrow">第 13 章 · 90–120 分钟</div>
+      <h1>怎样把 Harness 用到自己的仓库？</h1>
+      <p class="lesson-summary">综合实践要求你用任务契约、仓库知识、边界、验证、状态和复盘证明一项工作可执行、可检查、可恢复，而不只是交出一份代码 diff。</p>
+    </section>
+    <div class="lesson-layout">
+      <main class="lesson-content"><h2 id="选择一条路径">选择一条路径</h2>
+<p>两条路径使用同一套评价标准，编程深度不同。</p>
+<div class="table-wrap"><table><thead><tr><th>路径</th><th>适合方式</th><th>最终交付</th></tr></thead><tbody><tr><td>A：Harness 设计</td><td>不要求运行完整代码</td><td>任务契约、仓库地图、工具与权限、反馈回路、状态卡和复盘</td></tr><tr><td>B：Harness 工程</td><td>运行 Node/React，可选 Java</td><td>上述设计包，加验证脚本、测试、构建结果和最小实现</td></tr></tbody></table></div>
+<p>你可以改造 <code>starter/</code> 的优惠叠加，也可以用 <code>greenfield/</code> 建库存预占。不要两项都做。90–120 分钟内把一条闭环做完整，比留下两个半成品更有学习价值。</p>
+<h2 id="开始前保存基线">开始前保存基线</h2>
+<p>存量路径：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">cd courses/harness-engineering/labs/commerce-harness-lab/starter
+node scripts/audit-baseline.mjs
+node --test packages/promotion-engine/test/*.test.js</code></pre></figure>
+<p>新仓库路径先确认：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">greenfield/AGENTS.md
+greenfield/docs/architecture.md
+greenfield/specs/inventory-reservation.md</code></pre></figure>
+<p>保存命令、退出码和失败摘要。Java 环境不可用时，在计划里明确写出，不得把未执行的 Maven 测试记为通过。</p>
+<h2 id="第一步-写一份能阻止错误的任务契约">第一步：写一份能阻止错误的任务契约</h2>
+<p>契约至少包含：</p>
+<ul><li>用户结果和非目标。</li><li>允许、notice、approval 与 blocked 范围。</li><li>四条业务不变量。</li><li>五个验收样本，其中两个是失败或重试边界。</li><li>失败处理与可靠停止。</li></ul>
+<p>写完后问自己：如果智能体准备修改范围外共享代码，契约能否让它停下来？如果测试全绿但 Java 未运行，契约会不会允许完成？</p>
+<h2 id="第二步-建立任务-context-pack">第二步：建立任务 Context Pack</h2>
+<p>不要总结整个仓库。列出当前任务的：</p>
+<div class="table-wrap"><table><thead><tr><th>项目</th><th>必填内容</th></tr></thead><tbody><tr><td>任务</td><td>契约路径和版本</td></tr><tr><td>事实</td><td>架构、业务规则与来源</td></tr><tr><td>入口</td><td>两到五个代码或接口入口</td></tr><tr><td>验证</td><td>从局部到整体的命令</td></tr><tr><td>边界</td><td>路径级别和人工闸门</td></tr><tr><td>状态</td><td>进度文件和恢复入口</td></tr></tbody></table></div>
+<p>每条事实写明新鲜度。发现冲突时先解决或停止，不把两个说法一起塞给智能体。</p>
+<h2 id="第三步-先制造可观察失败">第三步：先制造可观察失败</h2>
+<p>优惠路径已有一条失败 Node 测试。工程路径应先确认它确实失败，再修改实现。</p>
+<p>库存路径至少先写：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">@Test
+void repeatedRequestReturnsTheFirstReservation() {
+    var first = service.reserve(request(&quot;checkout-781&quot;, 1));
+    var second = service.reserve(request(&quot;checkout-781&quot;, 1));
+
+    assertThat(second.id()).isEqualTo(first.id());
+    assertThat(service.available(&quot;SKU-RED-CHAIR&quot;)).isEqualTo(1);
+}</code></pre></figure>
+<p>还要补同键不同数量的冲突测试。没有失败基线，后面的绿色结果无法证明功能真的被修复。</p>
+<h2 id="第四步-做最小实现">第四步：做最小实现</h2>
+<p>存量优惠路径只需要修纯促销规则，再对齐 Java 报价和 React 明细。不要顺手重构两个应用。</p>
+<p>库存路径可以先用内存存储：按幂等键保存请求摘要和第一次结果；状态转换检查当前状态；重复终态操作返回原结果。课程不要求生产数据库或分布式锁。</p>
+<p>每完成一个小单元就运行最小相关测试。失败信息进入进度文件，不能只留在终端滚动区。</p>
+<h2 id="第五步-运行分层验证">第五步：运行分层验证</h2>
+<p>建议顺序：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">1. 结构与策略检查
+2. 纯 JavaScript 业务测试
+3. React 应用构建
+4. Java 单元与接口测试
+5. 跨语言验收样本
+6. 页面或 API 冒烟检查
+7. 完成条件和风险审校</code></pre></figure>
+<p>工程路径至少完成前三项。选择 Java 实现时必须完成第四项；如果本机环境缺失，任务状态保持 manual review 或 blocked，不得伪造结果。</p>
+<h2 id="第六步-准备证据包">第六步：准备证据包</h2>
+<p>最终证据包包含：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">task-contract.md
+context-pack.md
+change-plan.md
+progress.md
+test-results.md
+risk-and-approval.md
+retrospective.md</code></pre></figure>
+<p><code>test-results.md</code> 记录命令、运行目录、环境版本、退出码、关键结果和时间。截图可以补充页面证据，但不能替代可重复命令。</p>
+<h2 id="第七步-做一次独立审校">第七步：做一次独立审校</h2>
+<p>让 checker 只读取任务契约、diff 和证据包，回答：</p>
+<ol><li>是否覆盖全部验收场景？</li><li>是否出现范围外修改？</li><li>是否有未批准的公共接口或依赖变化？</li><li>运行结果能否复现？</li><li>未覆盖风险是否准确？</li></ol>
+<p>checker 发现 major 问题时，回到实现和验证。不要只改复盘文字。</p>
+<h2 id="综合评价表">综合评价表</h2>
+<div class="table-wrap"><table><thead><tr><th>维度</th><th>0 分</th><th>1 分</th><th>2 分</th></tr></thead><tbody><tr><td>意图</td><td>只有原始需求</td><td>有目标和范围</td><td>含不变量、验收和停止</td></tr><tr><td>仓库知识</td><td>无入口</td><td>有文件清单</td><td>有来源、新鲜度和最小 Context Pack</td></tr><tr><td>边界</td><td>无限制</td><td>有文字提醒</td><td>有分级、机械检查和人工闸门</td></tr><tr><td>反馈</td><td>只说测试通过</td><td>有局部命令</td><td>有分层结果、失败分类和回归</td></tr><tr><td>状态与恢复</td><td>只靠聊天</td><td>有进度摘要</td><td>可由另一人验证并继续</td></tr><tr><td>风险与审计</td><td>未说明</td><td>有泛化风险</td><td>有未覆盖项、审批和轨迹证据</td></tr></tbody></table></div>
+<p>总分 10 分以上，且没有伪造结果、敏感数据或 blocked 行为，说明实践形成了最小闭环。8–9 分适合继续补证据；低于 8 分先回到任务契约和基线。</p>
+<h2 id="参考实现不是标准答案">参考实现不是标准答案</h2>
+<p>实验仓库的 <code>harness-overlay/</code> 提供了一套可用结构。它故意没有完成全部业务实现，因为课程要训练的是：从失败证据推导下一项 Harness 改进。</p>
+<p>如果你的设计比参考覆盖层更小，但能稳定阻止同样错误，它可能更好。如果多了十份没有任何检查读取的模板，反而增加维护负担。</p>
+<h2 id="最后的复盘">最后的复盘</h2>
+<p>复盘只回答四个问题：</p>
+<ul><li>哪个失败最有价值？</li><li>哪项改动让失败更早暴露？</li><li>哪条规则仍靠人记忆？</li><li>下一次只增加哪一项 Harness 能力？</li></ul>
+<p>不要用“未来继续优化”收尾。写下一项具体任务、负责人和触发证据。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>完整 Harness 不是文件清单，而是一条可运行的因果链：意图决定行为与边界，仓库知识提供可信入口，工具采取行动，检查生成反馈，状态支持恢复，人工闸门处理风险，复盘再把真实失败写回系统。</p>
+<p>到这里，你应该能为一个小型项目做 Harness 设计，也能判断企业仓库下一步该补的是任务契约、知识入口、工具、边界、反馈还是状态，而不是笼统地要求智能体“更聪明一点”。</p>
+<p>上一章：<a href="./12-governance-drift-security-and-cost.md">速度提高后，怎样控制漂移和风险？</a><br> 返回：<a href="../index.html">课程目录</a><br> 术语复习：<a href="../reference/glossary.md">术语表</a></p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Ryan Lopopolo. <a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noreferrer">Harness engineering: leveraging Codex in an agent-first world</a>. OpenAI, 2026-02-11.</li><li>Anthropic. <a href="https://www.anthropic.com/engineering/harness-design-long-running-apps" target="_blank" rel="noreferrer">Harness design for long-running application development</a>. 2026-03-24.</li><li>OpenAI. <a href="https://openai.com/index/evals-drive-next-chapter-of-ai/" target="_blank" rel="noreferrer">How evals drive the next chapter in AI for businesses</a>. 2025-11-19.</li><li>Shopify Engineering. <a href="https://shopify.engineering/scaling-inventory-reservations" target="_blank" rel="noreferrer">We replaced Redis with MySQL for inventory reservations—and it scaled</a>. 2026-05-12.</li></ul><nav class="lesson-nav"><a href="../lessons/12-governance-drift-security-and-cost.html">← 第 12 章<br><strong>速度提高后，怎样控制漂移和风险？</strong></a><a href="../index.html">返回课程目录 →</a></nav></main>
+      <aside class="toc"><strong>本章目录</strong><a class="" href="#选择一条路径">选择一条路径</a><a class="" href="#开始前保存基线">开始前保存基线</a><a class="" href="#第一步-写一份能阻止错误的任务契约">第一步：写一份能阻止错误的任务契约</a><a class="" href="#第二步-建立任务-context-pack">第二步：建立任务 Context Pack</a><a class="" href="#第三步-先制造可观察失败">第三步：先制造可观察失败</a><a class="" href="#第四步-做最小实现">第四步：做最小实现</a><a class="" href="#第五步-运行分层验证">第五步：运行分层验证</a><a class="" href="#第六步-准备证据包">第六步：准备证据包</a><a class="" href="#第七步-做一次独立审校">第七步：做一次独立审校</a><a class="" href="#综合评价表">综合评价表</a><a class="" href="#参考实现不是标准答案">参考实现不是标准答案</a><a class="" href="#最后的复盘">最后的复盘</a><a class="" href="#本章小结">本章小结</a><a class="" href="#参考文献">参考文献</a></aside>
+    </div>
+    <footer class="site-footer">Harness Engineering · 驭缰工程</footer>
+  </div>
+</body>
+</html>

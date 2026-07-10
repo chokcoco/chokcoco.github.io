@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="存量仓库改造先定位真实入口和影响边界，再用最小覆盖层补任务契约、验证信号与可靠停止，而不是重写整个项目。">
+  <title>怎样改造一个已有企业仓库？ | Harness Engineering</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/course.js"></script>
+</head>
+<body>
+  <div class="course-shell">
+    <header class="topbar"><a class="brand" href="../index.html">Harness Engineering</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header>
+    <section class="lesson-header">
+      <div class="eyebrow">第 5 章 · 65–80 分钟</div>
+      <h1>怎样改造一个已有企业仓库？</h1>
+      <p class="lesson-summary">存量仓库改造先定位真实入口和影响边界，再用最小覆盖层补任务契约、验证信号与可靠停止，而不是重写整个项目。</p>
+    </section>
+    <div class="lesson-layout">
+      <main class="lesson-content"><h2 id="先接受仓库不整齐">先接受仓库不整齐</h2>
+<p>打开<a href="../labs/commerce-harness-lab/index.html">星桥商城实验仓库</a>的 <code>starter/</code>，你会看到两个 React 应用、一个共享促销包和一个 Spring Boot 服务。旧文档说前端可以独立预估价格，后端也有自己的促销实现；组合规则还写着“待产品确认”。</p>
+<p>这就是存量仓库的常态：代码能运行，知识却没有收敛到一个地方。Harness 改造的第一步不是创建一套完美目录，而是确认当前任务会经过哪些真实入口。</p>
+<h2 id="第一步-建立基线-不要急着修">第一步：建立基线，不要急着修</h2>
+<p>先运行基线检查：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">cd courses/harness-engineering/labs/commerce-harness-lab/starter
+node scripts/audit-baseline.mjs
+node --test packages/promotion-engine/test/*.test.js</code></pre></figure>
+<p>审计应发现四个设计缺口。Node 测试中“策略禁止叠加”会失败，这是课程刻意保留的基线故障。先保存命令、退出码和失败断言，后面才能证明改造真的改变了行为。</p>
+<p>不要为了得到绿色结果删掉失败测试。失败测试就是任务事实的一部分。</p>
+<h2 id="第二步-沿运行路径定位-而不是沿词面定位">第二步：沿运行路径定位，而不是沿词面定位</h2>
+<p>优惠叠加的运行路径是：</p>
+<div class="diagram-card"><pre class="mermaid">flowchart LR
+  A[&quot;storefront App&quot;] --&gt; B[&quot;promotion-engine&quot;]
+  A --&gt; C[&quot;commerce-api quote&quot;]
+  D[&quot;ops-console&quot;] --&gt; E[&quot;活动配置&quot;]
+  B -. &quot;预览&quot; .-&gt; F[&quot;价格明细&quot;]
+  C -. &quot;权威报价&quot; .-&gt; F</pre></div>
+<p>需要核验的事实包括：</p>
+<ol><li><code>storefront</code> 是否真的 import 共享促销引擎。</li><li>后端报价是否由 <code>PricingService</code> 计算。</li><li><code>ops-console</code> 当前是否写入组合策略，还是只展示静态数据。</li><li>共享包还有没有范围外消费者。</li></ol>
+<p>只有前两项能直接从当前 starter 证明。第三项尚未实现，第四项需要继续扫描 workspace。这里应把“未知”保留下来，不能补成确定结论。</p>
+<h2 id="第三步-给路径分级">第三步：给路径分级</h2>
+<p>用 allowed、notice、approval 和 blocked 四级控制修改：</p>
+<div class="table-wrap"><table><thead><tr><th>级别</th><th>星桥商城范围</th><th>系统行为</th></tr></thead><tbody><tr><td>allowed</td><td>当前任务 spec、局部测试、storefront 展示</td><td>可修改并自动验证</td></tr><tr><td>notice</td><td>共享促销包、Java 报价记录、多个应用</td><td>修改前列出消费者与影响</td></tr><tr><td>approval</td><td>公共 API、依赖升级、支付或库存语义</td><td>暂停并请求负责人决定</td></tr><tr><td>blocked</td><td>凭证、真实数据、跳过测试、削弱断言</td><td>拒绝执行并记录原因</td></tr></tbody></table></div>
+<p>notice 不是审批。它要求智能体先把影响面说清，再继续执行。这样既不会因为共享包而处处停顿，也不会静默扩大范围。</p>
+<h2 id="第四步-铺一层最小-harness">第四步：铺一层最小 Harness</h2>
+<p>实验仓库的 <a href="../labs/commerce-harness-lab/harness-overlay/AGENTS.md">harness-overlay 入口</a> 包含：</p>
+<ul><li><code>AGENTS.md</code>：短入口、默认验证与边界。</li><li><code>docs/index.md</code>：问题到事实源的地图。</li><li><code>specs/</code>：两个已确认任务契约。</li><li><code>plans/current-task.md</code>：顺序与审批点。</li><li><code>evals/cases.json</code>：稳定的行为样本。</li><li><code>state/progress.md</code>：跨会话进度和证据。</li><li><code>scripts/verify-overlay.mjs</code>：无依赖结构检查。</li></ul>
+<p>运行：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">cd courses/harness-engineering/labs/commerce-harness-lab/harness-overlay
+node scripts/verify-overlay.mjs</code></pre></figure>
+<p>通过只说明覆盖层结构完整，不说明业务实现已经正确。结构检查和行为测试要分开。</p>
+<h2 id="第五步-先修纯规则-再修界面">第五步：先修纯规则，再修界面</h2>
+<p>共享促销引擎中有一行注释，明确指出实现没有读取 <code>allowMemberWithOrderCoupon</code>。修复可以很小：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const canUseOrderCoupon =
+  couponEligible &amp;&amp;
+  (memberDiscount === 0 || policy.allowMemberWithOrderCoupon);
+
+const orderDiscount = canUseOrderCoupon ? 5000 : 0;</code></pre></figure>
+<p>先让纯函数的三个验收样本通过，再更新 React 展示。这样一旦金额不对，问题集中在业务规则；界面只负责显示分项结果。</p>
+<p>Java 端也要实现同一策略。课程不建议让浏览器和 Java 共享源码，而是让两边共享行为契约与验收样本。跨语言一致性靠相同输入输出验证，不靠复制文件。</p>
+<h2 id="第六步-把工具输出变成可行动反馈">第六步：把工具输出变成可行动反馈</h2>
+<p>下面两种输出都来自测试命令，价值不同：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">tests failed</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">case: promotion-no-stack
+expected payable: 73020
+actual payable: 68020
+policy: allowMemberWithOrderCoupon=false
+next check: ORDER_COUPON branch in promotion-engine</code></pre></figure>
+<p>第二种输出让智能体知道失败属于哪条业务规则、期望和实际差多少、下一步去哪里看。错误信息不必替智能体完成推理，但要给它足够证据采取新行动。</p>
+<h2 id="第七步-定义完成证据">第七步：定义完成证据</h2>
+<p>存量改造至少留下：</p>
+<div class="table-wrap"><table><thead><tr><th>证据</th><th>为什么需要</th></tr></thead><tbody><tr><td>修改前失败记录</td><td>证明问题可复现</td></tr><tr><td>任务契约版本</td><td>证明实现依据</td></tr><tr><td>影响文件与消费者</td><td>控制共享改动范围</td></tr><tr><td>JavaScript 与 Java 测试</td><td>检查两条实现路径</td></tr><tr><td>两个 React 构建</td><td>检查共享包没有破坏消费者</td></tr><tr><td>剩余风险</td><td>说明哪些路径没有验证</td></tr></tbody></table></div>
+<p>如果本机没有 Java 环境，应明确写“Java 测试未运行”，而不是用源码看起来正确代替测试通过。可靠停止比虚假的完成更有价值。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="先生成几十份文档">先生成几十份文档</h3>
+<p>文档没有真实任务牵引，很快变成无人维护的模板。先围绕一个高频失败补入口、契约和验证。</p>
+<h3 id="把旧代码都改成新风格">把旧代码都改成新风格</h3>
+<p>Harness 改造不是顺手重构。范围越大，越难判断哪项改动修复了问题。</p>
+<h3 id="把共享包设成永久禁止修改">把共享包设成永久禁止修改</h3>
+<p>共享包可能确实需要修。更合理的控制是 notice、消费者分析和跨应用回归。</p>
+<h3 id="只留下最终-diff">只留下最终 diff</h3>
+<p>没有基线失败、命令和风险记录，审核者无法判断 diff 是否真的满足任务。</p>
+<h2 id="本章练习-设计一份改造计划">本章练习：设计一份改造计划</h2>
+<p>阅读<a href="../labs/commerce-harness-lab/case/failure-traces.md">失败轨迹 A</a>和<a href="../labs/commerce-harness-lab/harness-overlay/specs/promotion-stacking.md">促销任务契约</a>，写出 6–10 步改造计划。每一步标明：输入证据、允许路径、验证命令、失败后的下一步。</p>
+<h3 id="通过标准">通过标准</h3>
+<ul><li>修改实现前先保存失败基线。</li><li>先处理纯促销规则，再处理 React 展示。</li><li>共享包修改触发消费者检查。</li><li>JavaScript 与 Java 使用相同验收样本。</li><li>至少有一个可靠停止条件。</li><li>最终证据包含未验证项。</li></ul>
+<p>六项全部出现，计划即可进入工程执行。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>存量仓库的 Harness 改造从事实收敛开始。先复现失败，沿运行路径找到真实入口，再用分级边界控制影响面。最小覆盖层补上任务契约、仓库地图、验证样本和进度状态；实现则从纯规则和最小 diff 开始。</p>
+<p>下一章换一个起点：没有历史代码时，怎样从第一天建立足够用、又不过度设计的 agent-first 仓库。</p>
+<p>上一章：<a href="./04-agent-legible-repository.md">智能体怎样读懂项目？</a><br> 下一章：<a href="./06-build-agent-first-repository.md">怎样从零建设 agent-first 新仓库？</a><br> 术语复习：<a href="../reference/glossary.md">术语表</a></p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Ryan Lopopolo. <a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noreferrer">Harness engineering: leveraging Codex in an agent-first world</a>. OpenAI, 2026-02-11.</li><li>Shopify Developers. <a href="https://shopify.dev/docs/api/admin-graphql/latest/objects/DiscountCombinesWith" target="_blank" rel="noreferrer">DiscountCombinesWith</a>. 访问于 2026-07-10.</li><li>Shopify Developers. <a href="https://shopify.dev/changelog/discount-rejection-support-for-discount-functions" target="_blank" rel="noreferrer">Discount Function support for rejecting discount codes</a>. 2025-12-17.</li></ul><nav class="lesson-nav"><a href="../lessons/04-agent-legible-repository.html">← 第 4 章<br><strong>智能体怎样读懂项目？</strong></a><a href="../lessons/06-build-agent-first-repository.html">第 6 章 →<br><strong>怎样从零建设 agent-first 新仓库？</strong></a></nav></main>
+      <aside class="toc"><strong>本章目录</strong><a class="" href="#先接受仓库不整齐">先接受仓库不整齐</a><a class="" href="#第一步-建立基线-不要急着修">第一步：建立基线，不要急着修</a><a class="" href="#第二步-沿运行路径定位-而不是沿词面定位">第二步：沿运行路径定位，而不是沿词面定位</a><a class="" href="#第三步-给路径分级">第三步：给路径分级</a><a class="" href="#第四步-铺一层最小-harness">第四步：铺一层最小 Harness</a><a class="" href="#第五步-先修纯规则-再修界面">第五步：先修纯规则，再修界面</a><a class="" href="#第六步-把工具输出变成可行动反馈">第六步：把工具输出变成可行动反馈</a><a class="" href="#第七步-定义完成证据">第七步：定义完成证据</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#先生成几十份文档">先生成几十份文档</a><a class="sub" href="#把旧代码都改成新风格">把旧代码都改成新风格</a><a class="sub" href="#把共享包设成永久禁止修改">把共享包设成永久禁止修改</a><a class="sub" href="#只留下最终-diff">只留下最终 diff</a><a class="" href="#本章练习-设计一份改造计划">本章练习：设计一份改造计划</a><a class="sub" href="#通过标准">通过标准</a><a class="" href="#本章小结">本章小结</a><a class="" href="#参考文献">参考文献</a></aside>
+    </div>
+    <footer class="site-footer">Harness Engineering · 驭缰工程</footer>
+  </div>
+</body>
+</html>

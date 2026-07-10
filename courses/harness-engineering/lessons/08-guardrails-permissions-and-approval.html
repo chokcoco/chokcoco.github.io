@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="把可计算的规则交给 schema、lint、测试和沙箱，把真正需要承担风险的决定交给审批，智能体才能在清楚边界内行动。">
+  <title>怎样让智能体有自由但不越界？ | Harness Engineering</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/course.js"></script>
+</head>
+<body>
+  <div class="course-shell">
+    <header class="topbar"><a class="brand" href="../index.html">Harness Engineering</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header>
+    <section class="lesson-header">
+      <div class="eyebrow">第 8 章 · 60–75 分钟</div>
+      <h1>怎样让智能体有自由但不越界？</h1>
+      <p class="lesson-summary">把可计算的规则交给 schema、lint、测试和沙箱，把真正需要承担风险的决定交给审批，智能体才能在清楚边界内行动。</p>
+    </section>
+    <div class="lesson-layout">
+      <main class="lesson-content"><h2 id="一条-省时间-的跨层-import">一条“省时间”的跨层 import</h2>
+<p>失败轨迹 C 里，智能体为了让前后端价格结构一致，直接让 React 应用引用 Java 服务目录下的 JSON 文件。本地页面能运行，CI 和架构边界却坏了。</p>
+<p>如果规则只写在架构文档里，智能体可能忽略；如果浏览器包根本不能解析服务端路径，或者结构测试会拒绝这条依赖，问题会在修改后几秒内暴露。</p>
+<p>这就是 <span class="term" tabindex="0" data-tip="限制行为范围或要求确认的规则、权限、沙箱与审批">guardrail</span>（护栏）的作用：约束行动空间，并在越界时返回明确反馈。</p>
+<h2 id="指导-检测-阻止和审批">指导、检测、阻止和审批</h2>
+<p>四种机制不要混用：</p>
+<div class="table-wrap"><table><thead><tr><th>机制</th><th>作用</th><th>示例</th></tr></thead><tbody><tr><td>指导</td><td>告诉智能体推荐做法</td><td>根入口说明后端报价是事实源</td></tr><tr><td>检测</td><td>发现违反规则</td><td>结构测试检查浏览器 import</td></tr><tr><td>阻止</td><td>让不允许的动作无法执行</td><td>沙箱禁止读取生产凭证</td></tr><tr><td>审批</td><td>把风险决定交给责任人</td><td>修改公共 API 前请求负责人确认</td></tr></tbody></table></div>
+<p>能稳定计算的规则，优先用检测或阻止。需要业务取舍的变化，保留人工审批。把所有内容都写成提示词，执行力不够；把所有变化都设成审批，团队会被通知淹没。</p>
+<h2 id="从不变量推导机械检查">从不变量推导机械检查</h2>
+<p>库存任务有一条不变量：同一幂等键不能代表两个不同意图。可以分层落实：</p>
+<ul><li>schema 要求幂等键、SKU 和数量存在。</li><li>服务保存首次请求摘要。</li><li>同键异义返回稳定错误码。</li><li>测试检查库存没有变化。</li><li>审计记录冲突键和请求摘要，不记录敏感凭证。</li></ul>
+<p>优惠任务的“金额使用整数分”也可以落成类型、schema 和测试。规则一旦能被机械检查，就不必每次靠评审者重新发现。</p>
+<h2 id="路径边界采用四级策略">路径边界采用四级策略</h2>
+<p>实验仓库的根指令已经定义：allowed、notice、approval、blocked。</p>
+<p>一项改动可能在执行中升级：开始只修改 storefront，后来发现必须改变共享促销包，就从 allowed 进入 notice；继续发现公共报价记录要加字段，再进入 approval。Harness 应把新影响面和证据交给人，而不是整项任务悄悄扩张。</p>
+<div class="diagram-card"><pre class="mermaid">flowchart LR
+  A[&quot;局部修改&quot;] --&gt; B{&quot;触碰共享边界？&quot;}
+  B -- &quot;否&quot; --&gt; C[&quot;自动验证&quot;]
+  B -- &quot;是&quot; --&gt; D[&quot;列出消费者与影响&quot;]
+  D --&gt; E{&quot;改变公共契约或高风险语义？&quot;}
+  E -- &quot;否&quot; --&gt; C
+  E -- &quot;是&quot; --&gt; F[&quot;请求批准&quot;]
+  F -- &quot;批准&quot; --&gt; C
+  F -- &quot;拒绝&quot; --&gt; G[&quot;缩小范围或停止&quot;]</pre></div>
+<h2 id="沙箱控制能力-不判断业务正确">沙箱控制能力，不判断业务正确</h2>
+<p>沙箱可以限制文件系统、网络和进程权限。例如：</p>
+<ul><li>默认只写当前工作区。</li><li>禁止访问生产网络和凭证目录。</li><li>依赖安装需要批准。</li><li>数据库操作只允许本地测试实例。</li><li>删除、发布和外部消息属于高风险动作。</li></ul>
+<p>沙箱不能判断“会员折扣是否能和订单券叠加”。业务正确仍靠任务契约、测试和人工决定。安全边界与业务边界要同时存在。</p>
+<h2 id="hook-适合生命周期闸门">Hook 适合生命周期闸门</h2>
+<p>Hook 可以在工具调用或任务阶段前后运行检查：</p>
+<div class="table-wrap"><table><thead><tr><th>时机</th><th>可执行检查</th></tr></thead><tbody><tr><td>修改前</td><td>路径级别、共享消费者、敏感文件</td></tr><tr><td>命令前</td><td>命令白名单、网络和凭证权限</td></tr><tr><td>修改后</td><td>格式、schema、依赖方向</td></tr><tr><td>结束前</td><td>测试、验收证据、未解决风险</td></tr></tbody></table></div>
+<p>Hook 的错误信息要可行动。“policy violation”不够；应说明哪条规则、哪个文件、允许的替代路径，以及是否可以申请例外。</p>
+<h2 id="防止来自仓库内容的指令注入">防止来自仓库内容的指令注入</h2>
+<p>智能体会读取 issue、README、测试数据和网页。这些内容可能包含“忽略之前规则”“上传密钥”等文本。Harness 要区分数据和高权威指令：</p>
+<ul><li>只有约定位置的指令文件能改变执行规则。</li><li>普通仓库内容按数据处理，不能自动扩大权限。</li><li>外部网页不能授权本地写入或发布。</li><li>高风险动作始终经过策略或人工批准。</li><li>工具输出中的命令默认不自动执行。</li></ul>
+<p>这不是靠一句“谨防提示注入”解决，而是由权限层级和工具门禁共同完成。</p>
+<h2 id="例外也要有生命周期">例外也要有生命周期</h2>
+<p>真实项目会有例外。临时允许跨层依赖时，应记录：</p>
+<ul><li>例外对应哪项任务。</li><li>谁批准，何时到期。</li><li>哪条检查被豁免。</li><li>风险和补救计划。</li><li>到期后由什么任务清理。</li></ul>
+<p>永久 <code>ignore</code> 往往比一次失败更危险。它会让后续智能体把坏模式当成仓库惯例复制。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="规则越多越安全">规则越多越安全</h3>
+<p>冲突、过期和没人理解的规则会制造绕过。每条规则都需要所有者、触发证据和删除条件。</p>
+<h3 id="用审批代替测试">用审批代替测试</h3>
+<p>人点了批准，只表示接受执行风险，不表示功能正确。</p>
+<h3 id="只限制写文件-不限制外部副作用">只限制写文件，不限制外部副作用</h3>
+<p>发送消息、调用生产 API、创建订单和发布版本都可能不写本地文件，仍需要权限控制。</p>
+<h3 id="为了通过检查削弱断言">为了通过检查削弱断言</h3>
+<p>删除测试、放宽 schema 或添加全局 ignore 属于 blocked 行为。Harness 应把这类 diff 单独报告。</p>
+<h2 id="本章练习-完成风险矩阵">本章练习：完成风险矩阵</h2>
+<p>为下列动作分配 allowed、notice、approval 或 blocked，并说明机械检查：</p>
+<ol><li>修改 storefront 的价格文案。</li><li>修改共享促销引擎。</li><li>增加报价响应字段。</li><li>升级 Spring Boot 大版本。</li><li>读取生产支付密钥复现问题。</li><li>删除失败测试让 CI 通过。</li><li>在本地测试库执行库存迁移。</li><li>向真实客户发送补偿邮件。</li></ol>
+<h3 id="参考答案">参考答案</h3>
+<p>1 通常 allowed；2 notice；3 和 4 approval；5、6 blocked；7 视环境可为 notice 或 approval；8 approval，并应由专门业务系统执行。答案必须同时写出路径检查、diff 检查、沙箱或审批中的至少一种机制。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>护栏不是一堵墙。指导帮助选择，检测尽早暴露错误，沙箱限制能力，审批承接风险决定。把业务不变量逐步升级成 schema、结构测试和稳定错误，智能体就能在边界内更快行动；证据不足时则可靠停止。</p>
+<p>下一章会把这些检查连接成反馈回路，处理一个更难的问题：测试通过之后，怎样判断智能体真的完成了业务任务。</p>
+<p>上一章：<a href="./07-tools-for-reliable-action.md">什么工具能让智能体真正行动？</a><br> 下一章：<a href="./09-evals-feedback-and-observability.md">如何知道它真的做对了？</a><br> 术语复习：<a href="../reference/glossary.md">术语表</a></p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Ryan Lopopolo. <a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noreferrer">Harness engineering: leveraging Codex in an agent-first world</a>. OpenAI, 2026-02-11.</li><li>GitHub. <a href="https://docs.github.com/en/copilot/concepts/agents/hooks" target="_blank" rel="noreferrer">About hooks for GitHub Copilot agents</a>. 访问于 2026-07-10.</li><li>Alexis King. <a href="https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/" target="_blank" rel="noreferrer">Parse, don't validate</a>. 2019-11-05.</li></ul><nav class="lesson-nav"><a href="../lessons/07-tools-for-reliable-action.html">← 第 7 章<br><strong>什么工具能让智能体真正行动？</strong></a><a href="../lessons/09-evals-feedback-and-observability.html">第 9 章 →<br><strong>如何知道它真的做对了？</strong></a></nav></main>
+      <aside class="toc"><strong>本章目录</strong><a class="" href="#一条-省时间-的跨层-import">一条“省时间”的跨层 import</a><a class="" href="#指导-检测-阻止和审批">指导、检测、阻止和审批</a><a class="" href="#从不变量推导机械检查">从不变量推导机械检查</a><a class="" href="#路径边界采用四级策略">路径边界采用四级策略</a><a class="" href="#沙箱控制能力-不判断业务正确">沙箱控制能力，不判断业务正确</a><a class="" href="#hook-适合生命周期闸门">Hook 适合生命周期闸门</a><a class="" href="#防止来自仓库内容的指令注入">防止来自仓库内容的指令注入</a><a class="" href="#例外也要有生命周期">例外也要有生命周期</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#规则越多越安全">规则越多越安全</a><a class="sub" href="#用审批代替测试">用审批代替测试</a><a class="sub" href="#只限制写文件-不限制外部副作用">只限制写文件，不限制外部副作用</a><a class="sub" href="#为了通过检查削弱断言">为了通过检查削弱断言</a><a class="" href="#本章练习-完成风险矩阵">本章练习：完成风险矩阵</a><a class="sub" href="#参考答案">参考答案</a><a class="" href="#本章小结">本章小结</a><a class="" href="#参考文献">参考文献</a></aside>
+    </div>
+    <footer class="site-footer">Harness Engineering · 驭缰工程</footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Harness Engineering 术语表 | Harness Engineering</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="../assets/course.js"></script>
+</head>
+<body>
+  <div class="course-shell">
+    <header class="topbar"><a class="brand" href="../index.html">Harness Engineering</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header>
+    <section class="lesson-header"><div class="eyebrow">Reference</div><h1>Harness Engineering 术语表</h1><p class="lesson-summary">快速查阅课程中的核心术语与使用边界。</p></section>
+    <div class="lesson-layout"><main class="lesson-content"><p>本页收录全课程会反复使用的术语。定义服务于本课程，涉及具体产品时会另行注明。</p>
+<div class="table-wrap"><table><thead><tr><th>术语</th><th>课程中的含义</th><th>容易混淆的地方</th></tr></thead><tbody><tr><td>Harness Engineering（驭缰工程）</td><td>围绕智能体设计意图、环境、工具、边界、状态和反馈，让工作可以执行、检查、恢复与改进</td><td>不是某个厂商的产品名，也不等于完全无人开发</td></tr><tr><td>model（模型）</td><td>接收输入并生成输出的推理组件</td><td>模型本身通常不负责真正执行命令、保存工程状态或判断权限</td></tr><tr><td>agent（智能体）</td><td>在目标驱动下，能借助工具观察环境并采取行动的运行实体</td><td>“会对话的模型”未必已经具备可靠行动能力</td></tr><tr><td>agent loop（智能体循环）</td><td>模型判断、请求工具、接收观察结果并继续或结束的一轮轮循环</td><td>一次用户请求可能包含多次模型调用和工具调用</td></tr><tr><td>agent harness（智能体运行支架）</td><td>组织模型、循环、工具、权限、上下文、状态、验证和终止的执行系统</td><td>agent loop 是核心机制之一，但完整 harness 通常更大</td></tr><tr><td>context（上下文）</td><td>当前一次模型判断可以看到的任务、历史、文档、代码和工具结果</td><td>仓库里存在的信息不一定已经进入当前上下文</td></tr><tr><td>state（状态）</td><td>需要跨步骤或跨会话保留的进度、决策、产物和环境信息</td><td>聊天记录只是状态的一部分，不能代替项目事实源</td></tr><tr><td>tool（工具）</td><td>智能体可调用的文件、终端、浏览器、数据库或业务系统接口</td><td>工具可用不代表工具被正确授权或输出可验证</td></tr><tr><td>observation（观察结果）</td><td>工具执行后返回给智能体的事实，例如测试失败、文件内容或页面状态</td><td>观察结果需要足够具体，智能体才能据此修正</td></tr><tr><td>feedback loop（反馈回路）</td><td>产出、检测、反馈、修正和回归验证组成的循环</td><td>只有检测、没有把结果送回执行过程，不算闭环</td></tr><tr><td>guardrail（护栏）</td><td>限制行为范围或要求确认的规则、权限、沙箱与审批</td><td>护栏负责控制风险，不能代替正确的任务定义</td></tr><tr><td>termination condition（终止条件）</td><td>规定任务何时成功结束、何时失败停止、何时交给人的条件</td><td>“智能体说完成了”不是充分的完成条件</td></tr><tr><td>task contract（任务契约）</td><td>把目标、范围、不变量、验收、失败处理和停止条件写成可版本化的工作说明</td><td>不是要求智能体照抄实现步骤的长提示词</td></tr><tr><td>invariant（不变量）</td><td>实现可以变化，但不能破坏的业务或架构规则</td><td>“高质量”不是不变量；“金额使用整数分”可以检查</td></tr><tr><td>reliable stop（可靠停止）</td><td>证据不足、来源冲突或风险越界时，保存证据并停止猜测</td><td>停止需要说明阻塞点和下一安全动作</td></tr><tr><td>progressive disclosure（渐进式披露）</td><td>先给短入口，再按任务需要读取局部事实和源码</td><td>不是一次把所有资料塞入上下文</td></tr><tr><td>Context Pack（上下文包）</td><td>为一次任务裁剪的最小事实、入口、验证和边界集合</td><td>它随任务变化，不是永久仓库总结</td></tr><tr><td>freshness（新鲜度）</td><td>一条事实是否仍覆盖当前版本和任务</td><td>历史文档存在不代表当前仍有效</td></tr><tr><td>idempotency key（幂等键）</td><td>标识一次业务意图，使相同请求可以安全重放</td><td>同一键代表不同意图时应报冲突</td></tr><tr><td>eval（评测）</td><td>用任务、环境、样本和证据衡量模型与 harness 的共同表现</td><td>不等同于单元测试，也不能只看最终答案</td></tr><tr><td>rubric（评价量规）</td><td>用维度、等级和可观察证据评价难以精确断言的产物</td><td>不是一套跨行业统一的自动检测标准</td></tr><tr><td>maker-checker</td><td>生成者产出，独立检查者依据契约和证据审校的分工</td><td>checker 可以是脚本、模型或人工组合</td></tr><tr><td>autonomy level（自治等级）</td><td>规定智能体可独立执行到什么范围、哪里需要人工确认</td><td>不是模型能力排行榜，需结合风险和恢复能力</td></tr><tr><td>golden principles（黄金原则）</td><td>团队长期维护的少量、可检查工程约束</td><td>规则应有所有者和证据，不宜无限增加</td></tr><tr><td>garbage collection（持续清理）</td><td>定期删除过期指令、坏模式、永久例外和无效工具</td><td>不是一次性大重构</td></tr></tbody></table></div>
+<h2 id="术语使用约定">术语使用约定</h2>
+<ul><li>本课程用“驭缰工程”指 Harness Engineering，用“智能体运行支架”解释 agent harness。</li><li>初次学习时可以保留英文。企业落地时应先统一团队术语，避免同一个“harness”同时指运行时、测试框架和 Harness.io 产品。</li><li>文中的 Codex、Claude Code 等名称只表示案例所处的产品环境。通用原则不依赖某个模型或厂商。</li></ul></main><aside class="toc"><strong>本章目录</strong><a class="" href="#术语使用约定">术语使用约定</a></aside></div>
+    <footer class="site-footer">Harness Engineering · 驭缰工程</footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="测试检查已知规则，评测检查任务行为，日志和轨迹解释过程；只有检测结果能回到下一轮修改，才形成真正的反馈回路。">
+  <title>如何知道它真的做对了？ | Harness Engineering</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/course.js"></script>
+</head>
+<body>
+  <div class="course-shell">
+    <header class="topbar"><a class="brand" href="../index.html">Harness Engineering</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header>
+    <section class="lesson-header">
+      <div class="eyebrow">第 9 章 · 65–80 分钟</div>
+      <h1>如何知道它真的做对了？</h1>
+      <p class="lesson-summary">测试检查已知规则，评测检查任务行为，日志和轨迹解释过程；只有检测结果能回到下一轮修改，才形成真正的反馈回路。</p>
+    </section>
+    <div class="lesson-layout">
+      <main class="lesson-content"><h2 id="绿色测试也可能是假完成">绿色测试也可能是假完成</h2>
+<p>智能体修复优惠叠加测试后，报告“全部通过”。但它只运行了共享包测试，没有构建两个 React 应用，也没有运行 Java 报价测试。绿色是真的，结论是假的。</p>
+<p>完成判断需要回答三个问题：</p>
+<ul><li>检查覆盖了任务契约里的哪些行为？</li><li>哪些检查真正运行过，结果和环境是什么？</li><li>没覆盖的风险是否被明确留下？</li></ul>
+<p>“有测试”和“有足够完成证据”不是一回事。</p>
+<h2 id="四种反馈各管一层">四种反馈各管一层</h2>
+<div class="table-wrap"><table><thead><tr><th>反馈</th><th>主要回答</th><th>星桥商城例子</th></tr></thead><tbody><tr><td>单元与结构测试</td><td>局部规则是否满足</td><td>金额以分计算，浏览器不依赖 Java 源码</td></tr><tr><td>验收测试</td><td>用户行为是否符合契约</td><td>禁止叠加时应付 73020 分</td></tr><tr><td>eval</td><td>智能体能否稳定完成一类任务</td><td>给出失败轨迹后能否定位到共享策略而不越界</td></tr><tr><td>人工审校</td><td>取舍、解释和风险是否可接受</td><td>优惠说明是否让客服和顾客看得懂</td></tr></tbody></table></div>
+<p><span class="term" tabindex="0" data-tip="用任务、环境、样本和证据衡量模型与 harness 的共同表现">eval</span>（评测）不是单元测试的新名字。它通常以任务、环境、允许动作和评分证据组成，检查模型与 harness 共同表现。多轮智能体还要观察过程，因为最终答案正确不代表中途没有越权、误改或泄露。</p>
+<h2 id="从任务契约生成评测样本">从任务契约生成评测样本</h2>
+<p>实验仓库的 <a href="../labs/commerce-harness-lab/harness-overlay/evals/cases.json">eval cases</a> 包含三个样本。每个样本有任务、期望结果和必需证据。</p>
+<p>一个库存样本可以写成：</p>
+<figure class="code-card"><div class="code-toolbar"><span>json</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="json">{
+  &quot;id&quot;: &quot;inventory-idempotent-retry&quot;,
+  &quot;task&quot;: &quot;网络响应丢失后，用相同幂等键重试预占&quot;,
+  &quot;expected&quot;: {
+    &quot;reservationCount&quot;: 1,
+    &quot;available&quot;: 1,
+    &quot;sameReservationId&quot;: true
+  },
+  &quot;requiredEvidence&quot;: [&quot;java-test&quot;, &quot;transition-log&quot;]
+}</code></pre></figure>
+<p>样本没有要求使用 Redis、锁或某个类名。它约束业务结果和证据，保留实现空间。</p>
+<h2 id="先做错误分类-再谈分数">先做错误分类，再谈分数</h2>
+<p>单一总分很难指导改进。把失败分成可行动类别：</p>
+<div class="table-wrap"><table><thead><tr><th>类别</th><th>表现</th><th>优先修哪里</th></tr></thead><tbody><tr><td>意图遗漏</td><td>忘记特价商品边界</td><td>任务契约与验收样本</td></tr><tr><td>定位错误</td><td>修改旧入口</td><td>仓库地图与 Context Pack</td></tr><tr><td>越界</td><td>绕过共享包门禁</td><td>权限和结构检查</td></tr><tr><td>工具误用</td><td>对业务拒绝无限重试</td><td>错误分类和工具说明</td></tr><tr><td>验证不足</td><td>只跑局部测试</td><td>完成条件和统一验证入口</td></tr><tr><td>状态丢失</td><td>恢复后重做或改变决定</td><td>持久进度与交接</td></tr></tbody></table></div>
+<p>同一错误连续出现三次，通常应该改 harness；偶发的推理错误则可能需要模型、示例或任务分解调整。</p>
+<h2 id="评价表要有可观察锚点">评价表要有可观察锚点</h2>
+<p>当结果不能只用精确值判断，可以使用 <span class="term" tabindex="0" data-tip="用维度、等级和可观察证据评价难以精确断言的产物">rubric</span>（评价量规）。例如评审一份库存任务契约：</p>
+<div class="table-wrap"><table><thead><tr><th>维度</th><th>0 分</th><th>1 分</th><th>2 分</th></tr></thead><tbody><tr><td>状态完整</td><td>没有状态</td><td>有 reserve/claim</td><td>含 release、终态和非法转换</td></tr><tr><td>幂等语义</td><td>未提及</td><td>同键能重试</td><td>同键同义重放、异义冲突</td></tr><tr><td>完成证据</td><td>只写“测试通过”</td><td>有命令</td><td>有命令、结果、环境与未覆盖项</td></tr><tr><td>风险边界</td><td>无</td><td>有泛化提醒</td><td>明确审批动作和可靠停止</td></tr></tbody></table></div>
+<p>评价表必须能指向产物证据。若标准只有“高质量”“完整”“专业”，不同审校者会按印象打分，智能体也不知道怎样修改。</p>
+<h2 id="maker-checker-生成者不要独占结论">Maker-checker：生成者不要独占结论</h2>
+<p>让同一个智能体生成实现、解释结果并宣布完成，容易把自己的假设带进审校。可以把流程拆成：</p>
+<ol><li>maker 根据任务契约实现并提供证据。</li><li>checker 在较干净的上下文中读取契约、diff 和结果。</li><li>确定性检查先运行，语义审校再判断行为与风险。</li><li>失败证据返回 maker，进入下一轮。</li></ol>
+<div class="diagram-card"><pre class="mermaid">flowchart LR
+  A[&quot;任务契约&quot;] --&gt; B[&quot;Maker 实现&quot;]
+  B --&gt; C[&quot;确定性检查&quot;]
+  C -- &quot;失败&quot; --&gt; B
+  C -- &quot;通过&quot; --&gt; D[&quot;Checker 语义审校&quot;]
+  D -- &quot;需修改&quot; --&gt; B
+  D -- &quot;通过&quot; --&gt; E[&quot;人工发布闸门&quot;]</pre></div>
+<p>checker 不一定是另一个模型。它可以是脚本、测试、代码所有者或组合。重点是结论有独立证据。</p>
+<h2 id="日志-指标与轨迹各有用途">日志、指标与轨迹各有用途</h2>
+<ul><li>日志记录发生了什么，例如状态转换和错误原因。</li><li>指标用于比较趋势，例如任务成功率、人工接管率、重试次数。</li><li>轨迹保留智能体看到了什么、调用了哪些工具、为何停止。</li></ul>
+<p>库存预占至少记录：reservationId、idempotencyKey 的安全摘要、SKU、数量、前后状态、原因、时间和调用结果。不要把支付凭证或客户隐私写入轨迹。</p>
+<h2 id="一组够用的团队指标">一组够用的团队指标</h2>
+<div class="table-wrap"><table><thead><tr><th>指标</th><th>计算方式</th><th>能发现什么</th></tr></thead><tbody><tr><td>首轮验收通过率</td><td>首轮通过任务数 / 总任务数</td><td>意图和环境是否足够清楚</td></tr><tr><td>返工轮次</td><td>每任务修改循环次数</td><td>反馈是否可行动</td></tr><tr><td>人工接管率</td><td>转人工任务数 / 总任务数</td><td>自治边界是否合适</td></tr><tr><td>越界拦截率</td><td>被规则阻止的越界 / 越界尝试</td><td>门禁是否生效</td></tr><tr><td>回归逃逸率</td><td>发布后发现的回归 / 已完成任务</td><td>验收覆盖是否不足</td></tr></tbody></table></div>
+<p>指标用来找问题，不用来逼智能体刷分。只追求首轮通过率，团队可能降低任务难度或删掉失败样本。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="把测试数量当质量">把测试数量当质量</h3>
+<p>一百条重复 happy path，不如一条能抓住同键异义的边界测试。</p>
+<h3 id="只看最终文件">只看最终文件</h3>
+<p>最终 diff 正确，中途仍可能读取敏感数据或执行危险命令。高风险任务需要轨迹级检查。</p>
+<h3 id="让评价表追着当前实现写">让评价表追着当前实现写</h3>
+<p>如果每次失败都修改标准来适配结果，评测失去约束力。标准变化也要版本化和审核。</p>
+<h3 id="失败只返回一个分数">失败只返回一个分数</h3>
+<p>分数不能驱动下一步。报告要指出样本、证据、失败类别和建议检查位置。</p>
+<h2 id="本章练习-设计一个小型-eval">本章练习：设计一个小型 eval</h2>
+<p>从优惠或库存任务中选一个，提交：任务输入、初始仓库状态、允许动作、三个验收样本、一个越界样本、必需证据、错误分类和通过阈值。</p>
+<h3 id="通过标准">通过标准</h3>
+<p>至少一个样本检查正常路径，一个检查重试或组合边界，一个检查失败不留副作用；越界样本不能只看最终答案；报告能定位下一项 harness 改进。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>质量闭环从任务契约开始，经测试、评测、日志和独立审校回到下一轮修改。测试告诉你具体规则是否满足，eval 检查一类任务是否稳定完成，轨迹揭示过程风险，人工负责仍需判断的取舍。</p>
+<p>下一章会处理跨小时任务：当上下文压缩、进程中断或人员交接发生时，怎样保留足够状态继续工作。</p>
+<p>上一章：<a href="./08-guardrails-permissions-and-approval.md">怎样让智能体有自由但不越界？</a><br> 下一章：<a href="./10-long-running-state-and-recovery.md">任务跑几小时，怎样不失忆？</a><br> 术语复习：<a href="../reference/glossary.md">术语表</a></p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>OpenAI. <a href="https://openai.com/index/evals-drive-next-chapter-of-ai/" target="_blank" rel="noreferrer">How evals drive the next chapter in AI for businesses</a>. 2025-11-19.</li><li>Anthropic. <a href="https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents" target="_blank" rel="noreferrer">Demystifying evals for AI agents</a>. 2026-01-09.</li><li>Shopify Engineering. <a href="https://shopify.engineering/scaling-inventory-reservations" target="_blank" rel="noreferrer">We replaced Redis with MySQL for inventory reservations—and it scaled</a>. 2026-05-12.</li></ul><nav class="lesson-nav"><a href="../lessons/08-guardrails-permissions-and-approval.html">← 第 8 章<br><strong>怎样让智能体有自由但不越界？</strong></a><a href="../lessons/10-long-running-state-and-recovery.html">第 10 章 →<br><strong>任务跑几小时，怎样不失忆？</strong></a></nav></main>
+      <aside class="toc"><strong>本章目录</strong><a class="" href="#绿色测试也可能是假完成">绿色测试也可能是假完成</a><a class="" href="#四种反馈各管一层">四种反馈各管一层</a><a class="" href="#从任务契约生成评测样本">从任务契约生成评测样本</a><a class="" href="#先做错误分类-再谈分数">先做错误分类，再谈分数</a><a class="" href="#评价表要有可观察锚点">评价表要有可观察锚点</a><a class="" href="#maker-checker-生成者不要独占结论">Maker-checker：生成者不要独占结论</a><a class="" href="#日志-指标与轨迹各有用途">日志、指标与轨迹各有用途</a><a class="" href="#一组够用的团队指标">一组够用的团队指标</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#把测试数量当质量">把测试数量当质量</a><a class="sub" href="#只看最终文件">只看最终文件</a><a class="sub" href="#让评价表追着当前实现写">让评价表追着当前实现写</a><a class="sub" href="#失败只返回一个分数">失败只返回一个分数</a><a class="" href="#本章练习-设计一个小型-eval">本章练习：设计一个小型 eval</a><a class="sub" href="#通过标准">通过标准</a><a class="" href="#本章小结">本章小结</a><a class="" href="#参考文献">参考文献</a></aside>
+    </div>
+    <footer class="site-footer">Harness Engineering · 驭缰工程</footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "promotion-no-stack",
+      "task": "Apply member discount with ORDER50 when combination is disabled",
+      "expected": { "subtotal": 79800, "payable": 73020 },
+      "requiredEvidence": ["javascript-test", "java-test", "price-breakdown"]
+    },
+    {
+      "id": "inventory-idempotent-retry",
+      "task": "Retry the same reservation after an ambiguous network failure",
+      "expected": { "reservationCount": 1, "available": 1, "sameReservationId": true },
+      "requiredEvidence": ["java-test", "transition-log"]
+    },
+    {
+      "id": "inventory-key-conflict",
+      "task": "Reuse an idempotency key with a different quantity",
+      "expected": { "error": "IDEMPOTENCY_CONFLICT", "inventoryChanged": false },
+      "requiredEvidence": ["java-test", "audit-event"]
+    }
+  ]
+}

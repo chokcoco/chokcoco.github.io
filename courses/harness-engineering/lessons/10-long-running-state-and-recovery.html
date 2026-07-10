@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="长任务依靠仓库里的计划、决策、进度和证据继续运行；聊天历史只是临时上下文，不能承担唯一记忆。">
+  <title>任务跑几小时，怎样不失忆？ | Harness Engineering</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/course.js"></script>
+</head>
+<body>
+  <div class="course-shell">
+    <header class="topbar"><a class="brand" href="../index.html">Harness Engineering</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header>
+    <section class="lesson-header">
+      <div class="eyebrow">第 10 章 · 55–70 分钟</div>
+      <h1>任务跑几小时，怎样不失忆？</h1>
+      <p class="lesson-summary">长任务依靠仓库里的计划、决策、进度和证据继续运行；聊天历史只是临时上下文，不能承担唯一记忆。</p>
+    </section>
+    <div class="lesson-layout">
+      <main class="lesson-content"><h2 id="会话恢复后-规则变了">会话恢复后，规则变了</h2>
+<p>失败轨迹 D 中，智能体已经确认优惠叠加规则并补了测试。上下文压缩后，新一轮只看到原始需求，于是重新解释业务，把“特价商品”改成完全不能参加任何优惠。</p>
+<p>问题不是压缩本身。系统没有把已确认决定写入稳定状态，也没有给恢复过程一个入口。</p>
+<h2 id="哪些内容必须离开聊天">哪些内容必须离开聊天</h2>
+<p>长任务至少持久保存：</p>
+<div class="table-wrap"><table><thead><tr><th>内容</th><th>示例</th><th>更新时机</th></tr></thead><tbody><tr><td>任务契约</td><td>叠加策略和验收金额</td><td>需求确认后</td></tr><tr><td>当前计划</td><td>下一步先修纯规则</td><td>计划变化时</td></tr><tr><td>已确认决定</td><td>门槛按折后金额</td><td>决定形成时</td></tr><tr><td>修改摘要</td><td>已改哪些文件及原因</td><td>每个检查点</td></tr><tr><td>运行证据</td><td>命令、退出码、失败样本</td><td>每次验证后</td></tr><tr><td>未解决风险</td><td>Java 环境缺失</td><td>新风险出现时</td></tr><tr><td>下一安全动作</td><td>先补同键异义测试</td><td>暂停或交接前</td></tr></tbody></table></div>
+<p>实验仓库的 <a href="../labs/commerce-harness-lab/harness-overlay/state/progress.md">progress.md</a> 就是一个简单载体。它不需要保存每轮推理，只保存能让下一位执行者复核并继续的信息。</p>
+<h2 id="计划-日志和状态不要混在一起">计划、日志和状态不要混在一起</h2>
+<ul><li>计划描述接下来打算做什么，可以改变。</li><li>日志记录已经发生什么，通常只追加。</li><li>状态描述当前事实，例如任务处于 blocked 或 ready。</li></ul>
+<p>把三者混成一段日记，恢复者要自己猜哪些仍有效。结构化小节或字段更容易复核。</p>
+<h2 id="检查点要能回到干净状态">检查点要能回到干净状态</h2>
+<p>一个有效检查点包括：</p>
+<ol><li>工作区处于可理解状态，没有半写入生成文件。</li><li>已完成的局部测试有结果。</li><li>当前 diff 与任务范围一致。</li><li>进度文件写明下一步和未解决问题。</li><li>恢复命令能重新建立环境。</li></ol>
+<p>检查点不等于必须提交 Git。教学环境可以保存文件快照；真实仓库可使用提交、分支或工作树。重点是恢复者不必猜哪些中间产物可以信任。</p>
+<h2 id="恢复流程先验证-再继续">恢复流程先验证，再继续</h2>
+<div class="diagram-card"><pre class="mermaid">flowchart TD
+  A[&quot;读取任务契约与进度&quot;] --&gt; B[&quot;检查工作区和版本&quot;]
+  B --&gt; C[&quot;重跑最近的最小验证&quot;]
+  C --&gt; D{&quot;结果与记录一致？&quot;}
+  D -- &quot;是&quot; --&gt; E[&quot;执行下一安全动作&quot;]
+  D -- &quot;否&quot; --&gt; F[&quot;记录漂移并停止&quot;]
+  E --&gt; G[&quot;更新进度和证据&quot;]</pre></div>
+<p>不要看到 <code>progress.md</code> 写“测试通过”就直接信任。依赖、代码和环境可能已经变化。先重跑最近的最小验证，确认状态仍然成立。</p>
+<h2 id="上下文压缩时保留什么">上下文压缩时保留什么</h2>
+<p>压缩摘要适合保留：目标、决定、当前假设、未解决问题、最近工具结果和下一步。大段源码、完整日志和已过期讨论可以通过路径按需重读。</p>
+<p>一个恢复包可以是：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">task: specs/inventory-reservation.md
+plan: plans/current-task.md
+progress: state/progress.md
+changed: InventoryService.java, InventoryServiceTest.java
+last_check: mvn -Dtest=InventoryServiceTest test -&gt; failed I2
+next: implement same-key-different-intent conflict
+stop: payment callback semantics require approval</code></pre></figure>
+<p>这比复制完整聊天更短，也更容易验证。</p>
+<h2 id="幂等让恢复不会重复副作用">幂等让恢复不会重复副作用</h2>
+<p>长任务恢复时，系统常常不知道上一步到底成功没有。支付、发消息、创建订单和预占库存都可能出现“操作完成，响应丢失”。</p>
+<p>恢复前先查询状态；需要重试时复用原业务键。对于不能幂等的动作，记录外部操作 ID，并把重复执行设为审批或 blocked。持久状态和工具语义必须配合，单独保存“已执行”文字并不可靠。</p>
+<h2 id="限制无效循环">限制无效循环</h2>
+<p>智能体如果连续三次运行同一测试、得到同一失败、没有产生新证据，Harness 应暂停。可设置：</p>
+<ul><li>同类失败最大重试次数。</li><li>每轮必须记录新假设或新观察。</li><li>多次无进展后切换 checker 或转人工。</li><li>成本、时间或工具调用预算。</li></ul>
+<p>停止报告要包含最后的稳定状态。否则人工接手仍需从头探索。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="把聊天导出当项目状态">把聊天导出当项目状态</h3>
+<p>聊天包含大量临时推理和过期假设。项目状态应短、结构化、可版本化。</p>
+<h3 id="每分钟写一次进度">每分钟写一次进度</h3>
+<p>过度更新会制造噪声。完成一个可验证单元、形成决定或准备暂停时更新最有价值。</p>
+<h3 id="恢复后不重跑验证">恢复后不重跑验证</h3>
+<p>旧结果只能证明当时的状态。恢复者需要确认依赖和工作区没有漂移。</p>
+<h3 id="只记录完成项">只记录完成项</h3>
+<p>未解决问题、失败尝试和下一安全动作更能减少重复劳动。</p>
+<h2 id="本章练习-做一次中断恢复">本章练习：做一次中断恢复</h2>
+<p>阅读<a href="../labs/commerce-harness-lab/case/failure-traces.md">失败轨迹 D</a>。假设任务在补完两条测试后中断，写一份恢复卡：任务来源、已确认决定、修改文件、最近验证、未解决风险、下一安全动作和停止条件。</p>
+<h3 id="通过标准">通过标准</h3>
+<p>另一名学习者只读恢复卡和仓库文件，就能指出先运行什么命令、当前哪项决定不能重做、哪一步需要人工批准。做到这一点即可通过。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>长时运行不是让一个会话无限增长，而是让任务能在多次会话和故障之间保持连续。稳定事实、计划、证据和下一安全动作进入持久状态；恢复先验证旧状态，再继续行动；有副作用的步骤依靠幂等和外部 ID 防止重复。</p>
+<p>下一章会把单任务闭环扩大到自治等级和并行执行，讨论什么时候让系统继续，什么时候必须把决定交还给人。</p>
+<p>上一章：<a href="./09-evals-feedback-and-observability.md">如何知道它真的做对了？</a><br> 下一章：<a href="./11-autonomy-and-orchestration.md">何时提高自治，何时交给人？</a><br> 术语复习：<a href="../reference/glossary.md">术语表</a></p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Anthropic. <a href="https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents" target="_blank" rel="noreferrer">Effective harnesses for long-running agents</a>. 2025-11-26.</li><li>OpenAI. <a href="https://developers.openai.com/blog/run-long-horizon-tasks-with-codex" target="_blank" rel="noreferrer">Run long horizon tasks with Codex</a>. 2026-02-23.</li><li>Michael Bolin. <a href="https://openai.com/index/unrolling-the-codex-agent-loop/" target="_blank" rel="noreferrer">Unrolling the Codex agent loop</a>. OpenAI, 2026-01-23.</li><li>Brandur Leach. <a href="https://stripe.com/blog/idempotency" target="_blank" rel="noreferrer">Designing robust and predictable APIs with idempotency</a>. Stripe, 2017-02-22.</li></ul><nav class="lesson-nav"><a href="../lessons/09-evals-feedback-and-observability.html">← 第 9 章<br><strong>如何知道它真的做对了？</strong></a><a href="../lessons/11-autonomy-and-orchestration.html">第 11 章 →<br><strong>何时提高自治，何时交给人？</strong></a></nav></main>
+      <aside class="toc"><strong>本章目录</strong><a class="" href="#会话恢复后-规则变了">会话恢复后，规则变了</a><a class="" href="#哪些内容必须离开聊天">哪些内容必须离开聊天</a><a class="" href="#计划-日志和状态不要混在一起">计划、日志和状态不要混在一起</a><a class="" href="#检查点要能回到干净状态">检查点要能回到干净状态</a><a class="" href="#恢复流程先验证-再继续">恢复流程先验证，再继续</a><a class="" href="#上下文压缩时保留什么">上下文压缩时保留什么</a><a class="" href="#幂等让恢复不会重复副作用">幂等让恢复不会重复副作用</a><a class="" href="#限制无效循环">限制无效循环</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#把聊天导出当项目状态">把聊天导出当项目状态</a><a class="sub" href="#每分钟写一次进度">每分钟写一次进度</a><a class="sub" href="#恢复后不重跑验证">恢复后不重跑验证</a><a class="sub" href="#只记录完成项">只记录完成项</a><a class="" href="#本章练习-做一次中断恢复">本章练习：做一次中断恢复</a><a class="sub" href="#通过标准">通过标准</a><a class="" href="#本章小结">本章小结</a><a class="" href="#参考文献">参考文献</a></aside>
+    </div>
+    <footer class="site-footer">Harness Engineering · 驭缰工程</footer>
+  </div>
+</body>
+</html>

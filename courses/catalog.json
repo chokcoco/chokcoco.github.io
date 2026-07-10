@@ -5,10 +5,16 @@
     {
       "slug": "rag-from-beginner-to-expert",
       "title": "RAG 从入门到精通",
-      "status": "published",
+      "description": "围绕科技公司内部知识库 / 客诉答疑 RAG 的项目式课程。",
       "href": "./rag-from-beginner-to-expert/index.html",
-      "lessons": 12,
-      "references": 6
+      "status": "framework-plus-seven-samples"
+    },
+    {
+      "slug": "harness-engineering",
+      "title": "Harness Engineering",
+      "description": "为 AI 智能体设计意图、环境、工具、边界和反馈的工程课程。",
+      "href": "./harness-engineering/index.html",
+      "status": "complete-draft"
     }
   ]
 }

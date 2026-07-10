@@ -1,0 +1,9 @@
+:root { font-family: Inter, "PingFang SC", sans-serif; color: #172b25; background: #eef1ed; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.shell { width: min(960px, calc(100% - 32px)); margin: 56px auto; }
+header p { color: #6f3f2d; font-size: 12px; letter-spacing: .15em; }
+h1 { font-size: 48px; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th, td { padding: 14px; border: 1px solid #d8ddd8; text-align: left; }
+.warning { padding: 16px; background: #fff4d8; border-left: 4px solid #c8792a; }

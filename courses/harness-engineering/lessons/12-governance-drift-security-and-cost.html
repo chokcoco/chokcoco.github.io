@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="规模化之后，团队要像维护产品一样维护 Harness：追踪坏模式、清理过期规则、审计权限与成本，并用真实失败决定下一项投入。">
+  <title>速度提高后，怎样控制漂移和风险？ | Harness Engineering</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/course.js"></script>
+</head>
+<body>
+  <div class="course-shell">
+    <header class="topbar"><a class="brand" href="../index.html">Harness Engineering</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header>
+    <section class="lesson-header">
+      <div class="eyebrow">第 12 章 · 60–75 分钟</div>
+      <h1>速度提高后，怎样控制漂移和风险？</h1>
+      <p class="lesson-summary">规模化之后，团队要像维护产品一样维护 Harness：追踪坏模式、清理过期规则、审计权限与成本，并用真实失败决定下一项投入。</p>
+    </section>
+    <div class="lesson-layout">
+      <main class="lesson-content"><h2 id="快速生成会复制仓库的平均水平">快速生成会复制仓库的平均水平</h2>
+<p>智能体会从现有代码学习局部模式。如果仓库里有两套金额单位、三个错误结构和一堆永久 ignore，它会继续复制。速度提高后，坏模式也扩散得更快。</p>
+<p>这类漂移常被统称为 AI slop，但只贴标签没有帮助。团队需要知道坏模式从哪里进入、为什么没被检查拦住、修复后怎样防止回归。</p>
+<h2 id="golden-principles-要少而能检查">Golden principles 要少而能检查</h2>
+<p><span class="term" tabindex="0" data-tip="团队长期维护的少量、可检查工程约束">golden principles</span>（黄金原则）是团队愿意长期维护的少量工程约束。星桥商城可以先保留四条：</p>
+<ol><li>金额使用整数分。</li><li>浏览器应用不拥有订单或库存事实。</li><li>有副作用的重试必须有稳定业务键。</li><li>完成结论必须附运行证据和未覆盖风险。</li></ol>
+<p>每条原则都能连接到类型、结构测试、验收样本或完成检查。若一条原则只能写成口号，先缩小到可观察行为。</p>
+<h2 id="持续清理是一项正常工作">持续清理是一项正常工作</h2>
+<p><span class="term" tabindex="0" data-tip="定期删除过期指令、坏模式、永久例外和无效工具">garbage collection</span>（持续清理）不是偶尔的大重构。它按周期发现：</p>
+<ul><li>过期或冲突的指令。</li><li>被复制的坏模式。</li><li>永久 ignore 和无所有者例外。</li><li>失效工具、重复命令和陈旧文档。</li><li>低价值、长期不命中的评测样本。</li><li>已不适合当前模型或工作流的规则。</li></ul>
+<p>清理时保留证据：哪类失败触发、删除或合并了什么、哪些任务会受影响。规则减少也可能提高可靠性，因为智能体不再处理冲突指导。</p>
+<h2 id="安全审计看完整轨迹">安全审计看完整轨迹</h2>
+<p>只检查最终 diff 会漏掉中途行为：智能体可能读取了不该读的凭证，向外部服务发送过数据，最后却没有把这些变化写进代码。</p>
+<p>安全审计至少覆盖：</p>
+<div class="table-wrap"><table><thead><tr><th>面</th><th>检查问题</th></tr></thead><tbody><tr><td>数据</td><td>是否读取真实客户、订单、密钥或支付信息？</td></tr><tr><td>工具</td><td>是否调用范围外 API、浏览器或 shell？</td></tr><tr><td>权限</td><td>哪个策略或人批准了高风险动作？</td></tr><tr><td>供应链</td><td>是否新增依赖、脚本或远程下载？</td></tr><tr><td>轨迹</td><td>是否出现注入、绕过、删除测试或隐藏失败？</td></tr><tr><td>产物</td><td>diff、日志和报告是否残留敏感数据？</td></tr></tbody></table></div>
+<p>训练和测试环境也要使用虚构或脱敏数据。课程实验仓库没有真实客户信息，就是一条治理设计，而不是内容上的小心翼翼。</p>
+<h2 id="成本不只是-token">成本不只是 token</h2>
+<p>团队应同时记录：</p>
+<ul><li>模型与工具调用成本。</li><li>环境启动、构建和测试时间。</li><li>人工审批与审查时间。</li><li>失败返工和回滚成本。</li><li>Harness 规则、工具和评测的维护时间。</li></ul>
+<p>如果一次自动修改省了十分钟编码，却增加四十分钟审查，它没有改善系统吞吐。指标应看端到端任务，而不是只看生成速度。</p>
+<h2 id="一张治理仪表板">一张治理仪表板</h2>
+<div class="table-wrap"><table><thead><tr><th>指标</th><th>观察周期</th><th>触发动作</th></tr></thead><tbody><tr><td>首轮验收通过率</td><td>每周</td><td>连续下降时检查任务契约和来源</td></tr><tr><td>人工接管率</td><td>每周</td><td>按失败类别找高频闸门</td></tr><tr><td>回归逃逸率</td><td>每次发布</td><td>增加真实失败样本</td></tr><tr><td>越界与注入拦截</td><td>每次运行</td><td>复核权限和来源层级</td></tr><tr><td>平均返工轮次</td><td>每月</td><td>改善错误输出或分解任务</td></tr><tr><td>单任务总成本</td><td>每月</td><td>调整模型、工具和验证深度</td></tr><tr><td>规则命中与过期</td><td>每月</td><td>删除低价值、无所有者规则</td></tr></tbody></table></div>
+<p>指标没有统一目标值。团队先建立基线，再观察变化。不同风险等级的任务不能混成一个平均数。</p>
+<h2 id="从个人试用到团队采用">从个人试用到团队采用</h2>
+<p>一个稳妥的采用路径有四段：</p>
+<ol><li>观察：记录个人任务、失败类型和人工接管点，不改变生产权限。</li><li>收敛：挑一个重复场景，建立任务契约、入口和验证命令。</li><li>扩展：加入共享边界、评测、审计和恢复，允许低风险任务半自动完成。</li><li>治理：建立所有者、变更审核、指标和持续清理，再扩大任务队列。</li></ol>
+<p>顺序可以往返。某类任务出现新风险时，自治等级应降低，而不是为了维持自动化比例继续放行。</p>
+<h2 id="组织角色怎样变化">组织角色怎样变化</h2>
+<p>产品负责把业务例外变成可检查行为；研发和架构维护模块边界与工具；测试把真实故障转成验收与评测；安全和平台管理沙箱、审计与凭证；技术负责人决定例外、自治和投入优先级。</p>
+<p>Harness 没有消除协作。它把许多口头判断变成共同维护的工程资产，也让责任边界更清楚。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="只治理模型-不治理-harness-变化">只治理模型，不治理 Harness 变化</h3>
+<p>系统提示、工具、压缩策略和权限的修改都可能造成质量回归。它们需要版本、评测和回滚。</p>
+<h3 id="把高拦截率当安全成功">把高拦截率当安全成功</h3>
+<p>规则可能过严，导致所有任务都转人工。还要看误报、例外和实际越界逃逸。</p>
+<h3 id="用代码行数或-pr-数量衡量价值">用代码行数或 PR 数量衡量价值</h3>
+<p>产出数量不能说明任务是否正确，也不能反映审查和返工成本。</p>
+<h3 id="永久保留所有历史规则">永久保留所有历史规则</h3>
+<p>规则越旧，冲突概率越高。没有所有者、命中证据和复核日期的规则应进入清理队列。</p>
+<h2 id="本章练习-做一次月度治理审查">本章练习：做一次月度治理审查</h2>
+<p>假设本月有 100 个智能体任务：60 个首轮通过，25 个经一轮返工通过，10 个转人工，5 个发布后回归；共有 18 次共享包 notice、6 次公共接口 approval、2 次凭证读取被 blocked。</p>
+<p>请提出四项下一月改进，每项必须绑定一个指标、一个失败类别和一个责任人。不能只写“加强测试”或“优化提示词”。</p>
+<h3 id="参考方向">参考方向</h3>
+<ul><li>对 5 个回归按类型建样本，由测试负责人维护。</li><li>分析 10 个接管是否集中在同一来源冲突，由模块所有者补事实入口。</li><li>复核 18 次 notice 的误报和重复消费者分析，由平台负责人改善工具输出。</li><li>保留凭证读取 blocked，并检查来源是否含恶意指令，由安全负责人复盘轨迹。</li></ul>
+<h2 id="本章小结">本章小结</h2>
+<p>Harness 会漂移，也会积累技术债。少量可检查的黄金原则控制方向，持续清理删除过期规则，轨迹审计覆盖中途行为，端到端指标衡量真实成本。团队再根据这些证据调整自治和投入。</p>
+<p>最后一章会把全课程压缩成一次综合实践：学习者可以完成 Harness 设计包，也可以在实验仓库上落地最小实现。</p>
+<p>上一章：<a href="./11-autonomy-and-orchestration.md">何时提高自治，何时交给人？</a><br> 下一章：<a href="./13-capstone-apply-harness.md">怎样把 Harness 用到自己的仓库？</a><br> 术语复习：<a href="../reference/glossary.md">术语表</a></p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Ryan Lopopolo. <a href="https://openai.com/index/harness-engineering/" target="_blank" rel="noreferrer">Harness engineering: leveraging Codex in an agent-first world</a>. OpenAI, 2026-02-11.</li><li>Anthropic. <a href="https://www.anthropic.com/engineering/april-23-postmortem" target="_blank" rel="noreferrer">An update on recent Claude Code quality reports</a>. 2026-04-23.</li><li>METR. <a href="https://metr.org/time-horizons/" target="_blank" rel="noreferrer">Task-completion time horizons of frontier AI models</a>. 更新于 2026-05-08.</li><li>GitHub. <a href="https://docs.github.com/en/copilot/concepts/agents/hooks" target="_blank" rel="noreferrer">About hooks for GitHub Copilot agents</a>. 访问于 2026-07-10.</li></ul><nav class="lesson-nav"><a href="../lessons/11-autonomy-and-orchestration.html">← 第 11 章<br><strong>何时提高自治，何时交给人？</strong></a><a href="../lessons/13-capstone-apply-harness.html">第 13 章 →<br><strong>怎样把 Harness 用到自己的仓库？</strong></a></nav></main>
+      <aside class="toc"><strong>本章目录</strong><a class="" href="#快速生成会复制仓库的平均水平">快速生成会复制仓库的平均水平</a><a class="" href="#golden-principles-要少而能检查">Golden principles 要少而能检查</a><a class="" href="#持续清理是一项正常工作">持续清理是一项正常工作</a><a class="" href="#安全审计看完整轨迹">安全审计看完整轨迹</a><a class="" href="#成本不只是-token">成本不只是 token</a><a class="" href="#一张治理仪表板">一张治理仪表板</a><a class="" href="#从个人试用到团队采用">从个人试用到团队采用</a><a class="" href="#组织角色怎样变化">组织角色怎样变化</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#只治理模型-不治理-harness-变化">只治理模型，不治理 Harness 变化</a><a class="sub" href="#把高拦截率当安全成功">把高拦截率当安全成功</a><a class="sub" href="#用代码行数或-pr-数量衡量价值">用代码行数或 PR 数量衡量价值</a><a class="sub" href="#永久保留所有历史规则">永久保留所有历史规则</a><a class="" href="#本章练习-做一次月度治理审查">本章练习：做一次月度治理审查</a><a class="sub" href="#参考方向">参考方向</a><a class="" href="#本章小结">本章小结</a><a class="" href="#参考文献">参考文献</a></aside>
+    </div>
+    <footer class="site-footer">Harness Engineering · 驭缰工程</footer>
+  </div>
+</body>
+</html>

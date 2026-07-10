@@ -1,0 +1,15 @@
+{
+  "name": "starbridge-commerce-starter",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "test:rules": "node --test packages/promotion-engine/test/*.test.js",
+    "audit": "node scripts/audit-baseline.mjs",
+    "build:web": "npm run build --workspaces --if-present"
+  }
+}

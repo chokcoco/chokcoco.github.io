@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="自治等级由风险、证据和恢复能力决定；先让单智能体闭环可靠，再用状态机、隔离和依赖图扩大并行。">
+  <title>何时提高自治，何时交给人？ | Harness Engineering</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/course.js"></script>
+</head>
+<body>
+  <div class="course-shell">
+    <header class="topbar"><a class="brand" href="../index.html">Harness Engineering</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header>
+    <section class="lesson-header">
+      <div class="eyebrow">第 11 章 · 55–75 分钟</div>
+      <h1>何时提高自治，何时交给人？</h1>
+      <p class="lesson-summary">自治等级由风险、证据和恢复能力决定；先让单智能体闭环可靠，再用状态机、隔离和依赖图扩大并行。</p>
+    </section>
+    <div class="lesson-layout">
+      <main class="lesson-content"><h2 id="能自动继续-不代表应该自动继续">能自动继续，不代表应该自动继续</h2>
+<p>优惠页面文案改错，可以快速回滚。库存 claim 语义改错，可能导致真实订单和库存账不一致。两项任务都能由智能体修改代码，适合的自治等级却不同。</p>
+<p>自治不是一个开关。它是任务在什么条件下可以继续、需要谁批准、失败后怎样恢复的组合。</p>
+<h2 id="五级自治模型">五级自治模型</h2>
+<div class="table-wrap"><table><thead><tr><th>等级</th><th>智能体权限</th><th>人的角色</th><th>适合任务</th></tr></thead><tbody><tr><td>0</td><td>只分析和建议</td><td>人执行全部动作</td><td>新领域、高风险诊断</td></tr><tr><td>1</td><td>在沙箱生成修改</td><td>人逐项审查并运行</td><td>初次接入仓库</td></tr><tr><td>2</td><td>自动修改和局部验证</td><td>人批准共享或外部影响</td><td>常规功能与测试</td></tr><tr><td>3</td><td>自动完成低风险任务并提交审核</td><td>人审核证据与例外</td><td>规则成熟的重复任务</td></tr><tr><td>4</td><td>持续处理任务队列</td><td>人管理策略、指标和异常</td><td>高度标准化、可恢复工作</td></tr></tbody></table></div>
+<p>等级越高，越需要稳定任务契约、权限边界、评测、审计和恢复。不能因为模型升级就直接从 1 跳到 4。</p>
+<h2 id="用风险和证据决定闸门">用风险和证据决定闸门</h2>
+<p>可以给任务看四个维度：</p>
+<ul><li>影响：错误会影响多少用户、资金或数据。</li><li>可逆：能否快速、完整回滚。</li><li>可检测：现有检查能否在发布前发现错误。</li><li>可恢复：中断和部分失败后能否回到已知状态。</li></ul>
+<p>库存账本语义影响高、回滚难，因此公共接口、状态转换和支付回调保留人工批准。React 运营台的只读字段影响小、构建和视觉检查充分，可以在沙箱内自动完成。</p>
+<h2 id="状态机比-自主完成-更清楚">状态机比“自主完成”更清楚</h2>
+<p>一个任务编排器可以只管理少量状态：</p>
+<div class="diagram-card"><pre class="mermaid">stateDiagram-v2
+  [*] --&gt; QUEUED
+  QUEUED --&gt; RUNNING: prerequisites ready
+  RUNNING --&gt; VERIFYING: maker reports done
+  VERIFYING --&gt; RUNNING: checks fail
+  VERIFYING --&gt; WAITING_APPROVAL: high-risk change
+  WAITING_APPROVAL --&gt; RUNNING: approved
+  WAITING_APPROVAL --&gt; BLOCKED: rejected
+  VERIFYING --&gt; COMPLETED: evidence passes
+  RUNNING --&gt; BLOCKED: reliable stop</pre></div>
+<p>每次转换都需要触发条件和证据。<code>COMPLETED</code> 不能由模型的一句话直接写入；它由验证结果决定。</p>
+<h2 id="并行前先画依赖图">并行前先画依赖图</h2>
+<p>优惠任务可以并行做 React 展示和 Java 报价，但两者都依赖已确认的策略和验收样本：</p>
+<div class="diagram-card"><pre class="mermaid">flowchart LR
+  A[&quot;策略与样本&quot;] --&gt; B[&quot;JavaScript 规则&quot;]
+  A --&gt; C[&quot;Java 报价&quot;]
+  B --&gt; D[&quot;React 展示&quot;]
+  B --&gt; E[&quot;跨语言契约&quot;]
+  C --&gt; E
+  D --&gt; F[&quot;整体验证&quot;]
+  E --&gt; F</pre></div>
+<p>如果两个 agent 同时改共享促销包，冲突和重复工作会抵消并行收益。分工应按所有权和输出接口切开，并使用独立工作区或分支。</p>
+<h2 id="多智能体需要四个额外条件">多智能体需要四个额外条件</h2>
+<ol><li>任务边界能独立描述。</li><li>文件或资源所有权不重叠。</li><li>子任务输出有稳定交接格式。</li><li>集成者能验证组合结果。</li></ol>
+<p>子智能体不应该把完整聊天发给管理者。它返回任务状态、修改摘要、证据、风险和建议下一步。管理者再决定集成、重试或转人工。</p>
+<h2 id="什么时候不要用多智能体">什么时候不要用多智能体</h2>
+<ul><li>核心业务规则尚未确认。</li><li>多项工作会频繁修改同一文件。</li><li>验收必须依赖人工主观判断。</li><li>单任务本身只有几分钟。</li><li>失败后无法隔离和回滚。</li></ul>
+<p>增加 agent 会增加通信、上下文和集成成本。一个可靠单循环通常比三个互相猜测的 agent 更快。</p>
+<h2 id="人工注意力也要排队">人工注意力也要排队</h2>
+<p>高自治系统的瓶颈常从编码转移到审批和审核。闸门应返回：</p>
+<ul><li>需要决定的具体问题。</li><li>可选方案及影响。</li><li>已完成的自动检查。</li><li>不批准时的安全默认。</li><li>决定有效期。</li></ul>
+<p>“请审核所有修改”会把人重新拖回完整执行。好的闸门只请求机器无法承担的判断。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="用任务成功率单独决定自治">用任务成功率单独决定自治</h3>
+<p>九成成功率对文案修改可能足够，对资金和库存仍不可接受。还要看影响、可逆和检测能力。</p>
+<h3 id="并行就是更快">并行就是更快</h3>
+<p>共享文件冲突、重复探索和集成失败都会增加总时间。先测量依赖和交接成本。</p>
+<h3 id="管理-agent-自动拥有更高权限">管理 agent 自动拥有更高权限</h3>
+<p>编排职责不等于安全授权。管理者也要经过相同策略和审计。</p>
+<h3 id="人工闸门没有超时和默认动作">人工闸门没有超时和默认动作</h3>
+<p>审批无人处理时，任务可能永久挂起。高风险默认停止，低风险可以超时回退到只读或缩小范围。</p>
+<h2 id="本章练习-为两项任务分配自治等级">本章练习：为两项任务分配自治等级</h2>
+<p>分别为“修改优惠说明文案”和“改变库存 claim 语义”选择自治等级，写出：允许动作、自动检查、人工闸门、超时默认和恢复方式。</p>
+<h3 id="参考方向">参考方向</h3>
+<p>文案任务可以是等级 2 或 3，但仍要构建和视觉检查。库存语义通常停在等级 1 或 2，公共契约和状态机变化必须审批，并需要幂等、并发和恢复证据。只写“重要任务人工审核”不够，要指出审核发生在哪个状态转换。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>自治来自可验证性，不来自愿望。任务影响低、可逆、可检测、可恢复时，可以逐步减少人工介入；资金、权限和库存语义仍保留明确闸门。并行则需要依赖图、隔离所有权和可验证交接。</p>
+<p>下一章会看规模化后的另一面：智能体会复制仓库里的坏模式，团队怎样控制漂移、安全、成本和组织负担。</p>
+<p>上一章：<a href="./10-long-running-state-and-recovery.md">任务跑几小时，怎样不失忆？</a><br> 下一章：<a href="./12-governance-drift-security-and-cost.md">速度提高后，怎样控制漂移和风险？</a><br> 术语复习：<a href="../reference/glossary.md">术语表</a></p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>OpenAI. <a href="https://openai.com/index/open-source-codex-orchestration-symphony/" target="_blank" rel="noreferrer">An open-source spec for Codex orchestration: Symphony</a>. 2026-04-27.</li><li>Anthropic. <a href="https://www.anthropic.com/engineering/managed-agents" target="_blank" rel="noreferrer">Scaling managed agents: decoupling the brain from the hands</a>. 2026-04-08.</li><li>Anthropic. <a href="https://www.anthropic.com/engineering/building-c-compiler" target="_blank" rel="noreferrer">Building a C compiler with a team of parallel Claudes</a>. 2026-02-05.</li></ul><nav class="lesson-nav"><a href="../lessons/10-long-running-state-and-recovery.html">← 第 10 章<br><strong>任务跑几小时，怎样不失忆？</strong></a><a href="../lessons/12-governance-drift-security-and-cost.html">第 12 章 →<br><strong>速度提高后，怎样控制漂移和风险？</strong></a></nav></main>
+      <aside class="toc"><strong>本章目录</strong><a class="" href="#能自动继续-不代表应该自动继续">能自动继续，不代表应该自动继续</a><a class="" href="#五级自治模型">五级自治模型</a><a class="" href="#用风险和证据决定闸门">用风险和证据决定闸门</a><a class="" href="#状态机比-自主完成-更清楚">状态机比“自主完成”更清楚</a><a class="" href="#并行前先画依赖图">并行前先画依赖图</a><a class="" href="#多智能体需要四个额外条件">多智能体需要四个额外条件</a><a class="" href="#什么时候不要用多智能体">什么时候不要用多智能体</a><a class="" href="#人工注意力也要排队">人工注意力也要排队</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#用任务成功率单独决定自治">用任务成功率单独决定自治</a><a class="sub" href="#并行就是更快">并行就是更快</a><a class="sub" href="#管理-agent-自动拥有更高权限">管理 agent 自动拥有更高权限</a><a class="sub" href="#人工闸门没有超时和默认动作">人工闸门没有超时和默认动作</a><a class="" href="#本章练习-为两项任务分配自治等级">本章练习：为两项任务分配自治等级</a><a class="sub" href="#参考方向">参考方向</a><a class="" href="#本章小结">本章小结</a><a class="" href="#参考文献">参考文献</a></aside>
+    </div>
+    <footer class="site-footer">Harness Engineering · 驭缰工程</footer>
+  </div>
+</body>
+</html>

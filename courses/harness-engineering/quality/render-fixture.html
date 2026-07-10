@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Harness renderer smoke fixture</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/course.js"></script>
+</head>
+<body>
+  <main class="course-shell lesson-content">
+    <h1>Renderer smoke fixture</h1>
+    <div class="diagram-card"><pre class="mermaid">flowchart LR
+  A["Intent"] --> B["Agent loop"]
+  B --> C["Feedback"]</pre></div>
+    <figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const status = "ready";
+if (status === "ready") console.log(status);</code></pre></figure>
+    <figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">@Service
+public class HarnessService {
+  public boolean ready() { return true; }
+}</code></pre></figure>
+  </main>
+</body>
+</html>

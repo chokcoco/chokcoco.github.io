@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="新仓库先建立一条能运行、能验证、能恢复的最小路径，再随着真实失败增加边界和工具，不要在第一行业务代码之前造一座平台。">
+  <title>怎样从零建设 agent-first 新仓库？ | Harness Engineering</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/course.js"></script>
+</head>
+<body>
+  <div class="course-shell">
+    <header class="topbar"><a class="brand" href="../index.html">Harness Engineering</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header>
+    <section class="lesson-header">
+      <div class="eyebrow">第 6 章 · 65–85 分钟</div>
+      <h1>怎样从零建设 agent-first 新仓库？</h1>
+      <p class="lesson-summary">新仓库先建立一条能运行、能验证、能恢复的最小路径，再随着真实失败增加边界和工具，不要在第一行业务代码之前造一座平台。</p>
+    </section>
+    <div class="lesson-layout">
+      <main class="lesson-content"><h2 id="空仓库既轻松-也危险">空仓库既轻松，也危险</h2>
+<p>存量仓库的问题是历史太多。空仓库的问题正相反：没有任何事实。智能体会快速补出目录、依赖和接口，但这些选择未必能延续到第二个功能。</p>
+<p>本章从库存预占开始。目标不是搭建生产级电商平台，而是让一个小仓库具备清楚的所有权：React 负责展示和发命令，Spring Boot 负责状态转换，任务契约和验收样本负责定义正确。</p>
+<p>实验仓库的 <a href="../labs/commerce-harness-lab/greenfield/README.md">greenfield 蓝图</a> 是起点。</p>
+<h2 id="为什么选择这组技术">为什么选择这组技术</h2>
+<p>截至 2026 年 7 月，本课程固定使用：</p>
+<div class="table-wrap"><table><thead><tr><th>部分</th><th>选择</th><th>原因</th></tr></thead><tbody><tr><td>浏览器应用</td><td>React 19.2</td><td>主流组件模型，官方稳定版本</td></tr><tr><td>前端构建</td><td>Vite 8.1</td><td>配置少，开发与构建入口清楚</td></tr><tr><td>Node.js</td><td>22</td><td>稳定 LTS，能运行 Vite 8 与内置测试</td></tr><tr><td>Java</td><td>21</td><td>LTS，适合作为企业后端教学基线</td></tr><tr><td>Java 框架</td><td>Spring Boot 4.1</td><td>当前稳定线，Web、验证和测试入口成熟</td></tr><tr><td>构建</td><td>Maven</td><td>企业 Java 中普遍，命令和依赖声明直接</td></tr></tbody></table></div>
+<p>版本不是 Harness 的核心。固定版本是为了减少环境歧义。正式项目应按组织支持周期选择，并定期升级；课程不在每次小版本发布后追新。</p>
+<h2 id="先画所有权-再创建目录">先画所有权，再创建目录</h2>
+<div class="diagram-card"><pre class="mermaid">flowchart LR
+  U[&quot;运营人员&quot;] --&gt; R[&quot;React 运营台&quot;]
+  R --&gt;|&quot;reserve / claim / release&quot;| J[&quot;Spring Boot API&quot;]
+  J --&gt; S[&quot;Reservation state&quot;]
+  J --&gt; A[&quot;Audit events&quot;]
+  T[&quot;Task contract + cases&quot;] --&gt; R
+  T --&gt; J</pre></div>
+<p>这张图规定两件事：前端不本地计算可售库存，服务端不决定页面排版。验收样本同时约束两端的接口行为。</p>
+<p>最小目录可以是：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">apps/ops-console/
+services/commerce-api/
+contracts/
+specs/
+scripts/
+state/
+AGENTS.md</code></pre></figure>
+<p>暂时不拆微服务，不加消息队列，也不引入 Redis。课程先用内存存储看清状态机、幂等和反馈。等测试证明并发或持久性成为瓶颈，再替换基础设施。</p>
+<h2 id="初始化-react-路径">初始化 React 路径</h2>
+<p>macOS、Windows PowerShell 和常见终端都可以使用：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">npm create vite@latest apps/ops-console -- --template react
+cd apps/ops-console
+npm install
+npm run dev</code></pre></figure>
+<p>课程仓库已经提供最小 React 应用，不要求重复生成。实践时至少保留三条命令：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">npm run dev
+npm run build
+npm test</code></pre></figure>
+<p>如果项目暂时没有测试，不要创建一个永远返回 0 的假命令。可以明确写 <code>test: not configured</code>，并把补测试列为任务前置。</p>
+<h2 id="初始化-spring-boot-路径">初始化 Spring Boot 路径</h2>
+<p>Java 服务使用 Java 21、Spring Boot 4.1 和 Maven。最小依赖是 Web、Validation 和 Test。运行入口保持简单：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">mvn test
+mvn spring-boot:run</code></pre></figure>
+<p>Windows PowerShell 使用同样命令。如果仓库提供 Maven Wrapper，则使用 <code>./mvnw</code>；Windows 使用 <code>mvnw.cmd</code>。Wrapper 能固定 Maven 版本，但不能代替 JDK。</p>
+<p>一个状态转换接口可以先写成：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public interface ReservationStore {
+    Reservation findByIdempotencyKey(String key);
+    Reservation save(Reservation reservation);
+    int available(String sku);
+}</code></pre></figure>
+<p>内存实现和数据库实现都遵守同一接口。这样教学版本保持轻量，后续又能讨论替换存储时哪些语义不能改变。</p>
+<h2 id="先把状态机写进契约">先把状态机写进契约</h2>
+<p>库存预占至少有三条路径：</p>
+<div class="diagram-card"><pre class="mermaid">stateDiagram-v2
+  [*] --&gt; RESERVED: reserve
+  RESERVED --&gt; CLAIMED: payment succeeds
+  RESERVED --&gt; RELEASED: cancel or expires
+  CLAIMED --&gt; CLAIMED: repeated claim
+  RELEASED --&gt; RELEASED: repeated release</pre></div>
+<p>状态图比“别超卖”更接近代码。它仍然需要不变量补充：同键相同请求返回第一次结果，同键不同请求拒绝；库存不足不留下半成品；每次转换写审计事件。</p>
+<h2 id="新仓库的最小-harness">新仓库的最小 Harness</h2>
+<p>第一版只需要六样东西：</p>
+<ol><li>一个短入口，说明去哪里找架构、任务和命令。</li><li>一份当前任务契约。</li><li>一张依赖与所有权图。</li><li>一组能失败的验收样本。</li><li>一个统一验证入口。</li><li>一份跨会话进度记录。</li></ol>
+<p>别急着创建几十个 skills、hook 和智能体角色。没有失败样本时，很难判断这些组件是在解决问题，还是只增加维护面。</p>
+<h2 id="为命令设计稳定输出">为命令设计稳定输出</h2>
+<p>统一验证脚本应明确报告每个阶段：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">PASS structure: browser does not import server source
+PASS javascript: promotion cases 3/3
+PASS react: storefront build
+PASS react: ops-console build
+FAIL java: JDK 21 not found
+STOP completion: Java acceptance cases not verified</code></pre></figure>
+<p>最后一行很重要。部分通过不能被总结成“所有检查通过”。工具应返回结构化结果和非零退出码，让 agent loop 知道是否继续。</p>
+<h2 id="从第二个功能开始检验架构">从第二个功能开始检验架构</h2>
+<p>第一个功能往往看不出架构问题。加入优惠叠加后，检查：</p>
+<ul><li>是否需要让库存服务知道优惠规则？通常不需要。</li><li>React 是否开始复制后端状态转换？不应该。</li><li>两个任务是否能共享金额、时间和错误码约定？可以共享 contract，不必共享所有源码。</li><li>是否出现多个验证入口？应收口到一个脚本或一组可组合命令。</li></ul>
+<p>如果第二个功能只能靠跨层 import 才能快速完成，说明边界写得不够清楚，或者工具没有提供合适接口。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="把-agent-first-理解成-让智能体决定全部架构">把 agent-first 理解成“让智能体决定全部架构”</h3>
+<p>Agent 可以提出方案，团队仍要决定所有权、风险和长期成本。架构决定应有证据和人工责任人。</p>
+<h3 id="一开始就模拟大厂生产架构">一开始就模拟大厂生产架构</h3>
+<p>课程案例借鉴现实问题，不复制生产规模。为两条业务规则搭建十个服务，只会掩盖状态语义。</p>
+<h3 id="版本永远写-latest">版本永远写 latest</h3>
+<p>初始化时用 latest 可以，进入课程或生产基线后应固定版本和锁文件，否则同一命令在不同日期得到不同项目。</p>
+<h3 id="只有-happy-path-测试">只有 happy path 测试</h3>
+<p>库存系统真正困难的是重试、冲突、重复转换和超时。正常预占成功只能证明最短路径可用。</p>
+<h2 id="本章练习-设计第一天的仓库">本章练习：设计第一天的仓库</h2>
+<p>不用写完整代码。为 greenfield 库存任务提交：</p>
+<ul><li>目录树。</li><li>一张所有权图。</li><li>根入口的 10–20 行草稿。</li><li>五个验收样本。</li><li>一个统一验证输出示例。</li><li>两个需要人工批准的变化。</li></ul>
+<h3 id="自检标准">自检标准</h3>
+<p>目录能说明职责；状态由 Java 服务拥有；React 不复制库存计算；验收覆盖重复与冲突；验证能报告部分失败；基础设施升级需要审批。六项全部满足即可通过。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>新仓库的优势是可以从第一天写清所有权和完成条件。先用单服务、纯规则和小型 React 页面跑通一条闭环，再让真实失败推动工具、边界和基础设施增长。</p>
+<p>下一章关注智能体真正行动的接口：什么样的工具输出能帮助它纠错，什么样的工具只会扩大风险。</p>
+<p>上一章：<a href="./05-retrofit-existing-enterprise-repository.md">怎样改造一个已有企业仓库？</a><br> 下一章：<a href="./07-tools-for-reliable-action.md">什么工具能让智能体真正行动？</a><br> 术语复习：<a href="../reference/glossary.md">术语表</a></p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>React Team. <a href="https://react.dev/blog/2025/10/01/react-19-2" target="_blank" rel="noreferrer">React 19.2</a>. 2025-10-01.</li><li>Vite Team. <a href="https://vite.dev/blog/announcing-vite8-1" target="_blank" rel="noreferrer">Vite 8.1 is out</a>. 2026-06-23.</li><li>Spring. <a href="https://docs.spring.io/spring-boot/cli/" target="_blank" rel="noreferrer">Spring Boot CLI and stable versions</a>. 访问于 2026-07-10.</li><li>Shopify Engineering. <a href="https://shopify.engineering/scaling-inventory-reservations" target="_blank" rel="noreferrer">We replaced Redis with MySQL for inventory reservations—and it scaled</a>. 2026-05-12.</li></ul><nav class="lesson-nav"><a href="../lessons/05-retrofit-existing-enterprise-repository.html">← 第 5 章<br><strong>怎样改造一个已有企业仓库？</strong></a><a href="../lessons/07-tools-for-reliable-action.html">第 7 章 →<br><strong>什么工具能让智能体真正行动？</strong></a></nav></main>
+      <aside class="toc"><strong>本章目录</strong><a class="" href="#空仓库既轻松-也危险">空仓库既轻松，也危险</a><a class="" href="#为什么选择这组技术">为什么选择这组技术</a><a class="" href="#先画所有权-再创建目录">先画所有权，再创建目录</a><a class="" href="#初始化-react-路径">初始化 React 路径</a><a class="" href="#初始化-spring-boot-路径">初始化 Spring Boot 路径</a><a class="" href="#先把状态机写进契约">先把状态机写进契约</a><a class="" href="#新仓库的最小-harness">新仓库的最小 Harness</a><a class="" href="#为命令设计稳定输出">为命令设计稳定输出</a><a class="" href="#从第二个功能开始检验架构">从第二个功能开始检验架构</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#把-agent-first-理解成-让智能体决定全部架构">把 agent-first 理解成“让智能体决定全部架构”</a><a class="sub" href="#一开始就模拟大厂生产架构">一开始就模拟大厂生产架构</a><a class="sub" href="#版本永远写-latest">版本永远写 latest</a><a class="sub" href="#只有-happy-path-测试">只有 happy path 测试</a><a class="" href="#本章练习-设计第一天的仓库">本章练习：设计第一天的仓库</a><a class="sub" href="#自检标准">自检标准</a><a class="" href="#本章小结">本章小结</a><a class="" href="#参考文献">参考文献</a></aside>
+    </div>
+    <footer class="site-footer">Harness Engineering · 驭缰工程</footer>
+  </div>
+</body>
+</html>

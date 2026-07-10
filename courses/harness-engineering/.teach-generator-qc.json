@@ -1,0 +1,46 @@
+{
+  "requiredPaths": [
+    "workspace/MISSION.md",
+    "workspace/RESOURCES.md",
+    "workspace/COURSE-GENERATION-SPEC.md",
+    "workspace/COURSE-BLUEPRINT.md",
+    "workspace/NOTES.md",
+    "index.html",
+    "course.json",
+    "lessons",
+    "reference/glossary.md",
+    "reference/glossary.html",
+    "assets/course.css",
+    "assets/course.js",
+    "labs/commerce-harness-lab/README.md",
+    "labs/commerce-harness-lab/case/business-brief.md",
+    "labs/commerce-harness-lab/starter/package.json",
+    "labs/commerce-harness-lab/harness-overlay/AGENTS.md",
+    "labs/commerce-harness-lab/greenfield/AGENTS.md"
+  ],
+  "contentRoots": [
+    "index.html",
+    "course.json",
+    "lessons",
+    "reference",
+    "assets",
+    "labs/commerce-harness-lab/README.md",
+    "labs/commerce-harness-lab/case",
+    "labs/commerce-harness-lab/starter/docs",
+    "labs/commerce-harness-lab/starter/packages/promotion-engine/src",
+    "labs/commerce-harness-lab/starter/packages/promotion-engine/test",
+    "labs/commerce-harness-lab/starter/services/commerce-api/src",
+    "labs/commerce-harness-lab/starter/scripts",
+    "labs/commerce-harness-lab/starter/apps/storefront/src",
+    "labs/commerce-harness-lab/starter/apps/ops-console/src",
+    "labs/commerce-harness-lab/harness-overlay",
+    "labs/commerce-harness-lab/greenfield"
+  ],
+  "forbiddenMermaidTypes": [
+    "mindmap"
+  ],
+  "allowedExternalUrlPrefixes": [
+    "https://cdn.jsdelivr.net/npm/mermaid@10/"
+  ],
+  "unregisteredExternalUrlSeverity": "error"
+}
