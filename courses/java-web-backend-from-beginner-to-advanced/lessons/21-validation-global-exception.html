@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="参数校验负责判断输入是否符合约定，全局异常处理负责把失败转换成含义清楚、结构稳定且不泄露内部信息的 HTTP 响应。"><title>参数校验、全局异常与错误响应 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 21 章 · 后端开发基础</div><h1>参数校验、全局异常与错误响应</h1><p class="lesson-summary">参数校验负责判断输入是否符合约定，全局异常处理负责把失败转换成含义清楚、结构稳定且不泄露内部信息的 HTTP 响应。</p><div class="meta-row"><span class="pill">先用一个字段完成最小校验，再逐步增加嵌套对象、异常分类和错误契约；本章不限制完成时间</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一-参数校验的基本概念">一、参数校验的基本概念</h2>
+<h3 id="1-1-后端接收的输入">1.1 后端接收的输入</h3>
+<p>Web 后端的工作通常从接收请求开始。请求中的数据可能来自不同位置：</p>
+<div class="table-wrap"><table><thead><tr><th>输入位置</th><th>示例</th><th>Spring MVC 中的常见写法</th></tr></thead><tbody><tr><td>路径</td><td><code>/users/42</code> 中的 <code>42</code></td><td><code>@PathVariable</code></td></tr><tr><td>查询参数</td><td><code>/users?page=2</code> 中的 <code>page</code></td><td><code>@RequestParam</code></td></tr><tr><td>请求头</td><td><code>Authorization</code></td><td><code>@RequestHeader</code></td></tr><tr><td>请求体</td><td>POST 请求中的 JSON</td><td><code>@RequestBody</code></td></tr></tbody></table></div>
+<p>这些数据都来自服务边界之外。浏览器表单可以限制输入，但调用者也可能是手机应用、脚本、第三方系统，甚至是手工发送请求的人。后端需要自己检查输入。</p>
+<p><span class="term" tabindex="0" data-tip="按照接口预先声明的规则检查输入，并在不符合规则时拒绝继续处理。">参数校验</span>是按照预先声明的规则检查输入，并在输入不符合规则时停止当前操作。例如：</p>
+<ul><li>用户名不能是空白字符串。</li><li>数量必须大于 0。</li><li>邮箱要符合基本格式。</li><li>订单列表至少有一项。</li></ul>
+<p>这些规则描述的是接口允许接收什么数据，也叫<span class="term" tabindex="0" data-tip="对输入值的非空、长度、格式或范围等要求。">约束</span>。</p>
+<h3 id="1-2-校验失败与程序异常">1.2 校验失败与程序异常</h3>
+<p>校验失败表示“请求没有满足接口约定”。它通常不是服务器程序崩溃，也不应该返回成功结果。</p>
+<p>Spring MVC 在处理请求时，会把不同失败表示成不同异常。<span class="term" tabindex="0" data-tip="Java 用来表示非正常执行情况并沿调用栈传播的信息对象。">异常</span>是 Java 描述非正常执行情况的对象，第 11 章已经讲过它的基础语法。当前只需要回忆这条路径：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">发现失败 → 创建或抛出异常 → 调用栈向外传播 → 某个边界捕获并处理</code></pre></figure>
+<p>Controller 是 HTTP 边界的一部分。如果每个 Controller 都重复写 <code>try/catch</code> 和错误响应，代码会迅速变乱。Spring 提供全局异常处理机制，让多个 Controller 共用一组转换规则。</p>
+<p><span class="term" tabindex="0" data-tip="在 Web 边界集中接收异常，并转换为 HTTP 状态与响应体的机制。">全局异常处理</span>在这里指：集中接收 Controller 处理过程中出现的异常，再把它们转换为 HTTP 状态码和响应体。</p>
+<h3 id="1-3-三类失败先分开">1.3 三类失败先分开</h3>
+<p>学习注解之前，先区分失败的性质：</p>
+<div class="table-wrap"><table><thead><tr><th>失败类型</th><th>判断内容</th><th>示例</th><th>常见 HTTP 状态</th></tr></thead><tbody><tr><td>输入校验失败</td><td>数据的结构、格式或范围不符合接口约定</td><td>用户名空白、数量为 0</td><td>400 Bad Request</td></tr><tr><td>业务规则失败</td><td>输入格式正确，但当前业务状态不允许操作</td><td>用户名已存在、订单已取消</td><td>409 Conflict 或团队约定状态</td></tr><tr><td>系统执行失败</td><td>服务本身或依赖没有正常完成工作</td><td>数据库不可用、程序缺陷</td><td>500 或 503</td></tr></tbody></table></div>
+<p>这三类失败不能只靠一组字段注解解决。字段约束适合输入结构；业务规则通常放在 Service；系统故障要保留日志和调用链证据。</p>
+<h2 id="二-bean-validation-与约束注解">二、Bean Validation 与约束注解</h2>
+<h3 id="2-1-bean-validation-的作用">2.1 Bean Validation 的作用</h3>
+<p><span class="term" tabindex="0" data-tip="通过约束注解描述输入规则，并由验证器检查对象或方法参数的规范。">Bean Validation</span>是 Java 生态中用于声明和执行对象约束的规范。开发者在字段、方法参数或类型使用位置添加注解，验证器读取这些注解并检查实际值。</p>
+<p>注解是一种附加在代码元素上的元数据。它本身不是 <code>if</code> 语句。Spring 在合适的请求处理阶段调用验证器，验证器才会执行约束检查。</p>
+<p>Spring Boot 3.x 项目通常通过下面的 starter 引入实现：</p>
+<figure class="code-card"><div class="code-toolbar"><span>xml</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-validation&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre></figure>
+<p>课程示例使用 Spring Boot 3.x，因此导入路径以 <code>jakarta.validation</code> 开头：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;</code></pre></figure>
+<p>旧教程中的 <code>javax.validation.*</code> 属于 Spring Boot 2.x 常见写法，不能直接复制到 Boot 3.x 项目。</p>
+<h3 id="2-2-第一个约束">2.2 第一个约束</h3>
+<p>下面的请求对象只有一个字段：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public record RegisterUserRequest(
+        @NotBlank(message = &quot;用户名不能为空&quot;)
+        String username
+) {
+}</code></pre></figure>
+<p>这段代码使用了第 9 章学过的 record。<code>@NotBlank</code> 作用在 String 上，要求值满足两个条件：</p>
+<ol><li>不能是 <code>null</code>。</li><li>去掉首尾空白后，至少还有一个字符。</li></ol>
+<p><code>message</code> 是约束失败时提供的默认提示。它适合给人阅读，前端程序不应把这段中文当作稳定判断条件。</p>
+<h3 id="2-3-常用约束的区别">2.3 常用约束的区别</h3>
+<p>几个名字相近的注解检查内容不同：</p>
+<div class="table-wrap"><table><thead><tr><th>约束</th><th>适用数据</th><th>允许 <code>null</code></th><th>主要检查</th></tr></thead><tbody><tr><td><code>@NotNull</code></td><td>任意引用类型</td><td>不允许</td><td>值不能为 <code>null</code></td></tr><tr><td><code>@NotEmpty</code></td><td>String、集合、数组、Map</td><td>不允许</td><td>值存在且长度或元素数大于 0</td></tr><tr><td><code>@NotBlank</code></td><td>字符串</td><td>不允许</td><td>去掉空白后仍有字符</td></tr><tr><td><code>@Positive</code></td><td>数值</td><td>默认允许</td><td>值必须大于 0</td></tr><tr><td><code>@Min(1)</code></td><td>整数类数值</td><td>默认允许</td><td>值不能小于 1</td></tr><tr><td><code>@Size(min = 1, max = 20)</code></td><td>String、集合、数组、Map</td><td>默认允许</td><td>长度或元素数在范围内</td></tr><tr><td><code>@Email</code></td><td>字符串</td><td>默认允许</td><td>符合实现支持的邮箱格式检查</td></tr></tbody></table></div>
+<p>许多约束把 <code>null</code> 交给 <code>@NotNull</code> 处理。例如，一个邮箱既不能空，又要检查格式，通常组合使用：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">@NotBlank(message = &quot;邮箱不能为空&quot;)
+@Email(message = &quot;邮箱格式不正确&quot;)
+String email</code></pre></figure>
+<p>约束的完整语义要以 Jakarta Validation 规范和 API 文档为准，不能只根据注解名称猜测。</p>
+<h3 id="2-4-基本类型与包装类型">2.4 基本类型与包装类型</h3>
+<p>请求字段如果使用基本类型 <code>int</code>，它不可能为 <code>null</code>。当 JSON 缺少字段时，反序列化结果可能落到基本类型默认值 <code>0</code>，程序无法区分“调用者没传”和“调用者明确传了 0”。</p>
+<p>需要区分这两种输入时，使用包装类型 <code>Integer</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">@NotNull(message = &quot;年龄不能为空&quot;)
+@Positive(message = &quot;年龄必须大于 0&quot;)
+Integer age</code></pre></figure>
+<p><code>@NotNull</code> 负责缺失值，<code>@Positive</code> 负责数值范围。两条规则的职责不同。</p>
+<h2 id="三-在-controller-中触发校验">三、在 Controller 中触发校验</h2>
+<h3 id="3-1-requestbody-与-valid">3.1 <code>@RequestBody</code> 与 <code>@Valid</code></h3>
+<p>第 18 章已经使用过 <code>@RestController</code>、<code>@PostMapping</code> 和 <code>@RequestBody</code>。这里再明确两个与校验有关的步骤：</p>
+<ol><li><code>@RequestBody</code> 让 Spring MVC 把 JSON 请求体转换成 Java 对象。</li><li><code>@Valid</code> 要求 Spring 在调用 Controller 方法之前验证这个对象。</li></ol>
+<p>最小 Controller 如下：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">@RestController
+@RequestMapping(&quot;/users&quot;)
+public class UserController {
+
+    @PostMapping
+    public String create(
+            @Valid @RequestBody RegisterUserRequest request) {
+        return &quot;created: &quot; + request.username();
+    }
+}</code></pre></figure>
+<p>如果请求是：</p>
+<figure class="code-card"><div class="code-toolbar"><span>json</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="json">{
+  &quot;username&quot;: &quot;alice&quot;
+}</code></pre></figure>
+<p>对象通过校验，Controller 方法继续执行。如果 <code>username</code> 是 <code>null</code>、空字符串或只有空格，校验失败，Controller 方法不会被调用。</p>
+<h3 id="3-2-valid-不等于非空">3.2 <code>@Valid</code> 不等于非空</h3>
+<p><code>@Valid</code> 的职责是触发对目标对象及其级联对象的验证。它本身不是“不能为空”的约束。</p>
+<p>如果某个嵌套对象既要存在，又要继续验证内部字段，要把两个意图分别写出来：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">@NotNull(message = &quot;地址不能为空&quot;)
+@Valid
+AddressRequest address</code></pre></figure>
+<p><code>@NotNull</code> 检查 <code>address</code> 是否存在，<code>@Valid</code> 继续检查 <code>AddressRequest</code> 内部的约束。</p>
+<h2 id="四-第一次观察校验结果">四、第一次观察校验结果</h2>
+<h3 id="4-1-使用-curl-发送请求">4.1 使用 curl 发送请求</h3>
+<p>测试框架将在第 27 章系统讲解。本章先使用第 17 章接触过的 curl 观察真实 HTTP 响应。</p>
+<p>启动应用后，发送一个合法请求：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">curl -i \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;username&quot;:&quot;alice&quot;}' \
+  http://localhost:8080/users</code></pre></figure>
+<p>再发送一个空白用户名：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">curl -i \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;username&quot;:&quot;   &quot;}' \
+  http://localhost:8080/users</code></pre></figure>
+<p>第二个请求应该得到 <code>400 Bad Request</code>。先确认状态码即可。Spring Boot 的默认错误响应适合开发阶段观察，但它不是团队已经设计好的稳定接口契约。</p>
+<h3 id="4-2-请求体格式错误不等于字段校验失败">4.2 请求体格式错误不等于字段校验失败</h3>
+<p>下面的内容不是合法 JSON：</p>
+<figure class="code-card"><div class="code-toolbar"><span>json</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="json">{
+  &quot;username&quot;: &quot;alice&quot;,
+}</code></pre></figure>
+<p>此时 Spring 连 <code>RegisterUserRequest</code> 对象都无法创建，Bean Validation 还没有机会执行。Spring MVC 通常以 <code>HttpMessageNotReadableException</code> 表示请求体无法读取。</p>
+<p>所以，两个请求都可能返回 400，但原因不同：</p>
+<ul><li>JSON 可以解析，对象字段违反约束。</li><li>JSON 本身无法解析。</li></ul>
+<p>错误响应应保留这种差异，至少使用不同错误码。</p>
+<h2 id="五-校验异常与最小全局处理器">五、校验异常与最小全局处理器</h2>
+<h3 id="5-1-请求对象校验失败的异常">5.1 请求对象校验失败的异常</h3>
+<p>对 <code>@Valid @RequestBody</code> 这种常见写法，字段校验失败通常产生 <code>MethodArgumentNotValidException</code>。异常对象中包含绑定与校验结果，包括字段名、被拒绝的值和提示消息。</p>
+<p>Controller 不必自己捕获它。异常会沿 Spring MVC 请求处理链向外传播，交给异常解析机制。</p>
+<h3 id="5-2-restcontrolleradvice-的作用">5.2 <code>@RestControllerAdvice</code> 的作用</h3>
+<p><span class="term" tabindex="0" data-tip="跨多个 Spring MVC Controller 复用异常处理、绑定或模型逻辑的组件。">Controller Advice</span>可以为多个 Controller 提供共用的异常处理方法。<code>@RestControllerAdvice</code> 表示这些方法的返回值直接写入 HTTP 响应体。</p>
+<p>先做一个最小错误对象：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public record SimpleError(
+        String code,
+        String message
+) {
+}</code></pre></figure>
+<p>再处理校验异常：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">@RestControllerAdvice
+public class GlobalApiExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    SimpleError handleValidation(
+            MethodArgumentNotValidException exception) {
+        return new SimpleError(
+                &quot;VALIDATION_FAILED&quot;,
+                &quot;请求参数不符合接口约定&quot;
+        );
+    }
+}</code></pre></figure>
+<p>三个注解各有职责：</p>
+<div class="table-wrap"><table><thead><tr><th>注解</th><th>作用</th></tr></thead><tbody><tr><td><code>@RestControllerAdvice</code></td><td>把类注册为多个 Controller 共用的响应式异常处理组件</td></tr><tr><td><code>@ExceptionHandler(...)</code></td><td>指定这个方法处理哪类异常</td></tr><tr><td><code>@ResponseStatus(...)</code></td><td>指定返回的 HTTP 状态</td></tr></tbody></table></div>
+<p>现在校验失败时，客户端会收到稳定的程序错误码，而不是依赖 Java 异常类名：</p>
+<figure class="code-card"><div class="code-toolbar"><span>json</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="json">{
+  &quot;code&quot;: &quot;VALIDATION_FAILED&quot;,
+  &quot;message&quot;: &quot;请求参数不符合接口约定&quot;
+}</code></pre></figure>
+<p>这已经形成最小闭环：声明约束、触发校验、捕获异常、返回错误响应。</p>
+<h2 id="六-返回字段级错误">六、返回字段级错误</h2>
+<h3 id="6-1-字段级错误的用途">6.1 字段级错误的用途</h3>
+<p>只有通用消息时，前端仍不知道哪个输入框需要提示。可以为每条字段错误增加路径与消息：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public record FieldViolation(
+        String field,
+        String message
+) {
+}</code></pre></figure>
+<p>错误响应增加列表：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public record ApiError(
+        String code,
+        String message,
+        List&lt;FieldViolation&gt; violations
+) {
+}</code></pre></figure>
+<p>这里的 List 是第 13 章学过的集合，record 是第 9 章学过的类型。</p>
+<h3 id="6-2-从异常中读取字段错误">6.2 从异常中读取字段错误</h3>
+<p><code>MethodArgumentNotValidException</code> 的 <code>getBindingResult()</code> 可以读取字段错误。第 14 章学过 Stream 后，下面的转换应该已经可以阅读：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">@ExceptionHandler(MethodArgumentNotValidException.class)
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+ApiError handleValidation(
+        MethodArgumentNotValidException exception) {
+
+    List&lt;FieldViolation&gt; violations = exception
+            .getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(error -&gt; new FieldViolation(
+                    error.getField(),
+                    error.getDefaultMessage()))
+            .toList();
+
+    return new ApiError(
+            &quot;VALIDATION_FAILED&quot;,
+            &quot;请求参数不符合接口约定&quot;,
+            violations
+    );
+}</code></pre></figure>
+<p>响应可能变为：</p>
+<figure class="code-card"><div class="code-toolbar"><span>json</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="json">{
+  &quot;code&quot;: &quot;VALIDATION_FAILED&quot;,
+  &quot;message&quot;: &quot;请求参数不符合接口约定&quot;,
+  &quot;violations&quot;: [
+    {
+      &quot;field&quot;: &quot;username&quot;,
+      &quot;message&quot;: &quot;用户名不能为空&quot;
+    }
+  ]
+}</code></pre></figure>
+<p><code>code</code> 给程序判断，<code>message</code> 给人阅读，<code>violations</code> 帮助界面定位字段。三者不要混用。</p>
+<h2 id="七-嵌套对象校验">七、嵌套对象校验</h2>
+<h3 id="7-1-从单层对象扩展到列表">7.1 从单层对象扩展到列表</h3>
+<p>基础闭环完成后，再进入订单请求。一个订单包含客户编号和多条商品记录：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public record OrderLineRequest(
+        @NotBlank(message = &quot;商品编号不能为空&quot;)
+        String productId,
+
+        @NotNull(message = &quot;数量不能为空&quot;)
+        @Positive(message = &quot;数量必须大于 0&quot;)
+        Integer quantity
+) {
+}</code></pre></figure>
+<p>外层请求如下：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public record CreateOrderRequest(
+        @NotBlank(message = &quot;客户编号不能为空&quot;)
+        String customerId,
+
+        @NotEmpty(message = &quot;订单至少包含一个商品&quot;)
+        @Valid
+        List&lt;OrderLineRequest&gt; lines
+) {
+}</code></pre></figure>
+<p>这次有两类检查：</p>
+<ul><li><code>@NotEmpty</code> 检查 <code>lines</code> 不是 <code>null</code>，并且至少有一个元素。</li><li><code>@Valid</code> 要求验证器继续检查列表元素中的 <code>productId</code> 和 <code>quantity</code>。</li></ul>
+<p>缺少 <code>@Valid</code> 时，列表本身可能通过 <code>@NotEmpty</code>，但元素内部的约束不会按预期级联执行。</p>
+<h3 id="7-2-字段路径">7.2 字段路径</h3>
+<p>如果第一条商品记录的数量是 0，字段路径通常类似：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">lines[0].quantity</code></pre></figure>
+<p>这个路径可以直接帮助前端找到列表中的具体输入项。错误处理器应保留这种定位信息，而不是把所有消息拼成一个无法解析的长字符串。</p>
+<h2 id="八-业务校验与业务异常">八、业务校验与业务异常</h2>
+<h3 id="8-1-注解适合结构规则">8.1 注解适合结构规则</h3>
+<p>约束注解适合检查局部、可重复的输入规则，例如非空、长度、数值范围和格式。它们不适合承担所有业务判断。</p>
+<p>下面这些问题通常需要 Service、领域对象或数据库参与：</p>
+<ul><li>用户名是否已经存在。</li><li>当前用户是否有权限修改订单。</li><li>库存是否足够。</li><li>订单当前状态是否允许取消。</li></ul>
+<p>如果自定义 Validator 每次都查询数据库，校验过程会隐藏 I/O，难以测试，也难以控制事务和超时。</p>
+<h3 id="8-2-用有含义的异常表示业务冲突">8.2 用有含义的异常表示业务冲突</h3>
+<p>假设 Service 发现订单已经取消，可以抛出业务异常：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class OrderConflictException
+        extends RuntimeException {
+
+    public OrderConflictException(String message) {
+        super(message);
+    }
+}</code></pre></figure>
+<p>全局处理器把它映射为 409：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">@ExceptionHandler(OrderConflictException.class)
+@ResponseStatus(HttpStatus.CONFLICT)
+ApiError handleOrderConflict(
+        OrderConflictException exception) {
+
+    return new ApiError(
+            &quot;ORDER_STATE_CONFLICT&quot;,
+            exception.getMessage(),
+            List.of()
+    );
+}</code></pre></figure>
+<p>校验错误与业务冲突都属于“已知失败”，但它们含义不同。前者通常是 400，后者可以使用 409 或团队明确约定的其他状态。</p>
+<h2 id="九-系统异常与信息边界">九、系统异常与信息边界</h2>
+<h3 id="9-1-未知异常不能直接返回内部消息">9.1 未知异常不能直接返回内部消息</h3>
+<p>数据库驱动、HTTP Client 和第三方 SDK 的异常消息可能包含表名、SQL 片段、服务器地址或其他内部信息。下面的写法不安全：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">return new SimpleError(
+        &quot;INTERNAL_ERROR&quot;,
+        exception.getMessage()
+);</code></pre></figure>
+<p>未知异常要分两路处理。服务端日志记录完整异常、堆栈和关联标识；客户端只收到 <code>INTERNAL_ERROR</code> 一类稳定错误码和“服务暂时无法完成请求”这样的通用消息。</p>
+<p>实际处理器需要使用第 19 章配置过的日志组件记录 <code>exception</code>，再返回不含内部细节的 <code>SimpleError</code>。这里不提前引入一套新的日志 API。兜底处理器只能防止信息泄露，不能代替具体异常分类；已知的校验、JSON 解析和业务冲突仍要分别处理。</p>
+<h3 id="9-2-错误响应可以逐步扩展">9.2 错误响应可以逐步扩展</h3>
+<p>实际项目通常还会加入：</p>
+<div class="table-wrap"><table><thead><tr><th>字段</th><th>用途</th><th>注意点</th></tr></thead><tbody><tr><td><code>timestamp</code></td><td>记录响应产生时间</td><td>使用统一格式和时区</td></tr><tr><td><code>path</code></td><td>标明失败的请求路径</td><td>不包含敏感查询参数</td></tr><tr><td><code>traceId</code></td><td>关联客户端报告与服务端日志</td><td>需要链路组件真正生成并传递</td></tr><tr><td><code>violations</code></td><td>返回字段路径与提示</td><td>只在相关错误中出现或返回空列表</td></tr></tbody></table></div>
+<p>这些字段共同形成<span class="term" tabindex="0" data-tip="API 对错误状态码、错误码、字段、消息和追踪信息的稳定约定。">错误契约</span>。契约一旦被前端和其他调用者依赖，字段名、类型和错误码就不应随异常类重命名而改变。</p>
+<h2 id="十-方法参数校验">十、方法参数校验</h2>
+<h3 id="10-1-直接写在方法参数上的约束">10.1 直接写在方法参数上的约束</h3>
+<p>请求对象校验之外，约束也可以直接写在 Controller 方法参数上：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">@GetMapping(&quot;/{id}&quot;)
+public String findById(
+        @PathVariable
+        @Positive(message = &quot;用户编号必须大于 0&quot;)
+        Long id) {
+    return &quot;user-&quot; + id;
+}</code></pre></figure>
+<p>Spring Framework 6.1+ 为 Spring MVC 提供内置的方法级校验。根据方法签名，直接参数约束失败可能以 <code>HandlerMethodValidationException</code> 表示，而 <code>@Valid @RequestBody</code> 对象校验常见的是 <code>MethodArgumentNotValidException</code>。</p>
+<p>如果错误契约要求两类校验返回相同结构，全局处理器需要覆盖两条路径。不要在刚学会 <code>@Valid</code> 时一次塞入所有异常类型；先完成对象校验闭环，再补方法级校验。</p>
+<h3 id="10-2-validated-的版本边界">10.2 <code>@Validated</code> 的版本边界</h3>
+<p>旧教程常在 Controller 类上添加 Spring 的 <code>@Validated</code>，通过 AOP 触发方法校验。Spring MVC 6.1+ 已有内置方法校验，类级 <code>@Validated</code> 可能使请求走另一套代理校验路径。</p>
+<p>课程以 Spring Boot 3.5.x、Spring Framework 6.2 为当前预览基线。迁移旧项目时，应依据公司锁定版本查看官方文档并运行契约测试，不能机械添加或删除 <code>@Validated</code>。</p>
+<h2 id="十一-完整错误处理流程">十一、完整错误处理流程</h2>
+<p>基础概念和各类异常都认识后，可以把一次请求串起来：</p>
+<div class="diagram-card"><pre class="mermaid">sequenceDiagram
+    participant Client as 客户端
+    participant MVC as Spring MVC
+    participant Validation as Bean Validation
+    participant Controller as Controller
+    participant Service as Service
+    participant Advice as 全局异常处理
+
+    Client-&gt;&gt;MVC: POST JSON 请求
+    MVC-&gt;&gt;MVC: 解析 JSON
+    alt JSON 格式错误
+        MVC--&gt;&gt;Advice: HttpMessageNotReadableException
+        Advice--&gt;&gt;Client: 400 + MALFORMED_JSON
+    else JSON 可解析
+        MVC-&gt;&gt;Validation: 检查约束
+        alt 字段校验失败
+            Validation--&gt;&gt;Advice: MethodArgumentNotValidException
+            Advice--&gt;&gt;Client: 400 + VALIDATION_FAILED
+        else 校验通过
+            MVC-&gt;&gt;Controller: 调用方法
+            Controller-&gt;&gt;Service: 执行业务
+            alt 业务状态冲突
+                Service--&gt;&gt;Advice: OrderConflictException
+                Advice--&gt;&gt;Client: 409 + ORDER_STATE_CONFLICT
+            else 执行成功
+                Service--&gt;&gt;Client: 2xx 响应
+            end
+        end
+    end</pre></div>
+<p>图中每一步都对应前面已经讲过的概念。全局异常处理不是把所有失败变成同一个响应，而是在一个位置维护分类与转换规则。</p>
+<h2 id="十二-本章练习">十二、本章练习</h2>
+<h3 id="12-1-为注册请求增加约束">12.1 为注册请求增加约束</h3>
+<p>已有请求对象：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public record RegisterUserRequest(
+        String username,
+        String email,
+        Integer age
+) {
+}</code></pre></figure>
+<p>请增加约束：</p>
+<ol><li>用户名不能为 <code>null</code>、空字符串或纯空格。</li><li>邮箱不能为空，并通过邮箱格式检查。</li><li>年龄不能为空，且必须大于 0。</li></ol>
+<p>完成后，用 curl 分别发送合法请求、空用户名、错误邮箱和缺失年龄。记录 HTTP 状态及响应体。</p>
+<h3 id="12-2-参考答案">12.2 参考答案</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public record RegisterUserRequest(
+        @NotBlank(message = &quot;用户名不能为空&quot;)
+        String username,
+
+        @NotBlank(message = &quot;邮箱不能为空&quot;)
+        @Email(message = &quot;邮箱格式不正确&quot;)
+        String email,
+
+        @NotNull(message = &quot;年龄不能为空&quot;)
+        @Positive(message = &quot;年龄必须大于 0&quot;)
+        Integer age
+) {
+}</code></pre></figure>
+<p>合法请求应进入 Controller。其他三类请求应返回 400，并在 <code>violations</code> 中出现对应字段。邮箱为空时应由 <code>@NotBlank</code> 报错；邮箱非空但格式不正确时由 <code>@Email</code> 报错。同一字段存在多条失败消息时，是否全部保留要由团队错误契约决定并用测试固定。</p>
+<h3 id="12-3-失败分类">12.3 失败分类</h3>
+<p>为下面四种失败指定 HTTP 状态和稳定错误码：</p>
+<ol><li><code>username</code> 为空。</li><li>用户名格式正确，但数据库中已经存在。</li><li>请求体不是合法 JSON。</li><li>数据库连接超时。</li></ol>
+<p>参考分类：</p>
+<div class="table-wrap"><table><thead><tr><th>场景</th><th>状态</th><th>错误码示例</th><th>字段错误列表</th></tr></thead><tbody><tr><td>用户名为空</td><td>400</td><td><code>VALIDATION_FAILED</code></td><td>有，指向 <code>username</code></td></tr><tr><td>用户名已存在</td><td>409</td><td><code>USERNAME_CONFLICT</code></td><td>无</td></tr><tr><td>JSON 不合法</td><td>400</td><td><code>MALFORMED_JSON</code></td><td>通常无</td></tr><tr><td>数据库连接超时</td><td>503 或团队约定的 500</td><td><code>SERVICE_UNAVAILABLE</code></td><td>无</td></tr></tbody></table></div>
+<p>状态码可以根据团队契约调整，但四类失败不能全部返回 <code>200 {&quot;success&quot;: false}</code>，也不能把数据库异常消息发给客户端。</p>
+<h3 id="12-4-完成标准">12.4 完成标准</h3>
+<ul><li>能解释每个约束为什么存在，以及 <code>@Valid</code> 在哪里触发验证。</li><li>能用 curl 复现成功、字段校验失败和 JSON 格式错误。</li><li>能说明字段校验、业务冲突与系统故障的区别。</li><li>错误响应至少包含稳定 <code>code</code>、人类可读 <code>message</code> 和可定位字段的 <code>violations</code>。</li></ul>
+<h2 id="十三-常见误区">十三、常见误区</h2>
+<h3 id="13-1-前端已经校验-后端可以不校验">13.1 “前端已经校验，后端可以不校验”</h3>
+<p>前端校验用于更快反馈，后端校验用于保护服务边界。调用者可以绕过页面，前后端版本也可能暂时不一致。</p>
+<h3 id="13-2-写了-valid-就不会出现-null">13.2 “写了 <code>@Valid</code> 就不会出现 <code>null</code>”</h3>
+<p><code>@Valid</code> 负责触发级联验证，不是非空约束。是否允许 <code>null</code> 要用 <code>@NotNull</code>、<code>@NotBlank</code> 或 <code>@NotEmpty</code> 明确表达。</p>
+<h3 id="13-3-所有业务规则都应该做成约束注解">13.3 “所有业务规则都应该做成约束注解”</h3>
+<p>注解适合结构和局部格式规则。库存、权限、唯一性和状态转换通常需要 Service 或数据库参与，放进 Validator 会隐藏 I/O 和事务边界。</p>
+<h3 id="13-4-全局异常处理就是捕获所有-exception">13.4 “全局异常处理就是捕获所有 Exception”</h3>
+<p>兜底处理器只负责未预期异常。已知的校验、解析和业务失败仍要分类，否则调用者只能得到模糊的 500。</p>
+<h3 id="13-5-异常消息可以直接作为前端错误码">13.5 “异常消息可以直接作为前端错误码”</h3>
+<p>异常消息会修改，也可能包含内部细节。前端逻辑依赖稳定 <code>code</code>，人类阅读使用 <code>message</code>，诊断信息留在服务端。</p>
+<h3 id="13-6-boot-2-示例改个版本号就能运行">13.6 “Boot 2 示例改个版本号就能运行”</h3>
+<p>Spring Boot 3 使用 <code>jakarta.validation.*</code>。从 Boot 2 迁移时还要检查 Servlet、JPA、Security 和第三方 starter 的包名与兼容性。</p>
+<h2 id="十四-本章小结">十四、本章小结</h2>
+<p>参数校验从输入和约束开始。Bean Validation 用注解声明非空、长度、格式和范围规则，<code>@Valid</code> 让 Spring MVC 在调用 Controller 之前执行验证。请求对象、嵌套对象和方法参数有不同触发方式，理解基础闭环后再补异常类型差异。</p>
+<p>全局异常处理集中维护“异常到 HTTP 响应”的转换。字段校验返回可定位的违规信息，业务冲突返回稳定业务错误码，未知异常在服务端记录完整证据，客户端只看到克制的通用响应。</p>
+<p>错误契约的目标是稳定和可区分。相同结构不等于相同状态；400、409、500 或 503 表达的失败性质不同，前端据此决定修改输入、提示业务状态还是稍后重试。</p>
+<h2 id="十五-快速自测">十五、快速自测</h2>
+<ol><li><code>@NotNull</code>、<code>@NotEmpty</code> 和 <code>@NotBlank</code> 的检查范围有什么差别？</li><li><code>@Valid</code> 为什么不能代替 <code>@NotNull</code>？</li><li>JSON 无法解析时，Bean Validation 是否已经执行？</li><li><code>MethodArgumentNotValidException</code> 常见于哪类校验？</li><li>业务状态冲突为什么通常不返回 500？</li><li>未知异常的完整堆栈应该放在哪里？</li></ol>
+<p>参考答案：分别检查非空、非空且有元素、非空且有非空白字符；<code>@Valid</code> 负责触发级联；没有；<code>@Valid @RequestBody</code> 的对象字段校验；它是已知业务状态，不是服务器未知故障；服务端日志或可观测系统。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Jakarta EE. <a href="https://jakarta.ee/specifications/bean-validation/" target="_blank" rel="noreferrer">Jakarta Validation Specification</a>.</li><li>Spring Framework. <a href="https://docs.spring.io/spring-framework/reference/6.2/web/webmvc/mvc-controller/ann-validation.html" target="_blank" rel="noreferrer">Validation in Spring MVC</a>.</li><li>Spring Framework. <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-advice.html" target="_blank" rel="noreferrer">Controller Advice</a>.</li><li>Spring Framework. <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-ann-rest-exceptions.html" target="_blank" rel="noreferrer">Error Responses</a>.</li><li>Spring Boot. <a href="https://docs.spring.io/spring-boot/reference/io/validation.html" target="_blank" rel="noreferrer">Validation</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/20-layered-backend.html">← 第 20 章<br><strong>Controller、Service 与 Repository 分层</strong></a><a href="../lessons/22-json-dto.html">第 22 章 →<br><strong>JSON、DTO 与接口兼容性</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一-参数校验的基本概念">一、参数校验的基本概念</a><a class="sub" href="#1-1-后端接收的输入">1.1 后端接收的输入</a><a class="sub" href="#1-2-校验失败与程序异常">1.2 校验失败与程序异常</a><a class="sub" href="#1-3-三类失败先分开">1.3 三类失败先分开</a><a class="" href="#二-bean-validation-与约束注解">二、Bean Validation 与约束注解</a><a class="sub" href="#2-1-bean-validation-的作用">2.1 Bean Validation 的作用</a><a class="sub" href="#2-2-第一个约束">2.2 第一个约束</a><a class="sub" href="#2-3-常用约束的区别">2.3 常用约束的区别</a><a class="sub" href="#2-4-基本类型与包装类型">2.4 基本类型与包装类型</a><a class="" href="#三-在-controller-中触发校验">三、在 Controller 中触发校验</a><a class="sub" href="#3-1-requestbody-与-valid">3.1 @RequestBody 与 @Valid</a><a class="sub" href="#3-2-valid-不等于非空">3.2 @Valid 不等于非空</a><a class="" href="#四-第一次观察校验结果">四、第一次观察校验结果</a><a class="sub" href="#4-1-使用-curl-发送请求">4.1 使用 curl 发送请求</a><a class="sub" href="#4-2-请求体格式错误不等于字段校验失败">4.2 请求体格式错误不等于字段校验失败</a><a class="" href="#五-校验异常与最小全局处理器">五、校验异常与最小全局处理器</a><a class="sub" href="#5-1-请求对象校验失败的异常">5.1 请求对象校验失败的异常</a><a class="sub" href="#5-2-restcontrolleradvice-的作用">5.2 @RestControllerAdvice 的作用</a><a class="" href="#六-返回字段级错误">六、返回字段级错误</a><a class="sub" href="#6-1-字段级错误的用途">6.1 字段级错误的用途</a><a class="sub" href="#6-2-从异常中读取字段错误">6.2 从异常中读取字段错误</a><a class="" href="#七-嵌套对象校验">七、嵌套对象校验</a><a class="sub" href="#7-1-从单层对象扩展到列表">7.1 从单层对象扩展到列表</a><a class="sub" href="#7-2-字段路径">7.2 字段路径</a><a class="" href="#八-业务校验与业务异常">八、业务校验与业务异常</a><a class="sub" href="#8-1-注解适合结构规则">8.1 注解适合结构规则</a><a class="sub" href="#8-2-用有含义的异常表示业务冲突">8.2 用有含义的异常表示业务冲突</a><a class="" href="#九-系统异常与信息边界">九、系统异常与信息边界</a><a class="sub" href="#9-1-未知异常不能直接返回内部消息">9.1 未知异常不能直接返回内部消息</a><a class="sub" href="#9-2-错误响应可以逐步扩展">9.2 错误响应可以逐步扩展</a><a class="" href="#十-方法参数校验">十、方法参数校验</a><a class="sub" href="#10-1-直接写在方法参数上的约束">10.1 直接写在方法参数上的约束</a><a class="sub" href="#10-2-validated-的版本边界">10.2 @Validated 的版本边界</a><a class="" href="#十一-完整错误处理流程">十一、完整错误处理流程</a><a class="" href="#十二-本章练习">十二、本章练习</a><a class="sub" href="#12-1-为注册请求增加约束">12.1 为注册请求增加约束</a><a class="sub" href="#12-2-参考答案">12.2 参考答案</a><a class="sub" href="#12-3-失败分类">12.3 失败分类</a><a class="sub" href="#12-4-完成标准">12.4 完成标准</a><a class="" href="#十三-常见误区">十三、常见误区</a><a class="sub" href="#13-1-前端已经校验-后端可以不校验">13.1 “前端已经校验，后端可以不校验”</a><a class="sub" href="#13-2-写了-valid-就不会出现-null">13.2 “写了 @Valid 就不会出现 null”</a><a class="sub" href="#13-3-所有业务规则都应该做成约束注解">13.3 “所有业务规则都应该做成约束注解”</a><a class="sub" href="#13-4-全局异常处理就是捕获所有-exception">13.4 “全局异常处理就是捕获所有 Exception”</a><a class="sub" href="#13-5-异常消息可以直接作为前端错误码">13.5 “异常消息可以直接作为前端错误码”</a><a class="sub" href="#13-6-boot-2-示例改个版本号就能运行">13.6 “Boot 2 示例改个版本号就能运行”</a><a class="" href="#十四-本章小结">十四、本章小结</a><a class="" href="#十五-快速自测">十五、快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

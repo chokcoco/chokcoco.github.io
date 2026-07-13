@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="普通类适合有状态和行为的对象，record 适合透明传递的数据，enum 适合有限且明确的选项；语法选择应表达业务意图。"><title>类、record 与 enum 的选择 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 9 章 · Java 语言及标准库基础</div><h1>类、record 与 enum 的选择</h1><p class="lesson-summary">普通类适合有状态和行为的对象，record 适合透明传递的数据，enum 适合有限且明确的选项；语法选择应表达业务意图。</p><div class="meta-row"><span class="pill">先看数据是否需要变化、是否有独立身份、取值是否有限，再选择类型写法。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="先问对象在表达什么">先问对象在表达什么</h2>
+<p>第 8 章的普通类可以保存字段、在构造器中校验，并通过方法改变状态。Java 17 还提供 <code>record</code> 与 <code>enum</code> 两种很常用的类型声明。选择它们之前，不必先背语法，先问三个问题：</p>
+<ol><li>这个值是否有自己的生命周期或可变状态？</li><li>它主要是携带几项数据，还是需要维护复杂行为？</li><li>它的取值是否只能来自一组有限选项？</li></ol>
+<p>普通类、record、enum 不互相替代。它们让读代码的人更快知道“这是一份可变对象”“这是一份数据快照”还是“这是一个有限状态”。</p>
+<h2 id="普通类适合有规则的对象">普通类适合有规则的对象</h2>
+<p>当对象需要维护可变状态或不变量时，使用第 8 章的普通类：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class ShoppingCartItem {
+    private final String productId;
+    private int quantity;
+
+    public ShoppingCartItem(String productId, int quantity) {
+        if (quantity &lt;= 0) {
+            throw new IllegalArgumentException(&quot;数量必须大于 0&quot;);
+        }
+        this.productId = productId;
+        this.quantity = quantity;
+    }
+
+    public void add(int amount) {
+        if (amount &lt;= 0) {
+            throw new IllegalArgumentException(&quot;增加数量必须大于 0&quot;);
+        }
+        quantity += amount;
+    }
+}</code></pre></figure>
+<p>购物车项会因用户操作改变数量，类通过方法限制变化方式。若简单改成公开字段或 record，就需要额外设计规则位置，反而失去封装。</p>
+<h2 id="record-表示一份数据">record 表示一份数据</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">record</span>在 JDK 16 正式加入，JDK 17 可直接使用。它适合主要任务是保存和传递数据的类型：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public record Address(String city, String street, String postalCode) {
+}</code></pre></figure>
+<p>这句声明已经生成了：</p>
+<ul><li>三个 private final 组件字段。</li><li>同名访问方法 <code>city()</code>、<code>street()</code>、<code>postalCode()</code>。</li><li>接收全部组件的构造器。</li><li>基于组件的 <code>equals</code>、<code>hashCode</code> 和 <code>toString</code>。</li></ul>
+<p>使用时：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Address address = new Address(&quot;上海&quot;, &quot;南京路&quot;, &quot;200001&quot;);
+System.out.println(address.city());</code></pre></figure>
+<p>record 的访问方法不是 <code>getCity()</code>，而是 <code>city()</code>。它的组件引用不能重新赋值，但 record 不保证深度不可变。若组件是可变数组或集合，外部仍可能修改其中内容：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public record Tags(String[] values) {
+}</code></pre></figure>
+<p><code>values</code> 字段本身不能指向另一数组，但数组元素能被修改。需要真正保护时，要在构造器和访问方法中复制可变数据；这会在集合章节后更容易理解。</p>
+<p>record 也可以写自己的构造器验证：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public record Email(String value) {
+    public Email {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(&quot;邮箱不能为空&quot;);
+        }
+    }
+}</code></pre></figure>
+<p>这是紧凑构造器写法，编译器会在验证后把参数赋给组件。第 11 章会进一步讨论异常设计。</p>
+<h2 id="enum-表示有限选项">enum 表示有限选项</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">enum</span>适合值域固定的情况，例如订单状态：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public enum OrderStatus {
+    CREATED,
+    PAID,
+    CANCELLED
+}</code></pre></figure>
+<p>使用 enum 比任意字符串更安全：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">OrderStatus status = OrderStatus.CREATED;
+
+if (status == OrderStatus.PAID) {
+    System.out.println(&quot;已付款&quot;);
+}</code></pre></figure>
+<p>enum 常量是固定对象，因此比较同一枚举类型时可以使用 <code>==</code>。它还能有字段、构造器和方法：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public enum OrderStatus {
+    CREATED(&quot;待支付&quot;),
+    PAID(&quot;已支付&quot;),
+    CANCELLED(&quot;已取消&quot;);
+
+    private final String label;
+
+    OrderStatus(String label) {
+        this.label = label;
+    }
+
+    public String label() {
+        return label;
+    }
+}</code></pre></figure>
+<p>不要把数据库或接口传来的任意字符串直接当成 enum 常量。第 22 章会讨论 JSON 映射和兼容性；此处只需知道未知值需要明确处理。</p>
+<h2 id="用选择表代替习惯用法">用选择表代替习惯用法</h2>
+<div class="table-wrap"><table><thead><tr><th>情况</th><th>优先选择</th><th>原因</th></tr></thead><tbody><tr><td>地址、坐标、查询结果等数据快照</td><td>record</td><td>组件、访问方法和内容相等性由语言生成</td></tr><tr><td>购物车项、账户、订单等会变化并维护规则的对象</td><td>普通类</td><td>可用方法和访问控制保护状态</td></tr><tr><td>订单状态、角色、星期等有限集合</td><td>enum</td><td>取值受限，分支和比较更安全</td></tr></tbody></table></div>
+<p>不要因为 record 代码短就把所有类改成 record，也不要因为习惯字符串就放弃 enum。类型的长度不是选择标准，数据的行为和变化方式才是。</p>
+<h2 id="练习-为三个概念选择类型">练习：为三个概念选择类型</h2>
+<p>为下列概念选择类型并写出两三句理由：</p>
+<ol><li>API 返回给前端的一次地址快照。</li><li>可增加、减少数量的购物车项。</li><li>只能为“草稿、已发布、已归档”的文章状态。</li></ol>
+<p>完成标准：理由涉及“是否需要可变状态”“是否只是数据”“取值是否有限”中的至少一项；不要只回答“record 写得更少”。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="以为-record-自动深度不可变">以为 record 自动深度不可变</h3>
+<p>record 的组件引用固定，但引用指向的数组、集合或其他可变对象仍可变化。</p>
+<h3 id="用字符串表示永远有限的状态">用字符串表示永远有限的状态</h3>
+<p>字符串可以拼错，<code>&quot;PAID&quot;</code>、<code>&quot;paid&quot;</code>、<code>&quot;Payed&quot;</code> 都能编译。enum 让非法状态更早暴露。</p>
+<h3 id="把-enum-当作普通可创建类">把 enum 当作普通可创建类</h3>
+<p>不能使用 <code>new OrderStatus(...)</code>。enum 常量由类型声明时固定创建。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>普通类、record 与 enum 都是类型，但它们表达的意图不同。普通类维护状态和行为；record 表达以数据为中心的值；enum 限制一组固定选项。下一章会让不同类通过接口和多态协作。</p>
+<h2 id="快速自测">快速自测</h2>
+<ol><li>record 默认生成哪些常用成员？</li><li>为什么 enum 状态通常比 String 更安全？</li><li>什么情况下不应把普通类改成 record？</li></ol>
+<p>参考答案：组件访问方法、构造器、<code>equals</code>、<code>hashCode</code>、<code>toString</code>；enum 限制合法取值且可安全比较；对象需要可变状态、身份或封装规则时。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Record.html" target="_blank" rel="noreferrer">Java SE 17 API: Record</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Enum.html" target="_blank" rel="noreferrer">Java SE 17 API: Enum</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/08-class-object-invariant.html">← 第 8 章<br><strong>类、对象与业务规则封装</strong></a><a href="../lessons/10-interface-inheritance-polymorphism.html">第 10 章 →<br><strong>接口、继承、组合与多态</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#先问对象在表达什么">先问对象在表达什么</a><a class="" href="#普通类适合有规则的对象">普通类适合有规则的对象</a><a class="" href="#record-表示一份数据">record 表示一份数据</a><a class="" href="#enum-表示有限选项">enum 表示有限选项</a><a class="" href="#用选择表代替习惯用法">用选择表代替习惯用法</a><a class="" href="#练习-为三个概念选择类型">练习：为三个概念选择类型</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#以为-record-自动深度不可变">以为 record 自动深度不可变</a><a class="sub" href="#用字符串表示永远有限的状态">用字符串表示永远有限的状态</a><a class="sub" href="#把-enum-当作普通可创建类">把 enum 当作普通可创建类</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

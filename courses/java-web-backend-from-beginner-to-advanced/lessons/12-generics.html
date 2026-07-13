@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="泛型用类型参数描述容器和方法处理的数据类型，让编译器阻止错误混入，并在读取时减少不安全的强制转换。"><title>Java 泛型与类型安全 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 12 章 · Java 语言及标准库基础</div><h1>Java 泛型与类型安全</h1><p class="lesson-summary">泛型用类型参数描述容器和方法处理的数据类型，让编译器阻止错误混入，并在读取时减少不安全的强制转换。</p><div class="meta-row"><span class="pill">先观察 Object 容器为什么需要强制转换，再看类型参数怎样把错误提前到编译期。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="object-容器的问题">Object 容器的问题</h2>
+<p><code>Object</code> 是许多类的共同父类型，因此可以保存不同对象：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Object value = &quot;Java&quot;;</code></pre></figure>
+<p>但拿回值时需要强制转换，且错误会拖到运行期：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Object value = &quot;Java&quot;;
+String text = (String) value;
+
+Object another = 3;
+// String wrong = (String) another; // 运行时 ClassCastException</code></pre></figure>
+<p>若一个容器本来只应保存 String，却允许任意 Object 混入，调用方每次读取都要猜类型。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">泛型</span>让容器把“保存什么类型”写进声明。</p>
+<h2 id="类型参数的基本写法">类型参数的基本写法</h2>
+<p><code>List&lt;String&gt;</code> 表示只保存 String 的列表：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">List&lt;String&gt; names = new ArrayList&lt;&gt;();
+names.add(&quot;Ada&quot;);
+// names.add(3); // 编译错误
+
+String name = names.get(0);</code></pre></figure>
+<p>尖括号中的 <code>String</code> 是类型实参。编译器知道 <code>get</code> 返回 String，因此不需要 <code>(String)</code>。</p>
+<p>自定义泛型类使用类型参数名，通常写 <code>T</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class Box&lt;T&gt; {
+    private final T value;
+
+    public Box(T value) {
+        this.value = value;
+    }
+
+    public T get() {
+        return value;
+    }
+}</code></pre></figure>
+<p>创建时指定实际类型：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Box&lt;String&gt; titleBox = new Box&lt;&gt;(&quot;Java&quot;);
+String title = titleBox.get();</code></pre></figure>
+<p>右侧的 <code>&lt;&gt;</code> 是菱形语法，编译器从左侧推断 <code>String</code>。第 13 章会实际使用泛型集合。</p>
+<h2 id="泛型方法">泛型方法</h2>
+<p>不是只有类可以泛型化。方法也可以声明自己的类型参数：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static &lt;T&gt; T first(T left, T right) {
+    return left;
+}</code></pre></figure>
+<p>调用时类型由参数推断：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String text = first(&quot;A&quot;, &quot;B&quot;);
+Integer number = first(1, 2);</code></pre></figure>
+<p><code>T</code> 代表“同一次调用中保持一致的某个类型”。它不是 Object，也不是可以同时代表 String 和 Integer 的任意混合。</p>
+<h2 id="上界让类型拥有必要能力">上界让类型拥有必要能力</h2>
+<p>若方法需要调用数字的能力，任意 <code>T</code> 不够。可以设置上界：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static double doubleValue(Number value) {
+    return value.doubleValue();
+}</code></pre></figure>
+<p>在泛型声明中：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static &lt;T extends Number&gt; double sumFirst(T value) {
+    return value.doubleValue();
+}</code></pre></figure>
+<p><code>extends Number</code> 表示 T 必须是 Number 或其子类，因此可以调用 <code>doubleValue()</code>。上界不是为了复杂语法而存在，而是让方法能安全使用某些成员。</p>
+<h2 id="通配符区分读取与写入">通配符区分读取与写入</h2>
+<p><code>List&lt;Integer&gt;</code> 不是 <code>List&lt;Number&gt;</code> 的子类型。虽然 Integer 是 Number，但若允许把 <code>List&lt;Integer&gt;</code> 当 <code>List&lt;Number&gt;</code>，就可能向它加入 Double，破坏列表约束。</p>
+<p>当方法只读取数字时，可使用上界通配符：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static double sum(List&lt;? extends Number&gt; values) {
+    double total = 0;
+    for (Number value : values) {
+        total += value.doubleValue();
+    }
+    return total;
+}</code></pre></figure>
+<p>它可以接收 <code>List&lt;Integer&gt;</code>、<code>List&lt;Double&gt;</code> 等。因为具体元素类型未知，不能安全地添加普通 Number。</p>
+<p>当方法需要向某个容器写入 Integer 时，可使用 <code>? super Integer</code>。记忆辅助是 PECS：Producer Extends，Consumer Super。先理解含义即可：只产出给你读的用 extends；主要接收你写入的用 super。</p>
+<h2 id="原始类型会绕过检查">原始类型会绕过检查</h2>
+<p>省略类型参数的 <code>List</code> 叫<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">原始类型</span>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">List values = new ArrayList();
+values.add(&quot;Java&quot;);
+values.add(3);</code></pre></figure>
+<p>它为了兼容旧代码仍存在，但会产生警告并放弃泛型保护。新代码不要使用原始类型，也不要为了消除警告随意加 <code>@SuppressWarnings</code>。</p>
+<p>泛型在运行期会发生类型擦除，因此不能写 <code>new T()</code>，也不能直接创建 <code>new T[10]</code>。目前无需深入实现细节，只要知道泛型主要在编译期提供类型检查。</p>
+<h2 id="练习-把-object-栈改为泛型栈">练习：把 Object 栈改为泛型栈</h2>
+<p>定义 <code>Stack&lt;T&gt;</code>，至少包含 <code>push(T value)</code>、<code>pop()</code>、<code>isEmpty()</code>。先不要求数组扩容；可以用第 13 章前暂时未讲的 List 吗？不可以。本章练习可只设计方法签名和用法，真正实现可变容器放在第 13 章后完成。</p>
+<p>再写一个 <code>Box&lt;Integer&gt;</code> 与 <code>Box&lt;String&gt;</code> 的使用示例，说明为什么不能把 String 放进前者。</p>
+<p>完成标准：类型错误在编译期出现；读取泛型值不需要强制转换；能解释 <code>List&lt;Integer&gt;</code> 不是 <code>List&lt;Number&gt;</code>。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="以为-t-总是代表-object">以为 <code>&lt;T&gt;</code> 总是代表 Object</h3>
+<p>T 在每个实例或调用中会被具体类型替换。<code>Box&lt;String&gt;</code> 不是 <code>Box&lt;Object&gt;</code>。</p>
+<h3 id="用原始类型逃避编译错误">用原始类型逃避编译错误</h3>
+<p>这只是把错误推迟到运行期。应修正类型参数或方法设计。</p>
+<h3 id="把-extends-理解为只能用于继承类">把 <code>extends</code> 理解为只能用于继承类</h3>
+<p>泛型上界中的 <code>extends</code> 同时适用于类和接口类型，它表示“该类型或其子类型/实现”。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>泛型把数据类型放入 API 契约中。它让错误更早发生、读取代码更安全；类型参数、上界、通配符和原始类型边界会在集合 API 中反复出现。</p>
+<h2 id="快速自测">快速自测</h2>
+<ol><li>泛型解决 Object 容器的什么问题？</li><li>为什么 <code>List&lt;Integer&gt;</code> 不能赋给 <code>List&lt;Number&gt;</code>？</li><li><code>? extends Number</code> 的列表适合主要做什么？</li></ol>
+<p>参考答案：避免运行期强制转换失败；否则可向整数列表写入其他 Number；适合安全读取 Number 及其子类元素。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Oracle. <a href="https://docs.oracle.com/javase/specs/jls/se17/html/jls-4.html" target="_blank" rel="noreferrer">Java SE 17 Language Specification: Generics</a>.</li><li>OpenJDK. <a href="https://dev.java/learn/generics/" target="_blank" rel="noreferrer">Learn Java: Generics</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/11-exception-boundary.html">← 第 11 章<br><strong>Java 异常与异常边界</strong></a><a href="../lessons/13-collections.html">第 13 章 →<br><strong>List、Set 与 Map</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#object-容器的问题">Object 容器的问题</a><a class="" href="#类型参数的基本写法">类型参数的基本写法</a><a class="" href="#泛型方法">泛型方法</a><a class="" href="#上界让类型拥有必要能力">上界让类型拥有必要能力</a><a class="" href="#通配符区分读取与写入">通配符区分读取与写入</a><a class="" href="#原始类型会绕过检查">原始类型会绕过检查</a><a class="" href="#练习-把-object-栈改为泛型栈">练习：把 Object 栈改为泛型栈</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#以为-t-总是代表-object">以为 &lt;T&gt; 总是代表 Object</a><a class="sub" href="#用原始类型逃避编译错误">用原始类型逃避编译错误</a><a class="sub" href="#把-extends-理解为只能用于继承类">把 extends 理解为只能用于继承类</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

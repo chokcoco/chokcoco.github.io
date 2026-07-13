@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Path/Files 提供清楚的文件 API，UTF-8 应显式指定；java.time 区分日期、当地时间和时间点，JDK 17 是主线，后续版本能力需要标注最低版本。"><title>文件、编码、日期时间与 JDK 版本差异 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 16 章 · Java 语言及标准库基础</div><h1>文件、编码、日期时间与 JDK 版本差异</h1><p class="lesson-summary">Path/Files 提供清楚的文件 API，UTF-8 应显式指定；java.time 区分日期、当地时间和时间点，JDK 17 是主线，后续版本能力需要标注最低版本。</p><div class="meta-row"><span class="pill">文件操作先明确路径和编码；时间操作先明确它表示日期、当地时间还是全球唯一时间点。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="用-path-表示文件位置">用 Path 表示文件位置</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Path</span>表示文件或目录的位置，不等于文件内容：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Path path = Path.of(&quot;notes.txt&quot;);</code></pre></figure>
+<p>相对路径以当前工作目录为起点；绝对路径从磁盘根目录开始。课程示例优先使用相对路径，避免把个人电脑路径写进代码。调试文件找不到时，可先输出：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">System.out.println(path.toAbsolutePath());</code></pre></figure>
+<p>这样能看见程序实际在什么目录中查找文件。</p>
+<h2 id="用-files-读写小文本">用 Files 读写小文本</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Files</span>提供常用静态方法。读写 UTF-8 文本时显式指定编码：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Path path = Path.of(&quot;notes.txt&quot;);
+String content = Files.readString(path, StandardCharsets.UTF_8);
+
+Files.writeString(path, &quot;第一行\n&quot;, StandardCharsets.UTF_8);</code></pre></figure>
+<p><code>readString</code> 适合小文件；它会把完整内容读入内存。非常大的文件应逐行或流式处理，避免一次占用大量内存。</p>
+<p>写入前可判断文件是否存在：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">if (Files.exists(path)) {
+    System.out.println(&quot;文件已存在&quot;);
+}</code></pre></figure>
+<p>文件操作可能抛出 <code>IOException</code>。根据第 11 章的规则，当前方法要么捕获并处理，要么在声明中使用 <code>throws IOException</code> 交给调用方。</p>
+<h2 id="编码必须明确">编码必须明确</h2>
+<p>文本文件存的是字节，编码规定字节如何解释为字符。若写入使用一种编码、读取使用另一种编码，中文和特殊字符可能变成乱码。</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Files.writeString(path, &quot;你好&quot;, StandardCharsets.UTF_8);
+String text = Files.readString(path, StandardCharsets.UTF_8);</code></pre></figure>
+<p>不要依赖“默认编码”。默认值会随操作系统、容器和启动参数改变；接口、文件和数据库边界应写清 UTF-8 或协议规定的编码。</p>
+<h2 id="资源流何时关闭">资源流何时关闭</h2>
+<p>需要逐行读取时可用 try-with-resources：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">try (Stream&lt;String&gt; lines = Files.lines(path, StandardCharsets.UTF_8)) {
+    long count = lines.filter(line -&gt; !line.isBlank()).count();
+    System.out.println(count);
+}</code></pre></figure>
+<p><code>Files.lines</code> 返回的 Stream 持有文件资源，必须关闭。try-with-resources 在代码块结束时自动关闭它。第 14 章的 Stream 在此用于过滤行；本例中不能在 try 块外继续使用 <code>lines</code>。</p>
+<h2 id="日期-当地时间与时间点">日期、当地时间与时间点</h2>
+<p>Java 8 以后推荐 <code>java.time</code> API。选择类型前先问数据表达什么：</p>
+<div class="table-wrap"><table><thead><tr><th>类型</th><th>表示什么</th><th>例子</th></tr></thead><tbody><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">LocalDate</span></td><td>没有时间和时区的日期</td><td>生日、账单日期</td></tr><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">LocalDateTime</span></td><td>某地日历上的日期和时间，但没有时区</td><td>预约表单输入的“2026-07-13 09:00”</td></tr><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Instant</span></td><td>时间线上的唯一时刻</td><td>日志事件、数据库创建时间</td></tr><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">ZoneId</span></td><td>时区规则</td><td><code>Asia/Shanghai</code></td></tr></tbody></table></div>
+<p>创建日期：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">LocalDate birthday = LocalDate.of(2000, 1, 1);
+LocalDate today = LocalDate.now();</code></pre></figure>
+<p>将当地时间和时区转换为唯一时间点：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">LocalDateTime local = LocalDateTime.of(2026, 7, 13, 9, 0);
+Instant instant = local.atZone(ZoneId.of(&quot;Asia/Shanghai&quot;)).toInstant();</code></pre></figure>
+<p><code>LocalDateTime</code> 本身不能表示全球唯一时刻：同样的“9 点”在上海和伦敦对应不同 Instant。跨系统存储、日志排序和接口传输通常更适合 Instant 或带 offset 的时间表示。</p>
+<h2 id="解析与格式化时间">解析与格式化时间</h2>
+<p>标准 ISO 格式可直接解析：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">LocalDate date = LocalDate.parse(&quot;2026-07-13&quot;);</code></pre></figure>
+<p>自定义格式使用 <code>DateTimeFormatter</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">DateTimeFormatter formatter = DateTimeFormatter.ofPattern(&quot;yyyy/MM/dd&quot;);
+LocalDate date = LocalDate.parse(&quot;2026/07/13&quot;, formatter);</code></pre></figure>
+<p>格式不匹配会抛出 <code>DateTimeParseException</code>。不要在不同接口中随意使用“看起来像日期”的字符串；先确定格式、时区和谁负责转换。</p>
+<h2 id="jdk-17-与后续版本怎样阅读">JDK 17 与后续版本怎样阅读</h2>
+<p>本课程全部可运行主线使用 JDK 17，不启用 preview feature。JDK 17 已包含 record、sealed class、<code>instanceof</code> 模式匹配等稳定能力。</p>
+<p>阅读其他项目时可能看到更高版本语法：</p>
+<div class="table-wrap"><table><thead><tr><th>能力</th><th>JDK 17 主线状态</th><th>阅读后续项目时的处理</th></tr></thead><tbody><tr><td>record、sealed class</td><td>可用</td><td>本课程已在第 9、10 章介绍</td></tr><tr><td>switch 模式匹配、record pattern</td><td>不作为 JDK 17 主线</td><td>先确认项目 JDK，不能直接复制到 17 工程</td></tr><tr><td>虚拟线程</td><td>JDK 21 稳定</td><td>第 34 章作为版本旁路讨论</td></tr></tbody></table></div>
+<p>遇到新语法的第一步不是尝试“让它编译”，而是查看项目的 JDK 版本和构建配置。版本边界是 Java 后端协作中的正常信息，不是语法能力高低的判断。</p>
+<h2 id="练习-读取活动日期">练习：读取活动日期</h2>
+<p>创建 UTF-8 文件 <code>events.txt</code>，每行写一个 <code>yyyy-MM-dd</code> 日期。读取后跳过空行，解析为 LocalDate，输出距离今天的天数。若某行格式错误，输出行内容并继续处理其他行。</p>
+<p>完成标准：显式使用 UTF-8；文件资源能关闭；能说明 LocalDate 与 Instant 为什么不互换；错误行不会终止全部处理。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="依赖默认编码">依赖默认编码</h3>
+<p>本机没有乱码不代表部署环境也正确。读写文本时明确使用 UTF-8。</p>
+<h3 id="把-localdatetime-当成时间点">把 LocalDateTime 当成时间点</h3>
+<p>没有时区的当地时间无法唯一定位到全球时间线。跨系统数据需要补充时区或转换为 Instant。</p>
+<h3 id="看到新-java-语法就复制">看到新 Java 语法就复制</h3>
+<p>代码能否编译取决于项目 JDK 和构建设置。课程主线是 17，后续版本能力必须单独确认。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>Path 描述位置，Files 读写内容，编码应明确为 UTF-8；java.time 用不同类型区分日期、当地时间和时间点。至此，Java 语言及标准库基础模块完成，下一章开始从 HTTP 请求与响应进入 Web 后端。</p>
+<h2 id="快速自测">快速自测</h2>
+<ol><li>为什么 <code>Files.lines</code> 要放进 try-with-resources？</li><li>LocalDateTime 为什么不能独立表示全球唯一时刻？</li><li>为什么不能把 JDK 21 的新语法直接复制到 JDK 17 项目？</li></ol>
+<p>参考答案：它持有文件资源，需要关闭；缺少时区；编译器和构建配置的语言版本不同。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html" target="_blank" rel="noreferrer">Java SE 17 API: Files</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/package-summary.html" target="_blank" rel="noreferrer">Java SE 17 API: java.time</a>.</li><li>OpenJDK. <a href="https://openjdk.org/jeps/0" target="_blank" rel="noreferrer">JEP Index</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/15-optional.html">← 第 15 章<br><strong>Optional 与缺失值</strong></a><a href="../lessons/17-http-rest-contract.html">第 17 章 →<br><strong>HTTP 与 REST API 契约</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#用-path-表示文件位置">用 Path 表示文件位置</a><a class="" href="#用-files-读写小文本">用 Files 读写小文本</a><a class="" href="#编码必须明确">编码必须明确</a><a class="" href="#资源流何时关闭">资源流何时关闭</a><a class="" href="#日期-当地时间与时间点">日期、当地时间与时间点</a><a class="" href="#解析与格式化时间">解析与格式化时间</a><a class="" href="#jdk-17-与后续版本怎样阅读">JDK 17 与后续版本怎样阅读</a><a class="" href="#练习-读取活动日期">练习：读取活动日期</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#依赖默认编码">依赖默认编码</a><a class="sub" href="#把-localdatetime-当成时间点">把 LocalDateTime 当成时间点</a><a class="sub" href="#看到新-java-语法就复制">看到新 Java 语法就复制</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

@@ -1,0 +1,16 @@
+{
+  "requiredPaths": ["workspace/MISSION.md", "workspace/RESOURCES.md", "course.json", "lessons", "reference", "assets", "quality"],
+  "contentRoots": ["lessons", "reference"],
+  "forbiddenMermaidTypes": ["mindmap"],
+  "allowedExternalUrlPrefixes": [
+    "https://dev.java/",
+    "https://docs.oracle.com/",
+    "https://docs.spring.io/",
+    "https://jakarta.ee/",
+    "https://openjdk.org/",
+    "https://maven.apache.org/",
+    "https://github.com/",
+    "https://cdn.jsdelivr.net/"
+  ],
+  "unregisteredExternalUrlSeverity": "error"
+}

@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Java 用八种基本类型直接表示简单值，用引用类型指向对象；自动转换只接受相对安全的方向，可能丢失范围或精度的转换必须显式写出并承担边界风险。"><title>Java 类型系统与类型转换 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 5 章 · Java 语言及标准库基础</div><h1>Java 类型系统与类型转换</h1><p class="lesson-summary">Java 用八种基本类型直接表示简单值，用引用类型指向对象；自动转换只接受相对安全的方向，可能丢失范围或精度的转换必须显式写出并承担边界风险。</p><div class="meta-row"><span class="pill">类型不只是变量前面的单词。它决定一个值怎样表示、可以参与哪些运算、能否为 `null`，以及编译器允许它流向哪里。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一-类型为值规定可用规则">一、类型为值规定可用规则</h2>
+<h3 id="1-1-同样的符号会因类型产生不同含义">1.1 同样的符号会因类型产生不同含义</h3>
+<p>第 4 章已经写过变量：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int quantity = 2;
+String label = &quot;2&quot;;</code></pre></figure>
+<p>虽然控制台看到的内容都可能是 2，但两个值不同。整数 <code>2</code> 可以做数值加法，字符串 <code>&quot;2&quot;</code> 是文本：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">System.out.println(quantity + 1); // 控制台输出：3
+System.out.println(label + 1);    // 控制台输出：21</code></pre></figure>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">类型</span>规定了值的表示范围、支持的操作以及能赋给哪些位置。编译器借此在程序运行前发现错误：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int quantity = 2;
+// quantity = &quot;two&quot;; // 编译失败：String 不能赋给 int</code></pre></figure>
+<h3 id="1-2-声明类型与运行时的值">1.2 声明类型与运行时的值</h3>
+<p>变量声明左侧写的是声明类型，右侧表达式产生一个值：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">long total = 100;</code></pre></figure>
+<p><code>total</code> 的声明类型是 <code>long</code>。右侧字面量 <code>100</code> 默认是 <code>int</code>，但它能安全扩展为 <code>long</code>，所以赋值成立。引用类型还可能出现“声明类型是父类型，实际对象是子类型”的情况，第 10 章讲多态时再展开。</p>
+<h3 id="1-3-java-类型的两大类别">1.3 Java 类型的两大类别</h3>
+<p>Java 类型先分为：</p>
+<ol><li><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">基本类型</span>：直接表示数值、字符或真假，共八种。</li><li><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">引用类型</span>：变量保存指向对象的引用，例如 <code>String</code>、数组和自定义类。</li></ol>
+<p>二者在默认值、能否为 <code>null</code>、相等性和参数传递中的表现不同。第 6 章会在本章基础上画出值与引用的关系。</p>
+<h2 id="二-整数类型表示不同范围的整数">二、整数类型表示不同范围的整数</h2>
+<h3 id="2-1-byte-short-int-与-long">2.1 byte、short、int 与 long</h3>
+<div class="table-wrap"><table><thead><tr><th>类型</th><th>位数</th><th>最小值到最大值</th><th>常见用途</th></tr></thead><tbody><tr><td><code>byte</code></td><td>8</td><td>-128 到 127</td><td>二进制数据、协议字段</td></tr><tr><td><code>short</code></td><td>16</td><td>-32,768 到 32,767</td><td>较少直接使用</td></tr><tr><td><code>int</code></td><td>32</td><td>约 -21 亿到 21 亿</td><td>普通整数计算、数量、索引</td></tr><tr><td><code>long</code></td><td>64</td><td>约正负 9.22×10¹⁸</td><td>大编号、毫秒时间戳、大计数</td></tr></tbody></table></div>
+<p>普通整数字面量默认是 <code>int</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int quantity = 100;
+long population = 1_400_000_000L;
+
+System.out.println(quantity);   // 控制台输出：100
+System.out.println(population); // 控制台输出：1400000000</code></pre></figure>
+<p>下划线只提高大数字可读性，不影响值。<code>long</code> 字面量建议使用大写 <code>L</code> 后缀，小写 <code>l</code> 容易与数字 1 混淆。</p>
+<h3 id="2-2-字面量能在范围内直接赋给小整数类型">2.2 字面量能在范围内直接赋给小整数类型</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">byte level = 100;
+short port = 8080;</code></pre></figure>
+<p>编译器知道常量 100 和 8080 在目标范围内，因此允许赋值。但两个 <code>byte</code> 参与普通算术时通常会先提升为 <code>int</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">byte left = 10;
+byte right = 20;
+// byte sum = left + right; // 编译失败：表达式结果是 int
+int sum = left + right;
+System.out.println(sum); // 控制台输出：30</code></pre></figure>
+<p>这条数值提升规则避免在很小的整数范围内反复运算，但要求目标变量类型匹配表达式结果。</p>
+<h3 id="2-3-整数溢出不会自动报错">2.3 整数溢出不会自动报错</h3>
+<p>整数超过类型最大值后会按固定位数回绕：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int max = Integer.MAX_VALUE;
+int overflow = max + 1;
+
+System.out.println(max);      // 控制台输出：2147483647
+System.out.println(overflow); // 控制台输出：-2147483648</code></pre></figure>
+<p>这不是数学结果，而是二进制补码在 32 位边界上的回绕。默认 <code>+</code> 不会抛异常。需要在溢出时失败，可以使用：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">// Math.addExact 在发生 int 溢出时抛出 ArithmeticException
+int result = Math.addExact(Integer.MAX_VALUE, 1);</code></pre></figure>
+<p>后端中的金额分、累计数量和时间换算都要评估最大范围，不能只看平常数据。</p>
+<h3 id="2-4-整数除法与除零">2.4 整数除法与除零</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">System.out.println(7 / 2); // 控制台输出：3</code></pre></figure>
+<p>两个整数相除仍是整数，小数部分被截去。整数除以 0 会在运行期抛出 <code>ArithmeticException</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int divisor = 0;
+// System.out.println(10 / divisor); // 运行时报错：/ by zero</code></pre></figure>
+<p>第 11 章会讲异常处理；目前应在运算前验证除数。</p>
+<h2 id="三-浮点类型表示近似小数">三、浮点类型表示近似小数</h2>
+<h3 id="3-1-float-与-double">3.1 float 与 double</h3>
+<div class="table-wrap"><table><thead><tr><th>类型</th><th>位数</th><th>大致有效十进制位数</th><th>常见选择</th></tr></thead><tbody><tr><td><code>float</code></td><td>32</td><td>约 6–7 位</td><td>图形、科学数据中明确需要节省空间时</td></tr><tr><td><code>double</code></td><td>64</td><td>约 15–16 位</td><td>Java 普通小数计算的默认选择</td></tr></tbody></table></div>
+<p>小数字面量默认是 <code>double</code>。赋给 <code>float</code> 时要加 <code>F</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">double rate = 0.8;
+float ratio = 0.8F;
+
+System.out.println(rate);  // 控制台输出：0.8
+System.out.println(ratio); // 控制台输出：0.8</code></pre></figure>
+<h3 id="3-2-二进制浮点不能精确表示所有十进制小数">3.2 二进制浮点不能精确表示所有十进制小数</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">double result = 0.1 + 0.2;
+System.out.println(result); // 控制台通常输出：0.30000000000000004</code></pre></figure>
+<p>计算机使用二进制分数表示 <code>double</code>，0.1、0.2 等十进制小数无法在有限二进制位中精确保存。打印的尾差不是随机错误，而是表示方式的边界。</p>
+<p>因此不要直接用 <code>==</code> 判断经过计算的浮点结果：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">double actual = 0.1 + 0.2;
+double expected = 0.3;
+double tolerance = 0.000_001;
+
+boolean close = Math.abs(actual - expected) &lt; tolerance;
+System.out.println(close); // 控制台输出：true</code></pre></figure>
+<p>容差应根据业务精度决定，不能把示例值机械用于所有场景。</p>
+<h3 id="3-3-金额通常不用-double">3.3 金额通常不用 double</h3>
+<p>金融金额需要明确的十进制精度与舍入规则，通常使用 <code>BigDecimal</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">import java.math.BigDecimal;
+
+public class MoneyDemo {
+    public static void main(String[] args) {
+        // 使用字符串构造，避免先产生 double 的二进制近似值
+        BigDecimal price = new BigDecimal(&quot;0.1&quot;);
+        BigDecimal tax = new BigDecimal(&quot;0.2&quot;);
+        BigDecimal total = price.add(tax);
+
+        System.out.println(total); // 控制台输出：0.3
+    }
+}</code></pre></figure>
+<p><code>BigDecimal</code> 是引用类型，运算使用 <code>add</code>、<code>subtract</code>、<code>multiply</code> 等方法，而不是 <code>+</code>。除法还要指定无法整除时的精度和舍入模式。这里只建立选择意识，后续业务示例再使用具体规则。</p>
+<h3 id="3-4-nan-与-infinity-是浮点特殊值">3.4 NaN 与 Infinity 是浮点特殊值</h3>
+<p>浮点除以零不会像整数一样抛出同一种异常：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">System.out.println(1.0 / 0.0); // 控制台输出：Infinity
+System.out.println(0.0 / 0.0); // 控制台输出：NaN</code></pre></figure>
+<p><code>NaN</code> 表示“不是一个数值结果”。它甚至不等于自身，应使用 <code>Double.isNaN(value)</code> 检查。后端输入若允许浮点数，校验时也要考虑这些特殊值。</p>
+<h2 id="四-boolean-只表示-true-或-false">四、boolean 只表示 true 或 false</h2>
+<h3 id="4-1-boolean-不与数字互换">4.1 boolean 不与数字互换</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">boolean enabled = true;
+boolean finished = false;
+
+// boolean wrong = 1; // 编译失败
+// int number = true; // 编译失败</code></pre></figure>
+<p>Java 不把 0 当作 <code>false</code>，也不把非 0 当作 <code>true</code>。条件表达式必须明确得到布尔值：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int quantity = 1;
+boolean available = quantity &gt; 0;
+
+if (available) {
+    System.out.println(&quot;可用&quot;); // 控制台输出：可用
+}</code></pre></figure>
+<h3 id="4-2-布尔变量表达状态或判断结果">4.2 布尔变量表达状态或判断结果</h3>
+<p>好的命名应让条件自然可读：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">boolean hasStock = stock &gt; 0;
+boolean canSell = hasStock &amp;&amp; requested &gt; 0;</code></pre></figure>
+<p>不要用 <code>status = true</code> 表达多个可能状态；有限状态更适合第 9 章的 <code>enum</code>。</p>
+<h2 id="五-char-表示一个-utf-16-代码单元">五、char 表示一个 UTF-16 代码单元</h2>
+<h3 id="5-1-char-使用单引号">5.1 char 使用单引号</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">char grade = 'A';
+char newline = '\n';
+
+System.out.println(grade); // 控制台输出：A</code></pre></figure>
+<p><code>char</code> 占 16 位，取值范围是 0 到 65535。它不是“任意一个人类可见字符”的完整模型，而是一个 UTF-16 <span class="term" tabindex="0" data-tip="课程术语，详见术语表。">代码单元</span>。</p>
+<h3 id="5-2-有些-unicode-字符需要两个-char">5.2 有些 Unicode 字符需要两个 char</h3>
+<p>部分 emoji 和辅助平面字符在 UTF-16 中由一对代理代码单元表示：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String emoji = &quot;😀&quot;;
+
+System.out.println(emoji.length()); // 控制台输出：2
+System.out.println(emoji.codePointCount(0, emoji.length())); // 控制台输出：1</code></pre></figure>
+<p>因此处理用户文本时，不能总把 <code>String.length()</code> 当作人眼所见字符数。第 7 章会系统讲字符串 API。</p>
+<h3 id="5-3-char-可以参与整数运算">5.3 char 可以参与整数运算</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">char letter = 'A';
+int code = letter;
+
+System.out.println(code); // 控制台输出：65</code></pre></figure>
+<p>这来自字符编码值，不表示应把文本处理都写成数字运算。需要完整文本时优先使用 <code>String</code>。</p>
+<h2 id="六-引用类型保存对象的引用">六、引用类型保存对象的引用</h2>
+<h3 id="6-1-string-数组和自定义类都是引用类型">6.1 String、数组和自定义类都是引用类型</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String title = &quot;Java&quot;;
+int[] scores = {80, 90};</code></pre></figure>
+<p>变量 <code>title</code> 和 <code>scores</code> 保存的不是把整个对象内容直接塞进变量槽位的基本值，而是指向对象的引用。第 6 章会画出引用复制、别名和相等性；第 7 章讲数组与字符串；第 8 章创建自定义对象。</p>
+<h3 id="6-2-null-表示当前没有对象引用">6.2 null 表示当前没有对象引用</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String title = null;
+System.out.println(title); // 控制台输出：null</code></pre></figure>
+<p><code>null</code> 不是空字符串。<code>&quot;&quot;</code> 是存在的 String 对象，长度为 0；<code>null</code> 表示没有 String 对象可用。对 <code>null</code> 调用方法会在运行期抛出 <code>NullPointerException</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String title = null;
+// System.out.println(title.length()); // 运行时报 NullPointerException</code></pre></figure>
+<p>基本类型不能为 <code>null</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">// int quantity = null; // 编译失败</code></pre></figure>
+<h2 id="七-自动类型转换处理相对安全的方向">七、自动类型转换处理相对安全的方向</h2>
+<h3 id="7-1-小范围整数可以扩展到大范围整数">7.1 小范围整数可以扩展到大范围整数</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int quantity = 100;
+long total = quantity;
+
+System.out.println(total); // 控制台输出：100</code></pre></figure>
+<p><code>int</code> 到 <code>long</code> 不会丢失整数范围内的值，编译器自动完成<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">宽化转换</span>。常见数值宽化方向包括：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">byte → short → int → long → float → double
+char → int → long → float → double</code></pre></figure>
+<p>箭头表示语言允许自动转换，不表示每一步都能精确保存所有值。例如很大的 <code>long</code> 转成 <code>float</code> 可能丢失低位精度。</p>
+<h3 id="7-2-混合数值运算先进行提升">7.2 混合数值运算先进行提升</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int count = 3;
+double unitPrice = 2.5;
+double total = count * unitPrice;
+
+System.out.println(total); // 控制台输出：7.5</code></pre></figure>
+<p>表达式中 <code>int</code> 会提升为 <code>double</code> 再计算，结果类型是 <code>double</code>。目标变量必须能接收提升后的结果。</p>
+<h3 id="7-3-赋值上下文与方法参数也会转换">7.3 赋值上下文与方法参数也会转换</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static void printLong(long value) {
+    System.out.println(value);
+}
+
+printLong(10); // 控制台输出：10；int 实参自动扩展为 long</code></pre></figure>
+<p>自动转换发生在编译器确认方向符合规则时，不是运行期随意改变变量类型。</p>
+<h2 id="八-强制类型转换显式接受信息损失">八、强制类型转换显式接受信息损失</h2>
+<h3 id="8-1-大范围到小范围需要-cast">8.1 大范围到小范围需要 cast</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">long value = 100L;
+int narrowed = (int) value;
+
+System.out.println(narrowed); // 控制台输出：100</code></pre></figure>
+<p>括号中的 <code>(int)</code> 是<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">强制类型转换</span>。它告诉编译器：“我知道目标范围更小，仍要转换。”强制转换消除的是编译错误，不保证运行结果符合业务预期。</p>
+<h3 id="8-2-超出范围时高位会被截断">8.2 超出范围时高位会被截断</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">long value = 3_000_000_000L;
+int narrowed = (int) value;
+
+System.out.println(narrowed); // 控制台输出：-1294967296</code></pre></figure>
+<p>结果不是 21 亿上限，也不会自动抛异常。转换保留低 32 位，解释为 <code>int</code> 后可能变成负数。转换外部数据前先检查范围：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">if (value &lt; Integer.MIN_VALUE || value &gt; Integer.MAX_VALUE) {
+    System.out.println(&quot;超出 int 范围&quot;); // 本例控制台输出此行
+} else {
+    int safe = (int) value;
+    System.out.println(safe);
+}</code></pre></figure>
+<p>也可以使用 <code>Math.toIntExact(value)</code>，越界时抛出异常，让问题不被静默隐藏。</p>
+<h3 id="8-3-浮点转整数会截去小数部分">8.3 浮点转整数会截去小数部分</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">double price = 19.99;
+int whole = (int) price;
+
+System.out.println(whole); // 控制台输出：19</code></pre></figure>
+<p>这不是四舍五入。需要舍入时明确使用 <code>Math.round</code>、<code>floor</code> 或 <code>ceil</code>，并理解它们对负数的结果。金额更不应靠强制转换处理分和元。</p>
+<h3 id="8-4-先运算再转换与先转换再运算不同">8.4 先运算再转换与先转换再运算不同</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int left = 5;
+int right = 2;
+
+double after = (double) (left / right);
+double before = (double) left / right;
+
+System.out.println(after);  // 控制台输出：2.0
+System.out.println(before); // 控制台输出：2.5</code></pre></figure>
+<p>第一行先完成整数除法得到 2，再转 <code>double</code>；第二行先把左操作数转成 <code>double</code>，整个除法按浮点规则计算。</p>
+<h2 id="九-包装类型把基本值放进对象世界">九、包装类型把基本值放进对象世界</h2>
+<h3 id="9-1-八种基本类型都有包装类">9.1 八种基本类型都有包装类</h3>
+<div class="table-wrap"><table><thead><tr><th>基本类型</th><th>包装类型</th></tr></thead><tbody><tr><td><code>byte</code></td><td><code>Byte</code></td></tr><tr><td><code>short</code></td><td><code>Short</code></td></tr><tr><td><code>int</code></td><td><code>Integer</code></td></tr><tr><td><code>long</code></td><td><code>Long</code></td></tr><tr><td><code>float</code></td><td><code>Float</code></td></tr><tr><td><code>double</code></td><td><code>Double</code></td></tr><tr><td><code>char</code></td><td><code>Character</code></td></tr><tr><td><code>boolean</code></td><td><code>Boolean</code></td></tr></tbody></table></div>
+<p>包装类型是引用类型，可以用于后面会讲的泛型和集合，也可以表示 <code>null</code>。</p>
+<h3 id="9-2-装箱与拆箱通常自动发生">9.2 装箱与拆箱通常自动发生</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Integer boxed = 10; // 自动装箱：int 变为 Integer
+int value = boxed;  // 自动拆箱：Integer 取出 int
+
+System.out.println(value); // 控制台输出：10</code></pre></figure>
+<p>这种便利称为自动<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">装箱</span>与<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">拆箱</span>。编译器会插入相应转换，但对象与基本值的差异仍存在。</p>
+<h3 id="9-3-null-拆箱会抛异常">9.3 null 拆箱会抛异常</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Integer boxed = null;
+// int value = boxed; // 运行时报 NullPointerException</code></pre></figure>
+<p>拆箱必须从真实包装对象中取值，<code>null</code> 没有可取的值。数据库可空数字、请求参数和配置值常会使用包装类型，转换为基本类型前必须决定“缺失”如何处理。</p>
+<h3 id="9-4-包装对象不要用-判断数值相等">9.4 包装对象不要用 == 判断数值相等</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Integer first = 1000;
+Integer second = 1000;
+
+System.out.println(first == second);      // 控制台通常输出：false
+System.out.println(first.equals(second)); // 控制台输出：true</code></pre></figure>
+<p><code>==</code> 比较的是引用，部分较小整数可能因缓存让结果看似为 <code>true</code>，不能依赖。第 6 章会完整解释引用相等性。</p>
+<h2 id="十-var-是局部变量类型推断">十、var 是局部变量类型推断</h2>
+<h3 id="10-1-编译器从初始化表达式推断静态类型">10.1 编译器从初始化表达式推断静态类型</h3>
+<p>JDK 10 起，局部变量可以使用 <code>var</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">var quantity = 10;  // 编译器推断为 int
+var title = &quot;Java&quot;; // 编译器推断为 String
+
+// quantity = &quot;ten&quot;; // 编译失败：quantity 仍然是 int</code></pre></figure>
+<p><code>var</code> 不是动态类型，也不是 <code>Object</code>。类型在编译时已经确定，只是省略了左侧重复书写。</p>
+<h3 id="10-2-var-只能用于有初始化值的局部变量">10.2 var 只能用于有初始化值的局部变量</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">// var count;       // 编译失败：无法推断类型
+// var missing = null; // 编译失败：仅凭 null 无法推断具体类型</code></pre></figure>
+<p>字段、方法参数和返回类型不能用 <code>var</code>。当右侧类型不明显时，显式类型更有助于阅读：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">BigDecimal total = calculateTotal();</code></pre></figure>
+<h2 id="十一-文本与数字之间需要解析或格式化">十一、文本与数字之间需要解析或格式化</h2>
+<h3 id="11-1-强制转换不能把字符串变成数字">11.1 强制转换不能把字符串变成数字</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String text = &quot;42&quot;;
+// int number = (int) text; // 编译失败：String 与 int 不是这种转换关系</code></pre></figure>
+<p>应调用解析方法：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String text = &quot;42&quot;;
+int number = Integer.parseInt(text);
+
+System.out.println(number + 1); // 控制台输出：43</code></pre></figure>
+<p>文本不是合法整数时会抛出 <code>NumberFormatException</code>。第 11 章会用它学习异常边界。</p>
+<h3 id="11-2-数字可以格式化为字符串">11.2 数字可以格式化为字符串</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int number = 42;
+String text = String.valueOf(number);
+
+System.out.println(text + 1); // 控制台输出：421</code></pre></figure>
+<p>字符串拼接也会把数字转换为文本，但 <code>String.valueOf</code> 更明确地表达“我要得到字符串”。</p>
+<h2 id="十二-后端数据类型的初步选择">十二、后端数据类型的初步选择</h2>
+<h3 id="12-1-数量-编号-金额和时间不是同一类数字">12.1 数量、编号、金额和时间不是同一类数字</h3>
+<div class="table-wrap"><table><thead><tr><th>数据含义</th><th>Java 常见起点</th><th>选择理由</th></tr></thead><tbody><tr><td>数量、页码</td><td><code>int</code></td><td>范围通常足够，计算方便</td></tr><tr><td>大计数、毫秒时间戳</td><td><code>long</code></td><td>范围更大</td></tr><tr><td>数据库可空整数</td><td><code>Integer</code> / <code>Long</code></td><td>可以表达缺失，但要防拆箱空值</td></tr><tr><td>金额</td><td><code>BigDecimal</code> 或最小货币单位的 <code>long</code></td><td>明确十进制或整数规则</td></tr><tr><td>普通测量近似值</td><td><code>double</code></td><td>接受浮点误差</td></tr><tr><td>有限业务状态</td><td><code>enum</code></td><td>第 9 章讲，避免魔法数字</td></tr><tr><td>日期时间</td><td><code>java.time</code> 类型</td><td>第 16 章讲，不用裸 long 表达所有时间语义</td></tr></tbody></table></div>
+<p>“数据库列是什么类型”不应成为唯一选择依据。还要考虑缺失值、单位、范围、精度、运算方式和接口表达。</p>
+<h3 id="12-2-类型选择要连同单位写清">12.2 类型选择要连同单位写清</h3>
+<p>变量 <code>timeout = 30</code> 无法判断是秒还是毫秒。可以命名为 <code>timeoutSeconds</code>，或第 16 章使用 <code>Duration</code>。<code>price = 1999</code> 也要说明单位是分还是元。类型保证表示规则，名字和领域类型补充业务语义。</p>
+<h2 id="十三-练习与验收">十三、练习与验收</h2>
+<h3 id="13-1-判断能否编译">13.1 判断能否编译</h3>
+<p>逐行判断并说明原因：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">byte a = 100;
+// byte b = 200;
+long c = 100;
+float d = 1.5F;
+// int e = 1.5;
+Integer f = null;
+// int g = null;</code></pre></figure>
+<p>答案：<code>a</code>、<code>c</code>、<code>d</code>、<code>f</code> 可编译；200 超出 byte 范围，1.5 是 double 且有小数，基本类型 int 不能为 null。</p>
+<h3 id="13-2-预测转换结果">13.2 预测转换结果</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int left = 7;
+int right = 2;
+
+System.out.println(left / right);            // 预测：？
+System.out.println((double) left / right);   // 预测：？
+System.out.println((double) (left / right)); // 预测：？</code></pre></figure>
+<p>答案依次为 3、3.5、3.0。</p>
+<h3 id="13-3-修复溢出风险">13.3 修复溢出风险</h3>
+<p>下面计算为什么可能先溢出？怎样修复？</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int unitPrice = 1_500_000_000;
+int quantity = 2;
+long total = unitPrice * quantity;
+System.out.println(total);</code></pre></figure>
+<p>乘法在两个 <code>int</code> 之间先完成，溢出后才赋给 <code>long</code>。让一个操作数先成为 <code>long</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">long total = (long) unitPrice * quantity;
+System.out.println(total); // 控制台输出：3000000000</code></pre></figure>
+<h3 id="13-4-独立练习">13.4 独立练习</h3>
+<p>编写 <code>TypeReport</code>：</p>
+<ol><li>保存商品数量、单价（以分为单位）和折扣比例。</li><li>计算折扣前总分值，确保乘法不会先发生 int 溢出。</li><li>把结果转换为便于显示的元，但说明浮点显示只用于演示，不用于最终结算。</li><li>解析字符串 <code>&quot;3&quot;</code> 作为新增数量。</li><li>为每条输出写预期结果注释。</li></ol>
+<p>完成标准：能解释每个变量为何选择当前类型、转换发生在哪一步、是否可能丢范围或精度、空值是否可出现。</p>
+<h2 id="十四-常见误区">十四、常见误区</h2>
+<h3 id="14-1-认为-long-目标会让-int-运算自动安全">14.1 认为 long 目标会让 int 运算自动安全</h3>
+<p>表达式先按操作数类型计算，再赋给目标变量。需要大范围时，在运算前让至少一个操作数成为 <code>long</code>。</p>
+<h3 id="14-2-用强制转换修复所有编译错误">14.2 用强制转换修复所有编译错误</h3>
+<p>cast 只表明接受窄化，不验证范围、单位和业务含义。优先检查类型选择是否正确。</p>
+<h3 id="14-3-用-double-保存精确金额">14.3 用 double 保存精确金额</h3>
+<p>二进制浮点存在十进制表示误差。金额选择 <code>BigDecimal</code> 或明确单位的整数，并定义舍入规则。</p>
+<h3 id="14-4-把包装类型当作永不为空的基本类型">14.4 把包装类型当作永不为空的基本类型</h3>
+<p><code>Integer</code> 可以为 <code>null</code>，自动拆箱时可能抛异常。接口、数据库和配置边界要明确缺失策略。</p>
+<h3 id="14-5-把-var-当成-javascript-的动态变量">14.5 把 var 当成 JavaScript 的动态变量</h3>
+<p><code>var</code> 只省略局部变量左侧类型，推断后类型固定。右侧不清楚时显式写类型。</p>
+<h2 id="十五-本章小结">十五、本章小结</h2>
+<p>八种基本类型直接表示整数、浮点数、字符和布尔值；引用类型保存指向对象的引用并可为 <code>null</code>。整数类型有固定范围和溢出边界，浮点类型是近似表示，<code>char</code> 是 UTF-16 代码单元而不是所有可见字符的完整抽象。</p>
+<p>宽化转换通常由编译器自动完成，窄化转换必须显式 cast，却仍可能丢失范围或精度。包装类型让基本值进入对象与泛型世界，同时带来空值和拆箱风险。<code>var</code> 仍是静态类型。类型选择还要结合单位、范围、精度和缺失语义。</p>
+<h2 id="十六-快速自测">十六、快速自测</h2>
+<ol><li>基本类型与引用类型的核心区别是什么？</li><li>普通整数和小数字面量默认分别是什么类型？</li><li>为什么两个 byte 相加通常不能直接赋给 byte？</li><li>int 溢出时会自动抛异常吗？</li><li>为什么 <code>0.1 + 0.2</code> 可能不等于精确的 0.3？</li><li><code>char</code> 一定对应一个人眼字符吗？</li><li>宽化与窄化转换的区别是什么？</li><li><code>(double) (5 / 2)</code> 为什么是 2.0？</li><li><code>Integer</code> 自动拆箱有什么风险？</li><li><code>var</code> 为什么不是动态类型？</li><li>字符串 <code>&quot;42&quot;</code> 怎样变成整数？</li><li>后端金额常用哪些表示方式？</li></ol>
+<p>参考答案：基本类型直接保存简单值，引用类型保存对象引用；int 与 double；算术提升为 int；默认不会；二进制浮点不能有限精确表示所有十进制小数；不一定，部分字符需要两个代码单元；前者向更宽目标自动进行，后者显式且可能丢信息；整数除法先得到 2；null 拆箱抛异常；编译时已推断并固定类型；<code>Integer.parseInt</code>；<code>BigDecimal</code> 或明确最小货币单位的 long。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>OpenJDK. <a href="https://dev.java/learn/language-basics/" target="_blank" rel="noreferrer">Java Language Basics</a>.</li><li>Oracle. <a href="https://docs.oracle.com/javase/specs/jls/se17/html/jls-4.html" target="_blank" rel="noreferrer">Java SE 17 Language Specification：Types, Values, and Variables</a>.</li><li>Oracle. <a href="https://docs.oracle.com/javase/specs/jls/se17/html/jls-5.html" target="_blank" rel="noreferrer">Java SE 17 Language Specification：Conversions and Contexts</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Number.html" target="_blank" rel="noreferrer">Java SE 17 API：Number</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html" target="_blank" rel="noreferrer">Java SE 17 API：BigDecimal</a>.</li><li>Unicode Consortium. <a href="https://www.unicode.org/faq/utf_bom.html#UTF16" target="_blank" rel="noreferrer">UTF-16</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/04-java-program-structure.html">← 第 4 章<br><strong>Java 变量、表达式与控制流</strong></a><a href="../lessons/06-reference-value-equality.html">第 6 章 →<br><strong>引用、值传递和相等性</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一-类型为值规定可用规则">一、类型为值规定可用规则</a><a class="sub" href="#1-1-同样的符号会因类型产生不同含义">1.1 同样的符号会因类型产生不同含义</a><a class="sub" href="#1-2-声明类型与运行时的值">1.2 声明类型与运行时的值</a><a class="sub" href="#1-3-java-类型的两大类别">1.3 Java 类型的两大类别</a><a class="" href="#二-整数类型表示不同范围的整数">二、整数类型表示不同范围的整数</a><a class="sub" href="#2-1-byte-short-int-与-long">2.1 byte、short、int 与 long</a><a class="sub" href="#2-2-字面量能在范围内直接赋给小整数类型">2.2 字面量能在范围内直接赋给小整数类型</a><a class="sub" href="#2-3-整数溢出不会自动报错">2.3 整数溢出不会自动报错</a><a class="sub" href="#2-4-整数除法与除零">2.4 整数除法与除零</a><a class="" href="#三-浮点类型表示近似小数">三、浮点类型表示近似小数</a><a class="sub" href="#3-1-float-与-double">3.1 float 与 double</a><a class="sub" href="#3-2-二进制浮点不能精确表示所有十进制小数">3.2 二进制浮点不能精确表示所有十进制小数</a><a class="sub" href="#3-3-金额通常不用-double">3.3 金额通常不用 double</a><a class="sub" href="#3-4-nan-与-infinity-是浮点特殊值">3.4 NaN 与 Infinity 是浮点特殊值</a><a class="" href="#四-boolean-只表示-true-或-false">四、boolean 只表示 true 或 false</a><a class="sub" href="#4-1-boolean-不与数字互换">4.1 boolean 不与数字互换</a><a class="sub" href="#4-2-布尔变量表达状态或判断结果">4.2 布尔变量表达状态或判断结果</a><a class="" href="#五-char-表示一个-utf-16-代码单元">五、char 表示一个 UTF-16 代码单元</a><a class="sub" href="#5-1-char-使用单引号">5.1 char 使用单引号</a><a class="sub" href="#5-2-有些-unicode-字符需要两个-char">5.2 有些 Unicode 字符需要两个 char</a><a class="sub" href="#5-3-char-可以参与整数运算">5.3 char 可以参与整数运算</a><a class="" href="#六-引用类型保存对象的引用">六、引用类型保存对象的引用</a><a class="sub" href="#6-1-string-数组和自定义类都是引用类型">6.1 String、数组和自定义类都是引用类型</a><a class="sub" href="#6-2-null-表示当前没有对象引用">6.2 null 表示当前没有对象引用</a><a class="" href="#七-自动类型转换处理相对安全的方向">七、自动类型转换处理相对安全的方向</a><a class="sub" href="#7-1-小范围整数可以扩展到大范围整数">7.1 小范围整数可以扩展到大范围整数</a><a class="sub" href="#7-2-混合数值运算先进行提升">7.2 混合数值运算先进行提升</a><a class="sub" href="#7-3-赋值上下文与方法参数也会转换">7.3 赋值上下文与方法参数也会转换</a><a class="" href="#八-强制类型转换显式接受信息损失">八、强制类型转换显式接受信息损失</a><a class="sub" href="#8-1-大范围到小范围需要-cast">8.1 大范围到小范围需要 cast</a><a class="sub" href="#8-2-超出范围时高位会被截断">8.2 超出范围时高位会被截断</a><a class="sub" href="#8-3-浮点转整数会截去小数部分">8.3 浮点转整数会截去小数部分</a><a class="sub" href="#8-4-先运算再转换与先转换再运算不同">8.4 先运算再转换与先转换再运算不同</a><a class="" href="#九-包装类型把基本值放进对象世界">九、包装类型把基本值放进对象世界</a><a class="sub" href="#9-1-八种基本类型都有包装类">9.1 八种基本类型都有包装类</a><a class="sub" href="#9-2-装箱与拆箱通常自动发生">9.2 装箱与拆箱通常自动发生</a><a class="sub" href="#9-3-null-拆箱会抛异常">9.3 null 拆箱会抛异常</a><a class="sub" href="#9-4-包装对象不要用-判断数值相等">9.4 包装对象不要用 == 判断数值相等</a><a class="" href="#十-var-是局部变量类型推断">十、var 是局部变量类型推断</a><a class="sub" href="#10-1-编译器从初始化表达式推断静态类型">10.1 编译器从初始化表达式推断静态类型</a><a class="sub" href="#10-2-var-只能用于有初始化值的局部变量">10.2 var 只能用于有初始化值的局部变量</a><a class="" href="#十一-文本与数字之间需要解析或格式化">十一、文本与数字之间需要解析或格式化</a><a class="sub" href="#11-1-强制转换不能把字符串变成数字">11.1 强制转换不能把字符串变成数字</a><a class="sub" href="#11-2-数字可以格式化为字符串">11.2 数字可以格式化为字符串</a><a class="" href="#十二-后端数据类型的初步选择">十二、后端数据类型的初步选择</a><a class="sub" href="#12-1-数量-编号-金额和时间不是同一类数字">12.1 数量、编号、金额和时间不是同一类数字</a><a class="sub" href="#12-2-类型选择要连同单位写清">12.2 类型选择要连同单位写清</a><a class="" href="#十三-练习与验收">十三、练习与验收</a><a class="sub" href="#13-1-判断能否编译">13.1 判断能否编译</a><a class="sub" href="#13-2-预测转换结果">13.2 预测转换结果</a><a class="sub" href="#13-3-修复溢出风险">13.3 修复溢出风险</a><a class="sub" href="#13-4-独立练习">13.4 独立练习</a><a class="" href="#十四-常见误区">十四、常见误区</a><a class="sub" href="#14-1-认为-long-目标会让-int-运算自动安全">14.1 认为 long 目标会让 int 运算自动安全</a><a class="sub" href="#14-2-用强制转换修复所有编译错误">14.2 用强制转换修复所有编译错误</a><a class="sub" href="#14-3-用-double-保存精确金额">14.3 用 double 保存精确金额</a><a class="sub" href="#14-4-把包装类型当作永不为空的基本类型">14.4 把包装类型当作永不为空的基本类型</a><a class="sub" href="#14-5-把-var-当成-javascript-的动态变量">14.5 把 var 当成 JavaScript 的动态变量</a><a class="" href="#十五-本章小结">十五、本章小结</a><a class="" href="#十六-快速自测">十六、快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

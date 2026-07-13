@@ -1,0 +1,668 @@
+{
+  "schemaVersion": 1,
+  "slug": "java-web-backend-from-beginner-to-advanced",
+  "title": "Java Web 后端入门到进阶",
+  "subtitle": "从 Java 零基础到能够独立修改 Web 后端",
+  "description": "以 JDK 17 和 Spring Boot 3.x 为主线，先学习 Java 基本语法与标准库，再进入 REST API、数据访问、安全、缓存、消息、并发与 JVM。",
+  "duration": "36 章，单章按知识点完整展开",
+  "status": "draft",
+  "allLessons": [
+    {
+      "number": 1,
+      "module": "环境介绍与准备",
+      "title": "Java Web 后端学习地图与开发环境",
+      "summary": "认识课程目标、后端组件和接下来要使用的开发工具。",
+      "status": "available",
+      "href": "lessons/01-java-web-request-map.html",
+      "markdown": "lessons/01-java-web-request-map.md"
+    },
+    {
+      "number": 2,
+      "module": "环境介绍与准备",
+      "title": "JDK 17、IDE 与 Maven 环境核验",
+      "summary": "让终端、IDE 和 Maven 使用同一套 JDK 17，并完成最小构建。",
+      "status": "available",
+      "href": "lessons/02-reproducible-jdk17-environment.html",
+      "markdown": "lessons/02-reproducible-jdk17-environment.md"
+    },
+    {
+      "number": 3,
+      "module": "Java 语言及标准库基础",
+      "title": "Java 程序结构、编译与运行",
+      "summary": "从源码、类、main 方法和编译运行流程开始写第一个 Java 程序。",
+      "status": "available",
+      "href": "lessons/03-maven-build.html",
+      "markdown": "lessons/03-maven-build.md"
+    },
+    {
+      "number": 4,
+      "module": "Java 语言及标准库基础",
+      "title": "Java 变量、表达式与控制流",
+      "summary": "学习变量、运算符、判断、循环和方法调用的基本语法。",
+      "status": "available",
+      "href": "lessons/04-java-program-structure.html",
+      "markdown": "lessons/04-java-program-structure.md"
+    },
+    {
+      "number": 5,
+      "module": "Java 语言及标准库基础",
+      "title": "Java 类型系统与类型转换",
+      "summary": "理解基本类型、引用类型、转换、装箱和数值边界。",
+      "status": "available",
+      "href": "lessons/05-java-type-system.html",
+      "markdown": "lessons/05-java-type-system.md"
+    },
+    {
+      "number": 6,
+      "module": "Java 语言及标准库基础",
+      "title": "引用、值传递和相等性",
+      "summary": "从变量和值开始，逐步理解引用、方法传参、对象身份和内容相等。",
+      "status": "available",
+      "href": "lessons/06-reference-value-equality.html",
+      "markdown": "lessons/06-reference-value-equality.md"
+    },
+    {
+      "number": 7,
+      "module": "Java 语言及标准库基础",
+      "title": "数组、字符串与控制流",
+      "summary": "用 JDK 17 的稳定语法处理数组、文本、分支与循环。",
+      "status": "available",
+      "href": "lessons/07-array-string-control-flow.html",
+      "markdown": "lessons/07-array-string-control-flow.md"
+    },
+    {
+      "number": 8,
+      "module": "Java 语言及标准库基础",
+      "title": "类、对象与业务规则封装",
+      "summary": "从类和对象的基本语法逐步进入封装与有效状态。",
+      "status": "available",
+      "href": "lessons/08-class-object-invariant.html",
+      "markdown": "lessons/08-class-object-invariant.md"
+    },
+    {
+      "number": 9,
+      "module": "Java 语言及标准库基础",
+      "title": "类、record 与 enum 的选择",
+      "summary": "根据对象身份、值和有限状态选择合适的类型。",
+      "status": "available",
+      "href": "lessons/09-class-record-enum.html",
+      "markdown": "lessons/09-class-record-enum.md"
+    },
+    {
+      "number": 10,
+      "module": "Java 语言及标准库基础",
+      "title": "接口、继承、组合与多态",
+      "summary": "从接口和实现类开始，建立可替换的类型关系。",
+      "status": "available",
+      "href": "lessons/10-interface-inheritance-polymorphism.html",
+      "markdown": "lessons/10-interface-inheritance-polymorphism.md"
+    },
+    {
+      "number": 11,
+      "module": "Java 语言及标准库基础",
+      "title": "Java 异常与异常边界",
+      "summary": "学习读取、抛出和处理异常，并保留失败原因。",
+      "status": "available",
+      "href": "lessons/11-exception-boundary.html",
+      "markdown": "lessons/11-exception-boundary.md"
+    },
+    {
+      "number": 12,
+      "module": "Java 语言及标准库基础",
+      "title": "Java 泛型与类型安全",
+      "summary": "使用类型参数、边界和通配符设计类型安全的 API。",
+      "status": "available",
+      "href": "lessons/12-generics.html",
+      "markdown": "lessons/12-generics.md"
+    },
+    {
+      "number": 13,
+      "module": "Java 语言及标准库基础",
+      "title": "List、Set 与 Map",
+      "summary": "按顺序、唯一性和按键查找需求选择集合。",
+      "status": "available",
+      "href": "lessons/13-collections.html",
+      "markdown": "lessons/13-collections.md"
+    },
+    {
+      "number": 14,
+      "module": "Java 语言及标准库基础",
+      "title": "Lambda 与 Stream 基础",
+      "summary": "先掌握 Lambda，再把集合处理写成清楚的 Stream 流水线。",
+      "status": "available",
+      "href": "lessons/14-lambda-stream.html",
+      "markdown": "lessons/14-lambda-stream.md"
+    },
+    {
+      "number": 15,
+      "module": "Java 语言及标准库基础",
+      "title": "Optional 与缺失值",
+      "summary": "区分查询无结果、业务拒绝和系统失败。",
+      "status": "available",
+      "href": "lessons/15-optional.html",
+      "markdown": "lessons/15-optional.md"
+    },
+    {
+      "number": 16,
+      "module": "Java 语言及标准库基础",
+      "title": "文件、编码、日期时间与 JDK 版本差异",
+      "summary": "处理文件和时间，并识别 JDK 17 与后续版本的边界。",
+      "status": "available",
+      "href": "lessons/16-io-time-version.html",
+      "markdown": "lessons/16-io-time-version.md"
+    },
+    {
+      "number": 17,
+      "module": "后端开发基础",
+      "title": "HTTP 与 REST API 契约",
+      "summary": "从请求、响应、方法和状态码开始学习接口行为。",
+      "status": "available",
+      "href": "lessons/17-http-rest-contract.html",
+      "markdown": "lessons/17-http-rest-contract.md"
+    },
+    {
+      "number": 18,
+      "module": "后端开发基础",
+      "title": "Spring Boot 请求处理流程",
+      "summary": "从最小应用和 Controller 开始认识 Spring Boot 请求路径。",
+      "status": "available",
+      "href": "lessons/18-spring-request-path.html",
+      "markdown": "lessons/18-spring-request-path.md"
+    },
+    {
+      "number": 19,
+      "module": "后端开发基础",
+      "title": "配置、环境与代码分离",
+      "summary": "管理配置、环境差异与秘密边界。",
+      "status": "available",
+      "href": "lessons/19-configuration.html",
+      "markdown": "lessons/19-configuration.md"
+    },
+    {
+      "number": 20,
+      "module": "后端开发基础",
+      "title": "Controller、Service 与 Repository 分层",
+      "summary": "从简单接口逐步拆分接口、业务和数据访问职责。",
+      "status": "available",
+      "href": "lessons/20-layered-backend.html",
+      "markdown": "lessons/20-layered-backend.md"
+    },
+    {
+      "number": 21,
+      "module": "后端开发基础",
+      "title": "参数校验、全局异常与错误响应",
+      "summary": "先理解输入、约束和异常，再建立前端可以稳定处理的错误响应。",
+      "status": "available",
+      "href": "lessons/21-validation-global-exception.html",
+      "markdown": "lessons/21-validation-global-exception.md"
+    },
+    {
+      "number": 22,
+      "module": "后端开发基础",
+      "title": "JSON、DTO 与接口兼容性",
+      "summary": "守住序列化、时间格式和接口演进边界。",
+      "status": "available",
+      "href": "lessons/22-json-dto.html",
+      "markdown": "lessons/22-json-dto.md"
+    },
+    {
+      "number": 23,
+      "module": "后端开发基础",
+      "title": "SQL、MySQL 与 PostgreSQL 基础",
+      "summary": "先学习表和基础 SQL，再比较两个数据库的重要差异。",
+      "status": "available",
+      "href": "lessons/23-sql-mysql-postgresql.html",
+      "markdown": "lessons/23-sql-mysql-postgresql.md"
+    },
+    {
+      "number": 24,
+      "module": "后端开发基础",
+      "title": "MyBatis-Plus 数据访问",
+      "summary": "从 Mapper 和基础 CRUD 开始理解 MyBatis-Plus。",
+      "status": "available",
+      "href": "lessons/24-mybatis-plus.html",
+      "markdown": "lessons/24-mybatis-plus.md"
+    },
+    {
+      "number": 25,
+      "module": "后端开发基础",
+      "title": "JPA 持久化基础",
+      "summary": "从实体保存与查询进入持久化上下文和查询边界。",
+      "status": "available",
+      "href": "lessons/25-jpa.html",
+      "markdown": "lessons/25-jpa.md"
+    },
+    {
+      "number": 26,
+      "module": "后端开发基础",
+      "title": "Spring 事务边界与常见失效场景",
+      "summary": "从提交和回滚开始理解 Spring 事务边界。",
+      "status": "available",
+      "href": "lessons/26-transactions.html",
+      "markdown": "lessons/26-transactions.md"
+    },
+    {
+      "number": 27,
+      "module": "后端开发基础",
+      "title": "Java Web 后端测试",
+      "summary": "从 JUnit 和断言开始，逐步学习单元、切片和集成测试。",
+      "status": "available",
+      "href": "lessons/27-backend-testing.html",
+      "markdown": "lessons/27-backend-testing.md"
+    },
+    {
+      "number": 28,
+      "module": "后端开发基础",
+      "title": "外部调用、失败处理与可观测证据",
+      "summary": "处理超时、错误、重试、日志和健康信号。",
+      "status": "available",
+      "href": "lessons/28-outbound-observability.html",
+      "markdown": "lessons/28-outbound-observability.md"
+    },
+    {
+      "number": 29,
+      "module": "后端开发基础",
+      "title": "Java Web 应用的 Docker 部署",
+      "summary": "从镜像和容器开始，用 Compose 复现应用运行环境。",
+      "status": "available",
+      "href": "lessons/29-docker.html",
+      "markdown": "lessons/29-docker.md"
+    },
+    {
+      "number": 30,
+      "module": "Java 进阶",
+      "title": "Spring Security 认证与授权",
+      "summary": "先学习认证、授权和过滤器链，再进入安全配置。",
+      "status": "available",
+      "href": "lessons/30-spring-security.html",
+      "markdown": "lessons/30-spring-security.md"
+    },
+    {
+      "number": 31,
+      "module": "Java 进阶",
+      "title": "JWT 登录与统一身份平台",
+      "summary": "从 JWT 结构和验证开始，比较两种身份接入路线。",
+      "status": "available",
+      "href": "lessons/31-jwt-identity.html",
+      "markdown": "lessons/31-jwt-identity.md"
+    },
+    {
+      "number": 32,
+      "module": "Java 进阶",
+      "title": "Redis 缓存与一致性",
+      "summary": "从缓存命中和 TTL 开始学习失效、一致性与降级。",
+      "status": "available",
+      "href": "lessons/32-redis-cache.html",
+      "markdown": "lessons/32-redis-cache.md"
+    },
+    {
+      "number": 33,
+      "module": "Java 进阶",
+      "title": "Kafka 消息处理与可靠性",
+      "summary": "先建立消息模型，再处理重复、失败和延迟。",
+      "status": "available",
+      "href": "lessons/33-kafka-mq.html",
+      "markdown": "lessons/33-kafka-mq.md"
+    },
+    {
+      "number": 34,
+      "module": "Java 进阶",
+      "title": "线程安全、线程池与异步执行",
+      "summary": "从线程和任务开始，根据任务性质选择并发执行策略。",
+      "status": "available",
+      "href": "lessons/34-thread-pool.html",
+      "markdown": "lessons/34-thread-pool.md"
+    },
+    {
+      "number": 35,
+      "module": "Java 进阶",
+      "title": "JVM 类加载、运行时内存与垃圾回收",
+      "summary": "从 JVM 和 class 文件开始建立类加载、内存与对象可达性模型。",
+      "status": "available",
+      "href": "lessons/35-jvm-runtime-gc.html",
+      "markdown": "lessons/35-jvm-runtime-gc.md"
+    },
+    {
+      "number": 36,
+      "module": "Java 进阶",
+      "title": "Java Web 后端综合故障诊断",
+      "summary": "用日志、线程转储、堆转储和 JFR 逐步缩小故障范围。",
+      "status": "available",
+      "href": "lessons/36-diagnose-backend.html",
+      "markdown": "lessons/36-diagnose-backend.md"
+    }
+  ],
+  "lessons": [
+    {
+      "number": 1,
+      "module": "环境介绍与准备",
+      "title": "Java Web 后端学习地图与开发环境",
+      "summary": "认识课程目标、后端组件和接下来要使用的开发工具。",
+      "status": "available",
+      "href": "lessons/01-java-web-request-map.html",
+      "markdown": "lessons/01-java-web-request-map.md"
+    },
+    {
+      "number": 2,
+      "module": "环境介绍与准备",
+      "title": "JDK 17、IDE 与 Maven 环境核验",
+      "summary": "让终端、IDE 和 Maven 使用同一套 JDK 17，并完成最小构建。",
+      "status": "available",
+      "href": "lessons/02-reproducible-jdk17-environment.html",
+      "markdown": "lessons/02-reproducible-jdk17-environment.md"
+    },
+    {
+      "number": 3,
+      "module": "Java 语言及标准库基础",
+      "title": "Java 程序结构、编译与运行",
+      "summary": "从源码、类、main 方法和编译运行流程开始写第一个 Java 程序。",
+      "status": "available",
+      "href": "lessons/03-maven-build.html",
+      "markdown": "lessons/03-maven-build.md"
+    },
+    {
+      "number": 4,
+      "module": "Java 语言及标准库基础",
+      "title": "Java 变量、表达式与控制流",
+      "summary": "学习变量、运算符、判断、循环和方法调用的基本语法。",
+      "status": "available",
+      "href": "lessons/04-java-program-structure.html",
+      "markdown": "lessons/04-java-program-structure.md"
+    },
+    {
+      "number": 5,
+      "module": "Java 语言及标准库基础",
+      "title": "Java 类型系统与类型转换",
+      "summary": "理解基本类型、引用类型、转换、装箱和数值边界。",
+      "status": "available",
+      "href": "lessons/05-java-type-system.html",
+      "markdown": "lessons/05-java-type-system.md"
+    },
+    {
+      "number": 6,
+      "module": "Java 语言及标准库基础",
+      "title": "引用、值传递和相等性",
+      "summary": "从变量和值开始，逐步理解引用、方法传参、对象身份和内容相等。",
+      "status": "available",
+      "href": "lessons/06-reference-value-equality.html",
+      "markdown": "lessons/06-reference-value-equality.md"
+    },
+    {
+      "number": 7,
+      "module": "Java 语言及标准库基础",
+      "title": "数组、字符串与控制流",
+      "summary": "用 JDK 17 的稳定语法处理数组、文本、分支与循环。",
+      "status": "available",
+      "href": "lessons/07-array-string-control-flow.html",
+      "markdown": "lessons/07-array-string-control-flow.md"
+    },
+    {
+      "number": 8,
+      "module": "Java 语言及标准库基础",
+      "title": "类、对象与业务规则封装",
+      "summary": "从类和对象的基本语法逐步进入封装与有效状态。",
+      "status": "available",
+      "href": "lessons/08-class-object-invariant.html",
+      "markdown": "lessons/08-class-object-invariant.md"
+    },
+    {
+      "number": 9,
+      "module": "Java 语言及标准库基础",
+      "title": "类、record 与 enum 的选择",
+      "summary": "根据对象身份、值和有限状态选择合适的类型。",
+      "status": "available",
+      "href": "lessons/09-class-record-enum.html",
+      "markdown": "lessons/09-class-record-enum.md"
+    },
+    {
+      "number": 10,
+      "module": "Java 语言及标准库基础",
+      "title": "接口、继承、组合与多态",
+      "summary": "从接口和实现类开始，建立可替换的类型关系。",
+      "status": "available",
+      "href": "lessons/10-interface-inheritance-polymorphism.html",
+      "markdown": "lessons/10-interface-inheritance-polymorphism.md"
+    },
+    {
+      "number": 11,
+      "module": "Java 语言及标准库基础",
+      "title": "Java 异常与异常边界",
+      "summary": "学习读取、抛出和处理异常，并保留失败原因。",
+      "status": "available",
+      "href": "lessons/11-exception-boundary.html",
+      "markdown": "lessons/11-exception-boundary.md"
+    },
+    {
+      "number": 12,
+      "module": "Java 语言及标准库基础",
+      "title": "Java 泛型与类型安全",
+      "summary": "使用类型参数、边界和通配符设计类型安全的 API。",
+      "status": "available",
+      "href": "lessons/12-generics.html",
+      "markdown": "lessons/12-generics.md"
+    },
+    {
+      "number": 13,
+      "module": "Java 语言及标准库基础",
+      "title": "List、Set 与 Map",
+      "summary": "按顺序、唯一性和按键查找需求选择集合。",
+      "status": "available",
+      "href": "lessons/13-collections.html",
+      "markdown": "lessons/13-collections.md"
+    },
+    {
+      "number": 14,
+      "module": "Java 语言及标准库基础",
+      "title": "Lambda 与 Stream 基础",
+      "summary": "先掌握 Lambda，再把集合处理写成清楚的 Stream 流水线。",
+      "status": "available",
+      "href": "lessons/14-lambda-stream.html",
+      "markdown": "lessons/14-lambda-stream.md"
+    },
+    {
+      "number": 15,
+      "module": "Java 语言及标准库基础",
+      "title": "Optional 与缺失值",
+      "summary": "区分查询无结果、业务拒绝和系统失败。",
+      "status": "available",
+      "href": "lessons/15-optional.html",
+      "markdown": "lessons/15-optional.md"
+    },
+    {
+      "number": 16,
+      "module": "Java 语言及标准库基础",
+      "title": "文件、编码、日期时间与 JDK 版本差异",
+      "summary": "处理文件和时间，并识别 JDK 17 与后续版本的边界。",
+      "status": "available",
+      "href": "lessons/16-io-time-version.html",
+      "markdown": "lessons/16-io-time-version.md"
+    },
+    {
+      "number": 17,
+      "module": "后端开发基础",
+      "title": "HTTP 与 REST API 契约",
+      "summary": "从请求、响应、方法和状态码开始学习接口行为。",
+      "status": "available",
+      "href": "lessons/17-http-rest-contract.html",
+      "markdown": "lessons/17-http-rest-contract.md"
+    },
+    {
+      "number": 18,
+      "module": "后端开发基础",
+      "title": "Spring Boot 请求处理流程",
+      "summary": "从最小应用和 Controller 开始认识 Spring Boot 请求路径。",
+      "status": "available",
+      "href": "lessons/18-spring-request-path.html",
+      "markdown": "lessons/18-spring-request-path.md"
+    },
+    {
+      "number": 19,
+      "module": "后端开发基础",
+      "title": "配置、环境与代码分离",
+      "summary": "管理配置、环境差异与秘密边界。",
+      "status": "available",
+      "href": "lessons/19-configuration.html",
+      "markdown": "lessons/19-configuration.md"
+    },
+    {
+      "number": 20,
+      "module": "后端开发基础",
+      "title": "Controller、Service 与 Repository 分层",
+      "summary": "从简单接口逐步拆分接口、业务和数据访问职责。",
+      "status": "available",
+      "href": "lessons/20-layered-backend.html",
+      "markdown": "lessons/20-layered-backend.md"
+    },
+    {
+      "number": 21,
+      "module": "后端开发基础",
+      "title": "参数校验、全局异常与错误响应",
+      "summary": "先理解输入、约束和异常，再建立前端可以稳定处理的错误响应。",
+      "status": "available",
+      "href": "lessons/21-validation-global-exception.html",
+      "markdown": "lessons/21-validation-global-exception.md"
+    },
+    {
+      "number": 22,
+      "module": "后端开发基础",
+      "title": "JSON、DTO 与接口兼容性",
+      "summary": "守住序列化、时间格式和接口演进边界。",
+      "status": "available",
+      "href": "lessons/22-json-dto.html",
+      "markdown": "lessons/22-json-dto.md"
+    },
+    {
+      "number": 23,
+      "module": "后端开发基础",
+      "title": "SQL、MySQL 与 PostgreSQL 基础",
+      "summary": "先学习表和基础 SQL，再比较两个数据库的重要差异。",
+      "status": "available",
+      "href": "lessons/23-sql-mysql-postgresql.html",
+      "markdown": "lessons/23-sql-mysql-postgresql.md"
+    },
+    {
+      "number": 24,
+      "module": "后端开发基础",
+      "title": "MyBatis-Plus 数据访问",
+      "summary": "从 Mapper 和基础 CRUD 开始理解 MyBatis-Plus。",
+      "status": "available",
+      "href": "lessons/24-mybatis-plus.html",
+      "markdown": "lessons/24-mybatis-plus.md"
+    },
+    {
+      "number": 25,
+      "module": "后端开发基础",
+      "title": "JPA 持久化基础",
+      "summary": "从实体保存与查询进入持久化上下文和查询边界。",
+      "status": "available",
+      "href": "lessons/25-jpa.html",
+      "markdown": "lessons/25-jpa.md"
+    },
+    {
+      "number": 26,
+      "module": "后端开发基础",
+      "title": "Spring 事务边界与常见失效场景",
+      "summary": "从提交和回滚开始理解 Spring 事务边界。",
+      "status": "available",
+      "href": "lessons/26-transactions.html",
+      "markdown": "lessons/26-transactions.md"
+    },
+    {
+      "number": 27,
+      "module": "后端开发基础",
+      "title": "Java Web 后端测试",
+      "summary": "从 JUnit 和断言开始，逐步学习单元、切片和集成测试。",
+      "status": "available",
+      "href": "lessons/27-backend-testing.html",
+      "markdown": "lessons/27-backend-testing.md"
+    },
+    {
+      "number": 28,
+      "module": "后端开发基础",
+      "title": "外部调用、失败处理与可观测证据",
+      "summary": "处理超时、错误、重试、日志和健康信号。",
+      "status": "available",
+      "href": "lessons/28-outbound-observability.html",
+      "markdown": "lessons/28-outbound-observability.md"
+    },
+    {
+      "number": 29,
+      "module": "后端开发基础",
+      "title": "Java Web 应用的 Docker 部署",
+      "summary": "从镜像和容器开始，用 Compose 复现应用运行环境。",
+      "status": "available",
+      "href": "lessons/29-docker.html",
+      "markdown": "lessons/29-docker.md"
+    },
+    {
+      "number": 30,
+      "module": "Java 进阶",
+      "title": "Spring Security 认证与授权",
+      "summary": "先学习认证、授权和过滤器链，再进入安全配置。",
+      "status": "available",
+      "href": "lessons/30-spring-security.html",
+      "markdown": "lessons/30-spring-security.md"
+    },
+    {
+      "number": 31,
+      "module": "Java 进阶",
+      "title": "JWT 登录与统一身份平台",
+      "summary": "从 JWT 结构和验证开始，比较两种身份接入路线。",
+      "status": "available",
+      "href": "lessons/31-jwt-identity.html",
+      "markdown": "lessons/31-jwt-identity.md"
+    },
+    {
+      "number": 32,
+      "module": "Java 进阶",
+      "title": "Redis 缓存与一致性",
+      "summary": "从缓存命中和 TTL 开始学习失效、一致性与降级。",
+      "status": "available",
+      "href": "lessons/32-redis-cache.html",
+      "markdown": "lessons/32-redis-cache.md"
+    },
+    {
+      "number": 33,
+      "module": "Java 进阶",
+      "title": "Kafka 消息处理与可靠性",
+      "summary": "先建立消息模型，再处理重复、失败和延迟。",
+      "status": "available",
+      "href": "lessons/33-kafka-mq.html",
+      "markdown": "lessons/33-kafka-mq.md"
+    },
+    {
+      "number": 34,
+      "module": "Java 进阶",
+      "title": "线程安全、线程池与异步执行",
+      "summary": "从线程和任务开始，根据任务性质选择并发执行策略。",
+      "status": "available",
+      "href": "lessons/34-thread-pool.html",
+      "markdown": "lessons/34-thread-pool.md"
+    },
+    {
+      "number": 35,
+      "module": "Java 进阶",
+      "title": "JVM 类加载、运行时内存与垃圾回收",
+      "summary": "从 JVM 和 class 文件开始建立类加载、内存与对象可达性模型。",
+      "status": "available",
+      "href": "lessons/35-jvm-runtime-gc.html",
+      "markdown": "lessons/35-jvm-runtime-gc.md"
+    },
+    {
+      "number": 36,
+      "module": "Java 进阶",
+      "title": "Java Web 后端综合故障诊断",
+      "summary": "用日志、线程转储、堆转储和 JFR 逐步缩小故障范围。",
+      "status": "available",
+      "href": "lessons/36-diagnose-backend.html",
+      "markdown": "lessons/36-diagnose-backend.md"
+    }
+  ],
+  "references": [
+    {
+      "title": "Java Web 后端术语表",
+      "href": "reference/glossary.html",
+      "markdown": "reference/glossary.md"
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Lambda 把短小行为写成值，Stream 把集合处理拆成过滤、转换和收集等步骤；它们提高表达力，但不替代清楚的业务命名和普通循环。"><title>Lambda 与 Stream 基础 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 14 章 · Java 语言及标准库基础</div><h1>Lambda 与 Stream 基础</h1><p class="lesson-summary">Lambda 把短小行为写成值，Stream 把集合处理拆成过滤、转换和收集等步骤；它们提高表达力，但不替代清楚的业务命名和普通循环。</p><div class="meta-row"><span class="pill">先把一个普通循环读懂，再只替换其中一个步骤为 Lambda 或 Stream；不要从长链式代码开始。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="先看-行为-为什么也要传递">先看“行为”为什么也要传递</h2>
+<p>第 10 章的接口描述能力。若一个接口只有一个抽象方法，它可以是<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">函数式接口</span>，调用方可以把一段短小行为作为参数传递。</p>
+<p>例如 <code>Runnable</code> 代表“不接收参数、不返回值的一段任务”。传统写法需要匿名类：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Runnable task = new Runnable() {
+    @Override
+    public void run() {
+        System.out.println(&quot;执行任务&quot;);
+    }
+};</code></pre></figure>
+<p>Lambda 用更短写法表达同一个行为：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Runnable task = () -&gt; System.out.println(&quot;执行任务&quot;);</code></pre></figure>
+<p><code>()</code> 是参数列表，<code>-&gt;</code> 读作“映射到”，右侧是方法体。Lambda 不是“随便写一段代码”，它必须匹配某个函数式接口的方法签名。</p>
+<h2 id="带参数和返回值的-lambda">带参数和返回值的 Lambda</h2>
+<p>Java 标准库提供 <code>Predicate&lt;T&gt;</code>、<code>Function&lt;T, R&gt;</code> 等常见函数式接口：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Predicate&lt;String&gt; notBlank = text -&gt; !text.isBlank();
+Function&lt;String, Integer&gt; lengthOf = text -&gt; text.length();
+
+System.out.println(notBlank.test(&quot;Java&quot;)); // true
+System.out.println(lengthOf.apply(&quot;Java&quot;)); // 4</code></pre></figure>
+<p>Lambda 参数类型能由目标接口推断时可以省略。参数只有一个时，括号也可省略：<code>text -&gt; text.length()</code>。方法体有多句时使用花括号，并显式 <code>return</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Function&lt;String, String&gt; normalize = text -&gt; {
+    String trimmed = text.trim();
+    return trimmed.toUpperCase();
+};</code></pre></figure>
+<p>Lambda 会捕获外部局部变量，但该变量必须是 final 或<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">有效 final</span>，也就是赋值后不再修改。这样可避免异步或延迟执行时读到难以预测的局部状态。</p>
+<h2 id="stream-不是集合">Stream 不是集合</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Stream</span>是对一组元素进行处理的流水线，不保存元素本身。它常从集合取得：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">List&lt;String&gt; names = List.of(&quot;Ada&quot;, &quot;&quot;, &quot;Lin&quot;);
+Stream&lt;String&gt; stream = names.stream();</code></pre></figure>
+<p>Stream 操作分两类：</p>
+<ul><li><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">中间操作</span>返回新的 Stream，例如 <code>filter</code>、<code>map</code>、<code>sorted</code>；它们通常是惰性的。</li><li><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">终止操作</span>产生结果或副作用，例如 <code>toList</code>、<code>forEach</code>、<code>count</code>；它会触发流水线执行。</li></ul>
+<p>先用普通循环完成需求：保留非空名字，转大写，得到新 List。</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">List&lt;String&gt; result = new ArrayList&lt;&gt;();
+for (String name : names) {
+    if (!name.isBlank()) {
+        result.add(name.toUpperCase());
+    }
+}</code></pre></figure>
+<p>再写成 Stream：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">List&lt;String&gt; result = names.stream()
+    .filter(name -&gt; !name.isBlank())
+    .map(String::toUpperCase)
+    .toList();</code></pre></figure>
+<p><code>filter</code> 的 Lambda 要返回 boolean；<code>map</code> 把每个元素转换成另一个值；<code>toList</code> 收集最终结果。<code>String::toUpperCase</code> 是方法引用，等价于 <code>name -&gt; name.toUpperCase()</code>。</p>
+<h2 id="读懂执行顺序">读懂执行顺序</h2>
+<p>Stream 不会在每个中间操作时立刻遍历全部元素。只有调用终止操作后，它才按元素推进流水线。通常一个元素先经过所有必要步骤，再处理下一个元素，而不是先过滤完整个列表再映射完整个列表。</p>
+<p>一个 Stream 使用终止操作后不能复用：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Stream&lt;String&gt; stream = names.stream();
+long count = stream.count();
+// stream.toList(); // IllegalStateException</code></pre></figure>
+<p>需要第二次处理时，从集合重新创建 <code>names.stream()</code>。</p>
+<h2 id="什么时候用循环-什么时候用-stream">什么时候用循环，什么时候用 Stream</h2>
+<p>Stream 很适合“从集合取元素 → 筛选 → 转换 → 收集”的数据流。普通循环仍适合：</p>
+<ul><li>需要多层 break/continue 的复杂控制流。</li><li>需要在每一步维护多个可变状态。</li><li>需要清楚地处理异常或提前返回。</li></ul>
+<p>不要为了“函数式”而把十几个操作链在一行。流水线长到不能用一句话说明目的时，拆出命名方法或回到循环。</p>
+<p><code>forEach</code> 适合最后的观察或简单输出，不应在其中修改外部集合：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">names.forEach(System.out::println);</code></pre></figure>
+<p>并行 Stream 不在本课程主线。第 34 章讲线程与并发后，才能讨论为什么 <code>.parallel()</code> 不是自动加速按钮。</p>
+<h2 id="练习-从循环迁移到-stream">练习：从循环迁移到 Stream</h2>
+<p>给定：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">List&lt;String&gt; titles = List.of(&quot; java &quot;, &quot;&quot;, &quot;Spring&quot;, &quot;java&quot;);</code></pre></figure>
+<p>先用循环完成：去空白、跳过空文本、转大写、收集成新 List。然后改写为 Stream。两版都打印结果，并解释每个 Stream 操作对应循环中的哪一步。</p>
+<p>完成标准：不修改原 List；<code>filter</code> 返回 boolean；<code>map</code> 返回转换后的值；使用 <code>toList</code> 结束流。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="把-stream-当成可重复使用的集合">把 Stream 当成可重复使用的集合</h3>
+<p>Stream 是一次处理管道。终止后需要从数据源重新创建。</p>
+<h3 id="在-foreach-中修改外部状态">在 <code>forEach</code> 中修改外部状态</h3>
+<p>这会让数据流难读，且在并发场景更危险。优先用 <code>map</code>、<code>filter</code>、<code>collect</code> 表达结果。</p>
+<h3 id="直接上并行-stream">直接上并行 Stream</h3>
+<p>并行涉及线程、数据安全和任务拆分，不能只凭一行 <code>.parallel()</code> 判断会更快。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>Lambda 是函数式接口的简洁实现方式，Stream 是集合处理的声明式流水线。先能写清楚普通循环，再用 filter、map、toList 表达稳定的数据转换；复杂控制流不必强行改写。</p>
+<h2 id="快速自测">快速自测</h2>
+<ol><li>Lambda 必须匹配什么类型的接口？</li><li><code>filter</code> 与 <code>map</code> 的返回结果分别是什么？</li><li>为什么同一个 Stream 不能终止两次？</li></ol>
+<p>参考答案：函数式接口；filter 保留/丢弃元素的 boolean，map 转换后的元素；终止操作会消费流水线。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/stream/Stream.html" target="_blank" rel="noreferrer">Java SE 17 API: Stream</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/function/package-summary.html" target="_blank" rel="noreferrer">Java SE 17 API: java.util.function</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/13-collections.html">← 第 13 章<br><strong>List、Set 与 Map</strong></a><a href="../lessons/15-optional.html">第 15 章 →<br><strong>Optional 与缺失值</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#先看-行为-为什么也要传递">先看“行为”为什么也要传递</a><a class="" href="#带参数和返回值的-lambda">带参数和返回值的 Lambda</a><a class="" href="#stream-不是集合">Stream 不是集合</a><a class="" href="#读懂执行顺序">读懂执行顺序</a><a class="" href="#什么时候用循环-什么时候用-stream">什么时候用循环，什么时候用 Stream</a><a class="" href="#练习-从循环迁移到-stream">练习：从循环迁移到 Stream</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#把-stream-当成可重复使用的集合">把 Stream 当成可重复使用的集合</a><a class="sub" href="#在-foreach-中修改外部状态">在 forEach 中修改外部状态</a><a class="sub" href="#直接上并行-stream">直接上并行 Stream</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

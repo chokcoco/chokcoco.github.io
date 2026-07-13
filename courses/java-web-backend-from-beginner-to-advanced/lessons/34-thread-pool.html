@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="从线程和任务开始，根据任务性质选择并发执行策略。"><title>线程安全、线程池与异步执行 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 34 章 · Java 进阶</div><h1>线程安全、线程池与异步执行</h1><p class="lesson-summary">从线程和任务开始，根据任务性质选择并发执行策略。</p><div class="meta-row"><span class="pill">先按本章的操作或推理顺序完成阅读，再记录每一步的结果与疑问。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="任务不等于线程">任务不等于线程</h2>
+<p>本节围绕“任务不等于线程”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
+<h2 id="先观察两个任务">先观察两个任务</h2>
+<p>本节围绕“先观察两个任务”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
+<h2 id="共享状态为何会错">共享状态为何会错</h2>
+<p>本节围绕“共享状态为何会错”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
+<h2 id="线程池怎样接收任务">线程池怎样接收任务</h2>
+<p>本节围绕“线程池怎样接收任务”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
+<h2 id="根据证据设置边界">根据证据设置边界</h2>
+<p>本节围绕“根据证据设置边界”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
+<h2 id="jdk-21-虚拟线程旁路">JDK 21 虚拟线程旁路</h2>
+<p>本节围绕“JDK 21 虚拟线程旁路”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
+<h2 id="练习与验收">练习与验收</h2>
+<p>复现一个计数器竞态，再用 AtomicInteger 修复；为线程池写出队列满时的处理策略。</p>
+<p>完成后，应能用本章的术语解释自己的操作结果；遇到失败时，先记录输入、实际结果和错误信息。</p>
+<h2 id="容易走偏的地方">容易走偏的地方</h2>
+<p>不要跳过本章的基础模型，直接复制框架、数据库或运维配置。每一项操作都应有明确的目的和可观察结果。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>本章的内容会在后续章节继续使用。先完成练习和验收，再进入下一章。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/" target="_blank" rel="noreferrer">Java SE 17 Documentation</a>.</li><li>OpenJDK. <a href="https://openjdk.org/jeps/0" target="_blank" rel="noreferrer">JEP Index</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/33-kafka-mq.html">← 第 33 章<br><strong>Kafka 消息处理与可靠性</strong></a><a href="../lessons/35-jvm-runtime-gc.html">第 35 章 →<br><strong>JVM 类加载、运行时内存与垃圾回收</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#任务不等于线程">任务不等于线程</a><a class="" href="#先观察两个任务">先观察两个任务</a><a class="" href="#共享状态为何会错">共享状态为何会错</a><a class="" href="#线程池怎样接收任务">线程池怎样接收任务</a><a class="" href="#根据证据设置边界">根据证据设置边界</a><a class="" href="#jdk-21-虚拟线程旁路">JDK 21 虚拟线程旁路</a><a class="" href="#练习与验收">练习与验收</a><a class="" href="#容易走偏的地方">容易走偏的地方</a><a class="" href="#本章小结">本章小结</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

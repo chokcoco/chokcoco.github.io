@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="接口约定能力，实现类提供不同规则；多态让调用方依赖抽象类型，继承用于真正的“是一个”关系，组合通常更适合复用行为。"><title>接口、继承、组合与多态 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 10 章 · Java 语言及标准库基础</div><h1>接口、继承、组合与多态</h1><p class="lesson-summary">接口约定能力，实现类提供不同规则；多态让调用方依赖抽象类型，继承用于真正的“是一个”关系，组合通常更适合复用行为。</p><div class="meta-row"><span class="pill">先看调用方需要什么能力，再决定使用接口、继承还是持有另一个对象。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="接口先描述能力">接口先描述能力</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">接口</span>不先描述“对象里有哪些字段”，而是描述“调用方可以要求它做什么”。例如折扣规则都能根据原价计算应付金额：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public interface DiscountPolicy {
+    int apply(int originalPrice);
+}</code></pre></figure>
+<p>接口方法没有方法体。它要求实现类提供 <code>apply</code>，却不规定具体计算方式。调用方因此可以只依赖 <code>DiscountPolicy</code>，不必写死某一种折扣。</p>
+<h2 id="两个实现类给出不同规则">两个实现类给出不同规则</h2>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class NoDiscountPolicy implements DiscountPolicy {
+    @Override
+    public int apply(int originalPrice) {
+        return originalPrice;
+    }
+}</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class PercentageDiscountPolicy implements DiscountPolicy {
+    @Override
+    public int apply(int originalPrice) {
+        return originalPrice * 90 / 100;
+    }
+}</code></pre></figure>
+<p><code>implements</code> 表示类实现接口；<code>@Override</code> 表示这个方法是对接口方法的实现。它能帮助编译器检查方法名、参数和返回值是否写对。</p>
+<p>调用时，变量类型可以写成接口：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">DiscountPolicy policy = new PercentageDiscountPolicy();
+int finalPrice = policy.apply(1000);</code></pre></figure>
+<p>变量 <code>policy</code> 的声明类型是接口，运行时保存的是具体实现对象。调用 <code>apply</code> 时，Java 会执行实际对象的实现。这种“同一调用根据对象类型产生不同结果”的能力叫<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">多态</span>。</p>
+<h2 id="把变化放在接口后面">把变化放在接口后面</h2>
+<p>订单计算不必知道每种折扣的细节：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class OrderCalculator {
+    private final DiscountPolicy discountPolicy;
+
+    public OrderCalculator(DiscountPolicy discountPolicy) {
+        this.discountPolicy = discountPolicy;
+    }
+
+    public int finalPrice(int originalPrice) {
+        return discountPolicy.apply(originalPrice);
+    }
+}</code></pre></figure>
+<p>创建时选择规则：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">OrderCalculator calculator = new OrderCalculator(new NoDiscountPolicy());
+System.out.println(calculator.finalPrice(1000));</code></pre></figure>
+<p>以后新增会员折扣时，只新增实现类，不必修改 OrderCalculator 的计算流程。这不是要求所有类都创建接口；当确实存在可替换规则时，接口才带来价值。</p>
+<h2 id="继承表示真正的-是一个-关系">继承表示真正的“是一个”关系</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">继承</span>使用 <code>extends</code>。子类继承父类可访问的字段和方法，并可重写行为：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class Notification {
+    public String channel() {
+        return &quot;unknown&quot;;
+    }
+}
+
+public class EmailNotification extends Notification {
+    @Override
+    public String channel() {
+        return &quot;email&quot;;
+    }
+}</code></pre></figure>
+<p>这里 EmailNotification 是一种 Notification，因此继承有意义。父类型变量也可以指向子类：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Notification notification = new EmailNotification();
+System.out.println(notification.channel()); // email</code></pre></figure>
+<p>继承会让子类和父类紧密耦合。若两个类只是“都需要发送通知”，通常接口更合适；若一个类只是“内部需要使用另一个对象”，组合更合适。</p>
+<h2 id="组合往往比继承更直接">组合往往比继承更直接</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">组合</span>表示一个对象持有另一个对象，并把工作委托出去：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class OrderService {
+    private final DiscountPolicy discountPolicy;
+
+    public OrderService(DiscountPolicy discountPolicy) {
+        this.discountPolicy = discountPolicy;
+    }
+}</code></pre></figure>
+<p>OrderService 不是 DiscountPolicy，因此不应继承它；它只是“有一个”折扣规则。组合能在创建对象时替换依赖，也能避免为了复用一两个方法而建立不自然的继承树。</p>
+<h2 id="抽象类与默认方法">抽象类与默认方法</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">抽象类</span>可以同时包含已实现的方法和必须由子类完成的抽象方法。它适合多个类确实共享一部分状态或通用算法时。Java 类只能继承一个父类，但可以实现多个接口。</p>
+<p>接口还可提供 <code>default</code> 方法：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public interface DiscountPolicy {
+    int apply(int originalPrice);
+
+    default boolean supports(int originalPrice) {
+        return originalPrice &gt;= 0;
+    }
+}</code></pre></figure>
+<p>默认方法适合给接口添加小型通用行为；不要把大量状态和复杂流程塞进接口。初学阶段优先把接口保持为少量、清楚的方法。</p>
+<p>JDK 17 的 <code>sealed</code> 类和接口可以限制谁能继承或实现它们。它适合确实只有少数可控子类型的模型；当前阶段先知道它存在，不必在普通业务代码中强行使用。</p>
+<h2 id="练习-可替换的运费规则">练习：可替换的运费规则</h2>
+<p>定义 <code>ShippingPolicy</code> 接口，包含 <code>int fee(int orderAmount)</code>。实现两个规则：普通运费固定 10 元；满 100 元免运费。让 <code>Checkout</code> 类通过构造器接收 ShippingPolicy，并计算总价加运费。</p>
+<p>完成标准：Checkout 的字段和参数类型写接口；新增规则时不修改 Checkout；每个实现类都用 <code>@Override</code>。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="为每个类提前创建接口">为每个类提前创建接口</h3>
+<p>只有一个实现、没有替换需求时，接口可能只是增加文件数量。接口用于表达边界或可替换能力，不是固定格式。</p>
+<h3 id="为了复用代码就继承">为了复用代码就继承</h3>
+<p>能复用一段方法不等于存在“是一个”关系。优先考虑把被复用的对象作为字段组合进来。</p>
+<h3 id="向下转型取得子类方法">向下转型取得子类方法</h3>
+<p>若频繁把父类型强制转回子类，通常说明接口或父类缺少调用方真正需要的能力。不要用强制转换绕过设计问题。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>接口让调用方依赖能力而不是具体实现；多态在运行时选择对象的实现。继承表达真实的类型关系，组合表达对象协作。第 11 章会把正常结果之外的失败信息纳入方法和边界设计。</p>
+<h2 id="快速自测">快速自测</h2>
+<ol><li><code>implements</code> 与 <code>extends</code> 分别表示什么？</li><li>为什么 OrderCalculator 的字段类型是 DiscountPolicy？</li><li>什么情况更适合组合而不是继承？</li></ol>
+<p>参考答案：前者实现接口，后者继承父类；这样可替换折扣实现；对象只是使用另一个对象而不是其一种类型时。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Oracle. <a href="https://docs.oracle.com/javase/specs/jls/se17/html/jls-9.html" target="_blank" rel="noreferrer">Java SE 17 Language Specification: Interfaces</a>.</li><li>OpenJDK. <a href="https://dev.java/learn/interfaces/" target="_blank" rel="noreferrer">Learn Java: Interfaces</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/09-class-record-enum.html">← 第 9 章<br><strong>类、record 与 enum 的选择</strong></a><a href="../lessons/11-exception-boundary.html">第 11 章 →<br><strong>Java 异常与异常边界</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#接口先描述能力">接口先描述能力</a><a class="" href="#两个实现类给出不同规则">两个实现类给出不同规则</a><a class="" href="#把变化放在接口后面">把变化放在接口后面</a><a class="" href="#继承表示真正的-是一个-关系">继承表示真正的“是一个”关系</a><a class="" href="#组合往往比继承更直接">组合往往比继承更直接</a><a class="" href="#抽象类与默认方法">抽象类与默认方法</a><a class="" href="#练习-可替换的运费规则">练习：可替换的运费规则</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#为每个类提前创建接口">为每个类提前创建接口</a><a class="sub" href="#为了复用代码就继承">为了复用代码就继承</a><a class="sub" href="#向下转型取得子类方法">向下转型取得子类方法</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

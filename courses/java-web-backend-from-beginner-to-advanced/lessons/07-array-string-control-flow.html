@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="数组按下标保存固定数量的同类型元素，String 表示不可变文本；结合第 4 章的分支和循环，已经可以完成小型文本处理规则。"><title>数组、字符串与控制流 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 7 章 · Java 语言及标准库基础</div><h1>数组、字符串与控制流</h1><p class="lesson-summary">数组按下标保存固定数量的同类型元素，String 表示不可变文本；结合第 4 章的分支和循环，已经可以完成小型文本处理规则。</p><div class="meta-row"><span class="pill">数组、字符串和循环都可以单独运行；先确认一个小例子的输出，再把它们组合起来。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一-数组保存固定数量的同类型数据">一、数组保存固定数量的同类型数据</h2>
+<p>当程序要保存多个相同类型的值时，可以使用<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">数组</span>。创建三个整数的数组：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int[] scores = {60, 75, 90};</code></pre></figure>
+<p><code>int[]</code> 表示“整数数组”。数组的每个位置有一个从 0 开始的<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">下标</span>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">System.out.println(scores[0]); // 60
+System.out.println(scores[2]); // 90
+System.out.println(scores.length); // 3</code></pre></figure>
+<p>最后一个元素的下标永远是 <code>length - 1</code>。访问 <code>scores[3]</code> 会在运行期抛出 <code>ArrayIndexOutOfBoundsException</code>，因为长度为 3 的数组只有 0、1、2 三个有效下标。</p>
+<p>数组创建后长度不能改变。下面写法创建五个整数位置，初始值都是 0：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int[] quantities = new int[5];
+quantities[0] = 2;</code></pre></figure>
+<p>需要可增可减的数据容器时，第 13 章会介绍 <code>List</code>。本章先把“固定位置、固定长度、同一类型”的数组规则讲清楚。</p>
+<h2 id="二-使用索引与循环访问数组">二、使用索引与循环访问数组</h2>
+<p>已知下标时，用普通 <code>for</code> 循环：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String[] names = {&quot;Ada&quot;, &quot;Lin&quot;, &quot;Mo&quot;};
+
+for (int index = 0; index &lt; names.length; index++) {
+    System.out.println(names[index]);
+}</code></pre></figure>
+<p>条件必须写 <code>index &lt; names.length</code>，不能写 <code>&lt;=</code>；后者最后会访问不存在的 <code>names[names.length]</code>。</p>
+<p>只需要读取每个元素、无需下标时，用增强 <code>for</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">for (String name : names) {
+    System.out.println(name);
+}</code></pre></figure>
+<p>它读作“从 names 中依次取出一个 String，命名为 name”。增强 <code>for</code> 简洁，但不适合需要知道位置、跳过指定下标或替换元素的场景。</p>
+<h2 id="三-string-表示不可变文本">三、String 表示不可变文本</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">String</span>表示文本。可以用双引号创建：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String title = &quot; Java Web &quot;;</code></pre></figure>
+<p>常见操作包括：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">System.out.println(title.length());        // 10，包含空格
+System.out.println(title.trim());          // &quot;Java Web&quot;
+System.out.println(title.contains(&quot;Web&quot;)); // true
+System.out.println(title.startsWith(&quot; &quot;)); // true</code></pre></figure>
+<p>String 有一个重要性质：<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">不可变</span>。调用 <code>trim()</code>、<code>toUpperCase()</code> 等方法不会改动原变量指向的文本，而是返回一个新字符串：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String title = &quot; java &quot;;
+title.trim();
+System.out.println(title); // 仍然是 &quot; java &quot;
+
+String cleaned = title.trim();
+System.out.println(cleaned); // &quot;java&quot;</code></pre></figure>
+<p>因此，想保留处理结果必须接住返回值。字符串相等性继续使用第 6 章的规则：比较内容使用 <code>equals</code>，不要用 <code>==</code>。</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String status = &quot;OPEN&quot;;
+if (&quot;OPEN&quot;.equals(status)) {
+    System.out.println(&quot;待处理&quot;);
+}</code></pre></figure>
+<p>把常量放在左侧能避免 <code>status</code> 为 <code>null</code> 时直接抛异常。</p>
+<h2 id="四-多次拼接时使用-stringbuilder">四、多次拼接时使用 StringBuilder</h2>
+<p>少量文本可以使用 <code>+</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String greeting = &quot;你好，&quot; + &quot;Java&quot;;</code></pre></figure>
+<p>循环中反复使用 <code>+</code> 会不断产生新的 String 对象。需要逐步构造文本时，使用<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">StringBuilder</span>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">StringBuilder report = new StringBuilder();
+
+for (int score : scores) {
+    report.append(score).append(&quot; &quot;);
+}
+
+System.out.println(report.toString());</code></pre></figure>
+<p><code>append</code> 把内容追加到 builder；最后 <code>toString()</code> 得到普通 String。第 8 章会解释 <code>new</code> 创建对象的语义，本章先把 StringBuilder 当成专门用于累积文本的标准库工具。</p>
+<h2 id="五-使用-switch-映射有限状态">五、使用 switch 映射有限状态</h2>
+<p>当一个值只有几个固定取值时，<code>switch</code> 可以让分支更集中。JDK 17 可使用 switch 表达式：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static String labelOf(String status) {
+    return switch (status) {
+        case &quot;OPEN&quot; -&gt; &quot;待处理&quot;;
+        case &quot;DONE&quot; -&gt; &quot;已完成&quot;;
+        case &quot;CANCELLED&quot; -&gt; &quot;已取消&quot;;
+        default -&gt; &quot;未知状态&quot;;
+    };
+}</code></pre></figure>
+<p><code>case</code> 后的 <code>-&gt;</code> 表示该分支直接产生结果；<code>default</code> 处理未列出的值。这里仍然是字符串状态，真正用 <code>enum</code> 表达有限状态会在第 9 章讲。</p>
+<h2 id="六-组合数组-字符串与控制流">六、组合数组、字符串与控制流</h2>
+<p>下面程序从固定数组中读取状态，去掉首尾空格、统一大写，再映射为显示文本：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class StatusDemo {
+    public static void main(String[] args) {
+        String[] rawStatuses = {&quot; open &quot;, &quot;done&quot;, &quot;&quot;, &quot;unknown&quot;};
+
+        for (String rawStatus : rawStatuses) {
+            String status = rawStatus.trim().toUpperCase();
+
+            if (status.isEmpty()) {
+                System.out.println(&quot;状态为空&quot;);
+                continue;
+            }
+
+            System.out.println(labelOf(status));
+        }
+    }
+
+    static String labelOf(String status) {
+        return switch (status) {
+            case &quot;OPEN&quot; -&gt; &quot;待处理&quot;;
+            case &quot;DONE&quot; -&gt; &quot;已完成&quot;;
+            default -&gt; &quot;未知状态&quot;;
+        };
+    }
+}</code></pre></figure>
+<p><code>continue</code> 表示结束本轮循环，直接进入下一个元素。这个例子只用了已经学过的数组、String、循环、判断、方法和 switch；没有提前引入集合或 Stream。</p>
+<h2 id="七-补充理解数组的创建与复制">七、补充理解数组的创建与复制</h2>
+<h3 id="7-1-声明数组变量不等于创建数组">7.1 声明数组变量不等于创建数组</h3>
+<p>下面只声明了一个数组变量，它目前没有指向数组对象：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int[] scores = null;
+// System.out.println(scores.length); // 运行时报 NullPointerException</code></pre></figure>
+<p><code>new int[3]</code> 才会创建长度为 3 的数组：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int[] scores = new int[3];
+
+System.out.println(scores.length); // 控制台输出：3
+System.out.println(scores[0]);     // 控制台输出：0</code></pre></figure>
+<p>数组创建后长度固定。<code>int</code> 元素默认是 0，<code>boolean</code> 默认是 <code>false</code>，引用类型元素默认是 <code>null</code>。这与第 4 章“局部变量必须初始化”并不冲突：变量 <code>scores</code> 已经指向真实数组，数组对象内部的槽位由 JVM 初始化。</p>
+<h3 id="7-2-数组变量保存引用">7.2 数组变量保存引用</h3>
+<p>数组属于引用类型。把一个数组变量赋给另一个变量，会复制引用，而不是复制全部元素：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int[] first = {10, 20};
+int[] second = first;
+
+// 两个变量指向同一个数组，因此通过 second 修改后，first 也能看到
+second[0] = 99;
+System.out.println(first[0]); // 控制台输出：99</code></pre></figure>
+<p>需要独立副本时，可以使用 <code>Arrays.copyOf</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">import java.util.Arrays;
+
+int[] first = {10, 20};
+int[] copy = Arrays.copyOf(first, first.length);
+
+copy[0] = 99;
+System.out.println(first[0]); // 控制台输出：10
+System.out.println(copy[0]);  // 控制台输出：99</code></pre></figure>
+<p><code>Arrays</code> 是标准库中的工具类。这里使用 <code>copyOf</code> 即可，不需要理解它的内部实现。</p>
+<h3 id="7-3-二维数组是数组中保存数组">7.3 二维数组是数组中保存数组</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int[][] table = {
+    {1, 2},
+    {3, 4}
+};
+
+System.out.println(table[0][1]); // 控制台输出：2</code></pre></figure>
+<p>第一个索引选择外层数组中的一行，第二个索引选择该行中的元素。Java 的二维数组每一行长度可以不同，因此更准确地说它是“数组的数组”，不是必须规则的数学矩阵。</p>
+<h2 id="八-补充掌握-string-的常用读取操作">八、补充掌握 String 的常用读取操作</h2>
+<h3 id="8-1-长度-字符和子串">8.1 长度、字符和子串</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String text = &quot;Java17&quot;;
+
+System.out.println(text.length());      // 控制台输出：6
+System.out.println(text.charAt(0));     // 控制台输出：J
+System.out.println(text.substring(0, 4)); // 控制台输出：Java</code></pre></figure>
+<p><code>substring(begin, end)</code> 包含开始位置，不包含结束位置，即左闭右开 <code>[begin, end)</code>。这与数组循环常用的 <code>index &lt; length</code> 一致。索引小于 0 或不小于长度时会抛出越界异常。</p>
+<h3 id="8-2-查找与判断">8.2 查找与判断</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String text = &quot;java-backend&quot;;
+
+System.out.println(text.contains(&quot;back&quot;)); // 控制台输出：true
+System.out.println(text.startsWith(&quot;java&quot;)); // 控制台输出：true
+System.out.println(text.indexOf('-')); // 控制台输出：4
+System.out.println(text.indexOf(&quot;web&quot;)); // 控制台输出：-1</code></pre></figure>
+<p><code>indexOf</code> 找不到内容时返回 -1。调用 <code>substring</code> 前若依赖查找结果，先确认索引不为 -1。</p>
+<h3 id="8-3-去除空白与大小写转换都会产生新字符串">8.3 去除空白与大小写转换都会产生新字符串</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String raw = &quot;  Paid  &quot;;
+String normalized = raw.strip().toUpperCase();
+
+System.out.println(raw);        // 控制台输出：  Paid  （原值不变）
+System.out.println(normalized); // 控制台输出：PAID</code></pre></figure>
+<p>JDK 11 起的 <code>strip</code> 按 Unicode 空白判断，旧的 <code>trim</code> 主要处理码值不大于空格的字符。处理国际化文本时通常优先 <code>strip</code>。</p>
+<h2 id="九-字符串拆分-连接与比较">九、字符串拆分、连接与比较</h2>
+<h3 id="9-1-split-的参数是正则表达式">9.1 split 的参数是正则表达式</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String line = &quot;Java,Spring,SQL&quot;;
+String[] parts = line.split(&quot;,&quot;);
+
+for (String part : parts) {
+    System.out.println(part);
+}
+// 控制台依次输出：Java、Spring、SQL</code></pre></figure>
+<p><code>split</code> 的参数不是普通字符，而是<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">正则表达式</span>。句点 <code>.</code> 在正则中表示任意字符，按字面句点拆分要写 <code>&quot;\\.&quot;</code>。复杂正则不属于本章范围。</p>
+<h3 id="9-2-join-把多个字符串连接起来">9.2 join 把多个字符串连接起来</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String result = String.join(&quot; | &quot;, &quot;Java&quot;, &quot;Spring&quot;, &quot;SQL&quot;);
+System.out.println(result); // 控制台输出：Java | Spring | SQL</code></pre></figure>
+<h3 id="9-3-文本内容使用-equals-比较">9.3 文本内容使用 equals 比较</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String status = new String(&quot;PAID&quot;);
+
+System.out.println(status.equals(&quot;PAID&quot;)); // 控制台输出：true
+System.out.println(status == &quot;PAID&quot;);      // 控制台输出：false</code></pre></figure>
+<p>第 6 章已经说明：<code>==</code> 比较引用值，<code>equals</code> 比较 String 内容。常量在前的 <code>&quot;PAID&quot;.equals(status)</code> 还可以安全处理 <code>status == null</code>。</p>
+<h2 id="十-遍历-拼接和控制流的选择">十、遍历、拼接和控制流的选择</h2>
+<h3 id="10-1-普通-for-与增强-for-各有用途">10.1 普通 for 与增强 for 各有用途</h3>
+<p>需要索引、修改指定位置或同时观察前后元素时，使用普通 <code>for</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String[] names = {&quot;小林&quot;, &quot;小周&quot;};
+
+for (int index = 0; index &lt; names.length; index++) {
+    System.out.println(index + &quot;：&quot; + names[index]);
+}
+// 控制台依次输出：0：小林、1：小周</code></pre></figure>
+<p>只需从头到尾读取元素时，增强 <code>for</code> 更直接：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">for (String name : names) {
+    System.out.println(name);
+}
+// 控制台依次输出：小林、小周</code></pre></figure>
+<p>增强 <code>for</code> 中的变量接收当前元素值。给变量重新赋值不会替换数组槽位：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">for (String name : names) {
+    name = &quot;已修改&quot;;
+}
+
+System.out.println(names[0]); // 控制台输出：小林</code></pre></figure>
+<h3 id="10-2-stringbuilder-适合循环中的累积拼接">10.2 StringBuilder 适合循环中的累积拼接</h3>
+<p>String 不可变，循环中的 <code>result = result + value</code> 每轮都可能创建新对象。<code>StringBuilder</code> 在内部维护可扩展字符缓冲区：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String[] names = {&quot;小林&quot;, &quot;小周&quot;, &quot;小吴&quot;};
+StringBuilder builder = new StringBuilder();
+
+for (int index = 0; index &lt; names.length; index++) {
+    if (index &gt; 0) {
+        builder.append(&quot;, &quot;);
+    }
+    builder.append(names[index]);
+}
+
+String result = builder.toString();
+System.out.println(result); // 控制台输出：小林, 小周, 小吴</code></pre></figure>
+<p>关键步骤是先创建 builder、反复 <code>append</code>，最后 <code>toString</code> 得到 String。少量固定字符串使用 <code>+</code> 更易读，不需要所有拼接都改成 builder。</p>
+<h3 id="10-3-判断-循环和-switch-解决不同问题">10.3 判断、循环和 switch 解决不同问题</h3>
+<ul><li><code>if</code> 适合范围、复合条件和不规则判断。</li><li><code>switch</code> 适合同一个值的有限分支。</li><li><code>for</code> 适合长度或次数明确的遍历。</li><li><code>while</code> 适合由状态决定何时结束的重复。</li></ul>
+<p>不要为了使用新语法把简单判断改写得更复杂。选择标准是执行意图能否被直接读出。</p>
+<h2 id="十一-练习与验收">十一、练习与验收</h2>
+<p>给定：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String[] tags = {&quot; java &quot;, &quot;&quot;, &quot;Web&quot;, &quot;java&quot;};</code></pre></figure>
+<p>要求：遍历数组，去掉首尾空格；跳过空文本；每个保留标签转为大写；用 <code>StringBuilder</code> 以逗号连接它们。暂时不要求去重，第 13 章会处理唯一性。</p>
+<p>完成标准：循环不会越界；能解释为什么要接住 <code>trim()</code> 和 <code>toUpperCase()</code> 的返回值；最后只调用一次 <code>toString()</code>。</p>
+<h2 id="十二-常见误区">十二、常见误区</h2>
+<h3 id="12-1-把-length-写成方法调用">12.1 把 <code>length</code> 写成方法调用</h3>
+<p>数组使用字段 <code>array.length</code>，String 使用方法 <code>text.length()</code>。少一个或多一个括号都会编译失败。</p>
+<h3 id="12-2-使用-array-length">12.2 使用 <code>&lt;= array.length</code></h3>
+<p>数组下标从 0 开始，最后一项是 <code>length - 1</code>。普通循环的继续条件通常是 <code>&lt; length</code>。</p>
+<h3 id="12-3-以为-string-方法原地修改文本">12.3 以为 String 方法原地修改文本</h3>
+<p>String 不可变。调用 <code>trim()</code> 后需要赋给变量，原字符串不会自动更新。</p>
+<h3 id="12-4-把-split-参数当成普通文本">12.4 把 split 参数当成普通文本</h3>
+<p><code>split</code> 使用正则表达式。按点号、竖线等特殊字符拆分时要转义，并用具体输入测试空字段和末尾分隔符。</p>
+<h3 id="12-5-在循环中反复用加号构建长文本">12.5 在循环中反复用加号构建长文本</h3>
+<p>少量拼接可以用 <code>+</code>；循环或大量片段使用 <code>StringBuilder</code>，最后只调用一次 <code>toString</code>。</p>
+<h2 id="十三-本章小结">十三、本章小结</h2>
+<p>数组处理固定数量的同类型数据，String 处理不可变文本，循环与分支决定逐项处理的路径。第 8 章开始把数据和操作组织进自定义类；第 13 章再使用可变长度集合替代一部分数组场景。</p>
+<h2 id="十四-快速自测">十四、快速自测</h2>
+<ol><li>长度为 3 的数组有哪些有效下标？</li><li><code>String.trim()</code> 为什么要接收返回值？</li><li>普通 <code>for</code> 与增强 <code>for</code> 分别适合什么情况？</li></ol>
+<p>参考答案：0、1、2；String 不可变，方法返回新字符串；需要下标时使用普通 <code>for</code>，只读取每个元素时增强 <code>for</code> 更简洁。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" target="_blank" rel="noreferrer">Java SE 17 API: String</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/StringBuilder.html" target="_blank" rel="noreferrer">Java SE 17 API: StringBuilder</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/06-reference-value-equality.html">← 第 6 章<br><strong>引用、值传递和相等性</strong></a><a href="../lessons/08-class-object-invariant.html">第 8 章 →<br><strong>类、对象与业务规则封装</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一-数组保存固定数量的同类型数据">一、数组保存固定数量的同类型数据</a><a class="" href="#二-使用索引与循环访问数组">二、使用索引与循环访问数组</a><a class="" href="#三-string-表示不可变文本">三、String 表示不可变文本</a><a class="" href="#四-多次拼接时使用-stringbuilder">四、多次拼接时使用 StringBuilder</a><a class="" href="#五-使用-switch-映射有限状态">五、使用 switch 映射有限状态</a><a class="" href="#六-组合数组-字符串与控制流">六、组合数组、字符串与控制流</a><a class="" href="#七-补充理解数组的创建与复制">七、补充理解数组的创建与复制</a><a class="sub" href="#7-1-声明数组变量不等于创建数组">7.1 声明数组变量不等于创建数组</a><a class="sub" href="#7-2-数组变量保存引用">7.2 数组变量保存引用</a><a class="sub" href="#7-3-二维数组是数组中保存数组">7.3 二维数组是数组中保存数组</a><a class="" href="#八-补充掌握-string-的常用读取操作">八、补充掌握 String 的常用读取操作</a><a class="sub" href="#8-1-长度-字符和子串">8.1 长度、字符和子串</a><a class="sub" href="#8-2-查找与判断">8.2 查找与判断</a><a class="sub" href="#8-3-去除空白与大小写转换都会产生新字符串">8.3 去除空白与大小写转换都会产生新字符串</a><a class="" href="#九-字符串拆分-连接与比较">九、字符串拆分、连接与比较</a><a class="sub" href="#9-1-split-的参数是正则表达式">9.1 split 的参数是正则表达式</a><a class="sub" href="#9-2-join-把多个字符串连接起来">9.2 join 把多个字符串连接起来</a><a class="sub" href="#9-3-文本内容使用-equals-比较">9.3 文本内容使用 equals 比较</a><a class="" href="#十-遍历-拼接和控制流的选择">十、遍历、拼接和控制流的选择</a><a class="sub" href="#10-1-普通-for-与增强-for-各有用途">10.1 普通 for 与增强 for 各有用途</a><a class="sub" href="#10-2-stringbuilder-适合循环中的累积拼接">10.2 StringBuilder 适合循环中的累积拼接</a><a class="sub" href="#10-3-判断-循环和-switch-解决不同问题">10.3 判断、循环和 switch 解决不同问题</a><a class="" href="#十一-练习与验收">十一、练习与验收</a><a class="" href="#十二-常见误区">十二、常见误区</a><a class="sub" href="#12-1-把-length-写成方法调用">12.1 把 length 写成方法调用</a><a class="sub" href="#12-2-使用-array-length">12.2 使用 &lt;= array.length</a><a class="sub" href="#12-3-以为-string-方法原地修改文本">12.3 以为 String 方法原地修改文本</a><a class="sub" href="#12-4-把-split-参数当成普通文本">12.4 把 split 参数当成普通文本</a><a class="sub" href="#12-5-在循环中反复用加号构建长文本">12.5 在循环中反复用加号构建长文本</a><a class="" href="#十三-本章小结">十三、本章小结</a><a class="" href="#十四-快速自测">十四、快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

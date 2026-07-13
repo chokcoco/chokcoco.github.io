@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Optional 用于明确表达方法可能没有返回结果；它应主要出现在返回值边界，通过 map、filter 和默认值处理缺失，而不是替代所有 null 或异常。"><title>Optional 与缺失值 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 15 章 · Java 语言及标准库基础</div><h1>Optional 与缺失值</h1><p class="lesson-summary">Optional 用于明确表达方法可能没有返回结果；它应主要出现在返回值边界，通过 map、filter 和默认值处理缺失，而不是替代所有 null 或异常。</p><div class="meta-row"><span class="pill">先区分“没有查到数据”“输入不合法”和“系统失败”，它们不应由同一种返回值表达。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="缺失-拒绝与失败不是一回事">缺失、拒绝与失败不是一回事</h2>
+<p>假设按编号查询昵称：</p>
+<ul><li>用户不存在：查询没有结果。</li><li>编号格式错误：调用方输入不合法。</li><li>数据库不可用：系统失败。</li></ul>
+<p>这三种情况不能都返回空字符串，也不应都抛同一种异常。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Optional</span>适合表示第一种：一个正常查询可能找不到结果。</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Optional&lt;String&gt; findNickname(String userId) {
+    if (&quot;u-1&quot;.equals(userId)) {
+        return Optional.of(&quot;Ada&quot;);
+    }
+    return Optional.empty();
+}</code></pre></figure>
+<p><code>Optional&lt;String&gt;</code> 表示“可能有一个 String，也可能没有”。它让调用方在类型上看见缺失可能，而不是把 <code>null</code> 藏在普通 String 返回值里。</p>
+<h2 id="创建-optional">创建 Optional</h2>
+<p>三个常用工厂方法：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Optional&lt;String&gt; known = Optional.of(&quot;Java&quot;);
+Optional&lt;String&gt; maybe = Optional.ofNullable(null);
+Optional&lt;String&gt; empty = Optional.empty();</code></pre></figure>
+<p><code>of</code> 只接收非 null 值；传入 null 会立即抛 <code>NullPointerException</code>。已有变量可能为 null 时使用 <code>ofNullable</code>。明确没有结果时使用 <code>empty</code>。</p>
+<p>不要把 Optional 当作“可以随处装 null 的盒子”。它的价值在于方法签名和调用链清楚地表达缺失。</p>
+<h2 id="不直接调用-get">不直接调用 get</h2>
+<p><code>get()</code> 在有值时返回内容，在为空时抛 <code>NoSuchElementException</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Optional&lt;String&gt; nickname = findNickname(&quot;missing&quot;);
+// nickname.get(); // 运行时失败</code></pre></figure>
+<p><code>get</code> 并没有真正处理缺失，只是把问题推迟。根据业务需要选择更明确的方式。</p>
+<p>有合理默认值：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String displayName = findNickname(&quot;missing&quot;).orElse(&quot;匿名用户&quot;);</code></pre></figure>
+<p>默认值创建成本较高或需要延迟计算：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String displayName = findNickname(&quot;missing&quot;)
+    .orElseGet(() -&gt; loadDefaultName());</code></pre></figure>
+<p><code>orElse</code> 的参数会先计算，<code>orElseGet</code> 只在 Optional 为空时执行 Lambda。默认值只是展示兜底时适合；若缺失必须阻止后续操作，应使用明确异常：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String nickname = findNickname(&quot;missing&quot;)
+    .orElseThrow(() -&gt; new IllegalArgumentException(&quot;用户不存在&quot;));</code></pre></figure>
+<h2 id="在有值时转换或筛选">在有值时转换或筛选</h2>
+<p>不必先 <code>isPresent()</code> 再 <code>get()</code>。Optional 的 <code>map</code> 只在有值时转换：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Optional&lt;Integer&gt; length = findNickname(&quot;u-1&quot;)
+    .map(String::length);</code></pre></figure>
+<p><code>filter</code> 保留满足条件的值：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Optional&lt;String&gt; longName = findNickname(&quot;u-1&quot;)
+    .filter(name -&gt; name.length() &gt;= 3);</code></pre></figure>
+<p>需要在有值时执行简单动作可使用 <code>ifPresent</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">findNickname(&quot;u-1&quot;).ifPresent(System.out::println);</code></pre></figure>
+<p>但业务流程不能被拆成很多 ifPresent Lambda。若后续分支复杂，先用 <code>orElseThrow</code> 取出必需对象，或用普通 if 写清楚路径。</p>
+<h2 id="optional-的使用边界">Optional 的使用边界</h2>
+<p>Optional 最适合作为“可能查不到单个结果”的返回值。通常不建议作为字段、构造器参数或 JSON DTO 字段：它会增加序列化、框架和调用代码的复杂度，而 <code>null</code> 的缺失语义仍需处理。</p>
+<p>空集合也不必包装 Optional：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">List&lt;String&gt; findTags(String articleId) {
+    return List.of(); // 没有标签时返回空列表
+}</code></pre></figure>
+<p>集合本身已经能表达“零个结果”。第 22 章处理 JSON DTO 时，会进一步区分字段缺失、null 和空数组的接口含义。</p>
+<h2 id="练习-安全显示昵称">练习：安全显示昵称</h2>
+<p>实现 <code>displayNameOf(String userId)</code>：调用一个返回 <code>Optional&lt;String&gt;</code> 的查询方法，去掉昵称首尾空格；若结果为空或清洗后为空，返回“匿名用户”。不要调用 get，不要在方法内部返回 null。</p>
+<p>完成标准：能解释为什么使用 <code>map</code>；默认值只在需要时产生；查询无结果不与数据库异常混为一谈。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="ispresent-后立刻-get"><code>isPresent()</code> 后立刻 <code>get()</code></h3>
+<p>这相当于把 Optional 还原成手工 null 检查。简单场景可读，复杂链条优先使用 map、orElse、orElseThrow。</p>
+<h3 id="用-optional-包装每个字段">用 Optional 包装每个字段</h3>
+<p>Optional 的设计重点是返回值边界。字段和参数中使用它往往让框架和序列化更复杂。</p>
+<h3 id="用默认值掩盖必须存在的数据">用默认值掩盖必须存在的数据</h3>
+<p>用户必须存在才能继续时，返回“匿名用户”会掩盖业务错误。根据场景选择默认值还是抛出明确异常。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>Optional 让“可能没有结果”成为显式 API 契约。用 <code>ofNullable</code> 创建可能缺失的值，用 map/filter 处理有值分支，用 orElse/orElseGet/orElseThrow 决定缺失后的行为；不要把它变成 null 的通用替身。</p>
+<h2 id="快速自测">快速自测</h2>
+<ol><li><code>Optional.of(null)</code> 会怎样？</li><li><code>orElse</code> 与 <code>orElseGet</code> 的区别是什么？</li><li>为什么空 List 通常不需要 Optional 包装？</li></ol>
+<p>参考答案：抛 NullPointerException；前者立即计算默认值，后者仅在为空时调用供应者；空集合已经表达“没有元素”。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Optional.html" target="_blank" rel="noreferrer">Java SE 17 API: Optional</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/14-lambda-stream.html">← 第 14 章<br><strong>Lambda 与 Stream 基础</strong></a><a href="../lessons/16-io-time-version.html">第 16 章 →<br><strong>文件、编码、日期时间与 JDK 版本差异</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#缺失-拒绝与失败不是一回事">缺失、拒绝与失败不是一回事</a><a class="" href="#创建-optional">创建 Optional</a><a class="" href="#不直接调用-get">不直接调用 get</a><a class="" href="#在有值时转换或筛选">在有值时转换或筛选</a><a class="" href="#optional-的使用边界">Optional 的使用边界</a><a class="" href="#练习-安全显示昵称">练习：安全显示昵称</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#ispresent-后立刻-get">isPresent() 后立刻 get()</a><a class="sub" href="#用-optional-包装每个字段">用 Optional 包装每个字段</a><a class="sub" href="#用默认值掩盖必须存在的数据">用默认值掩盖必须存在的数据</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

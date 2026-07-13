@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="List 表示有顺序的元素序列，Set 表示不重复元素，Map 表示键到值的映射；集合行为依赖泛型、相等性和可变性规则。"><title>List、Set 与 Map | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 13 章 · Java 语言及标准库基础</div><h1>List、Set 与 Map</h1><p class="lesson-summary">List 表示有顺序的元素序列，Set 表示不重复元素，Map 表示键到值的映射；集合行为依赖泛型、相等性和可变性规则。</p><div class="meta-row"><span class="pill">先按“是否需要顺序、是否允许重复、是否按键查找”选择集合接口，再考虑具体实现类。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="数组不够用时">数组不够用时</h2>
+<p>数组长度固定，创建后不能方便地增删元素。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">集合</span>提供可变长度的数据结构。Java 集合先看接口含义，再选择实现类；初学阶段最常用的是 <code>ArrayList</code>、<code>HashSet</code> 和 <code>HashMap</code>。</p>
+<p>集合都应带泛型：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">List&lt;String&gt; names = new ArrayList&lt;&gt;();</code></pre></figure>
+<p>这行表示“一个保存 String 的 List”。不要写原始类型 <code>List names</code>，否则会失去第 12 章建立的类型检查。</p>
+<h2 id="list-保留元素顺序">List 保留元素顺序</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">List</span>表示有顺序、允许重复的元素序列：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">List&lt;String&gt; tasks = new ArrayList&lt;&gt;();
+tasks.add(&quot;学习变量&quot;);
+tasks.add(&quot;学习集合&quot;);
+tasks.add(&quot;学习变量&quot;);
+
+System.out.println(tasks.get(0)); // 学习变量
+System.out.println(tasks.size()); // 3</code></pre></figure>
+<p>List 与数组一样按 0 开始的下标读取，但长度会随着 add/remove 改变：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">tasks.remove(&quot;学习变量&quot;); // 删除第一个匹配项
+tasks.set(0, &quot;学习异常&quot;); // 替换指定下标元素</code></pre></figure>
+<p>遍历优先使用增强 for：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">for (String task : tasks) {
+    System.out.println(task);
+}</code></pre></figure>
+<p>遍历时不要直接对同一个 List 调用结构性 add/remove，否则可能抛出 <code>ConcurrentModificationException</code>。需要按条件删除时，第 14 章会学习更合适的 Stream 方式；也可以使用迭代器，但当前先建立“遍历期间不要随手改结构”的边界。</p>
+<h2 id="set-表示唯一性">Set 表示唯一性</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Set</span>不保留重复元素：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Set&lt;String&gt; tags = new HashSet&lt;&gt;();
+tags.add(&quot;java&quot;);
+tags.add(&quot;web&quot;);
+tags.add(&quot;java&quot;);
+
+System.out.println(tags.size()); // 2</code></pre></figure>
+<p><code>HashSet</code> 通常不承诺遍历顺序。若业务需要保留插入顺序，后续可选择 <code>LinkedHashSet</code>；若需要排序，才考虑 <code>TreeSet</code>。先不要为了“看起来更高级”默认选择排序集合。</p>
+<p>Set 如何判断重复？对对象使用 <code>equals</code> 和 <code>hashCode</code>。第 6 章已经说明这两个方法要保持一致：若两个对象 <code>equals</code> 为 true，它们的 hashCode 必须相同。作为 Set 元素或 Map key 的对象，其影响相等性的字段不应在放入后修改，否则可能再也找不到它。</p>
+<h2 id="map-按键查找值">Map 按键查找值</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Map</span>保存 key 到 value 的映射：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Map&lt;String, Integer&gt; stockByProduct = new HashMap&lt;&gt;();
+stockByProduct.put(&quot;book&quot;, 10);
+stockByProduct.put(&quot;pen&quot;, 20);
+
+System.out.println(stockByProduct.get(&quot;book&quot;)); // 10</code></pre></figure>
+<p>同一个 key 再次 put 会覆盖旧 value：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">stockByProduct.put(&quot;book&quot;, 8);</code></pre></figure>
+<p>不存在的 key，<code>get</code> 返回 <code>null</code>。若需要默认值，可使用：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int stock = stockByProduct.getOrDefault(&quot;notebook&quot;, 0);</code></pre></figure>
+<p>遍历 Map 时，通常读取 entry：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">for (Map.Entry&lt;String, Integer&gt; entry : stockByProduct.entrySet()) {
+    System.out.println(entry.getKey() + &quot;: &quot; + entry.getValue());
+}</code></pre></figure>
+<p>不要写 <code>for (String key : map.keySet()) { map.get(key); }</code> 来处理大量数据后再做复杂查找；entrySet 一次就提供了键和值。</p>
+<h2 id="常见实现怎样选择">常见实现怎样选择</h2>
+<div class="table-wrap"><table><thead><tr><th>接口</th><th>常用实现</th><th>主要特征</th></tr></thead><tbody><tr><td>List</td><td>ArrayList</td><td>按下标读取快，适合大多数顺序列表</td></tr><tr><td>Set</td><td>HashSet</td><td>去重，通常不保证顺序</td></tr><tr><td>Map</td><td>HashMap</td><td>按 key 查找，通常不保证遍历顺序</td></tr></tbody></table></div>
+<p>集合变量优先声明为接口类型，例如 <code>List&lt;String&gt;</code> 而不是 <code>ArrayList&lt;String&gt;</code>。这样调用方依赖的是“列表能做什么”，实现细节可在需要时替换。</p>
+<p>Java 也提供 <code>List.of(...)</code>、<code>Set.of(...)</code>、<code>Map.of(...)</code> 创建不可修改集合：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">List&lt;String&gt; levels = List.of(&quot;LOW&quot;, &quot;MEDIUM&quot;, &quot;HIGH&quot;);
+// levels.add(&quot;URGENT&quot;); // 运行时 UnsupportedOperationException</code></pre></figure>
+<p>它适合固定配置或测试数据。若后面需要 add/remove，就创建 <code>new ArrayList&lt;&gt;(levels)</code> 得到可变副本。</p>
+<h2 id="练习-三种数据关系">练习：三种数据关系</h2>
+<p>实现三个小需求：</p>
+<ol><li>用 List 保存用户按点击顺序加入的商品。</li><li>用 Set 保存标签，重复标签只保留一个。</li><li>用 Map 按商品编号查库存，查不到时显示 0。</li></ol>
+<p>完成标准：能说明为什么三个需求不能都使用同一种集合；声明都带泛型；不假设 HashSet/HashMap 的遍历顺序。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="用-list-做去重">用 List 做去重</h3>
+<p>List 允许重复。若业务语义是“只能出现一次”，使用 Set 或先明确去重规则。</p>
+<h3 id="以为-hashmap-的顺序稳定">以为 HashMap 的顺序稳定</h3>
+<p>HashMap 不承诺迭代顺序。接口响应、日志或测试若需要顺序，应主动选择并说明对应实现。</p>
+<h3 id="修改-map-key-的相等性字段">修改 Map key 的相等性字段</h3>
+<p>若 key 的 equals/hashCode 依赖字段在放入后变化，HashMap 可能无法正确定位它。用不可变值作 key 最安全。</p>
+<h2 id="本章小结">本章小结</h2>
+<p>集合的第一选择来自数据关系：List 关心顺序，Set 关心唯一性，Map 关心按键定位。泛型保证元素类型，equals/hashCode 决定哈希集合中的重复与定位。下一章会在集合基础上使用 Lambda 和 Stream 描述处理流水线。</p>
+<h2 id="快速自测">快速自测</h2>
+<ol><li>List、Set、Map 分别解决什么数据关系？</li><li>HashSet 如何判断两个对象重复？</li><li>为什么 <code>List.of</code> 创建后不能 add？</li></ol>
+<p>参考答案：顺序序列、唯一元素、键值映射；依据 equals/hashCode；它返回不可修改集合。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/doc-files/coll-overview.html" target="_blank" rel="noreferrer">Java SE 17 API: Collections Framework</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" target="_blank" rel="noreferrer">Java SE 17 API: Map</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/12-generics.html">← 第 12 章<br><strong>Java 泛型与类型安全</strong></a><a href="../lessons/14-lambda-stream.html">第 14 章 →<br><strong>Lambda 与 Stream 基础</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#数组不够用时">数组不够用时</a><a class="" href="#list-保留元素顺序">List 保留元素顺序</a><a class="" href="#set-表示唯一性">Set 表示唯一性</a><a class="" href="#map-按键查找值">Map 按键查找值</a><a class="" href="#常见实现怎样选择">常见实现怎样选择</a><a class="" href="#练习-三种数据关系">练习：三种数据关系</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#用-list-做去重">用 List 做去重</a><a class="sub" href="#以为-hashmap-的顺序稳定">以为 HashMap 的顺序稳定</a><a class="sub" href="#修改-map-key-的相等性字段">修改 Map key 的相等性字段</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

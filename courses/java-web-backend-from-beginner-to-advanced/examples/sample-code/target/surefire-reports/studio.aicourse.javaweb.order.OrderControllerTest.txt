@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: studio.aicourse.javaweb.order.OrderControllerTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.92 s -- in studio.aicourse.javaweb.order.OrderControllerTest
