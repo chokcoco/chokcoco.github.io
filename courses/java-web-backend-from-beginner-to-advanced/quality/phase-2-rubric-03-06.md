@@ -2,9 +2,10 @@
 
 - 量规版本：1.0
 - 审校范围：`lessons/03-maven-build.md` 至 `lessons/06-reference-value-equality.md`
-- 第一阶段内容哈希：`6621bad5515f917a58374642ab1585cb1e8183c78e10d249923f22221bde66c5`
+- 第一阶段内容哈希：`fb9f7f0ab935d3c1560e97f42dc42613e9ba17af821ce7b86eb2fc59872f5579`
 - 第一阶段结果：0 error，0 warning
 - 审校轮次：1 轮；审校前修复第 3 章提前使用 `ArrayList<String>` 的前置断层
+- 哈希刷新说明：后续仅调整第 1、2 章教学标题编号；第 3–6 章 Markdown、HTML 和代码未变，本批次结论保持不变
 - 阻塞项：无
 - 决策：`ready`
 

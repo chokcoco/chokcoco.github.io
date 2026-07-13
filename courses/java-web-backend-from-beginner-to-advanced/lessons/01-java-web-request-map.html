@@ -1,18 +1,18 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Java Web 后端负责接收请求、执行规则并组织数据；本课程会先搭好环境，再由 Java 语言基础逐步走到可运行的后端服务。"><title>Java Web 后端学习地图与开发环境 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
-<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 1 章 · 环境介绍与准备</div><h1>Java Web 后端学习地图与开发环境</h1><p class="lesson-summary">Java Web 后端负责接收请求、执行规则并组织数据；本课程会先搭好环境，再由 Java 语言基础逐步走到可运行的后端服务。</p><div class="meta-row"><span class="pill">这一章先建立路线图，不要求安装工具，也不要求记住所有组件名称。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="从前端页面到后端服务">从前端页面到后端服务</h2>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 1 章 · 环境介绍与准备</div><h1>Java Web 后端学习地图与开发环境</h1><p class="lesson-summary">Java Web 后端负责接收请求、执行规则并组织数据；本课程会先搭好环境，再由 Java 语言基础逐步走到可运行的后端服务。</p><div class="meta-row"><span class="pill">这一章先建立路线图，不要求安装工具，也不要求记住所有组件名称。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一-从前端页面到后端服务">一、从前端页面到后端服务</h2>
 <p>前端工程师通常先接触页面、交互和浏览器请求。一个页面上的“查询商品”按钮被点击后，浏览器会向某个地址发送<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">HTTP</span>请求；后端服务收到请求，按业务规则读取或修改数据，再把结果作为 HTTP 响应交给浏览器。</p>
 <p>先把这件事看成一次信息往返：</p>
 <figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">浏览器准备请求 → Java 服务处理请求 → 数据库保存或读取事实 → Java 服务组织响应 → 浏览器显示结果</code></pre></figure>
 <p>后端不是一个神秘的黑盒。它主要处理三类事情：</p>
 <ul><li>接收并校验客户端输入，例如路径、查询参数和 JSON 请求体。</li><li>执行业务规则，例如“库存不能为负数”“当前用户没有管理权限”。</li><li>读取、修改或异步传递数据，并把处理结果以稳定的接口格式返回。</li></ul>
 <p>这门课的目的不是让你一开始就把所有组件连起来，而是先把这条路径上每一段的责任分清。这样以后看到一个 Spring Boot 工程时，你能知道代码大致在处理请求、业务、数据还是运行环境。</p>
-<h2 id="java-在这条路径中的位置">Java 在这条路径中的位置</h2>
+<h2 id="二-java-在这条路径中的位置">二、Java 在这条路径中的位置</h2>
 <p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Java</span>是一门编程语言。本课程会用它编写后端服务中的业务规则、数据对象和接口代码。Java 代码不会直接在浏览器中执行；它由 Java 运行环境执行，服务端进程持续等待并处理请求。</p>
 <p>Java Web 开发常见的几个名字很容易混在一起。现在只需要知道它们各自的工作位置：</p>
 <div class="table-wrap"><table><thead><tr><th>名称</th><th>现在先怎么理解</th><th>本课程何时系统学习</th></tr></thead><tbody><tr><td>Java</td><td>写程序的语言，以及配套标准库</td><td>第 3–16 章</td></tr><tr><td><span class="term" tabindex="0" data-tip="Java Development Kit，包含编译、运行、调试和诊断 Java 程序所需的工具。">JDK</span></td><td>编译、运行和开发 Java 程序所需的工具包</td><td>第 2 章</td></tr><tr><td><span class="term" tabindex="0" data-tip="Java Virtual Machine，加载并执行 class 文件、管理运行时内存的抽象机器。">JVM</span></td><td>运行 Java class 文件的虚拟机</td><td>第 2 章先建立印象，第 35 章展开</td></tr><tr><td>Spring Boot</td><td>帮 Java 程序快速提供 Web 接口的框架</td><td>第 18 章</td></tr><tr><td>数据库</td><td>保存长期数据，例如用户、订单和商品</td><td>第 23–26 章</td></tr><tr><td>Redis</td><td>常用于缓存和短期数据访问的服务</td><td>第 32 章</td></tr><tr><td>Kafka</td><td>用于异步传递消息的系统</td><td>第 33 章</td></tr><tr><td>Docker</td><td>将应用及其运行环境打包为可复现容器的工具</td><td>第 29 章</td></tr></tbody></table></div>
 <p>其中，Java 与 Spring Boot 不是同一个东西。Java 是语言；Spring Boot 是建立在 Java 生态上的 Web 框架。数据库也不是 Java 的一部分，它是后端服务通过网络或驱动访问的独立系统。</p>
-<h2 id="一次请求怎样经过后端">一次请求怎样经过后端</h2>
+<h2 id="三-一次请求怎样经过后端">三、一次请求怎样经过后端</h2>
 <p>先用一个很小的“查看待办项”场景建立直觉。浏览器请求 <code>/api/todos/42</code>，后端服务需要知道请求的是哪一条待办项，读取数据，并返回 JSON。</p>
 <div class="diagram-card"><pre class="mermaid">flowchart LR
     B[浏览器或前端应用] --&gt;|GET /api/todos/42| W[Java Web 服务]
@@ -22,30 +22,30 @@
 <p>图中的 Java Web 服务并不是一段单独的代码。一个较常见的服务会分成几类职责：</p>
 <ul><li>接口层负责理解 HTTP 请求和组织 HTTP 响应。</li><li>业务层负责判断规则，例如待办项是否存在、当前用户能否查看。</li><li>数据访问层负责把查询交给数据库。</li></ul>
 <p>第 20 章会正式讲这种分层。现在不要急着记住 Controller、Service、Repository 这些名字；只要记住同一条请求里既有“和浏览器说话”的部分，也有“和数据说话”的部分。</p>
-<h2 id="为什么以-jdk-17-为主线">为什么以 JDK 17 为主线</h2>
+<h2 id="四-以-jdk-17-作为课程主线">四、以 JDK 17 作为课程主线</h2>
 <p>Java 会持续发布新版本。版本差异会影响语法、标准库和项目所能使用的运行环境。为了让整门课程的示例有一个稳定基线，本课程统一使用 JDK 17：所有主线代码都以它编译和运行，不使用 preview feature。</p>
 <p>这不表示后续版本不重要。JDK 21 及之后的一些能力，例如虚拟线程和更多模式匹配语法，会在与它们有关的章节作为“版本旁路”说明，并明确最低版本。学习 Java 时，先看项目实际使用的 JDK，再判断某段语法能否使用，是一个很实用的习惯。</p>
 <p>对于刚转向后端的前端工程师，可以先建立一个简单对应关系：浏览器端要关注浏览器兼容性；Java 服务端要关注 JDK 版本、构建工具和部署环境是否一致。第 2 章会让终端、IDE 与 Maven 都使用同一套 JDK 17。</p>
-<h2 id="这门课的学习路线">这门课的学习路线</h2>
+<h2 id="五-课程学习路线">五、课程学习路线</h2>
 <p>36 章被分成四个模块。它们不是四套互不相关的技术清单，而是一条从“能运行”到“能判断问题”的路线。</p>
 <div class="table-wrap"><table><thead><tr><th>模块</th><th>章节</th><th>完成后应获得的能力</th></tr></thead><tbody><tr><td>环境介绍与准备</td><td>1–2</td><td>知道后端组件处在什么位置，并让电脑可以稳定运行 Java 17 项目</td></tr><tr><td>Java 语言及标准库基础</td><td>3–16</td><td>能读写 Java 基础代码，理解对象、集合、异常和常用标准库</td></tr><tr><td>后端开发基础</td><td>17–29</td><td>能从 HTTP 契约实现一个带校验、数据访问、测试与 Docker 运行方式的 REST API</td></tr><tr><td>Java 进阶</td><td>30–36</td><td>能理解安全、缓存、消息、线程池、JVM，并按证据排查常见问题</td></tr></tbody></table></div>
 <p>学习时请按顺序推进。特别是第 4 章的方法、第 5 章的类型和第 6 章的引用关系，是后面阅读 Java 代码时会反复使用的基础。不要因为已经会 JavaScript 或 TypeScript 就跳过它们；两门语言在对象、类型、相等性和运行方式上都有需要重新建立的规则。</p>
-<h2 id="第-2-章结束时你应该得到什么">第 2 章结束时你应该得到什么</h2>
+<h2 id="六-第-2-章结束时的环境结果">六、第 2 章结束时的环境结果</h2>
 <p>下一章不是“看完安装说明”就结束。完成第 2 章后，你应该能拿出下面四项证据：</p>
 <ol><li>终端中 <code>java -version</code> 与 <code>javac -version</code> 的输出。</li><li>一个自己创建并运行过的最小 Java 程序。</li><li>IDE 中同一个程序的运行结果。</li><li>Maven 的版本输出和一次成功构建结果。</li></ol>
 <p>如果四项结果都来自 Java 17，你就拥有了后续课程需要的最低环境。遇到问题时，不必靠重装软件碰运气；第 2 章会给出从 PATH、<code>JAVA_HOME</code>、IDE SDK 到 Maven Runner 的排查顺序。</p>
-<h2 id="常见误区">常见误区</h2>
-<h3 id="把-java-当成-spring-boot-的别名">把 Java 当成 Spring Boot 的别名</h3>
+<h2 id="七-常见误区">七、常见误区</h2>
+<h3 id="7-1-把-java-当成-spring-boot-的别名">7.1 把 Java 当成 Spring Boot 的别名</h3>
 <p>Spring Boot 项目中会出现大量注解和配置，但它们建立在 Java 语言、类型、对象和异常等基础之上。第 3–16 章不是绕路，而是在为后面的框架代码补齐阅读能力。</p>
-<h3 id="以为后端开发只需要写接口">以为后端开发只需要写接口</h3>
+<h3 id="7-2-以为后端开发只需要写接口">7.2 以为后端开发只需要写接口</h3>
 <p>接口是后端的一部分。数据建模、输入校验、事务、日志、安全、缓存和运行环境同样会影响一个需求是否真正完成。课程会逐步进入这些部分，不会要求你在第一个接口里全部掌握。</p>
-<h3 id="先背组件名词再开始操作">先背组件名词再开始操作</h3>
+<h3 id="7-3-先背组件名词再开始操作">7.3 先背组件名词再开始操作</h3>
 <p>现在不需要区分 Kafka 的每个角色，也不需要知道 Redis 的全部数据结构。先完成环境核验和 Java 基础，后面的名词会在实际需要时出现。</p>
-<h2 id="本章小结">本章小结</h2>
+<h2 id="八-本章小结">八、本章小结</h2>
 <p>Java Web 后端处在浏览器与数据系统之间：接收请求、执行规则、组织响应。Java 是写服务端代码的语言，Spring Boot、数据库、Redis、Kafka 和 Docker 则在不同阶段提供框架、数据、异步或运行能力。</p>
 <p>你现在只需要带着这张地图进入第 2 章。下一步的目标很具体：让终端、IDE 和 Maven 使用同一套 JDK 17，并运行同一个最小程序。</p>
-<h2 id="快速自测">快速自测</h2>
+<h2 id="九-快速自测">九、快速自测</h2>
 <ol><li>Java、Spring Boot 和数据库分别负责什么？</li><li>浏览器查询一条数据时，Java 服务至少要完成哪两类工作？</li><li>第 2 章结束时，为什么要同时核验终端、IDE 和 Maven？</li></ol>
 <p>参考答案：Java 用于编写程序；Spring Boot 帮 Java 程序提供 Web 能力；数据库保存数据。服务需要处理请求规则并组织数据访问与响应。三处都核验，是为了避免“本地能运行、构建时却使用了另一套 JDK”的环境错配。</p>
 <h2 id="参考文献">参考文献</h2>
-<ul><li>OpenJDK. <a href="https://dev.java/learn/" target="_blank" rel="noreferrer">Learn Java</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/" target="_blank" rel="noreferrer">Java SE 17 Documentation</a>.</li><li>Apache Maven. <a href="https://maven.apache.org/guides/getting-started/" target="_blank" rel="noreferrer">Getting Started Guide</a>.</li></ul><nav class="lesson-nav"><span></span><a href="../lessons/02-reproducible-jdk17-environment.html">第 2 章 →<br><strong>JDK 17、IDE 与 Maven 环境核验</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#从前端页面到后端服务">从前端页面到后端服务</a><a class="" href="#java-在这条路径中的位置">Java 在这条路径中的位置</a><a class="" href="#一次请求怎样经过后端">一次请求怎样经过后端</a><a class="" href="#为什么以-jdk-17-为主线">为什么以 JDK 17 为主线</a><a class="" href="#这门课的学习路线">这门课的学习路线</a><a class="" href="#第-2-章结束时你应该得到什么">第 2 章结束时你应该得到什么</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#把-java-当成-spring-boot-的别名">把 Java 当成 Spring Boot 的别名</a><a class="sub" href="#以为后端开发只需要写接口">以为后端开发只需要写接口</a><a class="sub" href="#先背组件名词再开始操作">先背组件名词再开始操作</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>
+<ul><li>OpenJDK. <a href="https://dev.java/learn/" target="_blank" rel="noreferrer">Learn Java</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/" target="_blank" rel="noreferrer">Java SE 17 Documentation</a>.</li><li>Apache Maven. <a href="https://maven.apache.org/guides/getting-started/" target="_blank" rel="noreferrer">Getting Started Guide</a>.</li></ul><nav class="lesson-nav"><span></span><a href="../lessons/02-reproducible-jdk17-environment.html">第 2 章 →<br><strong>JDK 17、IDE 与 Maven 环境核验</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一-从前端页面到后端服务">一、从前端页面到后端服务</a><a class="" href="#二-java-在这条路径中的位置">二、Java 在这条路径中的位置</a><a class="" href="#三-一次请求怎样经过后端">三、一次请求怎样经过后端</a><a class="" href="#四-以-jdk-17-作为课程主线">四、以 JDK 17 作为课程主线</a><a class="" href="#五-课程学习路线">五、课程学习路线</a><a class="" href="#六-第-2-章结束时的环境结果">六、第 2 章结束时的环境结果</a><a class="" href="#七-常见误区">七、常见误区</a><a class="sub" href="#7-1-把-java-当成-spring-boot-的别名">7.1 把 Java 当成 Spring Boot 的别名</a><a class="sub" href="#7-2-以为后端开发只需要写接口">7.2 以为后端开发只需要写接口</a><a class="sub" href="#7-3-先背组件名词再开始操作">7.3 先背组件名词再开始操作</a><a class="" href="#八-本章小结">八、本章小结</a><a class="" href="#九-快速自测">九、快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

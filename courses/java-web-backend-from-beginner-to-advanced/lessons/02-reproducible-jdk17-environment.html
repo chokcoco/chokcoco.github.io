@@ -1,34 +1,34 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="一套可用的 Java 开发环境需要 JDK 17、用于写和调试代码的 IDE、用于构建项目的 Maven，并且三者必须指向同一套 Java 17。"><title>JDK 17、IDE 与 Maven 环境核验 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
-<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 2 章 · 环境介绍与准备</div><h1>JDK 17、IDE 与 Maven 环境核验</h1><p class="lesson-summary">一套可用的 Java 开发环境需要 JDK 17、用于写和调试代码的 IDE、用于构建项目的 Maven，并且三者必须指向同一套 Java 17。</p><div class="meta-row"><span class="pill">本章同时给出 macOS 与 Windows 路径。严格按“安装 JDK → 终端核验 → 安装 IDE → 安装 Maven → 运行同一程序”的顺序操作；任何一步失败都先停下来排查。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="先看本章完成后的结果">先看本章完成后的结果</h2>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 2 章 · 环境介绍与准备</div><h1>JDK 17、IDE 与 Maven 环境核验</h1><p class="lesson-summary">一套可用的 Java 开发环境需要 JDK 17、用于写和调试代码的 IDE、用于构建项目的 Maven，并且三者必须指向同一套 Java 17。</p><div class="meta-row"><span class="pill">本章同时给出 macOS 与 Windows 路径。严格按“安装 JDK → 终端核验 → 安装 IDE → 安装 Maven → 运行同一程序”的顺序操作；任何一步失败都先停下来排查。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一-先看本章完成后的结果">一、先看本章完成后的结果</h2>
 <p>完成本章后，你的电脑应能完成下面三件事：</p>
 <ol><li>在终端执行 <code>java -version</code> 和 <code>javac -version</code>，都显示 Java 17。</li><li>在 IntelliJ IDEA 中新建并运行一个 Java 程序。</li><li>在终端执行 <code>mvn -v</code>，其中的 Java version 也是 17；随后用 Maven 编译同一个程序。</li></ol>
 <p>这三个结果缺一不可。只在 IDE 中点击“运行”成功，还不能说明 Maven 和终端环境正确；只在终端能运行，也不代表 IDE 的项目设置正确。</p>
-<h2 id="开始前-先认识要安装的三个工具">开始前：先认识要安装的三个工具</h2>
+<h2 id="二-开始前认识三个工具">二、开始前认识三个工具</h2>
 <p>这一章会出现三个工具。先分清它们的角色，安装时才不会把其中一个误当成全部环境。</p>
 <div class="table-wrap"><table><thead><tr><th>工具</th><th>解决什么问题</th><th>本章的使用方式</th></tr></thead><tbody><tr><td><span class="term" tabindex="0" data-tip="Java Development Kit，包含编译、运行、调试和诊断 Java 程序所需的工具。">JDK</span> 17</td><td>提供 Java 编译器、运行命令和标准库</td><td>编译、运行 Java 程序</td></tr><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">IDE</span></td><td>提供编辑器、代码提示、运行、调试和项目管理界面</td><td>编写并运行程序</td></tr><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Maven</span></td><td>根据项目规则下载依赖、编译、测试和打包</td><td>在终端构建 Java 项目</td></tr></tbody></table></div>
 <p><span class="term" tabindex="0" data-tip="Java Virtual Machine，加载并执行 class 文件、管理运行时内存的抽象机器。">JVM</span>是运行 Java class 文件的环境。它随着 JDK 一起安装。<code>java</code> 是启动程序的命令，<code>javac</code> 是编译源文件的命令；现在不用记住 class 文件的细节，第 3 章会展开。</p>
-<h2 id="安装-jdk-17">安装 JDK 17</h2>
+<h2 id="三-安装-jdk-17">三、安装 JDK 17</h2>
 <p>本课程以 JDK 17 为可运行基线。不要先安装“最新 Java”再猜它是否兼容课程；先明确选择 17，后面遇到 JDK 21+ 的新能力时会单独说明。</p>
-<h2 id="macos-安装-jdk-17">macOS：安装 JDK 17</h2>
+<h3 id="3-1-macos-安装-jdk-17">3.1 macOS 安装 JDK 17</h3>
 <p>下面提供两条 macOS 路径。没有 Homebrew、第一次配置开发环境的学习者，请使用路径 A；已经熟悉 Homebrew 的学习者可以使用路径 B。二选一即可。</p>
-<h3 id="路径-a-从-adoptium-下载图形安装包">路径 A：从 Adoptium 下载图形安装包</h3>
+<h4 id="3-1-1-从-adoptium-下载图形安装包">3.1.1 从 Adoptium 下载图形安装包</h4>
 <p>Adoptium 是提供 OpenJDK 构建发行版的项目。本课程建议从 <a href="https://adoptium.net/temurin/releases/?version=17" target="_blank" rel="noreferrer">Eclipse Adoptium Temurin 17 下载页</a> 下载 Temurin 17。</p>
 <ol><li>打开该下载页。</li><li>在版本中选择 <strong>17</strong>。</li><li>操作系统选择 <strong>macOS</strong>。</li><li>选择与你的 Mac 匹配的架构：Apple 芯片的 Mac 选 <strong>AArch64 / ARM64</strong>；Intel 芯片的 Mac 选 <strong>x64</strong>。</li><li>下载扩展名为 <code>.pkg</code> 的安装包。</li><li>双击下载的 <code>.pkg</code> 文件，按 macOS 安装器提示继续，通常保持默认安装位置即可。</li></ol>
 <p>不知道自己的 Mac 使用哪种芯片时，点击屏幕左上角苹果菜单，选择“关于本机”：看到 Apple M 系列芯片时选 AArch64；看到 Intel 时选 x64。架构选错时，安装或运行可能失败，不要尝试用 IDE 设置绕过去。</p>
 <p>安装完成后，关闭当前终端并重新打开一个新的终端窗口。接着进入下一节执行版本核验。</p>
-<h3 id="路径-b-已经安装-homebrew-时使用命令行安装">路径 B：已经安装 Homebrew 时使用命令行安装</h3>
+<h4 id="3-1-2-已安装-homebrew-时使用命令行安装">3.1.2 已安装 Homebrew 时使用命令行安装</h4>
 <p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Homebrew</span>是 macOS 常用的软件包管理工具。如果你在终端执行下面的命令能看到版本号，说明已经安装：</p>
 <figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">brew -v</code></pre></figure>
 <p>此时可以安装 JDK 17：</p>
 <figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">brew install --cask temurin@17</code></pre></figure>
 <p>命令完成后，重新打开终端，再执行下一节的版本核验。</p>
 <p>如果 <code>brew -v</code> 提示找不到命令，不必为了这一章额外学习 Homebrew；回到路径 A 下载 <code>.pkg</code> 安装包即可。路径 A 对第一次安装 Java 的读者更直接。</p>
-<h2 id="windows-安装-jdk-17">Windows：安装 JDK 17</h2>
+<h3 id="3-2-windows-安装-jdk-17">3.2 Windows 安装 JDK 17</h3>
 <p>Windows 学习者同样从 <a href="https://adoptium.net/temurin/releases/?version=17" target="_blank" rel="noreferrer">Eclipse Adoptium Temurin 17 下载页</a> 下载，步骤如下：</p>
 <ol><li>在版本中选择 <strong>17</strong>，操作系统选择 <strong>Windows</strong>。</li><li>大多数普通 Windows 笔记本或台式机选择 <strong>x64</strong>；只有明确使用 ARM 版 Windows 的电脑才选择 <strong>AArch64 / ARM64</strong>。可在“设置 → 系统 → 系统信息 → 系统类型”查看。</li><li>下载 <code>.msi</code> 安装包，双击后按安装向导继续。首次安装保持默认安装目录即可。</li><li>安装程序出现“设置 JAVA_HOME”或“添加到 PATH”一类选项时，保持勾选。</li><li>安装结束后，关闭已打开的 PowerShell 或命令提示符窗口，再重新打开一个窗口。</li></ol>
 <p>如果重新打开 PowerShell 后仍提示找不到 <code>java</code>，先在资源管理器中确认 JDK 已安装。常见安装目录位于 <code>C:\Program Files\Eclipse Adoptium\</code> 下，但具体文件夹名称会带有补丁版本。找到其中的 <code>bin</code> 目录后，再按“按顺序排查版本不一致”一节补充 PATH 与 <code>JAVA_HOME</code>；不要把带有 <code>bin</code> 的路径直接填进 <code>JAVA_HOME</code>。</p>
-<h2 id="在终端确认-java-17">在终端确认 Java 17</h2>
+<h2 id="四-在终端确认-java-17">四、在终端确认 Java 17</h2>
 <p>macOS 打开“终端”；Windows 打开 PowerShell 或命令提示符。依次执行：</p>
 <figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">java -version
 javac -version</code></pre></figure>
@@ -47,7 +47,7 @@ Get-Command javac</code></pre></figure>
 <p>如果它们没有指向 JDK 17，可在“编辑系统环境变量 → 环境变量”中设置：</p>
 <ul><li><code>JAVA_HOME</code>：JDK 17 的根目录，例如 <code>C:\Program Files\Eclipse Adoptium\jdk-17...</code>，不包含末尾的 <code>bin</code>。</li><li><code>Path</code>：新增 <code>%JAVA_HOME%\bin</code>。</li></ul>
 <p>保存后必须关闭并重新打开 PowerShell，再执行版本命令。环境变量的具体 JDK 文件夹名称会随补丁版本变化，应以自己电脑上的实际目录为准。</p>
-<h3 id="用最小程序确认编译与运行">用最小程序确认编译与运行</h3>
+<h3 id="4-1-用最小程序确认编译与运行">4.1 用最小程序确认编译与运行</h3>
 <p>在任意便于找到的位置新建一个文件夹，例如 macOS 的“文稿”目录或 Windows 的“文档”目录中的 <code>java-learning/chapter-02</code>。在其中新建文件 <code>HelloJava.java</code>，内容如下：</p>
 <figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class HelloJava {
     public static void main(String[] args) {
@@ -61,30 +61,30 @@ java HelloJava</code></pre></figure>
 <p>第一条命令成功后会多出 <code>HelloJava.class</code>。第二条命令应输出：</p>
 <figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">Java 17 environment is ready.</code></pre></figure>
 <p>运行命令中只写类名 <code>HelloJava</code>，不要写成 <code>java HelloJava.java</code> 或 <code>java HelloJava.class</code>。第 3 章会解释编译和运行的分工。</p>
-<h2 id="什么是-ide-为什么-java-需要它">什么是 IDE，为什么 Java 需要它</h2>
+<h2 id="五-认识-ide-与-java-开发工具">五、认识 IDE 与 Java 开发工具</h2>
 <p>IDE 是“集成开发环境”的缩写。不同语言的 IDE 外观不同，但它们通常把多个开发动作放到一个程序里：编辑代码、识别错误、跳转到定义、运行、调试、管理项目文件和执行构建工具。</p>
 <p>Java 项目会涉及多个源文件、包目录、Maven 配置和依赖。只用普通文本编辑器当然也能写 Java，但你需要自己完成更多路径、编译和运行设置。对刚开始学习 Java 的人，IDE 能把注意力放在代码和错误信息上，而不是在文件位置之间来回猜测。</p>
 <p>本课程默认推荐 <strong>IntelliJ IDEA</strong>。它对 Java、Maven 和 Spring Boot 的项目结构支持完整，后续章节的路径说明也会优先采用它的界面名称。IntelliJ IDEA 同时支持 macOS 与 Windows，界面中的项目设置名称基本一致。</p>
-<h3 id="常见-java-开发工具怎么选">常见 Java 开发工具怎么选</h3>
+<h3 id="5-1-常见-java-开发工具的选择">5.1 常见 Java 开发工具的选择</h3>
 <div class="table-wrap"><table><thead><tr><th>工具</th><th>适合谁</th><th>优点</th><th>需要注意的地方</th></tr></thead><tbody><tr><td>IntelliJ IDEA</td><td>本课程的默认选择；希望长期做 Java 后端开发的人</td><td>Java 项目、Maven、调试、重构和 Spring 相关工作集中在同一界面</td><td>占用内存相对较多；部分高级功能需要 Ultimate 订阅</td></tr><tr><td>VS Code + Java 扩展包</td><td>已经非常熟悉 VS Code、希望先复用现有编辑器的前端工程师</td><td>轻量，界面熟悉，安装 Java 扩展后可运行、调试和管理 Maven 项目</td><td>Java 能力由多个扩展组成，项目设置分散；跟随本课 IDE 步骤时需要自行对照菜单</td></tr><tr><td>Eclipse IDE</td><td>已在公司或旧项目中使用 Eclipse 的人</td><td>免费、成熟，Java 生态历史悠久</td><td>界面、快捷键和项目配置与本课默认工具不同，首次学习时不建议同时学习两套操作方式</td></tr></tbody></table></div>
 <p>IntelliJ IDEA 目前使用统一下载包：核心 Java/Kotlin 功能可以免费使用，安装后会提供 Ultimate 功能的试用；试用结束后仍可继续使用免费核心功能。不要为了本课程先购买订阅。</p>
-<h3 id="安装-intellij-idea">安装 IntelliJ IDEA</h3>
+<h3 id="5-2-安装-intellij-idea">5.2 安装 IntelliJ IDEA</h3>
 <ol><li>打开 <a href="https://www.jetbrains.com/idea/download/" target="_blank" rel="noreferrer">IntelliJ IDEA 下载页</a>。</li><li>macOS 选择 <strong>macOS</strong>，再选择与电脑匹配的 Apple Silicon 或 Intel 安装包；下载 <code>.dmg</code> 后，双击打开并把 IntelliJ IDEA 拖入 Applications（应用程序）文件夹。</li><li>Windows 选择 <strong>Windows</strong>，下载 <code>.exe</code> 安装程序；双击后按安装向导完成安装，默认选项即可。</li><li>从“应用程序”或 Windows 开始菜单启动 IntelliJ IDEA。首次启动时接受默认设置即可；不需要导入其他 IDE 的配置。</li><li>在欢迎页选择 <strong>New Project</strong>。</li><li>左侧选择 <strong>Java</strong>。在 JDK 或 Project SDK 下拉框中选择刚才安装的 <strong>17</strong>。</li><li>不勾选任何额外框架或示例，创建一个空 Java 项目。</li><li>在 <code>src</code> 目录下新建 <code>HelloJava</code> 类，粘贴上一节的代码，然后点击 <code>main</code> 方法旁的运行图标。</li></ol>
 <p>IDE 控制台中应看到同样的输出：</p>
 <figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">Java 17 environment is ready.</code></pre></figure>
 <p>如果创建项目时没有看到 JDK 17，点击添加 JDK 的选项，选择 JDK 的安装目录。不要选择 IDE 自己运行时附带的 Java，也不要在项目语言级别中选择高于 17 的版本。</p>
-<h3 id="选择-vs-code-时需要额外完成什么">选择 VS Code 时需要额外完成什么</h3>
+<h3 id="5-3-选择-vs-code-时需要额外完成的设置">5.3 选择 VS Code 时需要额外完成的设置</h3>
 <p>若你决定继续用 VS Code，请按 <a href="https://code.visualstudio.com/docs/java/java-tutorial" target="_blank" rel="noreferrer">VS Code Java 入门</a> 的官方步骤安装 <strong>Extension Pack for Java</strong>。它包含 Java 语言支持、调试器、测试、Maven 和项目管理扩展。</p>
 <p>VS Code 的 Coding Pack 可能会同时安装一个 JDK。由于本课程固定使用 JDK 17，建议先按前面的步骤安装并核验 JDK 17，再在 VS Code 中把项目运行时设为这套 JDK。不要因为 VS Code 能运行某个程序，就跳过 <code>java -version</code> 与 <code>javac -version</code>。</p>
-<h2 id="安装-maven">安装 Maven</h2>
+<h2 id="六-安装-maven">六、安装 Maven</h2>
 <p>Maven 负责读取 <code>pom.xml</code>，下载项目依赖，并执行编译、测试、打包等构建任务。后续 Spring Boot 项目会使用 Maven，所以本章必须让终端能够找到 <code>mvn</code> 命令。</p>
-<h3 id="macos-安装-maven">macOS：安装 Maven</h3>
+<h3 id="6-1-macos-安装-maven">6.1 macOS 安装 Maven</h3>
 <p>对 macOS 新手，最短的安装路径是使用 Homebrew：</p>
 <figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">brew install maven
 mvn -v</code></pre></figure>
 <p>如果此前没有安装 Homebrew，请先阅读 <a href="https://brew.sh/" target="_blank" rel="noreferrer">Homebrew 官网</a> 的安装说明，再决定是否安装。完成 Homebrew 安装后，重新打开终端，再执行上面两行命令。</p>
 <p>不想安装 Homebrew 时，可以从 <a href="https://maven.apache.org/download.cgi" target="_blank" rel="noreferrer">Apache Maven 下载页</a> 下载 Binary tar.gz 压缩包。解压后，需要把 Maven 的 <code>bin</code> 目录加入 PATH。这条路径的每台电脑都不同，因此不要从网上复制一个不属于自己电脑的 <code>MAVEN_HOME</code>；以你解压后的目录为准。对第一次配置环境的学习者，使用 Homebrew 会少掉这一步路径配置。</p>
-<h3 id="windows-安装-maven">Windows：安装 Maven</h3>
+<h3 id="6-2-windows-安装-maven">6.2 Windows 安装 Maven</h3>
 <p>Windows 上建议使用 <a href="https://maven.apache.org/download.cgi" target="_blank" rel="noreferrer">Apache Maven 下载页</a> 提供的 Binary zip 压缩包：</p>
 <ol><li>下载 Binary zip，不要下载 Source zip。</li><li>解压到一个不会随意删除的位置，例如 <code>C:\tools\apache-maven-版本号</code>。</li><li>打开“编辑系统环境变量 → 环境变量”。新建系统变量 <code>MAVEN_HOME</code>，值为刚才的 Maven 根目录，不包含 <code>bin</code>。</li><li>编辑系统变量 <code>Path</code>，新增 <code>%MAVEN_HOME%\bin</code>。</li><li>关闭并重新打开 PowerShell，执行 <code>mvn -v</code>。</li></ol>
 <p>如果 <code>mvn -v</code> 能显示 Maven 版本却提示 Java 版本不是 17，Maven 已经安装成功，但 JDK 选择不正确；回到 <code>JAVA_HOME</code> 和 PATH 的检查，不要重新解压 Maven。</p>
@@ -92,7 +92,7 @@ mvn -v</code></pre></figure>
 <figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">Apache Maven ...
 Java version: 17...</code></pre></figure>
 <p>如果 Maven 能运行但 Java version 不是 17，Maven 正在使用另一套 JDK。不要继续创建项目，先回到“按顺序排查版本不一致”一节。</p>
-<h2 id="用-maven-编译同一个程序">用 Maven 编译同一个程序</h2>
+<h2 id="七-用-maven-编译同一个程序">七、用 Maven 编译同一个程序</h2>
 <p>现在创建一个 Maven 项目目录：</p>
 <figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">chapter-02-maven/
 ├── pom.xml
@@ -140,25 +140,25 @@ java -cp target/classes com.example.HelloJava</code></pre></figure>
 <p>第二条命令应输出：</p>
 <figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">Maven uses Java 17.</code></pre></figure>
 <p>这说明终端 JDK、IDE 项目 JDK 和 Maven 编译基线已经完成同一轮核验。</p>
-<h2 id="按顺序排查版本不一致">按顺序排查版本不一致</h2>
+<h2 id="八-按顺序排查版本不一致">八、按顺序排查版本不一致</h2>
 <p>环境出现问题时，不要同时修改所有设置。按下表从外到内排查：</p>
 <div class="table-wrap"><table><thead><tr><th>现象</th><th>先检查什么</th><th>下一步</th></tr></thead><tbody><tr><td><code>java</code> 或 <code>javac</code> 找不到</td><td>JDK 安装是否完成，是否重新打开终端</td><td>执行 <code>/usr/libexec/java_home -V</code>，再检查 PATH</td></tr><tr><td><code>java -version</code> 与 <code>javac -version</code> 不一致</td><td><code>which java</code> 与 <code>which javac</code></td><td>重新选择同一套 JDK 的 bin 目录</td></tr><tr><td>终端正确，IDE 错误</td><td>项目 SDK、语言级别、运行配置</td><td>删除旧运行配置后重新选择 JDK 17</td></tr><tr><td>终端正确，<code>mvn -v</code> 错误</td><td>Maven 输出的 Java home</td><td>检查 <code>JAVA_HOME</code>、IDE 的 Maven Runner 设置</td></tr><tr><td>Maven 编译提示版本过高或过低</td><td><code>pom.xml</code> 的 compiler release</td><td>统一设为 17 后重新执行 <code>mvn compile</code></td></tr></tbody></table></div>
 <p>提问或搜索错误时，附上操作系统、<code>java -version</code>、<code>javac -version</code>、<code>mvn -v</code> 与完整报错，比只说“Java 配不好”更容易定位问题。</p>
-<h2 id="本章验收记录">本章验收记录</h2>
+<h2 id="九-本章验收记录">九、本章验收记录</h2>
 <p>完成后填写这张表。它也是后续排查项目环境的起点。</p>
 <div class="table-wrap"><table><thead><tr><th>核验项</th><th>你的结果</th></tr></thead><tbody><tr><td><code>java -version</code></td><td></td></tr><tr><td><code>javac -version</code></td><td></td></tr><tr><td>IntelliJ IDEA 项目 SDK</td><td>17 / 待排查</td></tr><tr><td>IDE 运行 <code>HelloJava</code></td><td>成功 / 待排查</td></tr><tr><td><code>mvn -v</code> 中的 Java version</td><td></td></tr><tr><td>当前操作系统（macOS / Windows）</td><td></td></tr><tr><td>Maven <code>mvn compile</code></td><td>成功 / 待排查</td></tr></tbody></table></div>
 <p>只有这些项目都确认完成，才算通过本章。此时再进入第 3 章，学习 Java 程序结构、编译和运行的原理。</p>
-<h2 id="常见误区">常见误区</h2>
-<h3 id="把-jdk-ide-和-maven-当成同一个软件">把 JDK、IDE 和 Maven 当成同一个软件</h3>
+<h2 id="十-常见误区">十、常见误区</h2>
+<h3 id="10-1-把-jdk-ide-和-maven-当成同一个软件">10.1 把 JDK、IDE 和 Maven 当成同一个软件</h3>
 <p>它们会协作，但负责不同事情。JDK 提供 Java 工具，IDE 提供写代码和调试的界面，Maven 负责构建项目。缺少任何一个，后续学习都会在不同位置中断。</p>
-<h3 id="只按教程安装最新版本">只按教程安装最新版本</h3>
+<h3 id="10-2-只按教程安装最新版本">10.2 只按教程安装最新版本</h3>
 <p>Java 项目必须看目标版本。本课程以 17 为主线，所以下载、项目 SDK、Maven 编译基线都应先选 17。以后项目要求 21 时，再按同样方法新增或切换版本。</p>
-<h3 id="因为熟悉-vs-code-而跳过-java-扩展和运行时设置">因为熟悉 VS Code 而跳过 Java 扩展和运行时设置</h3>
+<h3 id="10-3-因为熟悉-vs-code-而跳过-java-扩展和运行时设置">10.3 因为熟悉 VS Code 而跳过 Java 扩展和运行时设置</h3>
 <p>VS Code 本身不是完整 Java 环境。必须安装 Java 扩展包，并明确项目使用哪一套 JDK。否则同一个项目在命令行和编辑器中可能得到不同结果。</p>
-<h2 id="本章小结">本章小结</h2>
+<h2 id="十一-本章小结">十一、本章小结</h2>
 <p>你已经在 macOS 或 Windows 上建立了 Java 开发最小环境：安装 JDK 17，使用终端编译运行程序，在 IntelliJ IDEA 中使用同一套 JDK，并安装 Maven 完成一次构建。接下来第 3 章会解释这些命令背后的程序结构，而不是继续配置工具。</p>
-<h2 id="快速自测">快速自测</h2>
+<h2 id="十二-快速自测">十二、快速自测</h2>
 <ol><li>为什么要选择与 Mac 芯片类型匹配的 JDK 安装包？</li><li>IDE 与 JDK 的区别是什么？</li><li><code>mvn -v</code> 显示 Java 21，而 <code>java -version</code> 显示 17 时，应该先做什么？</li></ol>
 <p>参考答案：安装包的 CPU 架构必须和电脑匹配；JDK 提供编译和运行工具，IDE 提供集成的编写、运行和调试界面；停止构建，检查 Maven 的 Java home、<code>JAVA_HOME</code> 与 IDE 的 Maven Runner，统一到 JDK 17。</p>
 <h2 id="参考文献">参考文献</h2>
-<ul><li>Eclipse Adoptium. <a href="https://adoptium.net/temurin/releases/?version=17" target="_blank" rel="noreferrer">Temurin 17 下载页</a>.</li><li>JetBrains. <a href="https://www.jetbrains.com/idea/download/" target="_blank" rel="noreferrer">IntelliJ IDEA 下载页</a>.</li><li>JetBrains. <a href="https://www.jetbrains.com/help/idea/installation-guide.html" target="_blank" rel="noreferrer">IntelliJ IDEA 安装说明</a>.</li><li>Microsoft. <a href="https://code.visualstudio.com/docs/java/java-tutorial" target="_blank" rel="noreferrer">VS Code Java 入门</a>.</li><li>Homebrew. <a href="https://brew.sh/" target="_blank" rel="noreferrer">Homebrew 官网</a>.</li><li>Apache Maven. <a href="https://maven.apache.org/download.cgi" target="_blank" rel="noreferrer">Maven 下载页</a>.</li><li>Apache Maven. <a href="https://maven.apache.org/plugins/maven-compiler-plugin/" target="_blank" rel="noreferrer">Maven Compiler Plugin</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/01-java-web-request-map.html">← 第 1 章<br><strong>Java Web 后端学习地图与开发环境</strong></a><a href="../lessons/03-maven-build.html">第 3 章 →<br><strong>Java 程序结构、编译与运行</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#先看本章完成后的结果">先看本章完成后的结果</a><a class="" href="#开始前-先认识要安装的三个工具">开始前：先认识要安装的三个工具</a><a class="" href="#安装-jdk-17">安装 JDK 17</a><a class="" href="#macos-安装-jdk-17">macOS：安装 JDK 17</a><a class="sub" href="#路径-a-从-adoptium-下载图形安装包">路径 A：从 Adoptium 下载图形安装包</a><a class="sub" href="#路径-b-已经安装-homebrew-时使用命令行安装">路径 B：已经安装 Homebrew 时使用命令行安装</a><a class="" href="#windows-安装-jdk-17">Windows：安装 JDK 17</a><a class="" href="#在终端确认-java-17">在终端确认 Java 17</a><a class="sub" href="#用最小程序确认编译与运行">用最小程序确认编译与运行</a><a class="" href="#什么是-ide-为什么-java-需要它">什么是 IDE，为什么 Java 需要它</a><a class="sub" href="#常见-java-开发工具怎么选">常见 Java 开发工具怎么选</a><a class="sub" href="#安装-intellij-idea">安装 IntelliJ IDEA</a><a class="sub" href="#选择-vs-code-时需要额外完成什么">选择 VS Code 时需要额外完成什么</a><a class="" href="#安装-maven">安装 Maven</a><a class="sub" href="#macos-安装-maven">macOS：安装 Maven</a><a class="sub" href="#windows-安装-maven">Windows：安装 Maven</a><a class="" href="#用-maven-编译同一个程序">用 Maven 编译同一个程序</a><a class="" href="#按顺序排查版本不一致">按顺序排查版本不一致</a><a class="" href="#本章验收记录">本章验收记录</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#把-jdk-ide-和-maven-当成同一个软件">把 JDK、IDE 和 Maven 当成同一个软件</a><a class="sub" href="#只按教程安装最新版本">只按教程安装最新版本</a><a class="sub" href="#因为熟悉-vs-code-而跳过-java-扩展和运行时设置">因为熟悉 VS Code 而跳过 Java 扩展和运行时设置</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>
+<ul><li>Eclipse Adoptium. <a href="https://adoptium.net/temurin/releases/?version=17" target="_blank" rel="noreferrer">Temurin 17 下载页</a>.</li><li>JetBrains. <a href="https://www.jetbrains.com/idea/download/" target="_blank" rel="noreferrer">IntelliJ IDEA 下载页</a>.</li><li>JetBrains. <a href="https://www.jetbrains.com/help/idea/installation-guide.html" target="_blank" rel="noreferrer">IntelliJ IDEA 安装说明</a>.</li><li>Microsoft. <a href="https://code.visualstudio.com/docs/java/java-tutorial" target="_blank" rel="noreferrer">VS Code Java 入门</a>.</li><li>Homebrew. <a href="https://brew.sh/" target="_blank" rel="noreferrer">Homebrew 官网</a>.</li><li>Apache Maven. <a href="https://maven.apache.org/download.cgi" target="_blank" rel="noreferrer">Maven 下载页</a>.</li><li>Apache Maven. <a href="https://maven.apache.org/plugins/maven-compiler-plugin/" target="_blank" rel="noreferrer">Maven Compiler Plugin</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/01-java-web-request-map.html">← 第 1 章<br><strong>Java Web 后端学习地图与开发环境</strong></a><a href="../lessons/03-maven-build.html">第 3 章 →<br><strong>Java 程序结构、编译与运行</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一-先看本章完成后的结果">一、先看本章完成后的结果</a><a class="" href="#二-开始前认识三个工具">二、开始前认识三个工具</a><a class="" href="#三-安装-jdk-17">三、安装 JDK 17</a><a class="sub" href="#3-1-macos-安装-jdk-17">3.1 macOS 安装 JDK 17</a><a class="sub" href="#3-2-windows-安装-jdk-17">3.2 Windows 安装 JDK 17</a><a class="" href="#四-在终端确认-java-17">四、在终端确认 Java 17</a><a class="sub" href="#4-1-用最小程序确认编译与运行">4.1 用最小程序确认编译与运行</a><a class="" href="#五-认识-ide-与-java-开发工具">五、认识 IDE 与 Java 开发工具</a><a class="sub" href="#5-1-常见-java-开发工具的选择">5.1 常见 Java 开发工具的选择</a><a class="sub" href="#5-2-安装-intellij-idea">5.2 安装 IntelliJ IDEA</a><a class="sub" href="#5-3-选择-vs-code-时需要额外完成的设置">5.3 选择 VS Code 时需要额外完成的设置</a><a class="" href="#六-安装-maven">六、安装 Maven</a><a class="sub" href="#6-1-macos-安装-maven">6.1 macOS 安装 Maven</a><a class="sub" href="#6-2-windows-安装-maven">6.2 Windows 安装 Maven</a><a class="" href="#七-用-maven-编译同一个程序">七、用 Maven 编译同一个程序</a><a class="" href="#八-按顺序排查版本不一致">八、按顺序排查版本不一致</a><a class="" href="#九-本章验收记录">九、本章验收记录</a><a class="" href="#十-常见误区">十、常见误区</a><a class="sub" href="#10-1-把-jdk-ide-和-maven-当成同一个软件">10.1 把 JDK、IDE 和 Maven 当成同一个软件</a><a class="sub" href="#10-2-只按教程安装最新版本">10.2 只按教程安装最新版本</a><a class="sub" href="#10-3-因为熟悉-vs-code-而跳过-java-扩展和运行时设置">10.3 因为熟悉 VS Code 而跳过 Java 扩展和运行时设置</a><a class="" href="#十一-本章小结">十一、本章小结</a><a class="" href="#十二-快速自测">十二、快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>
