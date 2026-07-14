@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="一套可用的 Java 开发环境需要 JDK 17、用于写和调试代码的 IDE、用于构建项目的 Maven，并且三者必须指向同一套 Java 17。"><title>JDK 17、IDE 与 Maven 环境核验 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="一套可用的 Java 开发环境需要 JDK 17、用于写和调试代码的 IDE、用于构建项目的 Maven，并且三者必须指向同一套 Java 17。"><title>JDK 17、IDE 与 Maven 环境核验 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
 <body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 2 章 · 环境介绍与准备</div><h1>JDK 17、IDE 与 Maven 环境核验</h1><p class="lesson-summary">一套可用的 Java 开发环境需要 JDK 17、用于写和调试代码的 IDE、用于构建项目的 Maven，并且三者必须指向同一套 Java 17。</p><div class="meta-row"><span class="pill">本章同时给出 macOS 与 Windows 路径。严格按“安装 JDK → 终端核验 → 安装 IDE → 安装 Maven → 运行同一程序”的顺序操作；任何一步失败都先停下来排查。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一-先看本章完成后的结果">一、先看本章完成后的结果</h2>
 <p>完成本章后，你的电脑应能完成下面三件事：</p>
 <ol><li>在终端执行 <code>java -version</code> 和 <code>javac -version</code>，都显示 Java 17。</li><li>在 IntelliJ IDEA 中新建并运行一个 Java 程序。</li><li>在终端执行 <code>mvn -v</code>，其中的 Java version 也是 17；随后用 Maven 编译同一个程序。</li></ol>
@@ -19,9 +19,9 @@
 <p>安装完成后，关闭当前终端并重新打开一个新的终端窗口。接着进入下一节执行版本核验。</p>
 <h4 id="3-1-2-已安装-homebrew-时使用命令行安装">3.1.2 已安装 Homebrew 时使用命令行安装</h4>
 <p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Homebrew</span>是 macOS 常用的软件包管理工具。如果你在终端执行下面的命令能看到版本号，说明已经安装：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">brew -v</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">brew -v</code></pre></figure>
 <p>此时可以安装 JDK 17：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">brew install --cask temurin@17</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">brew install --cask temurin@17</code></pre></figure>
 <p>命令完成后，重新打开终端，再执行下一节的版本核验。</p>
 <p>如果 <code>brew -v</code> 提示找不到命令，不必为了这一章额外学习 Homebrew；回到路径 A 下载 <code>.pkg</code> 安装包即可。路径 A 对第一次安装 Java 的读者更直接。</p>
 <h3 id="3-2-windows-安装-jdk-17">3.2 Windows 安装 JDK 17</h3>
@@ -30,36 +30,36 @@
 <p>如果重新打开 PowerShell 后仍提示找不到 <code>java</code>，先在资源管理器中确认 JDK 已安装。常见安装目录位于 <code>C:\Program Files\Eclipse Adoptium\</code> 下，但具体文件夹名称会带有补丁版本。找到其中的 <code>bin</code> 目录后，再按“按顺序排查版本不一致”一节补充 PATH 与 <code>JAVA_HOME</code>；不要把带有 <code>bin</code> 的路径直接填进 <code>JAVA_HOME</code>。</p>
 <h2 id="四-在终端确认-java-17">四、在终端确认 Java 17</h2>
 <p>macOS 打开“终端”；Windows 打开 PowerShell 或命令提示符。依次执行：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">java -version
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">java -version
 javac -version</code></pre></figure>
 <p>两条输出都应显示 17。例如，<code>javac -version</code> 的结果通常类似：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">javac 17.0.x</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">javac 17.0.x</code></pre></figure>
 <p>其中 <code>x</code> 是 JDK 17 的补丁版本，数字不必与示例完全相同。关键是主版本为 17。</p>
 <p>如果命令提示找不到 <code>java</code> 或 <code>javac</code>，先确认 JDK 安装程序已经结束，然后关闭并重新打开终端。macOS 可以用下面的命令查看系统已经识别到的 JDK：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">/usr/libexec/java_home -V</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">/usr/libexec/java_home -V</code></pre></figure>
 <p>输出中应有一个包含 <code>17</code> 的条目。需要在当前终端临时选择它时，执行：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">export JAVA_HOME=$(/usr/libexec/java_home -v 17)
 export PATH=&quot;$JAVA_HOME/bin:$PATH&quot;</code></pre></figure>
 <p>再重新执行 <code>java -version</code> 与 <code>javac -version</code>。这两行只影响当前终端窗口；不要在还没确认成功前，把它们复制到多个 shell 配置文件中。</p>
 <p>Windows 可以先执行下面两条命令，查看系统准备执行哪个程序：</p>
-<figure class="code-card"><div class="code-toolbar"><span>powershell</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="powershell">Get-Command java
+<figure class="code-card"><div class="code-toolbar"><span>powershell</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-powershell">Get-Command java
 Get-Command javac</code></pre></figure>
 <p>如果它们没有指向 JDK 17，可在“编辑系统环境变量 → 环境变量”中设置：</p>
 <ul><li><code>JAVA_HOME</code>：JDK 17 的根目录，例如 <code>C:\Program Files\Eclipse Adoptium\jdk-17...</code>，不包含末尾的 <code>bin</code>。</li><li><code>Path</code>：新增 <code>%JAVA_HOME%\bin</code>。</li></ul>
 <p>保存后必须关闭并重新打开 PowerShell，再执行版本命令。环境变量的具体 JDK 文件夹名称会随补丁版本变化，应以自己电脑上的实际目录为准。</p>
 <h3 id="4-1-用最小程序确认编译与运行">4.1 用最小程序确认编译与运行</h3>
 <p>在任意便于找到的位置新建一个文件夹，例如 macOS 的“文稿”目录或 Windows 的“文档”目录中的 <code>java-learning/chapter-02</code>。在其中新建文件 <code>HelloJava.java</code>，内容如下：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class HelloJava {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class HelloJava {
     public static void main(String[] args) {
         System.out.println(&quot;Java 17 environment is ready.&quot;);
     }
 }</code></pre></figure>
 <p>文件名必须是 <code>HelloJava.java</code>，并与代码中的 <code>HelloJava</code> 保持一致。暂时不需要理解 <code>public</code>、<code>class</code> 和 <code>main</code> 的完整含义；这一节只验证 JDK 能把源文件编译并运行。</p>
 <p>在该文件夹的终端执行：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">javac HelloJava.java
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">javac HelloJava.java
 java HelloJava</code></pre></figure>
 <p>第一条命令成功后会多出 <code>HelloJava.class</code>。第二条命令应输出：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">Java 17 environment is ready.</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">Java 17 environment is ready.</code></pre></figure>
 <p>运行命令中只写类名 <code>HelloJava</code>，不要写成 <code>java HelloJava.java</code> 或 <code>java HelloJava.class</code>。第 3 章会解释编译和运行的分工。</p>
 <h2 id="五-认识-ide-与-java-开发工具">五、认识 IDE 与 Java 开发工具</h2>
 <p>IDE 是“集成开发环境”的缩写。不同语言的 IDE 外观不同，但它们通常把多个开发动作放到一个程序里：编辑代码、识别错误、跳转到定义、运行、调试、管理项目文件和执行构建工具。</p>
@@ -71,7 +71,7 @@ java HelloJava</code></pre></figure>
 <h3 id="5-2-安装-intellij-idea">5.2 安装 IntelliJ IDEA</h3>
 <ol><li>打开 <a href="https://www.jetbrains.com/idea/download/" target="_blank" rel="noreferrer">IntelliJ IDEA 下载页</a>。</li><li>macOS 选择 <strong>macOS</strong>，再选择与电脑匹配的 Apple Silicon 或 Intel 安装包；下载 <code>.dmg</code> 后，双击打开并把 IntelliJ IDEA 拖入 Applications（应用程序）文件夹。</li><li>Windows 选择 <strong>Windows</strong>，下载 <code>.exe</code> 安装程序；双击后按安装向导完成安装，默认选项即可。</li><li>从“应用程序”或 Windows 开始菜单启动 IntelliJ IDEA。首次启动时接受默认设置即可；不需要导入其他 IDE 的配置。</li><li>在欢迎页选择 <strong>New Project</strong>。</li><li>左侧选择 <strong>Java</strong>。在 JDK 或 Project SDK 下拉框中选择刚才安装的 <strong>17</strong>。</li><li>不勾选任何额外框架或示例，创建一个空 Java 项目。</li><li>在 <code>src</code> 目录下新建 <code>HelloJava</code> 类，粘贴上一节的代码，然后点击 <code>main</code> 方法旁的运行图标。</li></ol>
 <p>IDE 控制台中应看到同样的输出：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">Java 17 environment is ready.</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">Java 17 environment is ready.</code></pre></figure>
 <p>如果创建项目时没有看到 JDK 17，点击添加 JDK 的选项，选择 JDK 的安装目录。不要选择 IDE 自己运行时附带的 Java，也不要在项目语言级别中选择高于 17 的版本。</p>
 <h3 id="5-3-选择-vs-code-时需要额外完成的设置">5.3 选择 VS Code 时需要额外完成的设置</h3>
 <p>若你决定继续用 VS Code，请按 <a href="https://code.visualstudio.com/docs/java/java-tutorial" target="_blank" rel="noreferrer">VS Code Java 入门</a> 的官方步骤安装 <strong>Extension Pack for Java</strong>。它包含 Java 语言支持、调试器、测试、Maven 和项目管理扩展。</p>
@@ -80,7 +80,7 @@ java HelloJava</code></pre></figure>
 <p>Maven 负责读取 <code>pom.xml</code>，下载项目依赖，并执行编译、测试、打包等构建任务。后续 Spring Boot 项目会使用 Maven，所以本章必须让终端能够找到 <code>mvn</code> 命令。</p>
 <h3 id="6-1-macos-安装-maven">6.1 macOS 安装 Maven</h3>
 <p>对 macOS 新手，最短的安装路径是使用 Homebrew：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">brew install maven
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">brew install maven
 mvn -v</code></pre></figure>
 <p>如果此前没有安装 Homebrew，请先阅读 <a href="https://brew.sh/" target="_blank" rel="noreferrer">Homebrew 官网</a> 的安装说明，再决定是否安装。完成 Homebrew 安装后，重新打开终端，再执行上面两行命令。</p>
 <p>不想安装 Homebrew 时，可以从 <a href="https://maven.apache.org/download.cgi" target="_blank" rel="noreferrer">Apache Maven 下载页</a> 下载 Binary tar.gz 压缩包。解压后，需要把 Maven 的 <code>bin</code> 目录加入 PATH。这条路径的每台电脑都不同，因此不要从网上复制一个不属于自己电脑的 <code>MAVEN_HOME</code>；以你解压后的目录为准。对第一次配置环境的学习者，使用 Homebrew 会少掉这一步路径配置。</p>
@@ -89,12 +89,12 @@ mvn -v</code></pre></figure>
 <ol><li>下载 Binary zip，不要下载 Source zip。</li><li>解压到一个不会随意删除的位置，例如 <code>C:\tools\apache-maven-版本号</code>。</li><li>打开“编辑系统环境变量 → 环境变量”。新建系统变量 <code>MAVEN_HOME</code>，值为刚才的 Maven 根目录，不包含 <code>bin</code>。</li><li>编辑系统变量 <code>Path</code>，新增 <code>%MAVEN_HOME%\bin</code>。</li><li>关闭并重新打开 PowerShell，执行 <code>mvn -v</code>。</li></ol>
 <p>如果 <code>mvn -v</code> 能显示 Maven 版本却提示 Java 版本不是 17，Maven 已经安装成功，但 JDK 选择不正确；回到 <code>JAVA_HOME</code> 和 PATH 的检查，不要重新解压 Maven。</p>
 <p>执行 <code>mvn -v</code> 后，检查输出中的两项：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">Apache Maven ...
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">Apache Maven ...
 Java version: 17...</code></pre></figure>
 <p>如果 Maven 能运行但 Java version 不是 17，Maven 正在使用另一套 JDK。不要继续创建项目，先回到“按顺序排查版本不一致”一节。</p>
 <h2 id="七-用-maven-编译同一个程序">七、用 Maven 编译同一个程序</h2>
 <p>现在创建一个 Maven 项目目录：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">chapter-02-maven/
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">chapter-02-maven/
 ├── pom.xml
 └── src/
     └── main/
@@ -103,7 +103,7 @@ Java version: 17...</code></pre></figure>
                 └── example/
                     └── HelloJava.java</code></pre></figure>
 <p>把上一节的程序放到 <code>src/main/java/com/example/HelloJava.java</code>，在第一行加上包名：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">package com.example;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">package com.example;
 
 public class HelloJava {
     public static void main(String[] args) {
@@ -111,7 +111,7 @@ public class HelloJava {
     }
 }</code></pre></figure>
 <p>然后在项目根目录创建 <code>pom.xml</code>：</p>
-<figure class="code-card"><div class="code-toolbar"><span>xml</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="xml">&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+<figure class="code-card"><div class="code-toolbar"><span>xml</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-xml">&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
          xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
          xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
     &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
@@ -135,10 +135,10 @@ public class HelloJava {
 &lt;/project&gt;</code></pre></figure>
 <p><code>maven.compiler.release</code> 表示按 Java 17 的语言和 API 基线编译。现在不需要背诵 XML；它只是让 Maven 与前面已经核验的 JDK 17 对齐。</p>
 <p>在包含 <code>pom.xml</code> 的目录执行：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">mvn compile
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">mvn compile
 java -cp target/classes com.example.HelloJava</code></pre></figure>
 <p>第二条命令应输出：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">Maven uses Java 17.</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">Maven uses Java 17.</code></pre></figure>
 <p>这说明终端 JDK、IDE 项目 JDK 和 Maven 编译基线已经完成同一轮核验。</p>
 <h2 id="八-按顺序排查版本不一致">八、按顺序排查版本不一致</h2>
 <p>环境出现问题时，不要同时修改所有设置。按下表从外到内排查：</p>

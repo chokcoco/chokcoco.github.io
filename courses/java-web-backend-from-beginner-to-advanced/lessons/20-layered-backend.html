@@ -1,21 +1,247 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="从简单接口逐步拆分接口、业务和数据访问职责。"><title>Controller、Service 与 Repository 分层 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
-<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 20 章 · 后端开发基础</div><h1>Controller、Service 与 Repository 分层</h1><p class="lesson-summary">从简单接口逐步拆分接口、业务和数据访问职责。</p><div class="meta-row"><span class="pill">先按本章的操作或推理顺序完成阅读，再记录每一步的结果与疑问。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="先看未分层的接口">先看未分层的接口</h2>
-<p>本节围绕“先看未分层的接口”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="把-http-留在-controller">把 HTTP 留在 Controller</h2>
-<p>本节围绕“把 HTTP 留在 Controller”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="把业务规则放入-service">把业务规则放入 Service</h2>
-<p>本节围绕“把业务规则放入 Service”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="repository-或-mapper-负责数据">Repository 或 Mapper 负责数据</h2>
-<p>本节围绕“Repository 或 Mapper 负责数据”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="逐步拆分而不是套架构">逐步拆分而不是套架构</h2>
-<p>本节围绕“逐步拆分而不是套架构”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="练习与验收">练习与验收</h2>
-<p>把一个创建待办项接口拆成三层，并写出每层不该做的两件事。</p>
-<p>完成后，应能用本章的术语解释自己的操作结果；遇到失败时，先记录输入、实际结果和错误信息。</p>
-<h2 id="容易走偏的地方">容易走偏的地方</h2>
-<p>不要跳过本章的基础模型，直接复制框架、数据库或运维配置。每一项操作都应有明确的目的和可观察结果。</p>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Controller 处理 HTTP 输入输出，Service 执行业务规则，Repository 负责数据存取；构造器注入让依赖方向清晰，分层是为了可测试、可修改和可读。"><title>Controller、Service 与 Repository 分层 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 20 章 · 后端开发基础</div><h1>Controller、Service 与 Repository 分层</h1><p class="lesson-summary">Controller 处理 HTTP 输入输出，Service 执行业务规则，Repository 负责数据存取；构造器注入让依赖方向清晰，分层是为了可测试、可修改和可读。</p><div class="meta-row"><span class="pill">不要把&quot;未分层的代码&quot;看成错误，把它看成需要整理的桌面——每一层有它自己的职责；先从 Controller 中抽出一个 Service，再从 Service 中抽象出数据访问。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><p>第 18 章 Controller 中的方法直接返回了数据。如果把查询数据库、校验业务规则、调用外部 API 都放在 Controller 中，一个方法很快就膨胀成几十行甚至上百行。</p>
+<h2 id="一-先看未分层的接口">一、先看未分层的接口</h2>
+<p>把三个职责都堆在一个方法中是什么样：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@RestController
+public class TodoController {
+
+    // 模拟数据库
+    private final List&lt;Todo&gt; storage = new ArrayList&lt;&gt;();
+
+    @GetMapping(&quot;/todos/{id}&quot;)
+    public Todo getTodo(@PathVariable String id) {
+        // 1. 校验：ID 格式是否正确
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException(&quot;ID 不能为空&quot;);
+        }
+
+        // 2. 查询：从存储中查找
+        Todo found = null;
+        for (Todo todo : storage) {
+            if (todo.id().equals(id)) {
+                found = todo;
+                break;
+            }
+        }
+
+        // 3. 未找到时的处理
+        if (found == null) {
+            throw new NoSuchElementException(&quot;待办项不存在：&quot; + id);
+        }
+
+        // 4. 业务规则：已完成项不返回详细信息
+        if (found.completed()) {
+            return new Todo(found.id(), &quot;[已完成]&quot;, true);
+        }
+
+        return found;
+    }
+
+    @PostMapping(&quot;/todos&quot;)
+    public Todo createTodo(@RequestBody Todo todo) {
+        // 5. 校验重复
+        for (Todo existing : storage) {
+            if (existing.id().equals(todo.id())) {
+                throw new IllegalStateException(&quot;待办项已存在：&quot; + todo.id());
+            }
+        }
+
+        // 6. 存储
+        storage.add(todo);
+        return todo;
+    }
+}</code></pre></figure>
+<p>这个 Controller 混合了三种职责：</p>
+<ul><li><strong>HTTP 层职责</strong>：接收请求参数、返回响应。<code>@PathVariable</code> 绑定、<code>@RequestBody</code> 绑定属于这一层。</li><li><strong>业务逻辑</strong>：ID 格式校验、&quot;已完成项不显示标题&quot;的规则、重复检查。</li><li><strong>数据访问</strong>：遍历 <code>storage</code> 列表查找、添加元素、未找到时的判断。</li></ul>
+<p>当一个类包含三种职责时，以下问题会逐一出现：</p>
+<ul><li>修改校验规则需要改动 Controller，但它和 HTTP 绑定无关。</li><li>测试&quot;已完成项不显示标题&quot;这条规则，需要启动整个 HTTP 服务器。</li><li>未来换存储方式（例如从内存换成数据库）需要改遍每个 Controller 方法。</li><li>多个 Controller 方法中查询逻辑重复——<code>getTodo</code> 中的查找循环和 <code>createTodo</code> 中的重复检查，实际上是同一段数据访问逻辑的不同使用方式。</li></ul>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">分层架构</span>把三种职责拆到三个独立的层次中。</p>
+<h2 id="二-把-http-留在-controller">二、把 HTTP 留在 Controller</h2>
+<p>Controller 只做三件事：</p>
+<ol><li>接收 HTTP 请求，提取参数。</li><li>调用 Service 完成操作。</li><li>把 Service 返回的结果写入 HTTP 响应。</li></ol>
+<p>Controller 不应该做的事情：</p>
+<ul><li>直接读写数据库或集合。</li><li>判断业务规则（&quot;用户名不能重复&quot;&quot;订单金额不能为负&quot;）。</li><li>处理事务（&quot;如果 A 失败，回滚 B&quot;）。</li></ul>
+<p>重构后的 Controller：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@RestController
+@RequestMapping(&quot;/todos&quot;)
+public class TodoController {
+
+    private final TodoService todoService;
+
+    public TodoController(TodoService todoService) {
+        this.todoService = todoService;
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    public Todo getTodo(@PathVariable String id) {
+        return todoService.findById(id);
+    }
+
+    @PostMapping
+    public Todo createTodo(@RequestBody Todo todo) {
+        return todoService.create(todo);
+    }
+}</code></pre></figure>
+<p>Controller 变薄了：它不再关心怎么查数据、怎么判断重复。<code>TodoService</code> 从这里开始成为业务逻辑的集中位置。</p>
+<h2 id="三-把业务规则放入-service">三、把业务规则放入 Service</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Service</span>（有时也叫 Application Service 或 Business Service）负责：</p>
+<ul><li>协调多个数据源或外部调用。</li><li>执行不依赖 HTTP 协议的业务规则。</li><li>判断操作是否合法（权限、状态、重复等）。</li></ul>
+<p>它不应该做的事情：</p>
+<ul><li>解析 HTTP 参数。</li><li>写 HTTP 响应状态码。</li><li>直接依赖 <code>HttpServletRequest</code> 或 <code>@PathVariable</code>。</li></ul>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@Service
+public class TodoService {
+
+    private final TodoRepository todoRepository;
+
+    public TodoService(TodoRepository todoRepository) {
+        this.todoRepository = todoRepository;
+    }
+
+    public Todo findById(String id) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException(&quot;ID 不能为空&quot;);
+        }
+
+        Todo found = todoRepository.findById(id);
+        if (found == null) {
+            throw new NoSuchElementException(&quot;待办项不存在：&quot; + id);
+        }
+
+        // 业务规则：已完成项只返回简化信息
+        if (found.completed()) {
+            return new Todo(found.id(), &quot;[已完成]&quot;, true);
+        }
+
+        return found;
+    }
+
+    public Todo create(Todo todo) {
+        if (todo.id() == null || todo.id().isBlank()) {
+            throw new IllegalArgumentException(&quot;待办项 ID 不能为空&quot;);
+        }
+
+        Todo existing = todoRepository.findById(todo.id());
+        if (existing != null) {
+            throw new IllegalStateException(&quot;待办项已存在：&quot; + todo.id());
+        }
+
+        todoRepository.save(todo);
+        return todo;
+    }
+}</code></pre></figure>
+<p><code>@Service</code> 是 Spring 的组件注解，和 <code>@RestController</code> 一样，标记这个类由 Spring 管理。Controller 通过构造器注入获得 <code>TodoService</code>，而不是通过 <code>new TodoService()</code> 自己创建。</p>
+<p>构造器注入方式的优势：</p>
+<ul><li>依赖关系在对象创建时确定，之后不可变（字段可声明为 <code>final</code>）。</li><li>测试时可以方便地传入替代实现（第 27 章详述）。</li><li>不需要 <code>@Autowired</code> 注解——Spring 对只有一个构造器的类自动识别。</li></ul>
+<h2 id="四-repository-负责数据存取">四、Repository 负责数据存取</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Repository</span>（或 DAO——Data Access Object）只关心数据的存和取：</p>
+<ul><li>如何保存一个对象。</li><li>如何根据 ID 查找。</li><li>如何按条件查询。</li><li>如何删除。</li></ul>
+<p>Repository 不应该包含：</p>
+<ul><li>业务规则（如&quot;已完成项不显示标题&quot;）。</li><li>HTTP 知识。</li><li>事务决策（事务在第 26 章讲解，它在 Service 层声明）。</li></ul>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@Repository
+public class TodoRepository {
+
+    private final Map&lt;String, Todo&gt; storage = new ConcurrentHashMap&lt;&gt;();
+
+    public Todo findById(String id) {
+        return storage.get(id);
+    }
+
+    public void save(Todo todo) {
+        storage.put(todo.id(), todo);
+    }
+
+    public List&lt;Todo&gt; findAll() {
+        return List.copyOf(storage.values());
+    }
+}</code></pre></figure>
+<p><code>@Repository</code> 标记数据访问组件。现在用的是内存 <code>Map</code> 存储，第 23–25 章替换为真实数据库时，只改这一个类即可。Service 和 Controller 不需要知道数据实际存在哪里。</p>
+<p><code>ConcurrentHashMap</code> 替代了 <code>HashMap</code>：在多线程环境下，<code>HashMap</code> 的 <code>put</code> 操作不是线程安全的——多个线程同时写入时可能产生数据错乱甚至死循环（CPU 100%）。<code>ConcurrentHashMap</code> 提供了安全的并发访问。现在不需要深入理解线程安全，知道&quot;可能被多个请求同时访问的共享数据使用 <code>ConcurrentHashMap</code>&quot;即可。第 34 章会展开讲解。</p>
+<h2 id="五-完整的请求处理链路">五、完整的请求处理链路</h2>
+<p>一次 <code>POST /todos</code> 的完整请求链路：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">1. Tomcat 接收 HTTP 请求
+   → POST /todos
+   → Content-Type: application/json
+   → {&quot;id&quot;:&quot;42&quot;,&quot;title&quot;:&quot;学习&quot;,&quot;completed&quot;:false}
+
+2. DispatcherServlet 匹配
+   → 找到 TodoController.createTodo()
+
+3. Spring 把请求体转换为 Todo 对象
+   → 调用 @RequestBody 的 Jackson 反序列化
+
+4. Controller.createTodo()
+   → 仅提取参数 + 调用 todoService.create(todo)
+
+5. TodoService.create()
+   → 校验 ID 非空
+   → todoRepository.findById() 查重
+   → todoRepository.save() 保存
+
+6. TodoRepository.save()
+   → storage.put(todo.id(), todo)
+
+7. Controller 收到返回值
+   → Spring 把 Todo 对象序列化为 JSON
+   → 写入 HTTP 响应体，状态码 200</code></pre></figure>
+<p>每个箭头都是单向的：Controller → Service → Repository。Service 不依赖 Controller，Repository 不依赖 Service。这种单向依赖让代码更容易测试和修改。</p>
+<h2 id="六-逐步拆分而不是套架构">六、逐步拆分而不是套架构</h2>
+<p>在实际项目中，分层不是一次性完成的任务。通常的拆分顺序：</p>
+<ol><li>先把所有逻辑写在一个 Controller 方法中，确认能跑通。</li><li>当出现第二个需要相同查询逻辑的方法时，提取 Repository。</li><li>当需要写几条 if 判断数据合法性时，提取 Service。</li><li>当 Controller 超过 15-20 行时，考虑是否有业务逻辑混入。</li></ol>
+<p>不应该做的事情：</p>
+<ul><li>一个 Service 中只有一个 <code>repository.save(x)</code> 方法而没有其他逻辑。没有业务逻辑的 Service 只是转发——这种情况下，Controller 直接依赖 Repository 更清晰。</li><li>在未理解需求前就预设三层。</li><li>为一个 <code>if (x &gt; 0)</code> 创建单独的 Service 方法。</li><li>在 Controller 中 import <code>HttpServletRequest</code> 然后手动解析 JSON——Spring 已经帮你做了。</li></ul>
+<p>分层不是架构竞赛。增加一层必然增加一个文件和一个对象，如果这一层没有带来可测试性、可复用性或可读性的提升，就是多余的。</p>
+<h2 id="七-练习与验收">七、练习与验收</h2>
+<h3 id="练习-1-拆分层">练习 1：拆分层</h3>
+<p>将第 18 章的 <code>TodoController</code> 改造为三层：</p>
+<ul><li>Controller：只处理 <code>@GetMapping</code>、<code>@PostMapping</code>，注入 TodoService。</li><li>TodoService：包含&quot;标题不能为空&quot;和&quot;重复 ID 检查&quot;两条业务规则。</li><li>TodoRepository：使用 <code>ConcurrentHashMap</code> 存储。</li></ul>
+<p>完成标准：Controller 中的方法不超过 3 行；Service 不 import Spring Web 包；Repository 不包含业务规则。</p>
+<h3 id="练习-2-找出未分层的代码">练习 2：找出未分层的代码</h3>
+<p>阅读以下代码，指出每行属于哪一层，以及哪些行应该被移走：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@GetMapping(&quot;/orders/{id}&quot;)
+public Order getOrder(@PathVariable String id) {
+    if (id == null) throw new RuntimeException();
+    String sql = &quot;SELECT * FROM orders WHERE id = ?&quot;;
+    // execute SQL... (此处用伪代码表示实际查询)
+    Order order = executeQuery(sql, id);
+    if (order.getStatus().equals(&quot;CANCELLED&quot;)) {
+        return new Order(order.getId(), &quot;[已取消]&quot;);
+    }
+    if (order.getTotal().compareTo(BigDecimal.ZERO) &lt; 0) {
+        throw new RuntimeException(&quot;金额异常&quot;);
+    }
+    return order;
+}</code></pre></figure>
+<h3 id="练习-3-反向测试">练习 3：反向测试</h3>
+<p>写一个 TodoService 的纯 Java 测试（不使用 Spring、不使用 HTTP），验证：</p>
+<ul><li><code>findById(&quot;missing&quot;)</code> 抛出 <code>NoSuchElementException</code>。</li><li><code>create(new Todo(&quot;1&quot;, &quot;Learn Java&quot;, false))</code> 成功。</li><li><code>create(new Todo(&quot;1&quot;, &quot;Duplicate&quot;, false))</code> 抛出 <code>IllegalStateException</code>。</li></ul>
+<p>完成标准：不启动 Spring Boot（不写 <code>@SpringBootTest</code>），直接 <code>new TodoService(new TodoRepository())</code> 并调用方法。这是一个<strong>单元测试</strong>，只在内存中运行。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="service-没有业务逻辑">Service 没有业务逻辑</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@Service
+public class TodoService {
+    private final TodoRepository repo;
+    public Todo findById(String id) { return repo.findById(id); }
+    public void save(Todo t) { repo.save(t); }
+}</code></pre></figure>
+<p>这段代码只是 <code>TodoRepository</code> 的重命名。如果 Service 没有任何校验、转换或组合逻辑，它不增加价值。</p>
+<h3 id="controller-做业务判断">Controller 做业务判断</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@GetMapping(&quot;/{id}&quot;)
+public Todo getTodo(@PathVariable String id) {
+    Todo todo = todoService.findById(id);
+    if (todo.completed()) {    // 业务规则不应在 Controller 中
+        return new Todo(todo.id(), &quot;[已完成]&quot;, true);
+    }
+    return todo;
+}</code></pre></figure>
+<h3 id="把-service-和-repository-混用">把 @Service 和 @Repository 混用</h3>
+<p><code>@Service</code> 和 <code>@Repository</code> 从 Spring 的 Bean 管理角度看是等价的——都能被扫描到并创建实例。但它们的语义不同，分别表示业务逻辑和数据访问的职责。测试和 AOP 切面可以按注解类型做不同处理（例如 <code>@Repository</code> 的异常会自动转换为 Spring 的数据访问异常）。</p>
+<h3 id="在多个层中重复校验">在多个层中重复校验</h3>
+<p>ID 是否为空在 Controller 层校验了一次，又在 Service 层校验了一次，又在 Repository 层校验了一次——这不是&quot;更安全&quot;，而是维护噩梦。选择一个层做输入校验，通常是 Service 层（因为 Service 可能被非 HTTP 的入口调用，例如定时任务或消息队列）。</p>
 <h2 id="本章小结">本章小结</h2>
-<p>本章的内容会在后续章节继续使用。先完成练习和验收，再进入下一章。</p>
+<p>分层架构把 HTTP 处理、业务规则和数据存取分离。Controller 接收请求参数并返回响应，Service 执行业务逻辑，Repository 负责数据存取。构造器注入让依赖单向流动。分层的目标是可测试、可修改和可读，不是为了看起来&quot;像企业架构&quot;。下一章学习参数校验和全局异常处理——让 Controller 在接收非法输入时，能返回结构一致、含义清楚的错误响应。</p>
+<h2 id="快速自测">快速自测</h2>
+<ol><li>Controller、Service、Repository 三层各自的职责是什么？</li><li>为什么 Service 不应该依赖 <code>HttpServletRequest</code>？</li><li>构造器注入相比 <code>@Autowired</code> 字段注入的优势是什么？</li><li>什么样的 Service 方法是多余的转发？</li></ol>
+<p>参考答案：Controller 处理 HTTP 输入输出，Service 执行业务规则，Repository 负责数据存取；Service 应该能被非 HTTP 调用方使用（如定时任务），依赖 HTTP 协议会限制复用；依赖在构造时确定，字段可 final，测试时易于注入替代实现；只调用 repository 的同名方法、无任何校验或转换逻辑的方法。</p>
 <h2 id="参考文献">参考文献</h2>
-<ul><li>Spring. <a href="https://docs.spring.io/spring-boot/reference/" target="_blank" rel="noreferrer">Spring Boot Reference</a>.</li><li>Spring. <a href="https://docs.spring.io/spring-framework/reference/" target="_blank" rel="noreferrer">Spring Framework Reference</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/19-configuration.html">← 第 19 章<br><strong>配置、环境与代码分离</strong></a><a href="../lessons/21-validation-global-exception.html">第 21 章 →<br><strong>参数校验、全局异常与错误响应</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#先看未分层的接口">先看未分层的接口</a><a class="" href="#把-http-留在-controller">把 HTTP 留在 Controller</a><a class="" href="#把业务规则放入-service">把业务规则放入 Service</a><a class="" href="#repository-或-mapper-负责数据">Repository 或 Mapper 负责数据</a><a class="" href="#逐步拆分而不是套架构">逐步拆分而不是套架构</a><a class="" href="#练习与验收">练习与验收</a><a class="" href="#容易走偏的地方">容易走偏的地方</a><a class="" href="#本章小结">本章小结</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>
+<ul><li>Spring. <a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller.html" target="_blank" rel="noreferrer">Spring MVC Controller</a>.</li><li>Spring. <a href="https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html" target="_blank" rel="noreferrer">The IoC Container：Dependency Injection</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/19-configuration.html">← 第 19 章<br><strong>配置、环境与代码分离</strong></a><a href="../lessons/21-validation-global-exception.html">第 21 章 →<br><strong>参数校验、全局异常与错误响应</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一-先看未分层的接口">一、先看未分层的接口</a><a class="" href="#二-把-http-留在-controller">二、把 HTTP 留在 Controller</a><a class="" href="#三-把业务规则放入-service">三、把业务规则放入 Service</a><a class="" href="#四-repository-负责数据存取">四、Repository 负责数据存取</a><a class="" href="#五-完整的请求处理链路">五、完整的请求处理链路</a><a class="" href="#六-逐步拆分而不是套架构">六、逐步拆分而不是套架构</a><a class="" href="#七-练习与验收">七、练习与验收</a><a class="sub" href="#练习-1-拆分层">练习 1：拆分层</a><a class="sub" href="#练习-2-找出未分层的代码">练习 2：找出未分层的代码</a><a class="sub" href="#练习-3-反向测试">练习 3：反向测试</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#service-没有业务逻辑">Service 没有业务逻辑</a><a class="sub" href="#controller-做业务判断">Controller 做业务判断</a><a class="sub" href="#把-service-和-repository-混用">把 @Service 和 @Repository 混用</a><a class="sub" href="#在多个层中重复校验">在多个层中重复校验</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

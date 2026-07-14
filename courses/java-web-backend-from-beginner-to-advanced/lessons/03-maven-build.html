@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Java 源文件先由 `javac` 编译成 class 字节码，JVM 再根据完整类名找到并执行 `main` 方法；源文件、类、包、目录和命令必须互相对应。"><title>Java 程序结构、编译与运行 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Java 源文件先由 `javac` 编译成 class 字节码，JVM 再根据完整类名找到并执行 `main` 方法；源文件、类、包、目录和命令必须互相对应。"><title>Java 程序结构、编译与运行 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
 <body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 3 章 · Java 语言及标准库基础</div><h1>Java 程序结构、编译与运行</h1><p class="lesson-summary">Java 源文件先由 `javac` 编译成 class 字节码，JVM 再根据完整类名找到并执行 `main` 方法；源文件、类、包、目录和命令必须互相对应。</p><div class="meta-row"><span class="pill">这一章不追求写出复杂功能，而是把一份源代码怎样变成可执行程序看清楚。每做一步，都观察目录里发生了什么变化。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一-从文本文件认识-java-源代码">一、从文本文件认识 Java 源代码</h2>
 <h3 id="1-1-源代码是写给人和编译器看的文本">1.1 源代码是写给人和编译器看的文本</h3>
 <p>程序员直接编写的代码称为<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">源代码</span>。Java 源代码使用普通文本保存，文件扩展名是 <code>.java</code>。它可以用 IntelliJ IDEA 打开，也可以用系统自带的文本编辑器查看。</p>
 <p>新建一个名为 <code>HelloJava.java</code> 的文件，写入：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class HelloJava {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class HelloJava {
     public static void main(String[] args) {
         // println 会把括号里的文本输出到控制台，并在末尾换行
         System.out.println(&quot;Hello, Java&quot;); // 控制台输出：Hello, Java
@@ -15,11 +15,11 @@
 <p>Java 会区分大小写。<code>HelloJava</code>、<code>hellojava</code> 和 <code>HELLOJAVA</code> 是三个不同的名字；<code>String</code> 不能写成 <code>string</code>，<code>System</code> 也不能写成 <code>system</code>。</p>
 <h3 id="1-2-空白-换行和缩进帮助人阅读">1.2 空白、换行和缩进帮助人阅读</h3>
 <p>多数情况下，Java 编译器把连续空格、制表符和换行看作分隔符。下面的代码虽然很难读，但仍可能通过编译：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class Compact{public static void main(String[] args){System.out.println(&quot;ok&quot;);}}</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class Compact{public static void main(String[] args){System.out.println(&quot;ok&quot;);}}</code></pre></figure>
 <p>课程统一使用四个空格缩进。进入一个花括号后增加一级缩进，离开花括号后减少一级。缩进不会改变这段程序的执行结果，却能让类、方法和语句的归属一眼可见。</p>
 <h3 id="1-3-注释不会成为执行语句">1.3 注释不会成为执行语句</h3>
 <p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">注释</span>用于解释代码，编译器不会把注释当作要执行的指令。Java 常用三种注释：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">// 单行注释：从双斜杠开始，到这一行结束
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 单行注释：从双斜杠开始，到这一行结束
 
 /*
  * 多行注释：可以跨越多行
@@ -33,19 +33,19 @@
 <h3 id="2-1-public-类与文件名保持一致">2.1 public 类与文件名保持一致</h3>
 <p><code>public class HelloJava</code> 中，<code>HelloJava</code> 是类名。初学阶段遵守这条稳定规则：源文件里声明了 <code>public class HelloJava</code>，文件就命名为 <code>HelloJava.java</code>，大小写完全相同。</p>
 <p>下面的组合会编译失败：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">文件名：Welcome.java
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">文件名：Welcome.java
 代码：public class HelloJava { ... }</code></pre></figure>
 <p>编译器会提示公开类 <code>HelloJava</code> 应当声明在 <code>HelloJava.java</code> 中。一个文件可以包含多个非 <code>public</code> 的顶层类，但目前不要这样组织代码；每个源文件只放一个公开类，目录会更清楚。</p>
 <h3 id="2-2-main-是约定好的启动入口">2.2 main 是约定好的启动入口</h3>
 <p>命令行运行一个普通 Java 类时，JVM 会寻找下面这个方法：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public static void main(String[] args) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public static void main(String[] args) {
     // 程序从这里开始按顺序执行
 }</code></pre></figure>
 <p>现阶段把整行看成固定入口，再逐步认识每个部分：</p>
 <div class="table-wrap"><table><thead><tr><th>部分</th><th>当前需要理解的含义</th></tr></thead><tbody><tr><td><code>public</code></td><td>JVM 可以从类外找到这个方法</td></tr><tr><td><code>static</code></td><td>启动时不必先创建对象；第 8 章再系统解释</td></tr><tr><td><code>void</code></td><td>方法执行结束后不返回一个结果</td></tr><tr><td><code>main</code></td><td>JVM 约定的入口名称</td></tr><tr><td><code>String[] args</code></td><td>接收命令行传入的一组文本；数组在第 7 章讲解</td></tr></tbody></table></div>
 <p>拼写或签名改变后，源代码可能仍能编译，但用 <code>java</code> 启动时找不到标准入口。例如把 <code>main</code> 写成 <code>Main</code>，JVM 会报告找不到 main 方法。</p>
 <h3 id="2-3-main-中的语句从上到下执行">2.3 main 中的语句从上到下执行</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class OrderDemo {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class OrderDemo {
     public static void main(String[] args) {
         System.out.println(&quot;第一步&quot;); // 控制台第 1 行输出：第一步
         System.out.println(&quot;第二步&quot;); // 控制台第 2 行输出：第二步
@@ -57,9 +57,9 @@
 <h3 id="3-1-编译器负责语法和类型检查">3.1 编译器负责语法和类型检查</h3>
 <p>计算机不会直接执行 <code>.java</code> 文本。JDK 提供的 <code>javac</code> 是 Java <span class="term" tabindex="0" data-tip="课程术语，详见术语表。">编译器</span>，它读取源文件，检查词法、语法和类型规则，然后生成扩展名为 <code>.class</code> 的文件。</p>
 <p>在 <code>HelloJava.java</code> 所在目录打开终端或 PowerShell，先查看文件，再编译：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">javac HelloJava.java</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">javac HelloJava.java</code></pre></figure>
 <p>成功时通常没有提示文字。目录中会新增：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">HelloJava.java
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">HelloJava.java
 HelloJava.class</code></pre></figure>
 <p>“没有输出”在这里代表命令成功完成，不代表没有发生事情。判断标准是命令退出后没有错误，并且出现了 <code>HelloJava.class</code>。</p>
 <h3 id="3-2-class-文件保存-jvm-字节码">3.2 class 文件保存 JVM 字节码</h3>
@@ -67,43 +67,43 @@ HelloJava.class</code></pre></figure>
 <p>这就是常说的“编译一次，在不同平台的 JVM 上运行”的基础。它不表示所有 Java 程序完全没有平台差异：文件路径、字符编码、系统权限和本地库仍可能不同。第 16 章处理文件时会看到这些边界。</p>
 <h3 id="3-3-修改源文件后必须重新编译">3.3 修改源文件后必须重新编译</h3>
 <p>假设先编译了输出 <code>A</code> 的程序，随后把源文件改为输出 <code>B</code>，却直接运行旧 class：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">System.out.println(&quot;B&quot;); // 重新编译并运行后，控制台输出：B</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">System.out.println(&quot;B&quot;); // 重新编译并运行后，控制台输出：B</code></pre></figure>
 <p>如果没有再次执行 <code>javac HelloJava.java</code>，<code>java HelloJava</code> 仍可能运行上次生成的 class，输出旧结果。命令行学习时使用稳定顺序：保存源文件、编译、确认成功、运行。IDE 和 Maven 会替你判断哪些源文件需要重新编译，但底层关系没有改变。</p>
 <h3 id="3-4-编译错误要从第一条开始读">3.4 编译错误要从第一条开始读</h3>
 <p>删除输出语句末尾的分号：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">System.out.println(&quot;Hello, Java&quot;)</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">System.out.println(&quot;Hello, Java&quot;)</code></pre></figure>
 <p>编译器通常报告类似信息：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">HelloJava.java:3: error: ';' expected</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">HelloJava.java:3: error: ';' expected</code></pre></figure>
 <p>信息可以拆成四部分：文件名、行号、错误级别和原因。编译器标出的行是它确认无法继续理解的位置，真正遗漏的符号有时在上一行。一次语法错误可能引出多条后续错误，因此先修第一条，再重新编译，不要同时猜测所有报错。</p>
 <p>常见编译错误包括：</p>
 <div class="table-wrap"><table><thead><tr><th>提示线索</th><th>常见原因</th><th>首先检查</th></tr></thead><tbody><tr><td><code>';' expected</code></td><td>语句末尾漏分号</td><td>报错行及上一行</td></tr><tr><td><code>cannot find symbol</code></td><td>名字拼错、未声明或不可见</td><td>变量、类、方法的拼写和大小写</td></tr><tr><td><code>reached end of file while parsing</code></td><td>花括号没有配对</td><td>从最近的方法或类开始数 <code>{</code> 与 <code>}</code></td></tr><tr><td><code>incompatible types</code></td><td>值的类型不能放入目标位置</td><td>等号两边、参数和返回值类型</td></tr><tr><td><code>class ... is public</code></td><td>文件名与公开类名不一致</td><td>文件名和 <code>public class</code> 后的名字</td></tr></tbody></table></div>
 <h2 id="四-使用-java-启动-class">四、使用 java 启动 class</h2>
 <h3 id="4-1-java-命令接收类名">4.1 java 命令接收类名</h3>
 <p>编译成功后，在 class 文件所在的根目录执行：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">java HelloJava</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">java HelloJava</code></pre></figure>
 <p>此处写类名 <code>HelloJava</code>，不写 <code>HelloJava.java</code>，也不写 <code>HelloJava.class</code>。<code>java</code> 是 JVM 启动器，它找到类，加载 class 文件，验证字节码，然后调用标准 <code>main</code> 方法。</p>
 <p>完整路径可以写成：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">HelloJava.java --javac 编译--&gt; HelloJava.class --java 启动--&gt; 控制台输出</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">HelloJava.java --javac 编译--&gt; HelloJava.class --java 启动--&gt; 控制台输出</code></pre></figure>
 <p>源文件是输入，class 文件是编译产物，控制台文字是运行结果。把三者分开，排错时就不会把“没有重新编译”误认为“Java 忽略了修改”。</p>
 <h3 id="4-2-编译期错误与运行期错误属于不同阶段">4.2 编译期错误与运行期错误属于不同阶段</h3>
 <div class="table-wrap"><table><thead><tr><th>阶段</th><th>程序状态</th><th>典型问题</th></tr></thead><tbody><tr><td>编译期</td><td>还没有得到可用 class</td><td>漏分号、名字不存在、类型不匹配</td></tr><tr><td>启动期</td><td>class 存在，但 JVM 未成功进入 main</td><td>类名错误、类路径错误、没有标准 main</td></tr><tr><td>运行期</td><td>已经开始执行 main</td><td>除以零、文件不存在、使用空引用</td></tr></tbody></table></div>
 <p>后面会系统讲<span class="term" tabindex="0" data-tip="Java 用来表示非正常执行情况并沿调用栈传播的信息对象。">异常</span>。目前先根据证据定位阶段：<code>javac</code> 报错就是编译期；<code>java</code> 提示找不到类或 main，多半是启动期；已经看到部分输出后才报错，说明程序已经进入运行期。</p>
 <h3 id="4-3-命令行参数会进入-args">4.3 命令行参数会进入 args</h3>
 <p>虽然数组要到第 7 章才完整学习，但可以先观察入口参数。保存：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class ArgumentDemo {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class ArgumentDemo {
     public static void main(String[] args) {
         // args[0] 表示命令行传入的第一个文本参数
         System.out.println(args[0]);
     }
 }</code></pre></figure>
 <p>编译后执行：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">java ArgumentDemo Java17</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">java ArgumentDemo Java17</code></pre></figure>
 <p>控制台输出 <code>Java17</code>。如果没有提供参数，程序会在运行期报错，因为它试图读取不存在的第一个元素。这个例子只用于说明参数去向，数组索引和边界会在第 7 章解释。</p>
 <h2 id="五-包名-目录和完整类名">五、包名、目录和完整类名</h2>
 <h3 id="5-1-包用于组织和区分同名类">5.1 包用于组织和区分同名类</h3>
 <p>真实项目会有很多类。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">包</span>为类提供分组和命名空间。例如两个模块都可以有 <code>User</code> 类，只要完整名称分别是 <code>com.example.account.User</code> 和 <code>com.example.order.User</code>。</p>
 <p>包声明位于源文件有效代码的最前面：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">package com.example.hello;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">package com.example.hello;
 
 public class HelloJava {
     public static void main(String[] args) {
@@ -113,25 +113,25 @@ public class HelloJava {
 <p>常见包名全小写，并采用域名反写作为开头，例如组织拥有 <code>example.com</code>，可以使用 <code>com.example</code>。这是一种减少命名冲突的惯例，不要求真的联网访问该域名。</p>
 <h3 id="5-2-目录结构要与包结构对应">5.2 目录结构要与包结构对应</h3>
 <p>若包名是 <code>com.example.hello</code>，源文件按层级放置：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">project-root/
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">project-root/
 └── com/
     └── example/
         └── hello/
             └── HelloJava.java</code></pre></figure>
 <p>在 <code>project-root</code> 目录执行：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">javac com/example/hello/HelloJava.java
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">javac com/example/hello/HelloJava.java
 java com.example.hello.HelloJava</code></pre></figure>
 <p>编译命令使用文件路径，所以目录间是 <code>/</code>；运行命令使用完整类名，所以包之间是 <code>.</code>。Windows PowerShell 通常也接受命令参数中的 <code>/</code>，使用 <code>\</code> 路径分隔符也可以。关键不是斜杠形式，而是当前目录必须是包结构的根。</p>
 <h3 id="5-3-类路径决定-jvm-去哪里找类">5.3 类路径决定 JVM 去哪里找类</h3>
 <p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">类路径</span>（classpath）是一组供编译器或 JVM 查找 class 的位置。运行上面的程序时，默认类路径通常包含当前目录 <code>.</code>，因此 JVM 从当前目录开始寻找 <code>com/example/hello/HelloJava.class</code>。</p>
 <p>如果你进入 <code>com/example/hello</code> 再执行 <code>java HelloJava</code>，class 文件虽然就在眼前，仍可能失败：class 内部声明的完整名称是 <code>com.example.hello.HelloJava</code>，JVM 需要从包根开始查找。回到 <code>project-root</code>，使用完整类名即可。</p>
 <p>可以显式指定类路径：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">java -cp . com.example.hello.HelloJava</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">java -cp . com.example.hello.HelloJava</code></pre></figure>
 <p><code>-cp .</code> 表示把当前目录作为类路径。后面 Maven 引入第三方依赖时，构建工具会组合更长的类路径；本章只需建立“类路径是查找起点，不是源文件路径”的模型。</p>
 <h2 id="六-源代码中还可以出现-import">六、源代码中还可以出现 import</h2>
 <h3 id="6-1-import-缩短其他包中类的写法">6.1 import 缩短其他包中类的写法</h3>
 <p>代码使用另一个包中的类时，可以写完整类名，也可以先导入。下面只观察 <code>import</code> 在文件中的位置，不使用尚未学习的集合 API：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">package com.example.hello;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">package com.example.hello;
 
 import java.util.ArrayList;
 
@@ -152,14 +152,14 @@ public class ImportDemo {
 <ol><li>终端与 IDE 使用的 JDK 是否都是 17。</li><li>终端当前目录是否是正确的包根或项目根。</li><li>运行配置选择的入口类是否正确。</li><li>IDE 是否使用了尚未保存到磁盘的修改。</li><li>Maven 或 IDE 是否额外加入了终端命令缺少的依赖类路径。</li></ol>
 <h3 id="7-2-maven采用约定目录并批量完成构建">7.2 Maven采用约定目录并批量完成构建</h3>
 <p>第 2 章建立的 Maven 项目通常使用：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">project-root/
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">project-root/
 ├── pom.xml
 └── src/
     ├── main/java/com/example/App.java
     └── test/java/com/example/AppTest.java</code></pre></figure>
 <p><code>src/main/java</code> 是主程序源代码根目录，不是包名的一部分。若 <code>App.java</code> 声明 <code>package com.example;</code>，它放在 <code>src/main/java/com/example/App.java</code>。Maven 编译后，class 通常进入 <code>target/classes/com/example/App.class</code>。</p>
 <p>执行：</p>
-<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">mvn compile</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">mvn compile</code></pre></figure>
 <p>Maven 会读取 <code>pom.xml</code>，选择编译插件和 JDK 配置，寻找标准源代码目录，再调用编译器。它替代的是重复命令，不替代本章的结构规则。</p>
 <h2 id="八-从错误信息建立固定排查顺序">八、从错误信息建立固定排查顺序</h2>
 <h3 id="8-1-找不到源文件">8.1 找不到源文件</h3>
@@ -176,7 +176,7 @@ public class ImportDemo {
 <h3 id="9-1-第一轮-运行无包程序">9.1 第一轮：运行无包程序</h3>
 <ol><li>新建目录 <code>chapter-03</code>。</li><li>创建 <code>Welcome.java</code>，声明 <code>public class Welcome</code>。</li><li>在 <code>main</code> 中输出姓名和学习目标，并在输出语句旁写预期结果注释。</li><li>执行 <code>javac Welcome.java</code>，确认生成 <code>Welcome.class</code>。</li><li>执行 <code>java Welcome</code>，核对实际输出。</li></ol>
 <p>参考实现：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class Welcome {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class Welcome {
     public static void main(String[] args) {
         System.out.println(&quot;姓名：小林&quot;); // 控制台输出：姓名：小林
         System.out.println(&quot;目标：读懂 Java 程序结构&quot;); // 控制台输出：目标：读懂 Java 程序结构
@@ -188,7 +188,7 @@ public class ImportDemo {
 <p>每次只制造一个错误，修复并确认重新编译成功后再做下一项。练习目标不是背错误文本，而是学会从“阶段、文件、行号、原因”四个信息定位。</p>
 <h3 id="9-3-第三轮-加入包名">9.3 第三轮：加入包名</h3>
 <p>建立 <code>com/example/lesson</code> 目录，把文件移动进去并添加：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">package com.example.lesson;</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">package com.example.lesson;</code></pre></figure>
 <p>回到 <code>chapter-03</code> 根目录，编译并运行完整类名。完成后用自己的话解释：为什么编译命令中是路径，运行命令中是点号分隔的类名。</p>
 <p>完成标准：能指出 <code>.java</code>、<code>.class</code>、<code>javac</code>、<code>java</code>、JVM、包和类路径各自处于哪一步；遇到错误时先判断发生在编译、启动还是运行阶段。</p>
 <h2 id="十-常见误区">十、常见误区</h2>

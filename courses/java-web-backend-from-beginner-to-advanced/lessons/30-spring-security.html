@@ -1,21 +1,226 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="先学习认证、授权和过滤器链，再进入安全配置。"><title>Spring Security 认证与授权 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
-<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 30 章 · Java 进阶</div><h1>Spring Security 认证与授权</h1><p class="lesson-summary">先学习认证、授权和过滤器链，再进入安全配置。</p><div class="meta-row"><span class="pill">先按本章的操作或推理顺序完成阅读，再记录每一步的结果与疑问。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="先区分身份与权限">先区分身份与权限</h2>
-<p>本节围绕“先区分身份与权限”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="过滤器链在做什么">过滤器链在做什么</h2>
-<p>本节围绕“过滤器链在做什么”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="从默认配置开始">从默认配置开始</h2>
-<p>本节围绕“从默认配置开始”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="密码不能明文保存">密码不能明文保存</h2>
-<p>本节围绕“密码不能明文保存”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="url-方法与浏览器边界">URL、方法与浏览器边界</h2>
-<p>本节围绕“URL、方法与浏览器边界”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="练习与验收">练习与验收</h2>
-<p>保护一个管理接口，分别观察未登录、无权限和有权限三种响应。</p>
-<p>完成后，应能用本章的术语解释自己的操作结果；遇到失败时，先记录输入、实际结果和错误信息。</p>
-<h2 id="容易走偏的地方">容易走偏的地方</h2>
-<p>不要跳过本章的基础模型，直接复制框架、数据库或运维配置。每一项操作都应有明确的目的和可观察结果。</p>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Spring Security 通过过滤器链拦截请求，按认证和授权规则决定放行或拒绝；密码哈希、URL 保护和 CORS/CSRF 是 Web 安全的基本配置。"><title>Spring Security 认证与授权 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 30 章 · Java 进阶</div><h1>Spring Security 认证与授权</h1><p class="lesson-summary">Spring Security 通过过滤器链拦截请求，按认证和授权规则决定放行或拒绝；密码哈希、URL 保护和 CORS/CSRF 是 Web 安全的基本配置。</p><div class="meta-row"><span class="pill">先建立&quot;认证是证明你是谁，授权是判断你能做什么&quot;的基本概念，再从 Spring Security 的默认行为出发，逐步理解过滤器链如何保护接口。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><p>前面 20 多章搭建的 Web 服务中，任何人访问任何接口都能拿到响应。生产环境中，需要限制谁可以调用什么接口。这涉及两个独立的概念：先知道你是谁，再判断你能做什么。</p>
+<h2 id="一-身份与权限是两个独立概念">一、身份与权限是两个独立概念</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">认证</span>（Authentication）回答&quot;你是谁&quot;。常见的认证方式是用户名和密码登录，或者出示一张有效的令牌。</p>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">授权</span>（Authorization）回答&quot;你能做什么&quot;。认证成功后，系统还要判断当前用户是否有权限执行当前操作。例如：登录成功的普通用户不能删除别人的订单。</p>
+<p>两个概念分开的好处：认证方式可以换（从密码换成指纹或 JWT 令牌），授权规则可以独立调整（管理员今天可以删除，明天规则改成只有超管才能删除），两者互不绑定。</p>
+<p>在 HTTP 协议层面，认证信息通常通过请求头传递。第 17 章讲过，HTTP 是无状态的——服务器不会自动记得上一个请求是谁发的。所以每个请求都需要携带身份凭证：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">GET /orders/42 HTTP/1.1
+Authorization: Bearer eyJhbGciOi...</code></pre></figure>
+<p><code>Authorization</code> 是标准请求头，<code>Bearer</code> 表示&quot;持有者出示这张令牌&quot;。第 31 章会详细讲 JWT 令牌的结构和验证。本章先用用户名/密码方式理解认证的基本流程。</p>
+<h2 id="二-过滤器链在做什么">二、过滤器链在做什么</h2>
+<p>第 18 章讲过，Spring MVC 的 DispatcherServlet 是所有请求的中央分发器。但实际上请求到达 DispatcherServlet 之前，还要经过一条<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">过滤器链</span>（Filter Chain）。</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">HTTP 请求
+  → Filter A（例如：记录日志）
+  → Filter B（例如：检查认证状态）
+  → Filter C（例如：检查权限）
+  → DispatcherServlet（匹配 Controller）
+  → Controller 方法执行
+  → 响应原路返回，经过相同的 Filter</code></pre></figure>
+<p>Filter 是 Java Servlet 规范中的组件。它可以：</p>
+<ul><li>在请求到达 Controller 之前执行检查。</li><li>修改请求或响应。</li><li>直接拦截请求并返回错误（不经过 Controller）。</li></ul>
+<p>Spring Security 的核心就是一组 Filter。它把自己插入到过滤器链中，负责：</p>
+<ol><li><strong>SecurityContextPersistenceFilter</strong>：读取或创建安全上下文。</li><li><strong>UsernamePasswordAuthenticationFilter</strong>：处理用户名/密码登录请求。</li><li><strong>ExceptionTranslationFilter</strong>：把安全相关的异常转换为 HTTP 响应。</li><li><strong>FilterSecurityInterceptor</strong>：检查当前请求是否有权限访问目标资源。</li></ol>
+<p>学习者不需要手动配置这些 Filter 的顺序。Spring Security 通过 <code>spring-boot-starter-security</code> 自动注册它们。</p>
+<h2 id="三-从默认配置开始">三、从默认配置开始</h2>
+<h3 id="3-1-引入依赖">3.1 引入依赖</h3>
+<figure class="code-card"><div class="code-toolbar"><span>xml</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre></figure>
+<p>只需这一个 starter。它自动引入 Spring Security 的全部组件，并配置好默认的过滤器链。</p>
+<h3 id="3-2-默认行为">3.2 默认行为</h3>
+<p>引入 <code>spring-boot-starter-security</code> 后，不做任何配置，你的服务立即发生以下变化：</p>
+<ul><li>所有接口都需要认证才能访问。</li><li>启动时控制台输出一行随机密码：<code>Using generated security password: 8a3f...</code>。</li><li>默认用户名是 <code>user</code>。</li><li>提供用户名和密码后，浏览器会自动跳转到之前请求的页面。</li><li><code>/logout</code> 路径可以登出。</li></ul>
+<p>使用 curl 验证未认证的请求被拒绝：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">curl -i http://localhost:8080/todos</code></pre></figure>
+<p>响应：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Basic realm=&quot;Realm&quot;</code></pre></figure>
+<p><code>401</code> 表示请求缺少有效的认证信息。<code>WWW-Authenticate</code> 头告诉客户端&quot;你需要提供认证凭据&quot;。带上用户名和密码再请求：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">curl -i -u user:8a3f... http://localhost:8080/todos</code></pre></figure>
+<p><code>-u</code> 参数让 curl 自动添加 <code>Authorization: Basic ...</code> 请求头。<code>Basic</code> 后面是将 <code>user:password</code> 进行 Base64 编码的结果。</p>
+<p>响应正常返回 <code>200</code>。<code>Basic</code> 认证适合 curl 测试和内部工具调用，浏览器场景中更常用的是表单登录和 JWT（第 31 章）。</p>
+<h2 id="四-用-securityfilterchain-定制规则">四、用 SecurityFilterChain 定制规则</h2>
+<h3 id="4-1-第一个安全配置">4.1 第一个安全配置</h3>
+<p>创建配置类：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(auth -&gt; auth
+                .requestMatchers(&quot;/todos/**&quot;).authenticated()
+                .anyRequest().permitAll()
+            )
+            .httpBasic(httpBasic -&gt; {});  // 启用 HTTP Basic 认证
+
+        return http.build();
+    }
+}</code></pre></figure>
+<p>逐行解释：</p>
+<ul><li><code>@Configuration</code> 标记这是一个配置类，Spring 会读取其中的 Bean 定义。</li><li><code>@EnableWebSecurity</code> 启用 Spring Security 的 Web 安全支持。</li><li><code>securityFilterChain(HttpSecurity http)</code> 返回一个 <code>SecurityFilterChain</code> Bean，Spring Security 用它替换默认的过滤器链。</li><li><code>authorizeHttpRequests</code> 开始定义授权规则。</li><li><code>.requestMatchers(&quot;/todos/**&quot;).authenticated()</code> 表示匹配 <code>/todos/</code> 及其子路径的请求必须经过认证。</li><li><code>.anyRequest().permitAll()</code> 表示其他所有请求不需要认证。</li><li><code>.httpBasic(httpBasic -&gt; {})</code> 启用 HTTP Basic 认证方式。</li><li><code>http.build()</code> 将所有配置打包成一个生效的过滤器链。</li></ul>
+<p>现在 <code>/todos</code> 需要认证，<code>/welcome</code> 等公开路径无需认证。</p>
+<h3 id="4-2-匹配规则">4.2 匹配规则</h3>
+<p><code>requestMatchers</code> 支持多种匹配方式：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">.requestMatchers(&quot;/admin/**&quot;).hasRole(&quot;ADMIN&quot;)     // 需要 ADMIN 角色
+.requestMatchers(&quot;/api/users/**&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;USER&quot;) // ADMIN 或 USER
+.requestMatchers(HttpMethod.POST, &quot;/api/orders&quot;).authenticated() // POST 需认证
+.requestMatchers(HttpMethod.GET, &quot;/api/products/**&quot;).permitAll() // GET 公开</code></pre></figure>
+<p>匹配规则按声明顺序检查，第一条匹配的规则生效。因此更具体的规则放在前面，通用的放在后面：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">.requestMatchers(&quot;/admin/secret&quot;).hasRole(&quot;SUPER_ADMIN&quot;)  // 先匹配具体路径
+.requestMatchers(&quot;/admin/**&quot;).hasRole(&quot;ADMIN&quot;)             // 再匹配宽泛路径</code></pre></figure>
+<p>如果写反了，<code>/admin/secret</code> 会被 <code>/admin/**</code> 提前匹配，<code>SUPER_ADMIN</code> 的限制永远不被检查。</p>
+<h2 id="五-密码不能明文保存">五、密码不能明文保存</h2>
+<h3 id="5-1-为什么不能用明文">5.1 为什么不能用明文</h3>
+<p>如果数据库中直接存明文密码，任何有数据库访问权限的人都能看到所有用户的真实密码。密码在传输、存储和日志中都应该被保护。</p>
+<p>正确做法是存储密码的<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">哈希值</span>——通过单向数学函数计算出的固定长度字符串。哈希有三个特征：</p>
+<ol><li>同一个输入总是得到同一个输出（确定性）。</li><li>从输出无法反推输入（单向性）。</li><li>输入微小改变会导致输出完全不同（雪崩效应）。</li></ol>
+<p>用户登录时，系统对输入的密码做相同的哈希，比较结果是否与存储的哈希值一致。即使数据库泄露，攻击者得到的也是哈希值而非原始密码。</p>
+<h3 id="5-2-bcrypt-和-passwordencoder">5.2 BCrypt 和 PasswordEncoder</h3>
+<p>Spring Security 使用 <code>BCryptPasswordEncoder</code> 作为默认的密码编码器：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@Configuration
+public class PasswordConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}</code></pre></figure>
+<p><code>PasswordEncoder</code> 接口有两个核心方法：</p>
+<ul><li><code>encode(rawPassword)</code> 对明文密码做哈希。</li><li><code>matches(rawPassword, encodedPassword)</code> 检查明文是否匹配已存储的哈希。</li></ul>
+<p>BCrypt 的哈希结果包含盐值和计算强度的参数，格式类似：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy</code></pre></figure>
+<p><code>$2a</code> 是算法版本，<code>$10</code> 是计算强度（10 次迭代），后面是盐值和哈希值的组合。每次调用 <code>encode</code> 会产生不同的盐值，因此同样的密码两次 <code>encode</code> 的结果不同，但 <code>matches</code> 能正确比对。</p>
+<h3 id="5-3-在内存中定义用户">5.3 在内存中定义用户</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">import org.springframework.context.annotation.Bean;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+
+@Bean
+public UserDetailsService userDetailsService(PasswordEncoder encoder) {
+    var admin = User.withUsername(&quot;admin&quot;)
+        .password(encoder.encode(&quot;admin123&quot;))
+        .roles(&quot;ADMIN&quot;)
+        .build();
+
+    var user = User.withUsername(&quot;user&quot;)
+        .password(encoder.encode(&quot;user123&quot;))
+        .roles(&quot;USER&quot;)
+        .build();
+
+    return new InMemoryUserDetailsManager(admin, user);
+}</code></pre></figure>
+<p><code>InMemoryUserDetailsManager</code> 把用户信息保存在内存中，适合开发和演示。生产环境中应使用数据库或 LDAP 作为用户信息来源。</p>
+<h2 id="六-securitycontext-登录后的身份载体">六、SecurityContext：登录后的身份载体</h2>
+<p>认证成功后，Spring Security 将用户身份保存在<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">SecurityContext</span>中。它通过 <code>SecurityContextHolder</code> 获取：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+
+@GetMapping(&quot;/whoami&quot;)
+public String whoami() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth == null || !auth.isAuthenticated()) {
+        return &quot;未登录&quot;;
+    }
+    return &quot;当前用户：&quot; + auth.getName() + &quot;，角色：&quot; + auth.getAuthorities();
+}</code></pre></figure>
+<p><code>SecurityContextHolder</code> 默认使用 <code>ThreadLocal</code> 存储安全上下文——每个线程有自己的副本。这意味着同一个请求内的所有方法调用（Controller→Service→Repository）都能通过 <code>SecurityContextHolder</code> 获取当前用户，不需要逐层传递参数。</p>
+<h2 id="七-方法级授权">七、方法级授权</h2>
+<p>对于更细粒度的权限控制，可以使用方法注解：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+@Service
+public class OrderService {
+
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public void deleteOrder(String orderId) {
+        // 只有 ADMIN 角色的用户能调用这个方法
+    }
+
+    @PreAuthorize(&quot;#username == authentication.name&quot;)
+    public List&lt;Order&gt; findMyOrders(String username) {
+        // 只能查询自己的订单
+    }
+}</code></pre></figure>
+<p>要启用方法级授权，需要在配置类上添加 <code>@EnableMethodSecurity</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+public class SecurityConfig { ... }</code></pre></figure>
+<p><code>@PreAuthorize</code> 使用 SpEL（Spring Expression Language）表达式。<code>hasRole('ADMIN')</code> 检查当前用户是否有 ADMIN 角色，<code>#username == authentication.name</code> 检查传入的参数是否等于当前登录用户名。</p>
+<h3 id="7-2-postauthorize-与过滤">7.2 @PostAuthorize 与过滤</h3>
+<p><code>@PreAuthorize</code> 在方法执行前检查。<code>@PostAuthorize</code> 在方法执行后检查——适合需要根据返回结果判断权限的场景：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@PostAuthorize(&quot;returnObject.createdBy == authentication.name&quot;)
+public Order getOrder(String orderId) {
+    return orderRepository.findById(orderId);
+}</code></pre></figure>
+<p>方法执行后，SpEL 表达式中的 <code>returnObject</code> 是方法的返回值。这里检查订单的创建者是否是当前用户——即使订单存在，如果创建者不匹配，也返回 403。</p>
+<p>过滤集合中的元素：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@PostAuthorize(&quot;hasRole('ADMIN')&quot;)
+public List&lt;Order&gt; getAllOrders() {
+    // 返回所有订单，但非 ADMIN 用户访问时触发 403
+}
+
+// 更好的方式：过滤而不是拒绝
+@PreAuthorize(&quot;hasRole('USER')&quot;)
+public List&lt;Order&gt; getMyOrders() {
+    // 在 Service 层按当前用户过滤
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    return orderRepository.findByCreatedBy(username);
+}</code></pre></figure>
+<p><code>@PostAuthorize</code> 适合&quot;能读记录，但要检查记录归属&quot;的场景。<code>@PreAuthorize</code> 适合&quot;某些角色才能调用这个方法&quot;的场景。</p>
+<h2 id="八-cors-与-csrf-的基本边界">八、CORS 与 CSRF 的基本边界</h2>
+<h3 id="8-1-cors-跨域请求">8.1 CORS：跨域请求</h3>
+<p>当浏览器中的前端页面（<code>http://localhost:3000</code>）向另一个域的后端（<code>http://localhost:8080</code>）发请求时，浏览器会先发送一个 OPTIONS 预检请求，检查服务器是否允许跨域。Spring Security 默认允许配置 CORS：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">http.cors(cors -&gt; {});</code></pre></figure>
+<p>然后在 <code>application.yml</code> 或 <code>@Bean</code> 中配置允许的域。CORS 不是安全防护——它只是浏览器的同源策略机制，非浏览器客户端完全不受 CORS 限制。</p>
+<h3 id="8-2-csrf-跨站请求伪造">8.2 CSRF：跨站请求伪造</h3>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">CSRF</span>（Cross-Site Request Forgery）是一种攻击方式：受害者登录了银行网站后，访问了恶意站点的页面，恶意页面悄悄向银行网站提交转账请求，利用了受害者浏览器中仍然有效的登录 Cookie。</p>
+<p>Spring Security 默认开启 CSRF 防护：要求状态改变请求（POST/PUT/DELETE）携带一个 CSRF Token，服务器验证 Token 是否匹配。对于纯 REST API（无 Cookie 认证，只使用 <code>Authorization: Bearer</code> 令牌），CSRF 攻击不适用，可以关闭：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">http.csrf(csrf -&gt; csrf.disable());</code></pre></figure>
+<p><strong>关闭 CSRF 的前提是 API 不使用 Cookie 作为认证机制。</strong> 如果使用 Cookie 或 Session 认证，必须保留 CSRF 防护。</p>
+<h2 id="九-练习与验收">九、练习与验收</h2>
+<h3 id="练习-1-默认安全观察">练习 1：默认安全观察</h3>
+<p>引入 <code>spring-boot-starter-security</code>，不做任何配置。观察：</p>
+<ol><li>未认证访问 <code>/todos</code> 返回什么状态码和头信息？</li><li>用生成的随机密码通过 <code>-u user:password</code> 访问，返回什么？</li><li><code>/welcome</code>（假设未在 Controller 中声明路径）返回什么？</li></ol>
+<p>完成标准：能解释 401 的含义和 <code>WWW-Authenticate</code> 头的用途。</p>
+<h3 id="练习-2-定制保护规则">练习 2：定制保护规则</h3>
+<p>实现以下规则：</p>
+<ul><li><code>/api/public/**</code> 所有人可访问</li><li><code>/api/orders/**</code> 需要认证</li><li><code>/api/admin/**</code> 需要 ADMIN 角色</li><li>创建两个内存用户：admin（ADMIN 角色）和 user（USER 角色）</li></ul>
+<p>用 curl 验证：admin 能访问所有接口；user 能访问 <code>/api/orders</code> 但被 <code>/api/admin</code> 拒绝；无认证用户只能访问 <code>/api/public</code>。</p>
+<h3 id="练习-3-密码安全对比">练习 3：密码安全对比</h3>
+<p>用 BCryptPasswordEncoder 对同一个密码编码两次，验证：</p>
+<ol><li>两次 <code>encode</code> 的结果不同（盐值不同）。</li><li>两次编码结果都能通过 <code>matches</code> 验证。</li><li>修改密码中的一个字符，<code>matches</code> 返回 false。</li></ol>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="把认证和授权混为一谈">把认证和授权混为一谈</h3>
+<p>&quot;这个人有没有登录&quot;和&quot;这个人能不能做某事&quot;是两个独立判断。登录成功后不代表所有操作都被允许；没有特定权限也不代表需要重新登录。</p>
+<h3 id="在生产环境使用随机密码">在生产环境使用随机密码</h3>
+<p>随机密码只在首次启动时生成，重启后变化。生产环境必须使用数据库或外部身份服务管理用户。</p>
+<h3 id="关闭-csrf-但不理解前提">关闭 CSRF 但不理解前提</h3>
+<p>&quot;REST API 不需要 CSRF&quot;成立的前提是 API 只使用 <code>Authorization: Bearer</code> 令牌，不使用 Cookie 或 Session。如果前端通过 Cookie 携带 JSESSIONID，关闭 CSRF 会暴露风险。</p>
+<h3 id="在配置中把具体路径写在通配符后面">在配置中把具体路径写在通配符后面</h3>
+<p>Spring Security 按顺序匹配规则。<code>&quot;/admin/**&quot;</code> 应该放在 <code>&quot;/admin/secret&quot;</code> 之后，否则具体路径被通配符提前匹配。</p>
 <h2 id="本章小结">本章小结</h2>
-<p>本章的内容会在后续章节继续使用。先完成练习和验收，再进入下一章。</p>
+<p>Spring Security 通过一组 Filter 在请求到达 Controller 之前执行认证和授权检查。引入 starter 后默认所有接口需要认证，提供随机密码。SecurityFilterChain Bean 定制授权规则，按声明顺序匹配路径。BCryptPasswordEncoder 对密码做不可逆哈希，每次编码产生不同盐值但能正确匹配。SecurityContext 在整个请求线程中携带登录用户信息。CSRF 防护在 Cookie 认证场景中必须保留，纯 Bearer Token API 可关闭。下一章将用 JWT 令牌替代 Basic 认证，实现无状态的 API 身份验证。</p>
+<h2 id="快速自测">快速自测</h2>
+<ol><li>认证和授权分别回答什么问题？</li><li>Spring Security 的过滤器链在请求到达 Controller 之前还是之后执行？</li><li>BCrypt 的 <code>encode</code> 两次对同一个密码编码，结果相同吗？<code>matches</code> 能正确验证吗？</li><li>CSRF 在什么条件下可以安全关闭？</li><li><code>requestMatchers(&quot;/admin/**&quot;).hasRole(&quot;ADMIN&quot;)</code> 和 <code>requestMatchers(&quot;/admin/secret&quot;).hasRole(&quot;SUPER&quot;)</code> 应该谁写在前？</li></ol>
+<p>参考答案：认证回答&quot;你是谁&quot;，授权回答&quot;你能做什么&quot;；在到达 Controller 之前；两次编码结果不同（盐值不同），但 <code>matches</code> 都能正确验证；API 只使用 <code>Authorization: Bearer</code> 令牌、不使用 Cookie 认证时可以关闭；<code>/admin/secret</code> 必须写在前面，否则通配符提前匹配。</p>
 <h2 id="参考文献">参考文献</h2>
-<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/" target="_blank" rel="noreferrer">Java SE 17 Documentation</a>.</li><li>OpenJDK. <a href="https://openjdk.org/jeps/0" target="_blank" rel="noreferrer">JEP Index</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/29-docker.html">← 第 29 章<br><strong>Java Web 应用的 Docker 部署</strong></a><a href="../lessons/31-jwt-identity.html">第 31 章 →<br><strong>JWT 登录与统一身份平台</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#先区分身份与权限">先区分身份与权限</a><a class="" href="#过滤器链在做什么">过滤器链在做什么</a><a class="" href="#从默认配置开始">从默认配置开始</a><a class="" href="#密码不能明文保存">密码不能明文保存</a><a class="" href="#url-方法与浏览器边界">URL、方法与浏览器边界</a><a class="" href="#练习与验收">练习与验收</a><a class="" href="#容易走偏的地方">容易走偏的地方</a><a class="" href="#本章小结">本章小结</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>
+<ul><li>Spring Security. <a href="https://docs.spring.io/spring-security/reference/servlet/architecture.html" target="_blank" rel="noreferrer">Architecture</a>.</li><li>Spring Security. <a href="https://docs.spring.io/spring-security/reference/servlet/configuration/java.html" target="_blank" rel="noreferrer">Security Filter Chain</a>.</li><li>OWASP. <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html" target="_blank" rel="noreferrer">CSRF Cheat Sheet</a>.</li><li>OWASP. <a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html" target="_blank" rel="noreferrer">Password Storage Cheat Sheet</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/29-docker.html">← 第 29 章<br><strong>Java Web 应用的 Docker 部署</strong></a><a href="../lessons/31-jwt-identity.html">第 31 章 →<br><strong>JWT 登录与统一身份平台</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一-身份与权限是两个独立概念">一、身份与权限是两个独立概念</a><a class="" href="#二-过滤器链在做什么">二、过滤器链在做什么</a><a class="" href="#三-从默认配置开始">三、从默认配置开始</a><a class="sub" href="#3-1-引入依赖">3.1 引入依赖</a><a class="sub" href="#3-2-默认行为">3.2 默认行为</a><a class="" href="#四-用-securityfilterchain-定制规则">四、用 SecurityFilterChain 定制规则</a><a class="sub" href="#4-1-第一个安全配置">4.1 第一个安全配置</a><a class="sub" href="#4-2-匹配规则">4.2 匹配规则</a><a class="" href="#五-密码不能明文保存">五、密码不能明文保存</a><a class="sub" href="#5-1-为什么不能用明文">5.1 为什么不能用明文</a><a class="sub" href="#5-2-bcrypt-和-passwordencoder">5.2 BCrypt 和 PasswordEncoder</a><a class="sub" href="#5-3-在内存中定义用户">5.3 在内存中定义用户</a><a class="" href="#六-securitycontext-登录后的身份载体">六、SecurityContext：登录后的身份载体</a><a class="" href="#七-方法级授权">七、方法级授权</a><a class="sub" href="#7-2-postauthorize-与过滤">7.2 @PostAuthorize 与过滤</a><a class="" href="#八-cors-与-csrf-的基本边界">八、CORS 与 CSRF 的基本边界</a><a class="sub" href="#8-1-cors-跨域请求">8.1 CORS：跨域请求</a><a class="sub" href="#8-2-csrf-跨站请求伪造">8.2 CSRF：跨站请求伪造</a><a class="" href="#九-练习与验收">九、练习与验收</a><a class="sub" href="#练习-1-默认安全观察">练习 1：默认安全观察</a><a class="sub" href="#练习-2-定制保护规则">练习 2：定制保护规则</a><a class="sub" href="#练习-3-密码安全对比">练习 3：密码安全对比</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#把认证和授权混为一谈">把认证和授权混为一谈</a><a class="sub" href="#在生产环境使用随机密码">在生产环境使用随机密码</a><a class="sub" href="#关闭-csrf-但不理解前提">关闭 CSRF 但不理解前提</a><a class="sub" href="#在配置中把具体路径写在通配符后面">在配置中把具体路径写在通配符后面</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

@@ -1,66 +1,269 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="异常表示正常流程无法继续的失败信息；通过抛出、传播、捕获和保留原因链，程序可以在合适的边界处理失败而不吞掉线索。"><title>Java 异常与异常边界 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
-<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 11 章 · Java 语言及标准库基础</div><h1>Java 异常与异常边界</h1><p class="lesson-summary">异常表示正常流程无法继续的失败信息；通过抛出、传播、捕获和保留原因链，程序可以在合适的边界处理失败而不吞掉线索。</p><div class="meta-row"><span class="pill">先读异常类型、消息和第一处业务代码行号；不要一看到堆栈就从最后一行开始猜。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="异常不是编译错误">异常不是编译错误</h2>
-<p>编译错误发生在程序启动前，例如漏分号、类型不匹配。<span class="term" tabindex="0" data-tip="Java 用来表示非正常执行情况并沿调用栈传播的信息对象。">异常</span>发生在程序已经运行时，例如文本无法解析、文件不存在、对象为 <code>null</code>。</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int number = Integer.parseInt(&quot;abc&quot;);</code></pre></figure>
-<p>这行能编译，但运行时会抛出 <code>NumberFormatException</code>。程序输出的<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">堆栈</span>会包含异常类型、消息、调用路径和文件行号。阅读时优先寻找第一条指向自己代码的 <code>文件.java:行号</code>，它通常是实际操作失败的位置。</p>
-<h2 id="捕获能在当前位置处理的失败">捕获能在当前位置处理的失败</h2>
-<p><code>try</code> 包住可能失败的语句，<code>catch</code> 接收对应异常：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String input = &quot;abc&quot;;
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="异常携带失败类型和位置信息；通过抛出、捕获和链式传递，程序在合适的边界处理失败而不丢失原因。"><title>Java 异常与异常边界 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 11 章 · Java 语言及标准库基础</div><h1>Java 异常与异常边界</h1><p class="lesson-summary">异常携带失败类型和位置信息；通过抛出、捕获和链式传递，程序在合适的边界处理失败而不丢失原因。</p><div class="meta-row"><span class="pill">先读异常类型、消息和第一条指向自己代码的行号；不要把运行时错误当成编译问题，也不要从堆栈最后一行开始猜。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一-编译错误与运行时异常">一、编译错误与运行时异常</h2>
+<p>第 3 章提到，Java 程序必须通过编译才能运行。编译阶段检查语法、类型和基本的名称解析，通过后生成 class 文件。但程序通过编译不意味着运行一定成功。</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int number = Integer.parseInt(&quot;abc&quot;);</code></pre></figure>
+<p>这一行能通过编译——<code>Integer.parseInt</code> 接收 <code>String</code>、返回 <code>int</code>，类型完全匹配。但运行时会抛出 <code>NumberFormatException</code>，因为 <code>&quot;abc&quot;</code> 不是有效的整数表示。</p>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">编译错误</span>发生在程序运行之前，报错信息会指出文件名、行号和原因，例如漏分号、类型不匹配或变量未声明。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">运行时异常</span>（也叫运行期异常）发生在程序运行时，代码本身语法和类型正确，但执行到某一步时条件不允许操作继续。</p>
+<div class="table-wrap"><table><thead><tr><th>对比维度</th><th>编译错误</th><th>运行时异常</th></tr></thead><tbody><tr><td>发生时间</td><td><code>javac</code> 阶段</td><td><code>java</code> 运行阶段</td></tr><tr><td>典型原因</td><td>语法错误、类型错误、未声明</td><td>非法参数、空值、下标越界</td></tr><tr><td>修复方式</td><td>修正源码后重新编译</td><td>修正逻辑、增加校验或捕获处理</td></tr><tr><td>能否被捕获</td><td>无&quot;捕获&quot;概念，必须修复</td><td>可用 try-catch 处理</td></tr></tbody></table></div>
+<p>零基础阶段最容易犯的混淆是：看到红字报错就认为&quot;代码写错了需要重写语法&quot;。先把编译错误修掉，再运行程序。如果运行后出现异常堆栈，则说明语法和类型已经通过编译检查，问题是出在运行逻辑上。</p>
+<h2 id="二-异常层次结构">二、异常层次结构</h2>
+<p>Java 的异常对象有类型层次。理解这个层次有助于用正确的类型捕获和抛出异常。</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">java.lang.Throwable
+├── java.lang.Error（严重系统问题，通常不捕获）
+│   └── OutOfMemoryError、StackOverflowError、NoClassDefFoundError
+└── java.lang.Exception（程序可处理的失败）
+    ├── RuntimeException（运行时异常，不强制声明）
+    │   ├── NullPointerException
+    │   ├── IllegalArgumentException
+    │   ├── IndexOutOfBoundsException
+    │   └── NumberFormatException
+    └── 其他 Exception（受检异常，必须处理）
+        ├── IOException
+        ├── SQLException
+        └── InterruptedException</code></pre></figure>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Throwable</span>是所有异常和错误的根类。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Error</span>表示 JVM 级别的严重问题，例如内存耗尽（<code>OutOfMemoryError</code>）、栈溢出（<code>StackOverflowError</code>）。业务代码通常不捕获 Error，因为捕获后也无法恢复。初学阶段只需认识它们的名字，看到堆栈中出现 <code>Error</code> 类型的报错先拿到完整信息再求助。</p>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Exception</span>是程序可以处理的失败。其中 <span class="term" tabindex="0" data-tip="课程术语，详见术语表。">RuntimeException</span> 及其子类是运行时异常，编译器不要求声明或捕获；其他 Exception 的子类是<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">受检异常</span>，编译器要求方法要么捕获要么在签名中 <code>throws</code>。</p>
+<h2 id="三-读懂异常堆栈">三、读懂异常堆栈</h2>
+<p>异常发生时，Java 会输出<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">堆栈</span>（stack trace），包含异常类型、描述消息和调用路径。以下面这段代码为例：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class StackTraceDemo {
+    static int parseInt(String input) {
+        return Integer.parseInt(input); // 第 3 行
+    }
+
+    public static void main(String[] args) {
+        String text = getInput();
+        int number = parseInt(text); // 第 8 行
+        System.out.println(number);
+    }
+
+    static String getInput() {
+        return &quot;abc&quot;; // 第 12 行
+    }
+}</code></pre></figure>
+<p>运行后输出：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">Exception in thread &quot;main&quot; java.lang.NumberFormatException: For input string: &quot;abc&quot;
+    at java.base/java.lang.NumberFormatException.forInputString(NumberFormatException.java:67)
+    at java.base/java.lang.Integer.parseInt(Integer.java:658)
+    at StackTraceDemo.parseInt(StackTraceDemo.java:3)
+    at StackTraceDemo.main(StackTraceDemo.java:8)
+    at StackTraceDemo.getInput(StackTraceDemo.java:12)</code></pre></figure>
+<p>阅读顺序是：</p>
+<ol><li><strong>第一行</strong>：异常类型（<code>NumberFormatException</code>）和消息（<code>For input string: &quot;abc&quot;</code>），告诉你出了什么错以及导致错误的值。</li><li><strong>后续每一行</strong>：<code>at 类名.方法名(文件.java:行号)</code>，表示从异常发生位置到 main 方法的完整调用路径。最上面的行是异常实际抛出的位置，通常是 JDK 内部代码。</li><li><strong>找自己代码的行号</strong>：忽略 <code>java.base/</code> 开头的 JDK 内部行，找到第一行属于自己写的类。上例中 <code>StackTraceDemo.parseInt(StackTraceDemo.java:3)</code> 告诉我们 <code>parseInt</code> 方法的第 3 行——即 <code>Integer.parseInt(input)</code> 这行——收到了非法输入。</li></ol>
+<p>不要从堆栈底部开始猜测。底部是 <code>main</code>，它只是整个调用的起点。异常的实际根因在堆栈顶部附近，但需要跳过 JDK 内部方法，找到第一个自己代码的位置。</p>
+<h2 id="四-捕获能在当前位置处理的失败">四、捕获能在当前位置处理的失败</h2>
+<h3 id="4-1-try-catch-基础">4.1 try-catch 基础</h3>
+<p><code>try</code> 包住可能抛出异常的语句，<code>catch</code> 接收特定类型的异常并给出处理：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String input = &quot;abc&quot;;
 
 try {
     int number = Integer.parseInt(input);
-    System.out.println(number);
+    System.out.println(&quot;解析结果：&quot; + number);
 } catch (NumberFormatException exception) {
-    System.out.println(&quot;请输入整数：&quot; + input);
+    System.out.println(&quot;输入不是有效整数：&quot; + input);
 }</code></pre></figure>
-<p>捕获不等于忽略。catch 中应给出当前边界能做的处理，例如提示用户、选择默认值、记录失败或把异常转换为更合适的业务异常。空的 catch 块会让程序看似继续运行，却丢掉失败原因。</p>
-<p><code>finally</code> 中的代码无论 try 成功或失败都会执行，常用于旧式资源清理。现代 Java 更常使用后文的 try-with-resources。</p>
-<h2 id="throw-与-throws-表达责任">throw 与 throws 表达责任</h2>
-<p>方法发现调用方传入非法值时，可以主动 <code>throw</code>：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static int divide(int left, int right) {
-    if (right == 0) {
+<p>控制台输出：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">输入不是有效整数：abc</code></pre></figure>
+<p><code>try</code> 块中，<code>Integer.parseInt</code> 抛出异常后，块内后续语句（<code>System.out.println</code>）不会执行，流程直接跳到对应的 <code>catch</code>。</p>
+<p>捕获不等于忽略。catch 块中应该给出当前边界能做的合理处理，例如：</p>
+<ul><li>提示用户重新输入</li><li>使用默认值继续</li><li>记录日志后继续抛出一个更合适的异常</li><li>将失败转换为用户能理解的消息</li></ul>
+<p>空的 <code>catch</code> 块会让程序看似继续运行，但异常信息被完全丢弃：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">try {
+    int number = Integer.parseInt(input);
+} catch (NumberFormatException e) {
+    // 什么都不做——异常被吞掉了
+}</code></pre></figure>
+<p>这是最常见也最危险的异常误用之一。保留一条日志记录都比完全空 catch 好。</p>
+<h3 id="4-2-多-catch-块">4.2 多 catch 块</h3>
+<p>一个 <code>try</code> 块后面可以跟多个 <code>catch</code> 块，分别处理不同异常类型：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">try {
+    String text = Files.readString(Path.of(&quot;config.txt&quot;));
+    int timeout = Integer.parseInt(text.trim());
+    System.out.println(&quot;超时时间：&quot; + timeout);
+} catch (IOException exception) {
+    System.out.println(&quot;读取配置文件失败：&quot; + exception.getMessage());
+} catch (NumberFormatException exception) {
+    System.out.println(&quot;配置内容不是有效数字：&quot; + exception.getMessage());
+}</code></pre></figure>
+<h3 id="4-3-catch-顺序">4.3 catch 顺序</h3>
+<p>多个 catch 块按书写顺序匹配。一旦某个 catch 匹配，后续 catch 不再检查。因此子类异常应该写在父类异常前面：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">try {
+    // 可能抛出多种异常的操作
+} catch (FileNotFoundException e) {     // IOException 的子类
+    System.out.println(&quot;文件未找到&quot;);
+} catch (IOException e) {               // IOException 和其他子类
+    System.out.println(&quot;IO 错误&quot;);
+}</code></pre></figure>
+<p>如果把 <code>catch (IOException e)</code> 写在前面，<code>FileNotFoundException</code> 会被父类 catch 提前捕获，子类 catch 永远不会执行。编译器会检测到这种&quot;不可达的 catch 块&quot;并报错。</p>
+<h3 id="4-4-finally">4.4 finally</h3>
+<p><code>finally</code> 块中的代码无论 <code>try</code> 是否抛出异常、<code>catch</code> 是否捕获到，都会执行：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">try {
+    System.out.println(&quot;尝试打开资源&quot;);
+    throw new RuntimeException(&quot;模拟失败&quot;);
+} catch (RuntimeException e) {
+    System.out.println(&quot;捕获到：&quot; + e.getMessage());
+} finally {
+    System.out.println(&quot;finally 始终执行&quot;);
+}</code></pre></figure>
+<p>控制台输出：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">尝试打开资源
+捕获到：模拟失败
+finally 始终执行</code></pre></figure>
+<p>即使 <code>catch</code> 中包含 <code>return</code> 或再次 <code>throw</code>，<code>finally</code> 仍然会在控制转移之前执行。<code>finally</code> 传统上用于释放资源（关闭文件、网络连接等），但 Java 7 引入了更好的 try-with-resources。</p>
+<h3 id="4-5-try-with-resources-与异常屏蔽">4.5 try-with-resources 与异常屏蔽</h3>
+<p>对于实现 <code>AutoCloseable</code> 接口的资源（文件、网络流、数据库连接等），try-with-resources 会在代码块结束时自动关闭资源：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Path path = Path.of(&quot;data.txt&quot;);
+try (BufferedReader reader = Files.newBufferedReader(path)) {
+    String firstLine = reader.readLine();
+    System.out.println(&quot;第一行：&quot; + firstLine);
+}</code></pre></figure>
+<p><code>reader</code> 的作用域在 <code>try</code> 括号内。无论块内是否抛出异常，<code>reader.close()</code> 都会被自动调用。不需要手动写 <code>finally</code>。</p>
+<p>当 try 块抛出异常，同时 <code>close()</code> 也抛出异常时，try 块中原始的异常会被保留，<code>close()</code> 抛出的异常被添加为<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">被抑制异常</span>（suppressed exceptions）。原始异常可通过 <code>getSuppressed()</code> 获取被抑制的异常列表。这种机制保证了主要失败原因不会被资源关闭时产生的次要异常覆盖。</p>
+<h2 id="五-throw-与-throws">五、throw 与 throws</h2>
+<h3 id="5-1-throw-主动创建并抛出异常">5.1 throw：主动创建并抛出异常</h3>
+<p>方法发现调用方传入非法值时，可以主动 <code>throw</code> 一个异常对象：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static double divide(double left, double right) {
+    if (Math.abs(right) &lt; 1e-10) {
         throw new IllegalArgumentException(&quot;除数不能为 0&quot;);
     }
     return left / right;
 }</code></pre></figure>
-<p><code>throw</code> 真正创建并抛出异常对象。<code>throws</code> 写在方法声明中，表示方法可能把某种受检异常交给调用方处理：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static String readText(Path path) throws IOException {
-    return Files.readString(path);
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">System.out.println(divide(10, 0)); // 抛出 IllegalArgumentException</code></pre></figure>
+<p><code>throw</code> 语句后面必须是一个 Throwable 实例。程序执行到 <code>throw</code> 时会立即终止当前方法的正常流程，异常沿调用链向上传播。</p>
+<h3 id="5-2-throws-声明方法可能抛出的异常">5.2 throws：声明方法可能抛出的异常</h3>
+<p><code>throws</code> 写在方法声明中，表示该方法可能抛出某种受检异常，调用方必须处理：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static String readConfig() throws IOException {
+    return Files.readString(Path.of(&quot;config.properties&quot;));
 }</code></pre></figure>
-<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">受检异常</span>要求调用方捕获或继续声明；<code>IllegalArgumentException</code>、<code>NullPointerException</code> 这类运行时异常不要求声明。初学阶段不必把所有异常都背成分类表，关键是区分：调用方是否有合理恢复动作；没有时，让异常保留到更合适的边界。</p>
-<h2 id="保留原始原因">保留原始原因</h2>
-<p>底层失败有时需要转换成业务能理解的异常，但不能丢掉原始信息：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">try {
+<p>调用方可以选择继续抛出：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static void startApp() throws IOException {
+    String config = readConfig();
+}</code></pre></figure>
+<p>或者捕获处理：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static void startApp() {
+    try {
+        String config = readConfig();
+    } catch (IOException e) {
+        System.out.println(&quot;启动失败，使用默认配置&quot;);
+    }
+}</code></pre></figure>
+<p>运行时异常不要求 <code>throws</code> 声明，但可以选择性声明以提醒调用方。受检异常的 <code>throws</code> 是方法签名的一部分，覆盖的方法不能 throws 比父类更宽的受检异常。</p>
+<h2 id="六-受检异常与运行时异常的选择">六、受检异常与运行时异常的选择</h2>
+<h3 id="6-1-编译器行为的差异">6.1 编译器行为的差异</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 受检异常：必须处理
+void writeFile() {
+    // Files.writeString(path, content); // 编译错误：Unhandled IOException
+}
+
+// 运行时异常：可选处理
+void parseIntExample() {
+    Integer.parseInt(&quot;abc&quot;); // 编译通过，运行时抛 NumberFormatException
+}</code></pre></figure>
+<p>受检异常的设计意图是：调用方有能力并且应该处理这类失败。例如文件操作可能因磁盘满、权限不足或路径不存在而失败，调用方通常需要知道并做出反应。</p>
+<p>运行时异常的设计意图是：这类失败通常由编程错误引起（空值、越界、非法参数），或者在当前边界无法合理恢复。调用方不需要在每个方法调用处都处理空指针异常。</p>
+<h3 id="6-2-实际判断方法">6.2 实际判断方法</h3>
+<p>初学阶段不必死记哪些是受检异常。遇到新 API 时观察：</p>
+<ul><li>如果 IDE 提示&quot;Unhandled exception&quot;并要求加 <code>try</code> 或 <code>throws</code>，这个 API 抛出的就是受检异常。</li><li>如果编译能通过但运行时报错，就是运行时异常。</li></ul>
+<p>一个实用的判断：调用方是否能给出合理的恢复动作？如果有（比如重试、默认值、提示用户），适合受检异常。如果调用方不管怎么处理都只能让程序继续崩溃或把错误往上传，适合运行时异常。</p>
+<h2 id="七-保留原始原因">七、保留原始原因</h2>
+<p>底层失败有时需要转换成当前层能理解的异常类型，但不能丢失原始原因：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">try {
     return Files.readString(path);
 } catch (IOException exception) {
     throw new IllegalStateException(&quot;读取配置失败：&quot; + path, exception);
 }</code></pre></figure>
-<p>第二个参数 <code>exception</code> 是<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">cause</span>。之后查看堆栈时，既能知道“读取配置失败”，也能看到最初的 I/O 原因。只抛 <code>new IllegalStateException(&quot;失败&quot;)</code> 会让排查线索消失。</p>
-<h2 id="资源必须关闭">资源必须关闭</h2>
-<p>文件、网络连接等资源用完后需要释放。try-with-resources 会在代码块结束时自动关闭实现 <code>AutoCloseable</code> 的资源：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">try (BufferedReader reader = Files.newBufferedReader(path)) {
-    return reader.readLine();
+<p>第二个参数 <code>exception</code> 是<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">cause</span>（原因）。之后查看堆栈时，顶部是 <code>IllegalStateException</code>，下面会跟着 <code>cause</code> 指向的 <code>IOException</code>，再下面是 <code>IOException</code> 的原始堆栈。这样既能知道&quot;读取配置失败&quot;，也能追踪到具体的 I/O 错误。</p>
+<p>如果只写 <code>throw new IllegalStateException(&quot;读取配置失败&quot;)</code> 而不传 cause，原始异常被丢弃，排查时需要重新猜测底层原因。</p>
+<p>异常链可以有多层，但层数通常不会超过两到三层。每增加一层都会让堆栈更长，建议只在跨层转换时使用。</p>
+<h2 id="八-自定义异常">八、自定义异常</h2>
+<p>当标准库异常不足以表达业务语义时，可以自定义异常类：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class InsufficientStockException extends RuntimeException {
+    public InsufficientStockException(String productId, int requested, int available) {
+        super(&quot;商品 &quot; + productId + &quot; 库存不足，需求 &quot; + requested + &quot;，可用 &quot; + available);
+    }
 }</code></pre></figure>
-<p>即使读取过程中抛异常，reader 也会关闭。第 16 章会完整练习 Files、编码和文件路径；现在先形成“资源创建后要有关闭边界”的意识。</p>
-<h2 id="在什么地方捕获">在什么地方捕获</h2>
-<p>不要在每一行都 catch，也不要一层层捕获同一个异常。一个实用原则是：在能决定怎样恢复或怎样呈现失败的边界处理它。</p>
-<ul><li>纯 Java 输入工具可以捕获并让用户重新输入。</li><li>底层方法可补充上下文后继续抛出。</li><li>Web API 会在第 21 章由全局异常处理器转换成 HTTP 错误响应。</li></ul>
-<p>这叫<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">异常边界</span>。异常从深层代码向上传播不是错误；没有信息的吞掉才是问题。</p>
-<h2 id="练习-解析一组数量">练习：解析一组数量</h2>
-<p>给定 <code>String[] inputs = {&quot;3&quot;, &quot;&quot;, &quot;abc&quot;, &quot;5&quot;};</code>，逐个解析整数。空文本和非整数都输出清楚提示，其他值累计总和。不要用 catch 捕获 <code>Exception</code>；只捕获 <code>NumberFormatException</code>。</p>
-<p>完成标准：能解释异常在哪一行产生、在哪一层处理；不会因一个非法文本终止整个循环；不丢弃异常类型。</p>
+<p>自定义异常通常包含：</p>
+<ul><li>一个有意义的类名，一看就知道发生了什么业务失败</li><li>一个带详细消息的构造器，最好包含导致失败的具体数据</li><li>选择继承 <code>RuntimeException</code>（调用方不强制处理）还是 <code>Exception</code>（调用方必须处理），取决于调用方是否能合理恢复</li></ul>
+<p>通常无状态的业务校验、参数非法、前置条件不满足适合继承 <code>RuntimeException</code>；文件操作、网络调用等外部依赖失败适合继承 <code>Exception</code>（受检异常）。同一项目中保持一致即可。</p>
+<h2 id="九-异常边界设计">九、异常边界设计</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">异常边界</span>是异常在代码层次间传播时&quot;到此为止&quot;的位置。基本原则是：在能决定怎样恢复或怎样呈现失败的边界上处理它。</p>
+<ul><li>底层工具方法：校验参数后抛出运行时异常，或把受检异常转换后再抛出。</li><li>中层业务方法：可以补充业务上下文后继续抛出，或捕获后执行补偿逻辑。</li><li>顶层入口（例如 main、Web API 控制器）：捕获已知异常类型，转换成用户可见的消息或 HTTP 响应。</li></ul>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 底层：抛出具体异常
+static Order findOrder(String id) {
+    if (id == null || id.isBlank()) {
+        throw new IllegalArgumentException(&quot;订单 ID 不能为空&quot;);
+    }
+    // ...查找逻辑
+}
+
+// 中层：捕获并转换
+OrderDTO getOrderDTO(String id) {
+    try {
+        Order order = findOrder(id);
+        return toDTO(order);
+    } catch (IllegalArgumentException e) {
+        throw new BusinessException(&quot;查询订单失败&quot;, e);
+    }
+}
+
+// 顶层：呈现给用户
+public static void main(String[] args) {
+    try {
+        OrderDTO dto = getOrderDTO(userInput);
+        System.out.println(&quot;订单：&quot; + dto);
+    } catch (BusinessException e) {
+        System.out.println(&quot;业务错误：&quot; + e.getMessage());
+    } catch (Exception e) {
+        System.out.println(&quot;系统错误，请联系管理员&quot;);
+    }
+}</code></pre></figure>
+<p>第 21 章会学习 Spring Boot 中如何使用全局异常处理器统一管理 Web API 层的异常边界。</p>
+<p>流程如下：</p>
+<div class="diagram-card"><pre class="mermaid">flowchart LR
+    A[抛出异常] --&gt; B{当前方法能处理?}
+    B --&gt;|是| C[捕获并处理]
+    B --&gt;|否| D[继续传播]
+    D --&gt; E{到达异常边界?}
+    E --&gt;|是| F[统一处理并响应]
+    E --&gt;|否| D</pre></div>
+<h2 id="十-练习">十、练习</h2>
+<h3 id="练习-1-读懂堆栈">练习 1：读懂堆栈</h3>
+<p>运行以下代码，写出完整的堆栈输出，并圈出第一行属于自己代码的行号：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class StackReader {
+    static int step1(String input) {
+        return step2(input);
+    }
+    static int step2(String input) {
+        return Integer.parseInt(input);
+    }
+    public static void main(String[] args) {
+        System.out.println(step1(&quot;xyz&quot;));
+    }
+}</code></pre></figure>
+<p>完成标准：能指出异常类型、消息和实际抛出位置。</p>
+<h3 id="练习-2-安全的数值解析">练习 2：安全的数值解析</h3>
+<p>实现 <code>static int safeParseInt(String input, int defaultValue)</code>，解析输入字符串为整数。如果输入为 <code>null</code>、空字符串或非数字格式，不抛出异常，返回 <code>defaultValue</code>。</p>
+<p>完成标准：对 <code>&quot;42&quot;</code>、<code>&quot;&quot;</code>、<code>&quot;abc&quot;</code>、<code>null</code> 四种输入都能在不抛出异常的情况下返回正确结果。</p>
+<h3 id="练习-3-文件处理中的异常边界">练习 3：文件处理中的异常边界</h3>
+<p>写一个方法 <code>static long countNonBlankLines(String filePath)</code>，使用 <code>Files.lines</code> 逐行读取文件，返回非空行数。处理以下异常：</p>
+<ul><li>文件不存在：输出&quot;文件未找到，返回 0&quot;并返回 0</li><li>其他 I/O 错误：输出完整堆栈后抛出 <code>IllegalStateException</code>，保留原始原因</li><li>无论如何都确保文件资源关闭</li></ul>
+<p>完成标准：能解释为什么使用 try-with-resources；<code>IllegalStateException</code> 的 cause 必须是原始 IOException。</p>
 <h2 id="常见误区">常见误区</h2>
-<h3 id="捕获-exception-后什么也不做">捕获 <code>Exception</code> 后什么也不做</h3>
-<p>这会覆盖大量无关失败并丢掉原因。优先捕获最具体、当前确实能处理的类型。</p>
+<h3 id="捕获-exception-后什么也不做">捕获 Exception 后什么也不做</h3>
+<p>空 catch 块是排第一的异常误用。它会吞掉所有失败信息，让调用方和运维人员完全不知道发生了什么。即使只是临时调试，也应该至少输出堆栈：<code>catch (Exception e) { e.printStackTrace(); }</code>。</p>
 <h3 id="用异常代替普通分支">用异常代替普通分支</h3>
-<p>输入是否为空、状态是否允许等可预测情况通常先用 if 判断。异常适合表示无法按正常规则继续的失败。</p>
-<h3 id="重新抛出异常却不传-cause">重新抛出异常却不传 cause</h3>
-<p>转换异常时传入原始异常，才能保留完整调用链。</p>
+<p>输入是否为空、范围是否合法、状态是否允许，这些可预测的判断先用 <code>if</code> 语句。异常适合表示运行时无法按正常规则继续的情况，不适合作为控制流。异常处理的开销远高于普通分支。</p>
+<h3 id="捕获太宽的类型">捕获太宽的类型</h3>
+<p><code>catch (Exception e)</code> 会捕获所有 Exception 子类，包括 <code>NullPointerException</code>、<code>ArrayIndexOutOfBoundsException</code> 等本应由编程错误导致的异常。这会掩盖代码的逻辑问题。优先捕获一个或多个具体异常类型。</p>
+<h3 id="重新抛出却不传-cause">重新抛出却不传 cause</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">catch (IOException e) {
+    throw new RuntimeException(&quot;失败&quot;); // 丢失 cause
+}</code></pre></figure>
+<p>这样转换异常时，调用方只知道&quot;失败&quot;，无法追溯到底是文件不存在、磁盘满还是权限不足。始终传入原始异常做 cause。</p>
 <h2 id="本章小结">本章小结</h2>
-<p>异常携带失败类型和上下文。读堆栈、捕获可恢复失败、用 <code>throw</code> 表达非法状态、用 cause 保留根因、用 try-with-resources 关闭资源，是 Java 程序可靠处理失败的基础。</p>
+<p>Java 的异常机制让程序在运行时保存失败类型和上下文。编译错误和运行时异常的区别在于发生阶段不同，堆栈的阅读方法是从上往下找到第一行自己代码的位置。try-catch 处理可恢复的失败，try-with-resources 自动关闭资源并保留原始异常。受检异常要求调用方处理，运行时异常则适合编程错误或无法合理恢复的场景。throw 创建并抛出异常对象，throws 声明可能传播的受检异常类型，cause 保留异常链的原始根因。自定义异常让业务语义更清晰，异常边界决定了在代码的哪个层次处理或呈现失败。掌握这些基础之后，第 21 章会在 Spring Boot 的全局异常处理器中看到它们的实际应用。</p>
 <h2 id="快速自测">快速自测</h2>
-<ol><li>编译错误和异常分别发生在什么时候？</li><li><code>throw</code> 与 <code>throws</code> 的区别是什么？</li><li>为什么不应写空 catch 块？</li></ol>
-<p>参考答案：编译错误发生在程序运行前，异常发生在运行中；throw 抛出对象，throws 声明可能传播的受检异常；空 catch 丢掉失败线索。</p>
+<ol><li>编译错误和运行时异常各自发生在什么阶段？</li><li>阅读堆栈时，应该从第一行还是最后一行开始？为什么？</li><li><code>throw</code> 和 <code>throws</code> 在语法和作用上有什么区别？</li><li>空 catch 块为什么是危险的？</li><li>为什么转换异常时需要传入原始异常作为 cause？</li></ol>
+<p>参考答案：编译错误在 <code>javac</code> 阶段，运行时异常在 <code>java</code> 阶段；从堆栈顶部附近开始，找到第一条属于自己代码的行号，因为那里保存了实际产生异常的调用位置；throw 是语句，创建并抛出异常对象，throws 是方法声明，指明可能抛出的受检异常类型；空 catch 块丢失所有异常信息，导致调用方不知道失败原因；不传 cause 会丢失原始失败根因，排查时需要重新猜测原因。</p>
 <h2 id="参考文献">参考文献</h2>
-<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Throwable.html" target="_blank" rel="noreferrer">Java SE 17 API: Throwable</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/AutoCloseable.html" target="_blank" rel="noreferrer">Java SE 17 API: AutoCloseable</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/10-interface-inheritance-polymorphism.html">← 第 10 章<br><strong>接口、继承、组合与多态</strong></a><a href="../lessons/12-generics.html">第 12 章 →<br><strong>Java 泛型与类型安全</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#异常不是编译错误">异常不是编译错误</a><a class="" href="#捕获能在当前位置处理的失败">捕获能在当前位置处理的失败</a><a class="" href="#throw-与-throws-表达责任">throw 与 throws 表达责任</a><a class="" href="#保留原始原因">保留原始原因</a><a class="" href="#资源必须关闭">资源必须关闭</a><a class="" href="#在什么地方捕获">在什么地方捕获</a><a class="" href="#练习-解析一组数量">练习：解析一组数量</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#捕获-exception-后什么也不做">捕获 Exception 后什么也不做</a><a class="sub" href="#用异常代替普通分支">用异常代替普通分支</a><a class="sub" href="#重新抛出异常却不传-cause">重新抛出异常却不传 cause</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>
+<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Throwable.html" target="_blank" rel="noreferrer">Java SE 17 API: Throwable</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/AutoCloseable.html" target="_blank" rel="noreferrer">Java SE 17 API: AutoCloseable</a>.</li><li>Oracle. <a href="https://docs.oracle.com/javase/specs/jls/se17/html/jls-11.html" target="_blank" rel="noreferrer">Java SE 17 Language Specification: Exceptions</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/10-interface-inheritance-polymorphism.html">← 第 10 章<br><strong>接口、继承、组合与多态</strong></a><a href="../lessons/12-generics.html">第 12 章 →<br><strong>Java 泛型与类型安全</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一-编译错误与运行时异常">一、编译错误与运行时异常</a><a class="" href="#二-异常层次结构">二、异常层次结构</a><a class="" href="#三-读懂异常堆栈">三、读懂异常堆栈</a><a class="" href="#四-捕获能在当前位置处理的失败">四、捕获能在当前位置处理的失败</a><a class="sub" href="#4-1-try-catch-基础">4.1 try-catch 基础</a><a class="sub" href="#4-2-多-catch-块">4.2 多 catch 块</a><a class="sub" href="#4-3-catch-顺序">4.3 catch 顺序</a><a class="sub" href="#4-4-finally">4.4 finally</a><a class="sub" href="#4-5-try-with-resources-与异常屏蔽">4.5 try-with-resources 与异常屏蔽</a><a class="" href="#五-throw-与-throws">五、throw 与 throws</a><a class="sub" href="#5-1-throw-主动创建并抛出异常">5.1 throw：主动创建并抛出异常</a><a class="sub" href="#5-2-throws-声明方法可能抛出的异常">5.2 throws：声明方法可能抛出的异常</a><a class="" href="#六-受检异常与运行时异常的选择">六、受检异常与运行时异常的选择</a><a class="sub" href="#6-1-编译器行为的差异">6.1 编译器行为的差异</a><a class="sub" href="#6-2-实际判断方法">6.2 实际判断方法</a><a class="" href="#七-保留原始原因">七、保留原始原因</a><a class="" href="#八-自定义异常">八、自定义异常</a><a class="" href="#九-异常边界设计">九、异常边界设计</a><a class="" href="#十-练习">十、练习</a><a class="sub" href="#练习-1-读懂堆栈">练习 1：读懂堆栈</a><a class="sub" href="#练习-2-安全的数值解析">练习 2：安全的数值解析</a><a class="sub" href="#练习-3-文件处理中的异常边界">练习 3：文件处理中的异常边界</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#捕获-exception-后什么也不做">捕获 Exception 后什么也不做</a><a class="sub" href="#用异常代替普通分支">用异常代替普通分支</a><a class="sub" href="#捕获太宽的类型">捕获太宽的类型</a><a class="sub" href="#重新抛出却不传-cause">重新抛出却不传 cause</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

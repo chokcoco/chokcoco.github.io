@@ -1,21 +1,234 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="守住序列化、时间格式和接口演进边界。"><title>JSON、DTO 与接口兼容性 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
-<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 22 章 · 后端开发基础</div><h1>JSON、DTO 与接口兼容性</h1><p class="lesson-summary">守住序列化、时间格式和接口演进边界。</p><div class="meta-row"><span class="pill">先按本章的操作或推理顺序完成阅读，再记录每一步的结果与疑问。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="json-的对象与数组">JSON 的对象与数组</h2>
-<p>本节围绕“JSON 的对象与数组”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="jackson-怎样映射字段">Jackson 怎样映射字段</h2>
-<p>本节围绕“Jackson 怎样映射字段”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="dto-为什么单独存在">DTO 为什么单独存在</h2>
-<p>本节围绕“DTO 为什么单独存在”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="日期-命名与未知字段">日期、命名与未知字段</h2>
-<p>本节围绕“日期、命名与未知字段”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="接口演进的边界">接口演进的边界</h2>
-<p>本节围绕“接口演进的边界”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="练习与验收">练习与验收</h2>
-<p>设计创建用户请求 DTO 与响应 DTO，写出相应 JSON。</p>
-<p>完成后，应能用本章的术语解释自己的操作结果；遇到失败时，先记录输入、实际结果和错误信息。</p>
-<h2 id="容易走偏的地方">容易走偏的地方</h2>
-<p>不要跳过本章的基础模型，直接复制框架、数据库或运维配置。每一项操作都应有明确的目的和可观察结果。</p>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Jackson 自动完成 Java 对象和 JSON 的互转；DTO 是接口专用的数据载体，与内部实体保持独立；日期格式、字段命名和未知字段策略需要显式约定。"><title>JSON、DTO 与接口兼容性 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 22 章 · 后端开发基础</div><h1>JSON、DTO 与接口兼容性</h1><p class="lesson-summary">Jackson 自动完成 Java 对象和 JSON 的互转；DTO 是接口专用的数据载体，与内部实体保持独立；日期格式、字段命名和未知字段策略需要显式约定。</p><div class="meta-row"><span class="pill">先把 Java 对象和 JSON 之间的字段对应关系搞清，再思考什么数据应该暴露给客户端、什么数据应该隐藏；不要一开始就为未来所有版本的兼容性做规划。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><p>第 18 章和第 20 章中，待办项对象在 Controller 的返回值中自动变成了 JSON。Spring 没有魔法——是 Jackson 在背后完成了序列化。本章先讲 Jackson 的基础映射，再讲为什么要为接口单独定义 DTO。</p>
+<h2 id="一-json-的数据结构">一、JSON 的数据结构</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">JSON</span>（JavaScript Object Notation）是 Web API 中最通用的数据格式。它的语法只包含几种结构：</p>
+<figure class="code-card"><div class="code-toolbar"><span>json</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-json">{
+  &quot;id&quot;: &quot;42&quot;,
+  &quot;title&quot;: &quot;学习 JSON&quot;,
+  &quot;completed&quot;: false,
+  &quot;tags&quot;: [&quot;java&quot;, &quot;web&quot;],
+  &quot;author&quot;: {
+    &quot;name&quot;: &quot;Ada&quot;,
+    &quot;email&quot;: &quot;ada@example.com&quot;
+  }
+}</code></pre></figure>
+<p>JSON 的合法值类型只有六种：</p>
+<div class="table-wrap"><table><thead><tr><th>JSON 类型</th><th>示例</th><th>对应的 Java 类型</th></tr></thead><tbody><tr><td>字符串</td><td><code>&quot;hello&quot;</code></td><td><code>String</code></td></tr><tr><td>数字</td><td><code>42</code>、<code>3.14</code></td><td><code>int</code>/<code>long</code>/<code>double</code>/<code>BigDecimal</code></td></tr><tr><td>布尔值</td><td><code>true</code>、<code>false</code></td><td><code>boolean</code>/<code>Boolean</code></td></tr><tr><td>对象</td><td><code>{&quot;key&quot;:&quot;value&quot;}</code></td><td><code>Map</code> 或自定义类</td></tr><tr><td>数组</td><td><code>[1,2,3]</code></td><td><code>List</code> 或数组</td></tr><tr><td>null</td><td><code>null</code></td><td><code>null</code> 或包装类型 <code>null</code></td></tr></tbody></table></div>
+<p>JSON 的键必须是双引号包裹的字符串。数字没有引号。</p>
+<h2 id="二-jackson-怎样映射字段">二、Jackson 怎样映射字段</h2>
+<p>Jackson 是 Spring Boot <code>spring-boot-starter-web</code> 自动引入的 JSON 库。它默认按字段名做映射，不需要额外配置。</p>
+<h3 id="2-1-对象到-json-序列化">2.1 对象到 JSON（序列化）</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public record TodoSummary(
+    String id,
+    String title,
+    boolean completed
+) {}</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@GetMapping(&quot;/{id}&quot;)
+public TodoSummary getTodo(@PathVariable String id) {
+    return new TodoSummary(&quot;42&quot;, &quot;学习 JSON&quot;, false);
+}</code></pre></figure>
+<p>Jackson 把 record 的组件名作为 JSON 的键名：</p>
+<figure class="code-card"><div class="code-toolbar"><span>json</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-json">{&quot;id&quot;:&quot;42&quot;,&quot;title&quot;:&quot;学习 JSON&quot;,&quot;completed&quot;:false}</code></pre></figure>
+<p>对普通类来说，Jackson 默认使用 getter 方法推断属性名：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class TodoSummary {
+    private String id;
+    private String title;
+    private boolean completed;
+
+    public String getId() { return id; }
+    public String getTitle() { return title; }
+    public boolean isCompleted() { return completed; }
+}</code></pre></figure>
+<ul><li><code>getTitle()</code> → 去掉 <code>get</code> 前缀、首字母小写 → 属性名 <code>title</code></li><li><code>isCompleted()</code> → 去掉 <code>is</code> 前缀、首字母小写 → 属性名 <code>completed</code></li></ul>
+<h3 id="2-2-json-到对象-反序列化">2.2 JSON 到对象（反序列化）</h3>
+<p><code>@RequestBody</code> 触发反序列化，Jackson 把 JSON 键对应到 Java 字段名：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@PostMapping
+public TodoSummary create(@RequestBody TodoSummary todo) {
+    // todo.id() 的值是 JSON 中 &quot;id&quot; 的值
+    return todo;
+}</code></pre></figure>
+<p>JSON 中的 <code>&quot;id&quot;:&quot;42&quot;</code> 被映射为 Java 对象的 <code>id</code> 组件。record 使用规范构造器，普通类需要有默认构造器或 <code>@JsonCreator</code> 标记的构造器。</p>
+<h3 id="2-3-jsonproperty-自定义映射">2.3 @JsonProperty 自定义映射</h3>
+<p>当 JSON 键名与 Java 字段名不一致时：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public record UserInfo(
+    @JsonProperty(&quot;user_name&quot;) String userName,
+    @JsonProperty(&quot;created_at&quot;) String createdAt
+) {}</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>json</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-json">{&quot;user_name&quot;:&quot;Ada&quot;,&quot;created_at&quot;:&quot;2026-07-14&quot;}</code></pre></figure>
+<p>序列化时，<code>userName</code> 字段输出为 <code>user_name</code>。反序列化时，<code>user_name</code> 映射到 <code>userName</code> 字段。</p>
+<h2 id="三-dto-为什么单独存在">三、DTO 为什么单独存在</h2>
+<h3 id="3-1-实体的字段不等于接口需要的字段">3.1 实体的字段不等于接口需要的字段</h3>
+<p>第 20 章 Service 层处理业务对象。假设有一个内部使用的 <code>Todo</code> record：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public record Todo(
+    String id,
+    String title,
+    String description,
+    boolean completed,
+    String createdBy,
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt,
+    String internalNote   // 内部备注，不应暴露给客户端
+) {}</code></pre></figure>
+<p>如果 Controller 直接返回这个 <code>Todo</code>，八个字段全部暴露给客户端。客户端不需要也不应该看到 <code>internalNote</code>、<code>createdBy</code> 和数据库时间戳。</p>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">DTO</span>（Data Transfer Object）是专门为接口传输设计的数据载体。它只包含接口需要的字段：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public record TodoResponse(
+    String id,
+    String title,
+    boolean completed
+) {}</code></pre></figure>
+<p>Controller 在返回前把 <code>Todo</code> 转换为 <code>TodoResponse</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@GetMapping(&quot;/{id}&quot;)
+public TodoResponse getTodo(@PathVariable String id) {
+    Todo todo = todoService.findById(id);
+    return new TodoResponse(todo.id(), todo.title(), todo.completed());
+}</code></pre></figure>
+<p>DTO 带来的好处：</p>
+<ul><li>客户端看不到内部字段。</li><li>修改数据库字段不影响接口契约——只要 DTO 不变，客户端不受影响。</li><li>一个实体可以有多个 DTO：列表用 <code>TodoSummary</code>（少字段），详情用 <code>TodoDetail</code>（多字段），创建用 <code>CreateTodoRequest</code>（只包含可写字段）。</li></ul>
+<h3 id="3-2-请求-dto-与响应-dto-分开">3.2 请求 DTO 与响应 DTO 分开</h3>
+<p>创建资源的请求和查询资源的响应通常需要不同的 DTO：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 请求：客户端传入的字段
+public record CreateTodoRequest(
+    @NotBlank String title,
+    String description
+) {}
+
+// 响应：服务端返回的字段
+public record TodoResponse(
+    String id,
+    String title,
+    String description,
+    boolean completed,
+    String createdAt
+) {}</code></pre></figure>
+<p>请求 DTO 包含客户端可以写的字段（<code>title</code>、<code>description</code>），不包含服务端生成的字段（<code>id</code> 可能由服务端生成，<code>createdAt</code> 是服务端时间）。响应 DTO 包含服务端希望展示的字段。</p>
+<h3 id="3-3-在-service-层做转换">3.3 在 Service 层做转换</h3>
+<p>DTO 与实体的转换放在哪一层？推荐放在 Service 层：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@Service
+public class TodoService {
+    private final TodoRepository repository;
+
+    public TodoResponse findById(String id) {
+        Todo todo = repository.findById(id);
+        return toResponse(todo);
+    }
+
+    public TodoResponse create(CreateTodoRequest request) {
+        Todo todo = new Todo(
+            UUID.randomUUID().toString(),
+            request.title(),
+            request.description(),
+            false,
+            &quot;system&quot;,
+            LocalDateTime.now(),
+            null,
+            null
+        );
+        repository.save(todo);
+        return toResponse(todo);
+    }
+
+    private TodoResponse toResponse(Todo todo) {
+        return new TodoResponse(
+            todo.id(), todo.title(), todo.completed()
+        );
+    }
+}</code></pre></figure>
+<p>这样 Controller 只负责 HTTP 绑定和调用 Service，不涉及 DTO 转换。</p>
+<h2 id="四-日期-命名与未知字段">四、日期、命名与未知字段</h2>
+<h3 id="4-1-日期格式">4.1 日期格式</h3>
+<p>JSON 没有标准的日期类型。日期在 JSON 中通常表示为字符串。Jackson 默认把 <code>LocalDateTime</code> 序列化为数组格式 <code>[2026,7,14,9,30]</code>，这对客户端不友好。</p>
+<p>推荐的配置是使用 ISO 8601 字符串格式。在 <code>application.yml</code> 中：</p>
+<figure class="code-card"><div class="code-toolbar"><span>yaml</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-yaml">spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false</code></pre></figure>
+<p>或者在字段上用注解：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@JsonFormat(pattern = &quot;yyyy-MM-dd HH:mm:ss&quot;)
+private LocalDateTime createdAt;</code></pre></figure>
+<p><code>write-dates-as-timestamps: false</code> 让所有日期字段以 ISO 8601 字符串输出。跨服务通信时，建议使用 Instant 或带时区的类型，避免 LocalDateTime 的歧义（第 16 章讲过）。</p>
+<h3 id="4-2-命名策略">4.2 命名策略</h3>
+<p>不同团队可能使用不同的命名风格。Java 习惯驼峰命名（<code>userName</code>），而 JSON 可能要求蛇形命名（<code>user_name</code>）。在 <code>application.yml</code> 中全局配置：</p>
+<figure class="code-card"><div class="code-toolbar"><span>yaml</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-yaml">spring:
+  jackson:
+    property-naming-strategy: SNAKE_CASE</code></pre></figure>
+<p><code>SNAKE_CASE</code> 让所有字段的驼峰名自动转为蛇形名输出，反序列化时也能自动匹配。其他选项包括 <code>LOWER_CAMEL_CASE</code>（默认）、<code>UPPER_CAMEL_CASE</code>、<code>KEBAB_CASE</code>。</p>
+<p>全局命名策略适合统一风格。如果只在少数字段上需要不同名称，优先使用 <code>@JsonProperty</code>。</p>
+<h3 id="4-3-未知字段">4.3 未知字段</h3>
+<p>客户端可能发送 JSON 中包含 DTO 没有定义的字段：</p>
+<figure class="code-card"><div class="code-toolbar"><span>json</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-json">{&quot;title&quot;:&quot;学习&quot;,&quot;description&quot;:&quot;详情&quot;,&quot;priority&quot;:&quot;high&quot;}</code></pre></figure>
+<p>而 Java record 只有 <code>title</code> 和 <code>description</code> 两个组件。Jackson 默认行为是忽略未知字段，不报错。这符合&quot;宽容接收&quot;的原则。</p>
+<p>如果需要严格模式（拒绝未知字段），在类上标注：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@JsonIgnoreProperties(ignoreUnknown = false)
+public record CreateTodoRequest(String title, String description) {}</code></pre></figure>
+<p>严格模式适合需要精确控制输入的内部接口。对外部调用方开放的 API，宽容模式（默认）更友好。客户端升级后多了新字段，旧版服务端不应因此拒绝请求。</p>
+<h3 id="4-4-空值的处理">4.4 空值的处理</h3>
+<p>当 Java 字段为 <code>null</code> 时，Jackson 默认在 JSON 中包含该字段，值为 <code>null</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>json</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-json">{&quot;id&quot;:&quot;1&quot;,&quot;title&quot;:&quot;任务&quot;,&quot;description&quot;:null}</code></pre></figure>
+<p>全局排除 null 值：</p>
+<figure class="code-card"><div class="code-toolbar"><span>yaml</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-yaml">spring:
+  jackson:
+    default-property-inclusion: non_null</code></pre></figure>
+<p>排除 null 值的 JSON 更短，但客户端必须能处理可能缺失的字段。选择取决于与客户端的约定。</p>
+<h2 id="五-接口演进的边界">五、接口演进的边界</h2>
+<p>API 发布后会被客户端使用。修改已有接口需要谨慎：</p>
+<h3 id="5-1-安全的变更">5.1 安全的变更</h3>
+<ul><li>在响应中<strong>新增可选字段</strong>（客户端忽略即可）</li><li>在请求中<strong>新增可选字段</strong>（旧客户端不传时使用默认值）</li><li>新增一个独立的 API 端点</li></ul>
+<h3 id="5-2-破坏性的变更">5.2 破坏性的变更</h3>
+<ul><li><strong>删除或重命名响应字段</strong>（旧客户端可能崩溃）</li><li><strong>修改字段类型</strong>（例如将 <code>&quot;true&quot;</code> 改成 <code>true</code>，或将数字改成字符串）</li><li><strong>修改 URL 路径</strong></li><li><strong>让原本可选的请求字段变成必填</strong></li></ul>
+<h3 id="5-3-版本化策略">5.3 版本化策略</h3>
+<p>当确实需要破坏性变更时，常见做法是使用 URL 路径中的版本号：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">/api/v1/todos
+/api/v2/todos</code></pre></figure>
+<p><code>v1</code> 和 <code>v2</code> 可以同时运行，<code>v1</code> 在足够长时间后废弃并下线。不是所有变更都需要新版——只在确实需要破坏性变更时才升级版本。</p>
+<p>另一个策略是在响应头中标注版本，让客户端选择。本课程不展开多种版本化方案，实际项目中按团队约定执行。</p>
+<h2 id="六-实体不直接返回">六、实体不直接返回</h2>
+<p>回到第 3 节的要点：实体和 DTO 是不同层次的模型。实体的字段由数据表结构决定，DTO 的字段由接口契约决定。混淆二者会导致：</p>
+<ul><li>修改表结构影响接口，前后端耦合。</li><li>敏感字段（如内部备注、创建人）被意外暴露。</li><li>JPA 实体（第 25 章）在序列化时触发延迟加载，产生不必要的数据库查询。</li></ul>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 错误：直接返回 JPA 实体
+@GetMapping(&quot;/{id}&quot;)
+public TodoEntity getTodo(@PathVariable Long id) {
+    return todoRepository.findById(id).orElseThrow();
+}
+
+// 正确：返回 DTO
+@GetMapping(&quot;/{id}&quot;)
+public TodoResponse getTodo(@PathVariable String id) {
+    Todo todo = todoService.findById(id);
+    return new TodoResponse(todo.id(), todo.title(), todo.completed());
+}</code></pre></figure>
+<h2 id="七-练习与验收">七、练习与验收</h2>
+<h3 id="练习-1-设计请求与响应-dto">练习 1：设计请求与响应 DTO</h3>
+<p>为一个用户注册接口设计两个 DTO：</p>
+<ul><li><code>RegisterUserRequest</code>：字段 <code>username</code>（必填）、<code>email</code>（必填）、<code>bio</code>（可选）</li><li><code>UserResponse</code>：字段 <code>id</code>、<code>username</code>、<code>createdAt</code></li></ul>
+<p>写一个 Controller 方法：</p>
+<ul><li><code>POST /users</code>：接收 <code>RegisterUserRequest</code>，生成 UUID 作为 id，返回 <code>UserResponse</code>。</li><li><code>GET /users/{id}</code>：返回 <code>UserResponse</code>，如果找不到返回 404 错误。</li></ul>
+<p>用 curl 测试创建和查询。</p>
+<h3 id="练习-2-日期格式与命名策略">练习 2：日期格式与命名策略</h3>
+<p>在 <code>application.yml</code> 中配置 <code>spring.jackson.property-naming-strategy: SNAKE_CASE</code>。创建包含 <code>createdAt</code> 字段的 DTO，验证：</p>
+<ul><li>输出的 JSON 键名为 <code>created_at</code>。</li><li><code>LocalDateTime.now()</code> 的输出格式是 <code>&quot;2026-07-14T09:30:00&quot;</code> 格式（需配置 <code>write-dates-as-timestamps: false</code>）。</li></ul>
+<h3 id="练习-3-未知字段测试">练习 3：未知字段测试</h3>
+<p>创建 <code>CreateTodoRequest(title)</code> 只有一个字段。向接口发送包含额外字段 <code>&quot;priority&quot;: &quot;high&quot;</code> 的 JSON，验证：</p>
+<ul><li>默认行为下，请求成功（未知字段忽略）。</li><li>添加 <code>@JsonIgnoreProperties(ignoreUnknown = false)</code> 后，相同的请求返回 400 错误。</li></ul>
+<p>完成标准：能解释默认宽容模式和严格模式各自的适用场景。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="直接返回数据库实体">直接返回数据库实体</h3>
+<p>数据库实体的字段通常多于接口需要的字段。直接返回实体会暴露内部结构，且 JPA 的延迟加载可能引发意外查询。</p>
+<h3 id="把-dto-放在-controller-中创建">把 DTO 放在 Controller 中创建</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@GetMapping(&quot;/{id}&quot;)
+public TodoResponse getTodo(@PathVariable String id) {
+    Todo todo = todoRepository.findById(id);
+    return new TodoResponse(todo.getId(), todo.getTitle());
+}</code></pre></figure>
+<p>Controller 不应该操作 Repository。保持依赖方向：Controller → Service → Repository。</p>
+<h3 id="为每个字段组合创建不同的-dto">为每个字段组合创建不同的 DTO</h3>
+<p>一个待办项实体有 8 个字段，不需要为 <code>{id, title}</code>、<code>{id, title, description}</code>、<code>{id, title, completed}</code> 分别创建三个 DTO。通常两个就够：一个列表摘要（少量字段），一个详情（多数字段）。</p>
+<h3 id="忽略-json-解析失败的排查线索">忽略 JSON 解析失败的排查线索</h3>
+<p>当 <code>@RequestBody</code> 反序列化失败时，Spring 返回 <code>400 Bad Request</code>。日志中会包含类似 <code>Unrecognized field &quot;priority&quot;</code> 或 <code>Cannot deserialize value of type java.time.LocalDateTime</code> 的信息。排查 JSON 映射问题时，先从日志找 Jackson 的具体错误信息。</p>
 <h2 id="本章小结">本章小结</h2>
-<p>本章的内容会在后续章节继续使用。先完成练习和验收，再进入下一章。</p>
+<p>JSON 是 Web API 的通用数据格式，Jackson 默认按字段名完成 Java 对象和 JSON 的互转。DTO 是接口专用的数据载体，与内部实体保持独立——请求 DTO 只包含可写字段，响应 DTO 只包含需要展示的字段。日期格式（<code>write-dates-as-timestamps</code>）、命名策略（<code>SNAKE_CASE</code>）和 null 值处理通过配置管理。接口演进优先使用非破坏性变更，破坏性变更通过版本化控制。下一章学习 SQL 和关系数据库基础，为数据持久化做准备。</p>
+<h2 id="快速自测">快速自测</h2>
+<ol><li>DTO 和实体有什么区别？为什么不能直接返回实体？</li><li><code>@JsonProperty(&quot;user_name&quot;)</code> 在序列化和反序列化时分别起什么作用？</li><li>接口演进中，什么样的变更需要升级 API 版本？</li><li><code>spring.jackson.default-property-inclusion: non_null</code> 的作用是什么？</li></ol>
+<p>参考答案：DTO 是接口专用的数据载体，字段由契约决定；实体由数据表结构决定，直接返回会暴露内部字段和耦合表结构；序列化时将 Java 字段名 <code>userName</code> 输出为 <code>user_name</code>，反序列化时从 JSON 键 <code>user_name</code> 读取值赋给 Java 字段；删除或重命名字段、修改字段类型、让可选字段变必填；序列化时排除值为 null 的字段，使输出 JSON 不含 null 值键。</p>
 <h2 id="参考文献">参考文献</h2>
-<ul><li>Spring. <a href="https://docs.spring.io/spring-boot/reference/" target="_blank" rel="noreferrer">Spring Boot Reference</a>.</li><li>Spring. <a href="https://docs.spring.io/spring-framework/reference/" target="_blank" rel="noreferrer">Spring Framework Reference</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/21-validation-global-exception.html">← 第 21 章<br><strong>参数校验、全局异常与错误响应</strong></a><a href="../lessons/23-sql-mysql-postgresql.html">第 23 章 →<br><strong>SQL、MySQL 与 PostgreSQL 基础</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#json-的对象与数组">JSON 的对象与数组</a><a class="" href="#jackson-怎样映射字段">Jackson 怎样映射字段</a><a class="" href="#dto-为什么单独存在">DTO 为什么单独存在</a><a class="" href="#日期-命名与未知字段">日期、命名与未知字段</a><a class="" href="#接口演进的边界">接口演进的边界</a><a class="" href="#练习与验收">练习与验收</a><a class="" href="#容易走偏的地方">容易走偏的地方</a><a class="" href="#本章小结">本章小结</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>
+<ul><li>FasterXML. <a href="https://github.com/FasterXML/jackson-docs" target="_blank" rel="noreferrer">Jackson Documentation</a>.</li><li>Spring. <a href="https://docs.spring.io/spring-boot/reference/features/json.html" target="_blank" rel="noreferrer">Spring Boot Reference：JSON</a>.</li><li>Google. <a href="https://google.github.io/styleguide/jsoncstyleguide.xml" target="_blank" rel="noreferrer">JSON Style Guide</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/21-validation-global-exception.html">← 第 21 章<br><strong>参数校验、全局异常与错误响应</strong></a><a href="../lessons/23-sql-mysql-postgresql.html">第 23 章 →<br><strong>SQL、MySQL 与 PostgreSQL 基础</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一-json-的数据结构">一、JSON 的数据结构</a><a class="" href="#二-jackson-怎样映射字段">二、Jackson 怎样映射字段</a><a class="sub" href="#2-1-对象到-json-序列化">2.1 对象到 JSON（序列化）</a><a class="sub" href="#2-2-json-到对象-反序列化">2.2 JSON 到对象（反序列化）</a><a class="sub" href="#2-3-jsonproperty-自定义映射">2.3 @JsonProperty 自定义映射</a><a class="" href="#三-dto-为什么单独存在">三、DTO 为什么单独存在</a><a class="sub" href="#3-1-实体的字段不等于接口需要的字段">3.1 实体的字段不等于接口需要的字段</a><a class="sub" href="#3-2-请求-dto-与响应-dto-分开">3.2 请求 DTO 与响应 DTO 分开</a><a class="sub" href="#3-3-在-service-层做转换">3.3 在 Service 层做转换</a><a class="" href="#四-日期-命名与未知字段">四、日期、命名与未知字段</a><a class="sub" href="#4-1-日期格式">4.1 日期格式</a><a class="sub" href="#4-2-命名策略">4.2 命名策略</a><a class="sub" href="#4-3-未知字段">4.3 未知字段</a><a class="sub" href="#4-4-空值的处理">4.4 空值的处理</a><a class="" href="#五-接口演进的边界">五、接口演进的边界</a><a class="sub" href="#5-1-安全的变更">5.1 安全的变更</a><a class="sub" href="#5-2-破坏性的变更">5.2 破坏性的变更</a><a class="sub" href="#5-3-版本化策略">5.3 版本化策略</a><a class="" href="#六-实体不直接返回">六、实体不直接返回</a><a class="" href="#七-练习与验收">七、练习与验收</a><a class="sub" href="#练习-1-设计请求与响应-dto">练习 1：设计请求与响应 DTO</a><a class="sub" href="#练习-2-日期格式与命名策略">练习 2：日期格式与命名策略</a><a class="sub" href="#练习-3-未知字段测试">练习 3：未知字段测试</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#直接返回数据库实体">直接返回数据库实体</a><a class="sub" href="#把-dto-放在-controller-中创建">把 DTO 放在 Controller 中创建</a><a class="sub" href="#为每个字段组合创建不同的-dto">为每个字段组合创建不同的 DTO</a><a class="sub" href="#忽略-json-解析失败的排查线索">忽略 JSON 解析失败的排查线索</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

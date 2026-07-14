@@ -38,6 +38,19 @@
 
 ## Spring Web 与数据
 
+12a. IETF. [RFC 9110: HTTP Semantics](https://datatracker.ietf.org/doc/html/rfc9110)
+   - 用途：第 17 章校准资源、请求方法、响应状态码、安全方法与幂等性的语义
+12b. MDN. [HTTP 响应状态码](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Reference/Status)
+   - 用途：第 17 章为零基础学习者提供常见响应状态码的可读索引；状态语义仍以 RFC 9110 为准
+12c. curl. [curl man page](https://curl.se/docs/manpage.html)
+   - 用途：第 17 章校准 `curl` 的 `-i`、`-X`、`-H` 与 `--data` 命令行示例
+12d. Roy Fielding. [REST 架构风格](https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm)
+   - 用途：第 17 章解释客户端—服务器、无状态、缓存、统一接口、分层系统与按需代码约束，以及资源、表示和超媒体的关系
+12e. IETF. [RFC 9111: HTTP Caching](https://datatracker.ietf.org/doc/html/rfc9111)
+   - 用途：第 17 章校准 `Cache-Control`、新鲜度与验证式缓存的语义
+12f. IETF. [RFC 9457: Problem Details for HTTP APIs](https://datatracker.ietf.org/doc/html/rfc9457)
+   - 用途：第 17 章介绍 `application/problem+json`、标准成员和扩展边界
+
 12. Spring Boot Reference：https://docs.spring.io/spring-boot/reference/
    - 用途：自动配置、Web、配置、测试、Actuator、容器镜像
    - 版本边界：当前文档会变化，课程必须锁定与 Java 17、数据框架和 Security 兼容的版本矩阵
@@ -54,6 +67,15 @@
    - 暂定教学数据库；可根据公司栈改为 MySQL
 
 ## 安全、缓存、消息与部署
+
+20a. Oracle. [jcmd Command, JDK 17](https://docs.oracle.com/en/java/javase/17/docs/specs/man/jcmd.html)
+   - 用途：第 36 章对运行中 JVM 收集诊断命令、线程、堆和 JFR 记录的语义与影响说明
+20b. Oracle. [jstack Command, JDK 17](https://docs.oracle.com/en/java/javase/17/docs/specs/man/jstack.html)
+   - 用途：第 36 章补充线程栈输出与锁信息；该命令在 JDK 17 文档中标为实验性且不受支持，因此正文优先使用 `jcmd <pid> Thread.print`
+20c. Oracle. [Troubleshoot Performance Issues Using Flight Recorder](https://docs.oracle.com/en/java/javase/17/troubleshoot/troubleshoot-performance-issues-using-jfr.html)
+   - 用途：第 36 章校准 JFR 中 CPU、线程停顿、I/O、锁竞争、分配和 GC 事件的判读边界
+20d. Oracle. [Troubleshoot Process Hangs and Loops](https://docs.oracle.com/en/java/javase/17/troubleshoot/troubleshoot-process-hangs-and-loops.html)
+   - 用途：第 36 章校准连续线程转储、RUNNABLE 线程、挂起与 Java 层死锁的诊断方式
 
 20. Spring Security Reference：https://docs.spring.io/spring-security/reference/
    - 用途：过滤器链、认证、授权、攻击防护与 JWT Resource Server

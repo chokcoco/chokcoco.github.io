@@ -1,40 +1,40 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="变量为数据命名，表达式计算新值，分支与循环决定语句的执行路径，方法则把一组步骤封装成可以重复调用的单元。"><title>Java 变量、表达式与控制流 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="变量为数据命名，表达式计算新值，分支与循环决定语句的执行路径，方法则把一组步骤封装成可以重复调用的单元。"><title>Java 变量、表达式与控制流 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
 <body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 4 章 · Java 语言及标准库基础</div><h1>Java 变量、表达式与控制流</h1><p class="lesson-summary">变量为数据命名，表达式计算新值，分支与循环决定语句的执行路径，方法则把一组步骤封装成可以重复调用的单元。</p><div class="meta-row"><span class="pill">这一章建立后续所有 Java 代码都会使用的语法。先预测每个小例子的结果，再编译运行；不要急着把所有语法组合成一个大程序。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一-语句-代码块和执行顺序">一、语句、代码块和执行顺序</h2>
 <h3 id="1-1-语句表示一个完整动作">1.1 语句表示一个完整动作</h3>
 <p>Java 程序中的<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">语句</span>通常表示一次声明、赋值、调用或流程控制。下面三行分别完成三个动作：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int quantity = 2;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int quantity = 2;
 quantity = quantity + 1;
 System.out.println(quantity); // 控制台输出：3</code></pre></figure>
 <p>前两行末尾的分号表示语句结束。第三行调用输出方法，也以分号结束。<code>if</code>、<code>for</code> 和方法声明后面通常跟代码块，右花括号后不额外写分号。</p>
 <h3 id="1-2-代码块划定一组语句的范围">1.2 代码块划定一组语句的范围</h3>
 <p>花括号 <code>{ }</code> 包住的内容称为<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">代码块</span>。类有自己的代码块，方法有自己的代码块，<code>if</code> 和循环也可以拥有代码块。</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">if (true) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">if (true) {
     System.out.println(&quot;进入代码块&quot;); // 控制台输出：进入代码块
 }</code></pre></figure>
 <p>即使分支中暂时只有一条语句，也建议保留花括号。以后增加第二条语句时，不容易因遗漏括号而改变程序含义。</p>
 <h3 id="1-3-默认按从上到下执行">1.3 默认按从上到下执行</h3>
 <p>没有分支、循环和方法调用时，方法中的语句按书写顺序执行。程序不能先使用后面才声明的局部变量：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">// System.out.println(total); // 编译失败：此处还没有声明 total
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// System.out.println(total); // 编译失败：此处还没有声明 total
 int total = 30;
 System.out.println(total); // 控制台输出：30</code></pre></figure>
 <h2 id="二-变量为数据提供类型和名字">二、变量为数据提供类型和名字</h2>
 <h3 id="2-1-声明-初始化与赋值是三个相关动作">2.1 声明、初始化与赋值是三个相关动作</h3>
 <p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">变量</span>是程序中一个有类型、有名字的值槽位。基本声明形式为：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">数据类型 变量名;</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">数据类型 变量名;</code></pre></figure>
 <p>给变量第一次提供值称为<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">初始化</span>：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int quantity = 2;</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int quantity = 2;</code></pre></figure>
 <p>这行同时完成声明和初始化。变量已有值后，再写入新值称为<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">赋值</span>：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">quantity = 3;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">quantity = 3;
 System.out.println(quantity); // 控制台输出：3</code></pre></figure>
 <p>等号 <code>=</code> 是赋值运算符：先计算右侧，再把结果交给左侧变量。它不是数学中的“左右永远相等”。因此下面的写法合理：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int count = 1;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int count = 1;
 count = count + 1;
 System.out.println(count); // 控制台输出：2</code></pre></figure>
 <p>执行第二行时，先读取旧值 1，加 1 得到 2，再把 2 写回 <code>count</code>。</p>
 <h3 id="2-2-局部变量必须先初始化再使用">2.2 局部变量必须先初始化再使用</h3>
 <p>方法内部声明的变量称为<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">局部变量</span>。编译器不会为未初始化的局部变量猜一个值：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int score;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int score;
 // System.out.println(score); // 编译失败：score 可能尚未初始化
 
 score = 80;
@@ -45,13 +45,13 @@ System.out.println(score); // 控制台输出：80</code></pre></figure>
 <ul><li>变量和方法使用小驼峰：<code>unitPrice</code>、<code>calculateTotal</code>。</li><li>类名使用大驼峰：<code>OrderCalculator</code>。</li><li>常量使用大写加下划线：<code>MAX_RETRY_COUNT</code>。</li><li>布尔变量表达条件：<code>available</code>、<code>hasPermission</code>、<code>isFinished</code>。</li></ul>
 <p><code>a</code>、<code>x1</code> 虽能编译，但离开上下文后很难理解。循环索引常用 <code>i</code> 是一个有限例外。</p>
 <h3 id="2-4-一个变量只能保存兼容类型的值">2.4 一个变量只能保存兼容类型的值</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int quantity = 2;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int quantity = 2;
 // quantity = &quot;two&quot;; // 编译失败：String 不能赋给 int</code></pre></figure>
 <p>Java 是<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">静态类型语言</span>：变量类型在编译时已经确定，编译器会在运行前阻止明显不兼容的赋值。第 5 章会完整解释基本类型、引用类型和类型转换。</p>
 <h2 id="三-字面量直接表示一个值">三、字面量直接表示一个值</h2>
 <h3 id="3-1-常见字面量">3.1 常见字面量</h3>
 <p>代码中直接写出的值称为<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">字面量</span>：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int quantity = 2;          // 2 是整数字面量
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int quantity = 2;          // 2 是整数字面量
 double rate = 0.8;         // 0.8 是浮点数字面量
 boolean enabled = true;    // true 是布尔字面量
 char grade = 'A';          // 单引号表示一个 char
@@ -60,7 +60,7 @@ Object missing = null;     // null 表示没有引用任何对象</code></pre></
 <p>单引号与双引号不能互换。<code>'A'</code> 是一个字符，<code>&quot;A&quot;</code> 是长度为 1 的字符串。<code>null</code> 只能用于引用类型，不能赋给 <code>int</code>、<code>boolean</code> 等基本类型。</p>
 <h3 id="3-2-字符串中的转义字符">3.2 字符串中的转义字符</h3>
 <p>双引号本身用于界定字符串，要在字符串中表示特殊字符，需要反斜杠：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">System.out.println(&quot;第一行\n第二行&quot;);
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">System.out.println(&quot;第一行\n第二行&quot;);
 // 控制台输出两行：第一行、第二行
 
 System.out.println(&quot;他说：\&quot;你好\&quot;&quot;); // 控制台输出：他说：&quot;你好&quot;
@@ -69,7 +69,7 @@ System.out.println(&quot;C:\\java\\demo&quot;); // 控制台输出：C:\java\dem
 <h2 id="四-运算符组成表达式">四、运算符组成表达式</h2>
 <h3 id="4-1-表达式会计算出一个值">4.1 表达式会计算出一个值</h3>
 <p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">表达式</span>是能够计算出结果的代码片段。字面量、变量、运算和方法调用都可以参与表达式：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int unitPrice = 15;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int unitPrice = 15;
 int quantity = 2;
 int total = unitPrice * quantity;
 boolean freeShipping = total &gt;= 30;
@@ -79,12 +79,12 @@ System.out.println(freeShipping); // 控制台输出：true</code></pre></figure
 <h3 id="4-2-算术运算">4.2 算术运算</h3>
 <div class="table-wrap"><table><thead><tr><th>运算符</th><th>含义</th><th>示例结果</th></tr></thead><tbody><tr><td><code>+</code></td><td>加法；有字符串时也可拼接</td><td><code>2 + 3</code> 得 5</td></tr><tr><td><code>-</code></td><td>减法</td><td><code>5 - 2</code> 得 3</td></tr><tr><td><code>*</code></td><td>乘法</td><td><code>4 * 3</code> 得 12</td></tr><tr><td><code>/</code></td><td>除法</td><td><code>5 / 2</code> 得 2</td></tr><tr><td><code>%</code></td><td>取余</td><td><code>5 % 2</code> 得 1</td></tr></tbody></table></div>
 <p>两个整数相除，结果仍是整数，小数部分直接舍去：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">System.out.println(5 / 2);     // 控制台输出：2
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">System.out.println(5 / 2);     // 控制台输出：2
 System.out.println(5.0 / 2);   // 控制台输出：2.5
 System.out.println(5 % 2);     // 控制台输出：1</code></pre></figure>
 <p>取余常用于判断奇偶：<code>number % 2 == 0</code> 表示能被 2 整除。</p>
 <h3 id="4-3-自增-自减和复合赋值">4.3 自增、自减和复合赋值</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int count = 1;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int count = 1;
 count++;
 System.out.println(count); // 控制台输出：2
 
@@ -95,7 +95,7 @@ count--;
 System.out.println(count); // 控制台输出：4</code></pre></figure>
 <p><code>++count</code> 和 <code>count++</code> 单独作为一条语句时都会加 1；它们参与更大表达式时取值时机不同。零基础阶段不要写 <code>int result = count++ + ++count;</code> 这类难读代码，把更新拆成独立语句。</p>
 <h3 id="4-4-比较运算得到-boolean">4.4 比较运算得到 boolean</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int stock = 5;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int stock = 5;
 int requested = 3;
 
 System.out.println(stock &gt; requested);  // 控制台输出：true
@@ -104,12 +104,12 @@ System.out.println(stock != requested); // 控制台输出：true</code></pre></
 <p><code>==</code> 表示比较，<code>=</code> 表示赋值。第 6 章会解释 <code>==</code> 比较基本类型与引用类型时的差异；本章只用它比较整数和布尔值。</p>
 <h3 id="4-5-逻辑运算组合条件">4.5 逻辑运算组合条件</h3>
 <div class="table-wrap"><table><thead><tr><th>运算符</th><th>含义</th><th>结果为 true 的条件</th></tr></thead><tbody><tr><td><code>&amp;&amp;</code></td><td>并且</td><td>左右都为 true</td></tr><tr><td>`</td><td></td><td>`</td><td>或者</td><td>至少一边为 true</td></tr><tr><td><code>!</code></td><td>取反</td><td>原值为 false</td></tr></tbody></table></div>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int stock = 5;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int stock = 5;
 int requested = 3;
 boolean valid = requested &gt; 0 &amp;&amp; stock &gt;= requested;
 System.out.println(valid); // 控制台输出：true</code></pre></figure>
 <p>Java 的条件必须是 <code>boolean</code>。JavaScript 中的 <code>if (quantity)</code> 不能直接搬到 Java：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int quantity = 1;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int quantity = 1;
 // if (quantity) { } // 编译失败：int 不能当作 boolean
 
 if (quantity &gt; 0) {
@@ -117,25 +117,25 @@ if (quantity &gt; 0) {
 }</code></pre></figure>
 <h3 id="4-6-短路求值避免不必要计算">4.6 短路求值避免不必要计算</h3>
 <p><code>&amp;&amp;</code> 左侧为 <code>false</code> 时，整个表达式必然为 <code>false</code>，右侧不再执行；<code>||</code> 左侧为 <code>true</code> 时，右侧也不再执行。这称为<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">短路求值</span>。</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int divisor = 0;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int divisor = 0;
 boolean safe = divisor != 0 &amp;&amp; 10 / divisor &gt; 1;
 System.out.println(safe); // 控制台输出：false；右侧除法没有执行</code></pre></figure>
 <p>条件顺序应先放安全检查，再放依赖该检查的操作。</p>
 <h3 id="4-7-用括号明确优先级">4.7 用括号明确优先级</h3>
 <p>乘除通常先于加减，比较先于逻辑组合，但不要依赖读者背完优先级表：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int total = (10 + 5) * 2;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int total = (10 + 5) * 2;
 boolean allowed = (total &gt;= 20) &amp;&amp; (total &lt;= 100);</code></pre></figure>
 <p>括号能直接表达意图。表达式过长时，拆成有名字的中间变量比增加更多括号更清楚。</p>
 <h2 id="五-if-根据条件选择分支">五、if 根据条件选择分支</h2>
 <h3 id="5-1-单分支只在条件成立时执行">5.1 单分支只在条件成立时执行</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int stock = 5;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int stock = 5;
 
 if (stock &gt; 0) {
     System.out.println(&quot;有库存&quot;); // 控制台输出：有库存
 }</code></pre></figure>
 <p>条件为 <code>false</code> 时，代码块被跳过，程序继续执行 <code>if</code> 后面的语句。</p>
 <h3 id="5-2-if-else-表达二选一">5.2 if-else 表达二选一</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int score = 58;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int score = 58;
 
 if (score &gt;= 60) {
     System.out.println(&quot;通过&quot;);
@@ -144,7 +144,7 @@ if (score &gt;= 60) {
 }</code></pre></figure>
 <p>两个分支恰好执行一个。不要在两个独立 <code>if</code> 本应互斥时重复判断。</p>
 <h3 id="5-3-else-if-表达多个互斥区间">5.3 else-if 表达多个互斥区间</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int score = 85;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int score = 85;
 
 if (score &gt;= 90) {
     System.out.println(&quot;A&quot;);
@@ -161,7 +161,7 @@ if (score &gt;= 90) {
 <h2 id="六-switch-根据一个值选择分支">六、switch 根据一个值选择分支</h2>
 <h3 id="6-1-传统-switch-与-break">6.1 传统 switch 与 break</h3>
 <p>当多个分支都在比较同一个离散值时，可以使用 <code>switch</code>：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String status = &quot;PAID&quot;;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String status = &quot;PAID&quot;;
 
 switch (status) {
     case &quot;CREATED&quot;:
@@ -176,7 +176,7 @@ switch (status) {
 <p>传统写法中的 <code>break</code> 结束当前 switch。漏写后会继续进入下一个 case，这称为穿透。穿透偶尔有用，但容易造成错误。</p>
 <h3 id="6-2-jdk-17-的箭头-switch">6.2 JDK 17 的箭头 switch</h3>
 <p>课程主线可以使用更清楚的箭头形式：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String status = &quot;PAID&quot;;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String status = &quot;PAID&quot;;
 
 switch (status) {
     case &quot;CREATED&quot; -&gt; System.out.println(&quot;待支付&quot;);
@@ -184,7 +184,7 @@ switch (status) {
     default -&gt; System.out.println(&quot;未知状态&quot;);
 }</code></pre></figure>
 <p>箭头分支不会自动穿透。<code>switch</code> 还可以产生一个值：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String label = switch (status) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String label = switch (status) {
     case &quot;CREATED&quot; -&gt; &quot;待支付&quot;;
     case &quot;PAID&quot; -&gt; &quot;已支付&quot;;
     default -&gt; &quot;未知状态&quot;;
@@ -194,7 +194,7 @@ System.out.println(label); // 控制台输出：已支付</code></pre></figure>
 <p>模式匹配 switch 不是 JDK 17 的稳定主线能力，本课程不会在这里使用。</p>
 <h2 id="七-循环重复执行一组语句">七、循环重复执行一组语句</h2>
 <h3 id="7-1-for-适合次数或索引明确的重复">7.1 for 适合次数或索引明确的重复</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">for (int index = 0; index &lt; 3; index++) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">for (int index = 0; index &lt; 3; index++) {
     System.out.println(index);
 }
 // 控制台依次输出：0、1、2</code></pre></figure>
@@ -202,7 +202,7 @@ System.out.println(label); // 控制台输出：已支付</code></pre></figure>
 <ol><li>初始化：<code>int index = 0</code>，只在进入循环时执行一次。</li><li>继续条件：<code>index &lt; 3</code>，每轮开始前检查。</li><li>更新：<code>index++</code>，每轮结束后执行。</li></ol>
 <p>当条件变为 <code>false</code>，循环结束。索引从 0 开始是 Java 数组和集合中常见的规则。</p>
 <h3 id="7-2-while-适合次数未知但结束条件清楚的重复">7.2 while 适合次数未知但结束条件清楚的重复</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int remaining = 3;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int remaining = 3;
 
 while (remaining &gt; 0) {
     System.out.println(&quot;剩余：&quot; + remaining);
@@ -211,7 +211,7 @@ while (remaining &gt; 0) {
 // 控制台依次输出：剩余：3、剩余：2、剩余：1</code></pre></figure>
 <p>进入循环前先检查条件，所以条件一开始就是 <code>false</code> 时，一次也不执行。循环体必须推进结束条件；漏掉 <code>remaining--</code> 会形成无限循环。</p>
 <h3 id="7-3-do-while-至少执行一次">7.3 do-while 至少执行一次</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int attempts = 0;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int attempts = 0;
 
 do {
     attempts++;
@@ -220,7 +220,7 @@ do {
 <p><code>do-while</code> 在循环体后检查条件，因此至少执行一次。它适合“先执行一次，再决定是否重复”的流程，但普通后端代码中使用频率通常低于 <code>for</code> 和 <code>while</code>。</p>
 <h3 id="7-4-break-与-continue-改变当前循环">7.4 break 与 continue 改变当前循环</h3>
 <p><code>break</code> 立即结束最近一层循环；<code>continue</code> 跳过本轮剩余语句，进入下一轮。</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">for (int number = 1; number &lt;= 5; number++) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">for (int number = 1; number &lt;= 5; number++) {
     if (number == 2) {
         continue; // 跳过 2
     }
@@ -233,7 +233,7 @@ do {
 <p>过多的 <code>break</code> 和 <code>continue</code> 会让路径难以追踪。优先让循环条件本身表达结束规则。</p>
 <h2 id="八-作用域决定变量可以在哪里使用">八、作用域决定变量可以在哪里使用</h2>
 <h3 id="8-1-局部变量只在声明它的代码块内可见">8.1 局部变量只在声明它的代码块内可见</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">if (true) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">if (true) {
     int inside = 10;
     System.out.println(inside); // 控制台输出：10
 }
@@ -241,7 +241,7 @@ do {
 // System.out.println(inside); // 编译失败：已经离开 inside 的作用域</code></pre></figure>
 <p>变量的<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">作用域</span>从声明处开始，到所属代码块的右花括号结束。循环初始化中声明的变量也只在循环范围内可用。</p>
 <h3 id="8-2-内层可以读取外层-外层不能读取内层">8.2 内层可以读取外层，外层不能读取内层</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int total = 0;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int total = 0;
 
 for (int number = 1; number &lt;= 3; number++) {
     total = total + number; // 内层代码可以访问外层 total
@@ -252,14 +252,14 @@ System.out.println(total); // 控制台输出：6</code></pre></figure>
 <h2 id="九-方法把一组步骤命名">九、方法把一组步骤命名</h2>
 <h3 id="9-1-方法定义的组成">9.1 方法定义的组成</h3>
 <p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">方法</span>是一段有名字、可以被调用的代码。先看只做加法的方法：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static int add(int left, int right) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static int add(int left, int right) {
     return left + right;
 }</code></pre></figure>
 <p>逐项拆解：</p>
 <ul><li><code>static</code>：本章允许 <code>main</code> 不创建对象就调用；实例方法在第 8 章讲。</li><li>第一个 <code>int</code>：返回值类型。</li><li><code>add</code>：方法名。</li><li><code>int left, int right</code>：两个<span class="term" tabindex="0" data-tip="方法声明中用于接收输入的局部变量。">形参</span>，描述调用者必须提供的数据。</li><li><code>return</code>：结束方法，并把结果交回调用位置。</li></ul>
 <p>方法写在类的花括号中、其他方法的外面。Java 不能在 <code>main</code> 内再定义一个方法。</p>
 <h3 id="9-2-调用方法并接收返回值">9.2 调用方法并接收返回值</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class MethodDemo {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class MethodDemo {
     public static void main(String[] args) {
         int result = add(10, 20);
         System.out.println(result); // 控制台输出：30
@@ -272,14 +272,14 @@ System.out.println(total); // 控制台输出：6</code></pre></figure>
 <p>调用处的 <code>10</code> 和 <code>20</code> 称为<span class="term" tabindex="0" data-tip="调用方法时实际传入的表达式或值。">实参</span>。调用发生时，实参的值分别交给形参 <code>left</code> 和 <code>right</code>。第 6 章会进一步解释 Java 传递的是值。</p>
 <h3 id="9-3-void-方法只执行动作">9.3 void 方法只执行动作</h3>
 <p>不需要交回结果时，返回类型写 <code>void</code>：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static void printWelcome(String name) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static void printWelcome(String name) {
     System.out.println(&quot;欢迎，&quot; + name);
 }</code></pre></figure>
 <p>调用：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">printWelcome(&quot;小林&quot;); // 控制台输出：欢迎，小林</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">printWelcome(&quot;小林&quot;); // 控制台输出：欢迎，小林</code></pre></figure>
 <p>能计算结果的方法通常优先 <code>return</code>，让调用者决定是否打印、保存或继续计算。把计算与输出全部绑在一个方法里，会降低复用性。</p>
 <h3 id="9-4-return-可以提前结束方法">9.4 return 可以提前结束方法</h3>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static boolean canSell(int stock, int requested) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static boolean canSell(int stock, int requested) {
     if (requested &lt;= 0) {
         return false; // 无效请求直接结束方法
     }
@@ -289,7 +289,7 @@ System.out.println(total); // 控制台输出：6</code></pre></figure>
 <p>这种先处理无效情况的写法称为守卫式返回。它能减少深层嵌套，但方法中有资源需要关闭时还要考虑清理，第 11 章会讲。</p>
 <h3 id="9-5-方法重载按参数列表区分">9.5 方法重载按参数列表区分</h3>
 <p>同一个类中可以定义同名但参数列表不同的方法，称为<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">方法重载</span>：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static int add(int left, int right) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static int add(int left, int right) {
     return left + right;
 }
 
@@ -299,7 +299,7 @@ static int add(int first, int second, int third) {
 <p>返回类型不同但参数完全相同不能构成重载，因为调用处无法只凭返回类型选择方法。初学阶段不要创建大量相似重载；参数含义明显不同时，使用不同方法名更清楚。</p>
 <h2 id="十-组合一个仍然可读的小程序">十、组合一个仍然可读的小程序</h2>
 <p>下面程序只组合本章已经学过的变量、循环、方法和分支：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class ScoreReport {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class ScoreReport {
     public static void main(String[] args) {
         // 依次生成 50、70、90 三个分数
         for (int score = 50; score &lt;= 90; score += 20) {
@@ -325,7 +325,7 @@ static int add(int first, int second, int third) {
 <h2 id="十一-练习与验收">十一、练习与验收</h2>
 <h3 id="11-1-预测表达式">11.1 预测表达式</h3>
 <p>先写下结果，再运行验证：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int a = 5;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int a = 5;
 int b = 2;
 
 System.out.println(a / b);          // 预测：？
@@ -336,7 +336,7 @@ System.out.println(a &gt; 3 &amp;&amp; b &lt; 3); // 预测：？</code></pre></
 <p>把成绩规则改为：90 及以上为优秀，75–89 为良好，60–74 为通过，其余待改进。至少测试边界值 59、60、74、75、89、90。</p>
 <h3 id="11-3-编写库存判断方法">11.3 编写库存判断方法</h3>
 <p>编写 <code>canSell(int stock, int requested)</code>：请求数量小于等于 0 时返回 <code>false</code>，否则仅在库存足够时返回 <code>true</code>。在 <code>main</code> 中打印以下调用的预期结果：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">System.out.println(canSell(5, 3)); // 控制台输出：true
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">System.out.println(canSell(5, 3)); // 控制台输出：true
 System.out.println(canSell(5, 6)); // 控制台输出：false
 System.out.println(canSell(5, 0)); // 控制台输出：false</code></pre></figure>
 <h3 id="11-4-独立组合练习">11.4 独立组合练习</h3>

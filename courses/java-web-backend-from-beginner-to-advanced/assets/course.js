@@ -12,4 +12,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (window.mermaid) {
     window.mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "strict" });
   }
+
+  if (window.hljs) {
+    document.querySelectorAll("pre code[class^='language-']").forEach((block) => {
+      window.hljs.highlightElement(block);
+    });
+  }
 });

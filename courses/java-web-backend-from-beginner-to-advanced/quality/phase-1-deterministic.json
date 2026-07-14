@@ -1,11 +1,11 @@
 {
   "schemaVersion": "1.0",
   "tool": "teach-generator/validate-course",
-  "generatedAt": "2026-07-13T10:29:36.658Z",
+  "generatedAt": "2026-07-14T10:37:43.556Z",
   "courseRoot": "/Users/qi.qiao/Documents/Playground/ai-course-studio/courses/java-web-backend-from-beginner-to-advanced",
   "repositoryRoot": "/Users/qi.qiao/Documents/Playground/ai-course-studio",
   "configPath": "/Users/qi.qiao/Documents/Playground/ai-course-studio/courses/java-web-backend-from-beginner-to-advanced/.teach-generator-qc.json",
-  "contentHash": "fb9f7f0ab935d3c1560e97f42dc42613e9ba17af821ce7b86eb2fc59872f5579",
+  "contentHash": "42b7ba5c5b855174517856059569f1734ffa32b4d62234d5085611c6167411d0",
   "passed": true,
   "decision": "phase1_passed",
   "counts": {

@@ -1,75 +1,235 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="List 表示有顺序的元素序列，Set 表示不重复元素，Map 表示键到值的映射；集合行为依赖泛型、相等性和可变性规则。"><title>List、Set 与 Map | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
-<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 13 章 · Java 语言及标准库基础</div><h1>List、Set 与 Map</h1><p class="lesson-summary">List 表示有顺序的元素序列，Set 表示不重复元素，Map 表示键到值的映射；集合行为依赖泛型、相等性和可变性规则。</p><div class="meta-row"><span class="pill">先按“是否需要顺序、是否允许重复、是否按键查找”选择集合接口，再考虑具体实现类。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="数组不够用时">数组不够用时</h2>
-<p>数组长度固定，创建后不能方便地增删元素。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">集合</span>提供可变长度的数据结构。Java 集合先看接口含义，再选择实现类；初学阶段最常用的是 <code>ArrayList</code>、<code>HashSet</code> 和 <code>HashMap</code>。</p>
-<p>集合都应带泛型：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">List&lt;String&gt; names = new ArrayList&lt;&gt;();</code></pre></figure>
-<p>这行表示“一个保存 String 的 List”。不要写原始类型 <code>List names</code>，否则会失去第 12 章建立的类型检查。</p>
-<h2 id="list-保留元素顺序">List 保留元素顺序</h2>
-<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">List</span>表示有顺序、允许重复的元素序列：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">List&lt;String&gt; tasks = new ArrayList&lt;&gt;();
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="List 管理有序序列，Set 保证元素唯一性，Map 建立键到值的映射；集合的实际行为依赖 equals/hashCode、可变性和泛型。"><title>List、Set 与 Map | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 13 章 · Java 语言及标准库基础</div><h1>List、Set 与 Map</h1><p class="lesson-summary">List 管理有序序列，Set 保证元素唯一性，Map 建立键到值的映射；集合的实际行为依赖 equals/hashCode、可变性和泛型。</p><div class="meta-row"><span class="pill">先根据数据关系选择集合接口：是否需要顺序、是否允许重复、是否按键查找。再选择具体实现。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一-从数组到集合">一、从数组到集合</h2>
+<p>第 7 章学习了数组：固定长度、通过下标访问、可以保存基本类型或引用类型。数组的问题是创建后长度不能改变。</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 如果需要在 &quot;Java&quot;, &quot;Spring&quot;, &quot;Docker&quot; 之后再添加一个 &quot;Redis&quot;
+String[] topics = {&quot;Java&quot;, &quot;Spring&quot;, &quot;Docker&quot;};
+// topics[3] = &quot;Redis&quot;; // ArrayIndexOutOfBoundsException</code></pre></figure>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">集合框架</span>（Collections Framework）提供可变长度的数据容器。JDK 17 的集合框架包含多个接口和实现类，但初学阶段掌握三个接口和它们最常用的实现就够用：</p>
+<div class="table-wrap"><table><thead><tr><th>接口</th><th>核心语义</th><th>常用实现</th><th>初始使用场景</th></tr></thead><tbody><tr><td><code>List</code></td><td>有序、可重复</td><td><code>ArrayList</code></td><td>需要按添加顺序访问的元素序列</td></tr><tr><td><code>Set</code></td><td>不重复、唯一性</td><td><code>HashSet</code></td><td>需要确保元素不重复的集合</td></tr><tr><td><code>Map</code></td><td>键到值的映射</td><td><code>HashMap</code></td><td>需要按键查找对应值</td></tr></tbody></table></div>
+<p>集合都应带上泛型：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">List&lt;String&gt; names = new ArrayList&lt;&gt;(); // 明确保存 String
+Set&lt;Integer&gt; ids = new HashSet&lt;&gt;();     // 明确保存 Integer
+Map&lt;String, Integer&gt; scores = new HashMap&lt;&gt;(); // 明确键和值类型</code></pre></figure>
+<p>不要使用原始类型 <code>List items = new ArrayList();</code>，否则会失去第 12 章建立的泛型保护。</p>
+<h2 id="二-list-有序-可重复的序列">二、List：有序、可重复的序列</h2>
+<h3 id="2-1-arraylist-的基本操作">2.1 ArrayList 的基本操作</h3>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">List</span>表示一个有顺序、允许重复元素的序列。最常用的实现是 <span class="term" tabindex="0" data-tip="课程术语，详见术语表。">ArrayList</span>，它内部使用数组存储，按下标读取元素非常快。</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">List&lt;String&gt; tasks = new ArrayList&lt;&gt;();
 tasks.add(&quot;学习变量&quot;);
 tasks.add(&quot;学习集合&quot;);
 tasks.add(&quot;学习变量&quot;);
 
-System.out.println(tasks.get(0)); // 学习变量
-System.out.println(tasks.size()); // 3</code></pre></figure>
-<p>List 与数组一样按 0 开始的下标读取，但长度会随着 add/remove 改变：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">tasks.remove(&quot;学习变量&quot;); // 删除第一个匹配项
-tasks.set(0, &quot;学习异常&quot;); // 替换指定下标元素</code></pre></figure>
-<p>遍历优先使用增强 for：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">for (String task : tasks) {
+System.out.println(tasks.get(0));   // 学习变量
+System.out.println(tasks.size());   // 3
+System.out.println(tasks.isEmpty());// false</code></pre></figure>
+<p><code>add(E element)</code> 在末尾追加元素。<code>add(int index, E element)</code> 在指定位置插入：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">tasks.add(1, &quot;学习异常&quot;);
+System.out.println(tasks); // [学习变量, 学习异常, 学习集合, 学习变量]</code></pre></figure>
+<p>删除元素：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">tasks.remove(&quot;学习变量&quot;); // 删除第一个匹配项，返回 boolean
+tasks.remove(0);           // 按下标删除，返回被删除的元素
+
+System.out.println(tasks); // [学习异常, 学习集合]</code></pre></figure>
+<p>修改元素：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">tasks.set(0, &quot;学习数组&quot;); // 替换指定下标位置的元素
+System.out.println(tasks); // [学习数组, 学习集合]</code></pre></figure>
+<h3 id="2-2-遍历-list">2.2 遍历 List</h3>
+<p>增强 for 循环是最常用的遍历方式：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">for (String task : tasks) {
     System.out.println(task);
 }</code></pre></figure>
-<p>遍历时不要直接对同一个 List 调用结构性 add/remove，否则可能抛出 <code>ConcurrentModificationException</code>。需要按条件删除时，第 14 章会学习更合适的 Stream 方式；也可以使用迭代器，但当前先建立“遍历期间不要随手改结构”的边界。</p>
-<h2 id="set-表示唯一性">Set 表示唯一性</h2>
-<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Set</span>不保留重复元素：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Set&lt;String&gt; tags = new HashSet&lt;&gt;();
+<p>使用下标遍历：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">for (int i = 0; i &lt; tasks.size(); i++) {
+    System.out.println(i + &quot;: &quot; + tasks.get(i));
+}</code></pre></figure>
+<p>两种方式的选择：增强 for 更简洁，适合不需要下标的场景；下标遍历适合需要知道元素位置的场景。</p>
+<p>遍历时不要通过 List 本身添加或删除元素，否则可能抛出 <code>ConcurrentModificationException</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">for (String task : tasks) {
+    if (task.equals(&quot;学习集合&quot;)) {
+        // tasks.remove(task); // 可能抛出 ConcurrentModificationException
+    }
+}</code></pre></figure>
+<p>需要条件删除时，可以使用 <code>removeIf</code>（JDK 8+）或先记录要删除的元素再统一删除：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">tasks.removeIf(task -&gt; task.equals(&quot;学习集合&quot;));</code></pre></figure>
+<h3 id="2-3-arraylist-vs-linkedlist">2.3 ArrayList vs LinkedList</h3>
+<div class="table-wrap"><table><thead><tr><th>操作</th><th>ArrayList</th><th>LinkedList</th></tr></thead><tbody><tr><td>按下标访问</td><td>O(1)</td><td>O(n)</td></tr><tr><td>末尾插入/删除</td><td>O(1) 均摊</td><td>O(1)</td></tr><tr><td>中间插入/删除</td><td>O(n)</td><td>O(n)</td></tr><tr><td>内存占用</td><td>连续内存 + 预留空间</td><td>每个元素存储前后节点引用</td></tr></tbody></table></div>
+<p>O(1) 表示操作时间与元素数量无关，O(n) 表示操作时间随元素数量线性增长。大多数场景下 <code>ArrayList</code> 是默认选择。除非你在列表前端频繁插入删除，否则优先使用 <code>ArrayList</code>。</p>
+<h3 id="2-4-list-与数组转换">2.4 List 与数组转换</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// List 转数组
+List&lt;String&gt; list = List.of(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;);
+String[] array = list.toArray(new String[0]);
+
+// 数组转 List（注意：不可修改）
+String[] arr = {&quot;A&quot;, &quot;B&quot;, &quot;C&quot;};
+List&lt;String&gt; listFromArray = Arrays.asList(arr);
+// listFromArray.add(&quot;D&quot;); // UnsupportedOperationException</code></pre></figure>
+<p><code>Arrays.asList</code> 返回的 List 不能改变大小，但可以修改元素。如果需要可变的 List，传入 new ArrayList 构造器：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">List&lt;String&gt; mutableList = new ArrayList&lt;&gt;(Arrays.asList(arr));
+mutableList.add(&quot;D&quot;); // 正常</code></pre></figure>
+<h2 id="三-set-不重复元素集合">三、Set：不重复元素集合</h2>
+<h3 id="3-1-hashset-的基本操作">3.1 HashSet 的基本操作</h3>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Set</span>不保留重复元素。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">HashSet</span> 是 Set 最常用的实现，基于哈希表存储：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Set&lt;String&gt; tags = new HashSet&lt;&gt;();
 tags.add(&quot;java&quot;);
 tags.add(&quot;web&quot;);
-tags.add(&quot;java&quot;);
+tags.add(&quot;java&quot;); // 重复，不会添加
 
-System.out.println(tags.size()); // 2</code></pre></figure>
-<p><code>HashSet</code> 通常不承诺遍历顺序。若业务需要保留插入顺序，后续可选择 <code>LinkedHashSet</code>；若需要排序，才考虑 <code>TreeSet</code>。先不要为了“看起来更高级”默认选择排序集合。</p>
-<p>Set 如何判断重复？对对象使用 <code>equals</code> 和 <code>hashCode</code>。第 6 章已经说明这两个方法要保持一致：若两个对象 <code>equals</code> 为 true，它们的 hashCode 必须相同。作为 Set 元素或 Map key 的对象，其影响相等性的字段不应在放入后修改，否则可能再也找不到它。</p>
-<h2 id="map-按键查找值">Map 按键查找值</h2>
-<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Map</span>保存 key 到 value 的映射：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Map&lt;String, Integer&gt; stockByProduct = new HashMap&lt;&gt;();
-stockByProduct.put(&quot;book&quot;, 10);
-stockByProduct.put(&quot;pen&quot;, 20);
+System.out.println(tags.size()); // 2（&quot;java&quot; 只算一次）
 
-System.out.println(stockByProduct.get(&quot;book&quot;)); // 10</code></pre></figure>
-<p>同一个 key 再次 put 会覆盖旧 value：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">stockByProduct.put(&quot;book&quot;, 8);</code></pre></figure>
-<p>不存在的 key，<code>get</code> 返回 <code>null</code>。若需要默认值，可使用：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int stock = stockByProduct.getOrDefault(&quot;notebook&quot;, 0);</code></pre></figure>
-<p>遍历 Map 时，通常读取 entry：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">for (Map.Entry&lt;String, Integer&gt; entry : stockByProduct.entrySet()) {
-    System.out.println(entry.getKey() + &quot;: &quot; + entry.getValue());
+// 检查元素是否存在
+System.out.println(tags.contains(&quot;web&quot;)); // true
+System.out.println(tags.contains(&quot;spring&quot;)); // false
+
+// 遍历
+for (String tag : tags) {
+    System.out.println(tag);
 }</code></pre></figure>
-<p>不要写 <code>for (String key : map.keySet()) { map.get(key); }</code> 来处理大量数据后再做复杂查找；entrySet 一次就提供了键和值。</p>
-<h2 id="常见实现怎样选择">常见实现怎样选择</h2>
-<div class="table-wrap"><table><thead><tr><th>接口</th><th>常用实现</th><th>主要特征</th></tr></thead><tbody><tr><td>List</td><td>ArrayList</td><td>按下标读取快，适合大多数顺序列表</td></tr><tr><td>Set</td><td>HashSet</td><td>去重，通常不保证顺序</td></tr><tr><td>Map</td><td>HashMap</td><td>按 key 查找，通常不保证遍历顺序</td></tr></tbody></table></div>
-<p>集合变量优先声明为接口类型，例如 <code>List&lt;String&gt;</code> 而不是 <code>ArrayList&lt;String&gt;</code>。这样调用方依赖的是“列表能做什么”，实现细节可在需要时替换。</p>
-<p>Java 也提供 <code>List.of(...)</code>、<code>Set.of(...)</code>、<code>Map.of(...)</code> 创建不可修改集合：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">List&lt;String&gt; levels = List.of(&quot;LOW&quot;, &quot;MEDIUM&quot;, &quot;HIGH&quot;);
-// levels.add(&quot;URGENT&quot;); // 运行时 UnsupportedOperationException</code></pre></figure>
-<p>它适合固定配置或测试数据。若后面需要 add/remove，就创建 <code>new ArrayList&lt;&gt;(levels)</code> 得到可变副本。</p>
-<h2 id="练习-三种数据关系">练习：三种数据关系</h2>
-<p>实现三个小需求：</p>
-<ol><li>用 List 保存用户按点击顺序加入的商品。</li><li>用 Set 保存标签，重复标签只保留一个。</li><li>用 Map 按商品编号查库存，查不到时显示 0。</li></ol>
-<p>完成标准：能说明为什么三个需求不能都使用同一种集合；声明都带泛型；不假设 HashSet/HashMap 的遍历顺序。</p>
+<p><code>HashSet</code> 不承诺遍历顺序。多次运行可能看到不同输出顺序。如果需要可预测的顺序：</p>
+<ul><li><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">LinkedHashSet</span> 保留插入顺序</li><li><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">TreeSet</span> 按自然排序或自定义比较器排序</li></ul>
+<h3 id="3-2-set-如何判断重复">3.2 Set 如何判断重复</h3>
+<p>Set 判断两个对象是否重复，依据的是两个方法：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class Person {
+    private String name;
+
+    // ... 构造器、getter
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Person other)) return false;
+        return Objects.equals(this.name, other.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+}</code></pre></figure>
+<ul><li><code>equals</code> 判断两个对象是否&quot;内容相等&quot;。</li><li><code>hashCode</code> 返回一个整数，相同的对象必须有相同的哈希码。</li></ul>
+<p>第 6 章提到过这两个方法的一致契约：<strong>如果两个对象 equals 返回 true，它们的 hashCode 必须相同</strong>。如果不一致，HashSet 会错误地允许重复元素。</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Set&lt;Person&gt; people = new HashSet&lt;&gt;();
+people.add(new Person(&quot;Ada&quot;));
+people.add(new Person(&quot;Ada&quot;));
+
+// 如果没有正确实现 hashCode，size 可能是 2（错误的重复）
+// 如果 hashCode 正确实现，size 为 1（去重成功）</code></pre></figure>
+<h3 id="3-3-可变对象作为-set-元素的风险">3.3 可变对象作为 Set 元素的风险</h3>
+<p>如果 Set 中元素的可变性字段影响 equals/hashCode，元素放入 Set 后修改这些字段会导致数据结构损坏：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Set&lt;List&lt;Integer&gt;&gt; setOfLists = new HashSet&lt;&gt;();
+List&lt;Integer&gt; list = new ArrayList&lt;&gt;(List.of(1, 2, 3));
+setOfLists.add(list);
+System.out.println(setOfLists.contains(list)); // true
+
+list.add(4); // 修改了 list
+System.out.println(setOfLists.contains(list)); // 可能是 false！</code></pre></figure>
+<p>放入 Set 后不要修改会影响相等性的字段。如果确实需要基于可变内容的唯一性，使用不可变对象（如 record、<code>List.of</code> 创建的不变列表）作为集合元素更安全。</p>
+<h2 id="四-map-键到值的映射">四、Map：键到值的映射</h2>
+<h3 id="4-1-hashmap-的基本操作">4.1 HashMap 的基本操作</h3>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Map</span>保存从键到值的映射关系。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">HashMap</span> 是最常用的 Map 实现：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Map&lt;String, Integer&gt; stock = new HashMap&lt;&gt;();
+stock.put(&quot;book&quot;, 10);
+stock.put(&quot;pen&quot;, 20);
+
+System.out.println(stock.get(&quot;book&quot;));    // 10
+System.out.println(stock.get(&quot;eraser&quot;));  // null（不存在）</code></pre></figure>
+<p>同一个 key 再次 put 会覆盖旧值，并返回旧值：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Integer old = stock.put(&quot;book&quot;, 8);
+System.out.println(old);     // 10（旧值）
+System.out.println(stock.get(&quot;book&quot;)); // 8</code></pre></figure>
+<p>提供默认值：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// getOrDefault：key 不存在时返回默认值
+int count = stock.getOrDefault(&quot;notebook&quot;, 0); // 0</code></pre></figure>
+<p>检查键或值是否存在：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">System.out.println(stock.containsKey(&quot;pen&quot;));   // true
+System.out.println(stock.containsValue(20));    // true</code></pre></figure>
+<h3 id="4-2-遍历-map">4.2 遍历 Map</h3>
+<p>遍历 Map 有三种方式，最常用的是 entrySet：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">for (Map.Entry&lt;String, Integer&gt; entry : stock.entrySet()) {
+    String key = entry.getKey();
+    Integer value = entry.getValue();
+    System.out.println(key + &quot;: &quot; + value);
+}</code></pre></figure>
+<p>如果需要旧版式的遍历，但 entrySet 通常更高效，因为一次迭代同时获取键和值：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 不推荐：多余的一次 get 查找
+for (String key : stock.keySet()) {
+    System.out.println(key + &quot;: &quot; + stock.get(key));
+}</code></pre></figure>
+<p>只遍历键或值：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">for (String key : stock.keySet()) {
+    System.out.println(key);
+}
+
+for (Integer value : stock.values()) {
+    System.out.println(value);
+}</code></pre></figure>
+<p>JDK 8 引入的 <code>forEach</code> 方法让遍历更紧凑：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">stock.forEach((key, value) -&gt; System.out.println(key + &quot;: &quot; + value));</code></pre></figure>
+<h3 id="4-3-map-key-的可变性风险">4.3 Map key 的可变性风险</h3>
+<p>与 Set 类似，Map 中作为 key 的对象不应修改影响 equals/hashCode 的字段：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Map&lt;List&lt;Integer&gt;, String&gt; map = new HashMap&lt;&gt;();
+List&lt;Integer&gt; key = new ArrayList&lt;&gt;(List.of(1, 2));
+map.put(key, &quot;value&quot;);
+
+key.add(3); // 修改了 key
+System.out.println(map.get(key)); // 很可能是 null，因为 hashCode 变了</code></pre></figure>
+<p>推荐使用不可变对象作为 Map key。记录字符串、Integer、record 等都是安全的。</p>
+<h3 id="4-4-map-的常用实现对比">4.4 Map 的常用实现对比</h3>
+<div class="table-wrap"><table><thead><tr><th>实现</th><th>顺序</th><th>key 要求</th><th>使用场景</th></tr></thead><tbody><tr><td>HashMap</td><td>不保证顺序</td><td>需要正确的 equals/hashCode</td><td>通用键值存储</td></tr><tr><td>LinkedHashMap</td><td>插入顺序或访问顺序</td><td>同上</td><td>需要可预测遍历顺序</td></tr><tr><td>TreeMap</td><td>key 的自然顺序或比较器</td><td>key 必须可比较</td><td>需要排序的键值集合</td></tr><tr><td>EnumMap</td><td>enum 声明顺序</td><td>key 必须是 enum</td><td>key 是枚举类型</td></tr></tbody></table></div>
+<p>初学阶段默认选择 <code>HashMap</code>。需要顺序时优先考虑 <code>LinkedHashMap</code>。</p>
+<h2 id="五-不可修改集合">五、不可修改集合</h2>
+<p>JDK 9 引入了工厂方法，用一行创建不可修改集合：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">List&lt;String&gt; levels = List.of(&quot;LOW&quot;, &quot;MEDIUM&quot;, &quot;HIGH&quot;);
+Set&lt;String&gt; tags = Set.of(&quot;java&quot;, &quot;web&quot;);
+Map&lt;String, Integer&gt; config = Map.of(&quot;timeout&quot;, 30, &quot;retry&quot;, 3);</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// levels.add(&quot;URGENT&quot;); // 运行时 UnsupportedOperationException</code></pre></figure>
+<p>不可修改集合的优势：</p>
+<ul><li>线程安全</li><li>内存占用更小</li><li>明确表达&quot;数据不会变化&quot;</li></ul>
+<p>如果需要后续添加或修改，传入可变构造器：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">List&lt;String&gt; mutableLevels = new ArrayList&lt;&gt;(List.of(&quot;LOW&quot;, &quot;MEDIUM&quot;));
+mutableLevels.add(&quot;HIGH&quot;); // 正常</code></pre></figure>
+<h2 id="六-collections-工具类">六、Collections 工具类</h2>
+<p><code>java.util.Collections</code> 提供操作集合的静态方法：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">List&lt;String&gt; list = new ArrayList&lt;&gt;(List.of(&quot;C&quot;, &quot;A&quot;, &quot;B&quot;));
+Collections.sort(list);            // 排序：[A, B, C]
+Collections.reverse(list);         // 反转：[C, B, A]
+Collections.shuffle(list);         // 随机打乱：[B, A, C]（每次不同）</code></pre></figure>
+<p>包装为不可修改视图：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">List&lt;String&gt; unmodifiable = Collections.unmodifiableList(list);
+// unmodifiable.add(&quot;D&quot;); // UnsupportedOperationException</code></pre></figure>
+<p>只是包装视图，原始集合的修改仍然会反映到视图中。创建不可修改集合更推荐使用 <code>List.of</code> 工厂方法。</p>
+<h2 id="七-练习">七、练习</h2>
+<h3 id="练习-1-list-去重">练习 1：List 去重</h3>
+<p>给定一个 List：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">List&lt;String&gt; input = new ArrayList&lt;&gt;(List.of(&quot;apple&quot;, &quot;banana&quot;, &quot;apple&quot;, &quot;cherry&quot;, &quot;banana&quot;));</code></pre></figure>
+<p>输出一个不包含重复元素的 List，保持首次出现的顺序。</p>
+<p>完成标准：结果应为 <code>[&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;]</code>；不使用 <code>Set</code> 构造器。</p>
+<h3 id="练习-2-单词频率统计">练习 2：单词频率统计</h3>
+<p>给定一段文本：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String text = &quot;java spring java boot spring cloud java docker&quot;;</code></pre></figure>
+<p>统计每个单词出现的次数。使用 <code>Map&lt;String, Integer&gt;</code> 实现。</p>
+<p>完成标准：输出类似 <code>{java=3, spring=2, boot=1, cloud=1, docker=1}</code>；不存在的单词返回 0，不抛出 NPE。</p>
+<h3 id="练习-3-商品标签管理">练习 3：商品标签管理</h3>
+<p>设计两个方法：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">/** 添加标签，重复标签不添加，返回 true 表示首次添加 */
+boolean addTag(String tag);
+
+/** 获取所有标签，按添加顺序 */
+List&lt;String&gt; getTags();</code></pre></figure>
+<p>完成标准：使用合适的集合类型组合；不手动调用 <code>contains</code> 做去重检查。</p>
 <h2 id="常见误区">常见误区</h2>
 <h3 id="用-list-做去重">用 List 做去重</h3>
-<p>List 允许重复。若业务语义是“只能出现一次”，使用 Set 或先明确去重规则。</p>
-<h3 id="以为-hashmap-的顺序稳定">以为 HashMap 的顺序稳定</h3>
-<p>HashMap 不承诺迭代顺序。接口响应、日志或测试若需要顺序，应主动选择并说明对应实现。</p>
-<h3 id="修改-map-key-的相等性字段">修改 Map key 的相等性字段</h3>
-<p>若 key 的 equals/hashCode 依赖字段在放入后变化，HashMap 可能无法正确定位它。用不可变值作 key 最安全。</p>
+<p>List 允许重复。如果语义是&quot;只能出现一次&quot;，优先使用 Set，或使用 Stream 的 <code>distinct()</code>。</p>
+<h3 id="假设-hashmap-的迭代顺序稳定">假设 HashMap 的迭代顺序稳定</h3>
+<p><code>HashMap</code> 不承诺迭代顺序，响应、日志或测试若依赖顺序应该显式选择实现。<code>HashMap</code> 内部结构在扩容后可能改变遍历顺序。</p>
+<h3 id="修改-key-或-set-元素的影响相等性字段">修改 key 或 Set 元素的影响相等性字段</h3>
+<p>这会让数据在 Map 和 HashSet 中&quot;丢失&quot;——对象在集合中，但查找不到。使用不可变值（String、Integer、record 等）作为 key 或 Set 元素最安全。</p>
+<h3 id="用-替代-equals-判断集合中的元素相等性">用 == 替代 equals 判断集合中的元素相等性</h3>
+<p><code>==</code> 比较引用是否指向同一个对象。HashSet 使用 <code>equals</code> 去重；Map 中 key 的查找也依赖 <code>equals</code>，不是 <code>==</code>。只有 <code>EnumSet</code> 和 <code>EnumMap</code> 不受影响，因为 enum 实例天然单例。</p>
 <h2 id="本章小结">本章小结</h2>
-<p>集合的第一选择来自数据关系：List 关心顺序，Set 关心唯一性，Map 关心按键定位。泛型保证元素类型，equals/hashCode 决定哈希集合中的重复与定位。下一章会在集合基础上使用 Lambda 和 Stream 描述处理流水线。</p>
+<p>List、Set 和 Map 是 Java 集合框架的三个核心接口，分别处理有序序列、唯一元素和键值映射。ArrayList 是 List 的默认选择，HashSet 和 HashMap 分别是 Set 和 Map 的默认选择。Set 和 Map 的元素唯一性依赖 equals/hashCode 的实现，这两个方法需要保持&quot;相等对象哈希码相同&quot;的契约。可变对象放入 Set 或作为 Map key 后不应修改影响相等性的字段。不可修改集合使用 <code>List.of</code>、<code>Set.of</code>、<code>Map.of</code> 创建，适合固定数据。下一章将使用集合数据学习 Lambda 和 Stream 的操作。</p>
 <h2 id="快速自测">快速自测</h2>
-<ol><li>List、Set、Map 分别解决什么数据关系？</li><li>HashSet 如何判断两个对象重复？</li><li>为什么 <code>List.of</code> 创建后不能 add？</li></ol>
-<p>参考答案：顺序序列、唯一元素、键值映射；依据 equals/hashCode；它返回不可修改集合。</p>
+<ol><li>List、Set、Map 分别解决什么数据关系？</li><li>HashSet 如何判断两个元素是重复的？</li><li>为什么放入 HashMap 作为 key 的对象不应该修改 equals/hashCode 相关的字段？</li><li><code>List.of(&quot;A&quot;, &quot;B&quot;)</code> 创建后能 add 元素吗？</li></ol>
+<p>参考答案：List 关心顺序和可重复，Set 关心唯一性，Map 关心按键定位值；依据 equals 和 hashCode 方法的返回值；修改后 hashCode 会变，HashMap 可能找不到该 key；不能，返回的是不可修改集合，add 会抛 UnsupportedOperationException。</p>
 <h2 id="参考文献">参考文献</h2>
-<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/doc-files/coll-overview.html" target="_blank" rel="noreferrer">Java SE 17 API: Collections Framework</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" target="_blank" rel="noreferrer">Java SE 17 API: Map</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/12-generics.html">← 第 12 章<br><strong>Java 泛型与类型安全</strong></a><a href="../lessons/14-lambda-stream.html">第 14 章 →<br><strong>Lambda 与 Stream 基础</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#数组不够用时">数组不够用时</a><a class="" href="#list-保留元素顺序">List 保留元素顺序</a><a class="" href="#set-表示唯一性">Set 表示唯一性</a><a class="" href="#map-按键查找值">Map 按键查找值</a><a class="" href="#常见实现怎样选择">常见实现怎样选择</a><a class="" href="#练习-三种数据关系">练习：三种数据关系</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#用-list-做去重">用 List 做去重</a><a class="sub" href="#以为-hashmap-的顺序稳定">以为 HashMap 的顺序稳定</a><a class="sub" href="#修改-map-key-的相等性字段">修改 Map key 的相等性字段</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>
+<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/doc-files/coll-overview.html" target="_blank" rel="noreferrer">Java SE 17 API: Collections Framework</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/List.html" target="_blank" rel="noreferrer">Java SE 17 API: List</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Set.html" target="_blank" rel="noreferrer">Java SE 17 API: Set</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" target="_blank" rel="noreferrer">Java SE 17 API: Map</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Collections.html" target="_blank" rel="noreferrer">Java SE 17 API: Collections</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/12-generics.html">← 第 12 章<br><strong>Java 泛型与类型安全</strong></a><a href="../lessons/14-lambda-stream.html">第 14 章 →<br><strong>Lambda 与 Stream 基础</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一-从数组到集合">一、从数组到集合</a><a class="" href="#二-list-有序-可重复的序列">二、List：有序、可重复的序列</a><a class="sub" href="#2-1-arraylist-的基本操作">2.1 ArrayList 的基本操作</a><a class="sub" href="#2-2-遍历-list">2.2 遍历 List</a><a class="sub" href="#2-3-arraylist-vs-linkedlist">2.3 ArrayList vs LinkedList</a><a class="sub" href="#2-4-list-与数组转换">2.4 List 与数组转换</a><a class="" href="#三-set-不重复元素集合">三、Set：不重复元素集合</a><a class="sub" href="#3-1-hashset-的基本操作">3.1 HashSet 的基本操作</a><a class="sub" href="#3-2-set-如何判断重复">3.2 Set 如何判断重复</a><a class="sub" href="#3-3-可变对象作为-set-元素的风险">3.3 可变对象作为 Set 元素的风险</a><a class="" href="#四-map-键到值的映射">四、Map：键到值的映射</a><a class="sub" href="#4-1-hashmap-的基本操作">4.1 HashMap 的基本操作</a><a class="sub" href="#4-2-遍历-map">4.2 遍历 Map</a><a class="sub" href="#4-3-map-key-的可变性风险">4.3 Map key 的可变性风险</a><a class="sub" href="#4-4-map-的常用实现对比">4.4 Map 的常用实现对比</a><a class="" href="#五-不可修改集合">五、不可修改集合</a><a class="" href="#六-collections-工具类">六、Collections 工具类</a><a class="" href="#七-练习">七、练习</a><a class="sub" href="#练习-1-list-去重">练习 1：List 去重</a><a class="sub" href="#练习-2-单词频率统计">练习 2：单词频率统计</a><a class="sub" href="#练习-3-商品标签管理">练习 3：商品标签管理</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#用-list-做去重">用 List 做去重</a><a class="sub" href="#假设-hashmap-的迭代顺序稳定">假设 HashMap 的迭代顺序稳定</a><a class="sub" href="#修改-key-或-set-元素的影响相等性字段">修改 key 或 Set 元素的影响相等性字段</a><a class="sub" href="#用-替代-equals-判断集合中的元素相等性">用 == 替代 equals 判断集合中的元素相等性</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

@@ -1,21 +1,209 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="管理配置、环境差异与秘密边界。"><title>配置、环境与代码分离 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
-<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 19 章 · 后端开发基础</div><h1>配置、环境与代码分离</h1><p class="lesson-summary">管理配置、环境差异与秘密边界。</p><div class="meta-row"><span class="pill">先按本章的操作或推理顺序完成阅读，再记录每一步的结果与疑问。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="先识别哪些值会变">先识别哪些值会变</h2>
-<p>本节围绕“先识别哪些值会变”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="properties-与-yaml">properties 与 YAML</h2>
-<p>本节围绕“properties 与 YAML”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="读取配置">读取配置</h2>
-<p>本节围绕“读取配置”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="区分开发-测试与生产">区分开发、测试与生产</h2>
-<p>本节围绕“区分开发、测试与生产”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="秘密不进入仓库">秘密不进入仓库</h2>
-<p>本节围绕“秘密不进入仓库”展开本章主题。先把相关对象、输入和可观察结果说清，再补充当前章节需要的规则、操作或边界；不引入后续章节才会系统讲解的工具。</p>
-<h2 id="练习与验收">练习与验收</h2>
-<p>让应用名称和端口可由配置覆盖，并准备不包含真实秘密的环境变量示例。</p>
-<p>完成后，应能用本章的术语解释自己的操作结果；遇到失败时，先记录输入、实际结果和错误信息。</p>
-<h2 id="容易走偏的地方">容易走偏的地方</h2>
-<p>不要跳过本章的基础模型，直接复制框架、数据库或运维配置。每一项操作都应有明确的目的和可观察结果。</p>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="配置让同样的代码在不同环境中表现不同：properties/YAML 管理简单值，Profile 区分环境，环境变量和命令行参数保护秘密。"><title>配置、环境与代码分离 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 19 章 · 后端开发基础</div><h1>配置、环境与代码分离</h1><p class="lesson-summary">配置让同样的代码在不同环境中表现不同：properties/YAML 管理简单值，Profile 区分环境，环境变量和命令行参数保护秘密。</p><div class="meta-row"><span class="pill">先从代码中识别出会变的数字和地址，再把它们移到配置文件；不要一次把项目的所有配置都改完，每次只处理一个会变的值。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><p>第 18 章的服务启动后，端口、数据库地址、第三方服务的 URL 全都写死在代码里。把应用从开发电脑搬到测试环境或生产服务器时，这些值需要改变。如果每次换环境都要改代码、重新编译，就失去了&quot;代码一样、配置不同&quot;的灵活性。</p>
+<h2 id="一-识别哪些值会随环境变化">一、识别哪些值会随环境变化</h2>
+<p>在 Controller 中，如果直接写了数字、地址或开关：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@RestController
+public class WelcomeController {
+    private String appName = &quot;todo-app&quot;;     // 不同环境可能要求不同应用名
+    private int maxPageSize = 100;            // 开发环境用 20，生产环境可能用 100
+
+    @GetMapping(&quot;/info&quot;)
+    public String info() {
+        return appName + &quot; 最大页大小: &quot; + maxPageSize;
+    }
+}</code></pre></figure>
+<p><code>&quot;todo-app&quot;</code> 和 <code>100</code> 是<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">硬编码</span>——值直接写在源码中。硬编码的问题不是当前运行不对，而是换了环境后必须重新编译。</p>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">配置</span>就是把会变化的值从代码移到外部文件或外部来源。代码只声明&quot;我需要一个叫 <code>app.name</code> 的值&quot;，不关心它具体是多少。值由配置文件、环境变量或启动参数在运行时提供。</p>
+<p>哪些值适合作为配置：</p>
+<ul><li>端口号（<code>8080</code>、<code>9090</code>）</li><li>数据库连接字符串（URL、用户名）</li><li>第三方服务的地址和密钥</li><li>日志级别和输出位置</li><li>业务开关（如&quot;是否开启注册&quot;）</li></ul>
+<p>哪些值不适合作为配置：</p>
+<ul><li>只在单个方法内部使用的计算常量</li><li>固定不变的业务规则（如税率百分比——如果它确实不变的话）</li></ul>
+<h2 id="二-properties-与-yaml">二、properties 与 YAML</h2>
+<p>Spring Boot 支持两种主要的配置文件格式：<code>.properties</code> 和 <code>.yml</code>/<code>.yaml</code>。它们都放在 <code>src/main/resources/</code> 目录下，Spring Boot 启动时会自动读取。</p>
+<h3 id="2-1-application-properties">2.1 application.properties</h3>
+<figure class="code-card"><div class="code-toolbar"><span>properties</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-properties"># src/main/resources/application.properties
+server.port=8080
+app.name=todo-app
+app.max-page-size=100
+app.welcome-message=欢迎使用待办事项服务</code></pre></figure>
+<p><code>properties</code> 格式使用 <code>key=value</code>，每一行一个配置项。Spring Boot 把 <code>.</code> 作为层级分隔符，<code>server.port</code> 和 <code>app.name</code> 是两个独立的配置项。</p>
+<h3 id="2-2-application-yml">2.2 application.yml</h3>
+<figure class="code-card"><div class="code-toolbar"><span>yaml</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-yaml"># src/main/resources/application.yml
+server:
+  port: 8080
+
+app:
+  name: todo-app
+  max-page-size: 100
+  welcome-message: 欢迎使用待办事项服务</code></pre></figure>
+<p>YAML 使用缩进表达层级。<code>app</code> 下面缩进两个空格的是它的子项。YAML 的优势是结构一目了然，适合配置项较多的项目。两种格式可以共存，但通常一个项目只选一种。</p>
+<h3 id="2-3-配置的优先级">2.3 配置的优先级</h3>
+<p>同一个配置项可能在多个地方出现。Spring Boot 按固定顺序读取，后面的覆盖前面的：</p>
+<ol><li>默认值（框架内置的 <code>server.port=8080</code> 等）</li><li><code>application.properties</code> / <code>application.yml</code>（打包在 jar 内）</li><li>jar 外部的 <code>application.properties</code> / <code>application.yml</code>（放在运行目录下）</li><li>操作系统环境变量</li><li>命令行参数（<code>--server.port=9090</code>）</li></ol>
+<p>这意味着你可以用 jar 内的配置作为&quot;开发默认值&quot;，然后在生产环境用环境变量或命令行覆盖关键配置，而不需要重新打包。</p>
+<h2 id="三-在代码中读取配置">三、在代码中读取配置</h2>
+<h3 id="3-1-value-注入单个值">3.1 @Value 注入单个值</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@RestController
+public class WelcomeController {
+
+    @Value(&quot;${app.name}&quot;)
+    private String appName;
+
+    @Value(&quot;${app.max-page-size}&quot;)
+    private int maxPageSize;
+
+    @GetMapping(&quot;/info&quot;)
+    public String info() {
+        return appName + &quot; 最大页大小: &quot; + maxPageSize;
+    }
+}</code></pre></figure>
+<ul><li><code>@Value(&quot;${app.name}&quot;)</code> 告诉 Spring：&quot;从配置中读取键为 <code>app.name</code> 的值，注入这个字段&quot;。</li><li>Spring 在创建 Controller 实例时，从配置源中查找 <code>app.name</code> 并完成赋值。</li><li><code>${}</code> 中的键名必须与配置文件中的键名完全匹配。</li></ul>
+<p>如果配置项缺失，应用启动时报错：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">Could not resolve placeholder 'app.name' in value &quot;${app.name}&quot;</code></pre></figure>
+<p>这意味着代码声明了需要配置，但配置文件或环境变量没有提供。可以设置默认值避免启动失败：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@Value(&quot;${app.max-page-size:50}&quot;)
+private int maxPageSize;</code></pre></figure>
+<p>冒号后面是默认值。如果 <code>app.max-page-size</code> 在配置中不存在，使用 <code>50</code>。</p>
+<h3 id="3-2-configurationproperties-绑定一组配置">3.2 @ConfigurationProperties 绑定一组配置</h3>
+<p>当一个前缀下配置项较多时，逐字段 <code>@Value</code> 会分散在类各处。<code>@ConfigurationProperties</code> 把一组配置绑定到一个类：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+@Component
+@ConfigurationProperties(prefix = &quot;app&quot;)
+public class AppProperties {
+    private String name;
+    private int maxPageSize;
+    private String welcomeMessage;
+
+    // getters and setters 必须存在
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public int getMaxPageSize() { return maxPageSize; }
+    public void setMaxPageSize(int maxPageSize) { this.maxPageSize = maxPageSize; }
+    public String getWelcomeMessage() { return welcomeMessage; }
+    public void setWelcomeMessage(String welcomeMessage) { this.welcomeMessage = welcomeMessage; }
+}</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>yaml</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-yaml">app:
+  name: todo-app
+  max-page-size: 100
+  welcome-message: 欢迎使用</code></pre></figure>
+<p>Spring 会自动把 <code>app.name</code> 映射到 <code>AppProperties.name</code>（通过 <code>setName</code>），<code>app.max-page-size</code> 映射到 <code>maxPageSize</code>（Spring 自动去掉连字符并转为驼峰命名）。</p>
+<p>使用时注入这个类即可：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">@RestController
+public class WelcomeController {
+    private final AppProperties appProperties;
+
+    public WelcomeController(AppProperties appProperties) {
+        this.appProperties = appProperties;
+    }
+
+    @GetMapping(&quot;/info&quot;)
+    public String info() {
+        return appProperties.getName() + &quot; &quot; + appProperties.getWelcomeMessage();
+    }
+}</code></pre></figure>
+<p><code>@ConfigurationProperties</code> 比 <code>@Value</code> 更适合：</p>
+<ul><li>配置项超过三个且共享前缀</li><li>需要在多个类中复用同一组配置</li><li>需要类型安全的嵌套结构（例如 <code>app.database.host</code>、<code>app.database.port</code>）</li></ul>
+<h3 id="3-3-record-绑定">3.3 record 绑定</h3>
+<p>Java 17 的 record 也可以用于配置绑定，前提是使用构造器注入的方式：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties(prefix = &quot;app&quot;)
+public record AppConfig(String name, int maxPageSize, String welcomeMessage) {
+}</code></pre></figure>
+<p>record 比传统类更简洁，但需要确认 Spring Boot 版本支持（3.0+ 对 record 的支持已经完善）。</p>
+<h2 id="四-区分开发-测试与生产">四、区分开发、测试与生产</h2>
+<h3 id="4-1-profile-的概念">4.1 Profile 的概念</h3>
+<p>同一个应用在开发、测试和生产环境中需要的配置不同：</p>
+<ul><li>开发环境：<code>server.port=8080</code>，日志详细，数据库是本机</li><li>测试环境：<code>server.port=8080</code>，数据库是测试实例，连接池较小</li><li>生产环境：<code>server.port=80</code>，日志精简，数据库有密码</li></ul>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Profile</span>是一组配置的命名集合。Spring Boot 支持多配置文件，文件名中包含 profile 名称：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">application.yml              # 公共配置，所有环境共享
+application-dev.yml          # 仅 dev profile 激活时加载
+application-test.yml         # 仅 test profile 激活时加载
+application-prod.yml         # 仅 prod profile 激活时加载</code></pre></figure>
+<h3 id="4-2-激活-profile">4.2 激活 Profile</h3>
+<p>在 <code>application.yml</code> 中设置：</p>
+<figure class="code-card"><div class="code-toolbar"><span>yaml</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-yaml">spring:
+  profiles:
+    active: dev</code></pre></figure>
+<p>或者通过命令行参数：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">java -jar app.jar --spring.profiles.active=prod</code></pre></figure>
+<p>或者通过环境变量：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">export SPRING_PROFILES_ACTIVE=prod</code></pre></figure>
+<p>多个 profile 可以同时激活：<code>spring.profiles.active: dev,local</code>。</p>
+<h3 id="4-3-按-profile-拆分配置示例">4.3 按 Profile 拆分配置示例</h3>
+<figure class="code-card"><div class="code-toolbar"><span>yaml</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-yaml"># application.yml（公共）
+app:
+  name: todo-app</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>yaml</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-yaml"># application-dev.yml
+server:
+  port: 8080
+app:
+  max-page-size: 20
+logging:
+  level:
+    root: DEBUG  # 开发环境打印详细日志</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>yaml</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-yaml"># application-prod.yml
+server:
+  port: 80
+app:
+  max-page-size: 100
+logging:
+  level:
+    root: WARN   # 生产环境只打印警告及以上</code></pre></figure>
+<p>激活 <code>dev</code> profile 时，<code>server.port</code> 为 8080，<code>app.max-page-size</code> 为 20。激活 <code>prod</code> 时，这些值被 <code>application-prod.yml</code> 覆盖。</p>
+<h2 id="五-秘密不进入仓库">五、秘密不进入仓库</h2>
+<h3 id="5-1-为什么秘密不能在-application-yml-中">5.1 为什么秘密不能在 application.yml 中</h3>
+<figure class="code-card"><div class="code-toolbar"><span>yaml</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-yaml"># 错误示例——绝对不要提交到 Git
+spring:
+  datasource:
+    password: MySecret123!</code></pre></figure>
+<p>任何提交到 Git 仓库的人都能看到密码。即使私有仓库也可能被共享、镜像或备份，密码泄露的后果远高于开发便利性。</p>
+<h3 id="5-2-通过环境变量注入">5.2 通过环境变量注入</h3>
+<p>Spring Boot 自动把环境变量映射为配置属性。环境变量名中的下划线对应配置属性中的点和连字符：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">export SPRING_DATASOURCE_PASSWORD=MySecret123!</code></pre></figure>
+<p>启动时，Spring 会检测到 <code>SPRING_DATASOURCE_PASSWORD</code> 环境变量，并把它映射为 <code>spring.datasource.password</code> 配置值。不需要在配置文件中声明。</p>
+<h3 id="5-3-命令行参数">5.3 命令行参数</h3>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-bash">java -jar app.jar --spring.datasource.password=MySecret123!</code></pre></figure>
+<p>命令行中直接传入的值优先级最高。适合一次性启动，不适合日常使用。</p>
+<h3 id="5-4-提供安全配置模板">5.4 提供安全配置模板</h3>
+<p>在仓库中保留一个模板文件，不包含真实秘密：</p>
+<figure class="code-card"><div class="code-toolbar"><span>yaml</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-yaml"># application-secrets.example.yml
+# 复制此文件为 application-secrets.yml 并填入真实值
+# 不要把 application-secrets.yml 提交到 Git
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/todo
+    username: your-username
+    password: your-password</code></pre></figure>
+<p>在 <code>.gitignore</code> 中排除 <code>application-secrets.yml</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">application-secrets.yml</code></pre></figure>
+<h3 id="5-5-外部化配置的总结">5.5 外部化配置的总结</h3>
+<div class="table-wrap"><table><thead><tr><th>方式</th><th>适合场景</th><th>安全性</th><th>提交到 Git</th></tr></thead><tbody><tr><td><code>application.yml</code> 打包在 jar 中</td><td>默认值、非敏感值</td><td>低</td><td>是</td></tr><tr><td>jar 外部 <code>application.yml</code></td><td>环境通用值</td><td>低</td><td>否（通常）</td></tr><tr><td>环境变量</td><td>秘密、每环境不同值</td><td>高</td><td>否</td></tr><tr><td>命令行参数</td><td>临时覆盖</td><td>中</td><td>否</td></tr></tbody></table></div>
+<h2 id="六-练习与验收">六、练习与验收</h2>
+<h3 id="练习-1-端口外部化">练习 1：端口外部化</h3>
+<p>在第 18 章的项目中，创建 <code>application.yml</code>，将 <code>server.port</code> 设为 9090。启动应用后，使用 curl 请求 <code>http://localhost:9090/welcome</code> 确认服务运行在新的端口。</p>
+<p>然后通过命令行参数 <code>--server.port=9091</code> 重新启动，验证命令行参数优先级高于配置文件。</p>
+<h3 id="练习-2-分组配置">练习 2：分组配置</h3>
+<p>使用 <code>@ConfigurationProperties(prefix = &quot;app&quot;)</code> 绑定一组配置（app.name、app.max-page-size、app.welcome-message），在 Controller 中注入并返回。</p>
+<p>创建 <code>application-dev.yml</code>，覆盖 app.name 为 <code>todo-app-dev</code>。分别以 <code>dev</code> profile 和默认 profile 启动，观察返回的应用名不同。</p>
+<h3 id="练习-3-秘密处理">练习 3：秘密处理</h3>
+<p>创建 <code>application-secrets.example.yml</code> 模板，在 <code>.gitignore</code> 中排除 <code>application-secrets.yml</code>。通过环境变量 <code>export APP_WELCOME_MESSAGE=HelloSecret</code> 启动应用，验证环境变量覆盖了配置文件中的 <code>app.welcome-message</code>。</p>
+<h2 id="常见误区">常见误区</h2>
+<h3 id="把所有值都放到配置文件">把所有值都放到配置文件</h3>
+<p>配置文件不是变量垃圾桶。只在单个方法内使用的计算常量、不会随环境变化的业务规则不需要外部化。过多的配置项会降低可维护性。</p>
+<h3 id="硬编码敏感信息然后-以后改">硬编码敏感信息然后&quot;以后改&quot;</h3>
+<p>&quot;先写死，上线前再改&quot;几乎总是变成&quot;忘记改了&quot;。从一开始就使用环境变量存放密码和密钥。</p>
+<h3 id="把所有-profile-配置混在一个文件">把所有 Profile 配置混在一个文件</h3>
+<p>一个巨大的 <code>application.yml</code> 中混着所有 Profile 的配置，难以阅读和排查。优先使用多文件 Profile 拆分（<code>application-dev.yml</code>、<code>application-prod.yml</code>），公共值放在 <code>application.yml</code>。</p>
+<h3 id="以为-value-支持复杂类型">以为 @Value 支持复杂类型</h3>
+<p><code>@Value</code> 只能注入简单类型（String、int、boolean 等）。需要绑定嵌套对象或 List 时，使用 <code>@ConfigurationProperties</code>。</p>
 <h2 id="本章小结">本章小结</h2>
-<p>本章的内容会在后续章节继续使用。先完成练习和验收，再进入下一章。</p>
+<p>配置让代码和环境分离。<code>application.yml</code> 存放默认值，Profile（<code>application-dev.yml</code> 等）管理环境差异。<code>@Value</code> 适合注入单个配置项，<code>@ConfigurationProperties</code> 适合绑定一组共享前缀的配置。环境变量和命令行参数保护秘密并支持运行时覆盖。第 20 章将学习如何按职责拆分 Controller、Service 和 Repository，让业务代码不再和 HTTP 逻辑混在一起。</p>
+<h2 id="快速自测">快速自测</h2>
+<ol><li>硬编码的问题是什么？配置解决了什么问题？</li><li><code>@Value(&quot;${app.name:default}&quot;)</code> 中的冒号表示什么？</li><li><code>application-dev.yml</code> 什么时候被加载？</li><li>为什么数据库密码不应该放在 application.yml 中？</li><li>环境变量 <code>SPRING_PROFILES_ACTIVE</code> 对应哪个配置属性？</li></ol>
+<p>参考答案：硬编码让环境切换需要修改代码再编译，配置把可变值移到运行时加载的外部来源；冒号表示默认值，配置不存在时使用 &quot;default&quot;；当 spring.profiles.active 包含 &quot;dev&quot; 时加载；因为提交到 Git 后密码泄露，任何有仓库访问权限的人都能看到；对应 spring.profiles.active。</p>
 <h2 id="参考文献">参考文献</h2>
-<ul><li>Spring. <a href="https://docs.spring.io/spring-boot/reference/" target="_blank" rel="noreferrer">Spring Boot Reference</a>.</li><li>Spring. <a href="https://docs.spring.io/spring-framework/reference/" target="_blank" rel="noreferrer">Spring Framework Reference</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/18-spring-request-path.html">← 第 18 章<br><strong>Spring Boot 请求处理流程</strong></a><a href="../lessons/20-layered-backend.html">第 20 章 →<br><strong>Controller、Service 与 Repository 分层</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#先识别哪些值会变">先识别哪些值会变</a><a class="" href="#properties-与-yaml">properties 与 YAML</a><a class="" href="#读取配置">读取配置</a><a class="" href="#区分开发-测试与生产">区分开发、测试与生产</a><a class="" href="#秘密不进入仓库">秘密不进入仓库</a><a class="" href="#练习与验收">练习与验收</a><a class="" href="#容易走偏的地方">容易走偏的地方</a><a class="" href="#本章小结">本章小结</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>
+<ul><li>Spring. <a href="https://docs.spring.io/spring-boot/reference/features/external-config.html" target="_blank" rel="noreferrer">Spring Boot Reference：Externalized Configuration</a>.</li><li>Spring. <a href="https://docs.spring.io/spring-boot/reference/features/profiles.html" target="_blank" rel="noreferrer">Spring Boot Reference：Profiles</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/18-spring-request-path.html">← 第 18 章<br><strong>Spring Boot 请求处理流程</strong></a><a href="../lessons/20-layered-backend.html">第 20 章 →<br><strong>Controller、Service 与 Repository 分层</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一-识别哪些值会随环境变化">一、识别哪些值会随环境变化</a><a class="" href="#二-properties-与-yaml">二、properties 与 YAML</a><a class="sub" href="#2-1-application-properties">2.1 application.properties</a><a class="sub" href="#2-2-application-yml">2.2 application.yml</a><a class="sub" href="#2-3-配置的优先级">2.3 配置的优先级</a><a class="" href="#三-在代码中读取配置">三、在代码中读取配置</a><a class="sub" href="#3-1-value-注入单个值">3.1 @Value 注入单个值</a><a class="sub" href="#3-2-configurationproperties-绑定一组配置">3.2 @ConfigurationProperties 绑定一组配置</a><a class="sub" href="#3-3-record-绑定">3.3 record 绑定</a><a class="" href="#四-区分开发-测试与生产">四、区分开发、测试与生产</a><a class="sub" href="#4-1-profile-的概念">4.1 Profile 的概念</a><a class="sub" href="#4-2-激活-profile">4.2 激活 Profile</a><a class="sub" href="#4-3-按-profile-拆分配置示例">4.3 按 Profile 拆分配置示例</a><a class="" href="#五-秘密不进入仓库">五、秘密不进入仓库</a><a class="sub" href="#5-1-为什么秘密不能在-application-yml-中">5.1 为什么秘密不能在 application.yml 中</a><a class="sub" href="#5-2-通过环境变量注入">5.2 通过环境变量注入</a><a class="sub" href="#5-3-命令行参数">5.3 命令行参数</a><a class="sub" href="#5-4-提供安全配置模板">5.4 提供安全配置模板</a><a class="sub" href="#5-5-外部化配置的总结">5.5 外部化配置的总结</a><a class="" href="#六-练习与验收">六、练习与验收</a><a class="sub" href="#练习-1-端口外部化">练习 1：端口外部化</a><a class="sub" href="#练习-2-分组配置">练习 2：分组配置</a><a class="sub" href="#练习-3-秘密处理">练习 3：秘密处理</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#把所有值都放到配置文件">把所有值都放到配置文件</a><a class="sub" href="#硬编码敏感信息然后-以后改">硬编码敏感信息然后&quot;以后改&quot;</a><a class="sub" href="#把所有-profile-配置混在一个文件">把所有 Profile 配置混在一个文件</a><a class="sub" href="#以为-value-支持复杂类型">以为 @Value 支持复杂类型</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

@@ -1,71 +1,271 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Path/Files 提供清楚的文件 API，UTF-8 应显式指定；java.time 区分日期、当地时间和时间点，JDK 17 是主线，后续版本能力需要标注最低版本。"><title>文件、编码、日期时间与 JDK 版本差异 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
-<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 16 章 · Java 语言及标准库基础</div><h1>文件、编码、日期时间与 JDK 版本差异</h1><p class="lesson-summary">Path/Files 提供清楚的文件 API，UTF-8 应显式指定；java.time 区分日期、当地时间和时间点，JDK 17 是主线，后续版本能力需要标注最低版本。</p><div class="meta-row"><span class="pill">文件操作先明确路径和编码；时间操作先明确它表示日期、当地时间还是全球唯一时间点。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="用-path-表示文件位置">用 Path 表示文件位置</h2>
-<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Path</span>表示文件或目录的位置，不等于文件内容：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Path path = Path.of(&quot;notes.txt&quot;);</code></pre></figure>
-<p>相对路径以当前工作目录为起点；绝对路径从磁盘根目录开始。课程示例优先使用相对路径，避免把个人电脑路径写进代码。调试文件找不到时，可先输出：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">System.out.println(path.toAbsolutePath());</code></pre></figure>
-<p>这样能看见程序实际在什么目录中查找文件。</p>
-<h2 id="用-files-读写小文本">用 Files 读写小文本</h2>
-<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Files</span>提供常用静态方法。读写 UTF-8 文本时显式指定编码：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Path path = Path.of(&quot;notes.txt&quot;);
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Path/Files 提供跨平台文件操作，UTF-8 应显式指定；java.time 用不同类区分日历、本地时间和时间戳；JDK 17 是课程主线，后续版本差异需要版本标注。"><title>文件、编码、日期时间与 JDK 版本差异 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 16 章 · Java 语言及标准库基础</div><h1>文件、编码、日期时间与 JDK 版本差异</h1><p class="lesson-summary">Path/Files 提供跨平台文件操作，UTF-8 应显式指定；java.time 用不同类区分日历、本地时间和时间戳；JDK 17 是课程主线，后续版本差异需要版本标注。</p><div class="meta-row"><span class="pill">文件操作先明确路径和编码；时间操作先明确它要表示日期、当地时间还是全球唯一时间点；遇到未见过的新语法先检查项目 JDK 版本。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一-用-path-表示文件位置">一、用 Path 表示文件位置</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Path</span> 是 Java 7 引入的文件路径抽象。它表示文件或目录的位置，不代表文件是否存在或可打开：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Path dataPath = Path.of(&quot;data.txt&quot;);
+Path configDir = Path.of(&quot;config&quot;, &quot;dev&quot;);    // config/dev
+Path absolutePath = Path.of(&quot;/home/user/data.txt&quot;);</code></pre></figure>
+<p>路径的表示与操作系统有关：</p>
+<ul><li>macOS / Linux：<code>Path.of(&quot;config&quot;, &quot;dev&quot;)</code> → <code>config/dev</code>（正斜杠 <code>/</code>）</li><li>Windows：<code>Path.of(&quot;config&quot;, &quot;dev&quot;)</code> → <code>config\dev</code>（反斜杠 <code>\</code>）</li></ul>
+<p><code>Path.of</code> 在 Windows 和 Unix 路径风格下都能工作，因为它是操作系统感知的。</p>
+<p>相对路径以当前工作目录为起点。调试文件找不到时，先打印绝对路径确认程序实际在哪个目录查找：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Path path = Path.of(&quot;data.txt&quot;);
+System.out.println(path.toAbsolutePath()); // /Users/me/project/data.txt</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 常用 Path 方法
+Path file = Path.of(&quot;docs&quot;, &quot;readme.txt&quot;);
+System.out.println(file.getFileName());   // readme.txt
+System.out.println(file.getParent());       // docs
+System.out.println(file.getRoot());         // null（相对路径没有根）
+System.out.println(Files.exists(file));     // false（文件不一定存在）
+System.out.println(Files.isRegularFile(file)); // false</code></pre></figure>
+<p><code>Path</code> 比字符串拼接路径更安全，因为它自动处理分隔符差异和路径规范化。</p>
+<h2 id="二-用-files-读写文件">二、用 Files 读写文件</h2>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Files</span> 类提供常用的静态文件操作。读写小文本文件时最常用两个方法：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Path path = Path.of(&quot;notes.txt&quot;);
+
+// 写入文件（覆盖模式）
+Files.writeString(path, &quot;第一行内容\n第二行内容&quot;, StandardCharsets.UTF_8);
+
+// 读取整个文件
+String content = Files.readString(path, StandardCharsets.UTF_8);
+System.out.println(content);</code></pre></figure>
+<h3 id="2-1-写入说明">2.1 写入说明</h3>
+<p><code>writeString</code> 默认覆盖文件。若需要追加内容，使用 <code>StandardOpenOption.APPEND</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Files.writeString(path, &quot;追加的行\n&quot;, StandardCharsets.UTF_8,
+    StandardOpenOption.APPEND);</code></pre></figure>
+<h3 id="2-2-文件存在性检查">2.2 文件存在性检查</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">if (Files.exists(path)) {
+    System.out.println(&quot;文件已存在，大小：&quot; + Files.size(path) + &quot; 字节&quot;);
+}</code></pre></figure>
+<p>除了 <code>exists</code>，还有 <code>Files.isRegularFile()</code>（判断是否为普通文件，而不是目录或特殊文件）和 <code>Files.isDirectory()</code>。</p>
+<h3 id="2-3-复制-移动与删除">2.3 复制、移动与删除</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Path source = Path.of(&quot;source.txt&quot;);
+Path target = Path.of(&quot;backup/source.txt&quot;);
+
+// 复制文件（若目标存在则覆盖）
+Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+
+// 移动/重命名
+Files.move(source, Path.of(&quot;renamed.txt&quot;), StandardCopyOption.REPLACE_EXISTING);
+
+// 删除文件
+Files.delete(source);                    // 不存在时抛 NoSuchFileException
+boolean deleted = Files.deleteIfExists(source); // 返回 boolean</code></pre></figure>
+<p><code>Files.list</code> 列出目录内容（返回 Stream，需要关闭）：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">try (Stream&lt;Path&gt; entries = Files.list(Path.of(&quot;config&quot;))) {
+    entries.forEach(System.out::println);
+}</code></pre></figure>
+<h3 id="2-4-i-o-异常">2.4 I/O 异常</h3>
+<p>文件操作的几乎所有方法都可能抛出 <code>IOException</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">try {
+    String content = Files.readString(Path.of(&quot;missing.txt&quot;));
+} catch (IOException e) {
+    System.out.println(&quot;读取失败：&quot; + e.getMessage());
+}</code></pre></figure>
+<p>根据第 11 章的异常边界原则，如果当前方法能处理异常则在当前方法 try-catch，不能处理则 <code>throws IOException</code> 交给调用方。</p>
+<h2 id="三-编码必须明确">三、编码必须明确</h2>
+<h3 id="3-1-编码是什么">3.1 编码是什么</h3>
+<p>文本文件存储的是字节序列。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">编码</span>（encoding）规定字节如何解释为字符。最简单的编码如 ASCII 用 7 位表示英文和数字，但只能覆盖 128 个字符。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">UTF-8</span> 是 Unicode 的一种可变长度编码，兼容 ASCII，且能表示几乎所有语言的字符。</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 写入 UTF-8
+Path path = Path.of(&quot;message.txt&quot;);
+Files.writeString(path, &quot;你好，世界&quot;, StandardCharsets.UTF_8);
+
+// 用相同编码读取，得到原文
+String correct = Files.readString(path, StandardCharsets.UTF_8);
+System.out.println(correct); // 你好，世界
+
+// 用不同编码读取，得到乱码
+String wrong = Files.readString(path, StandardCharsets.ISO_8859_1);
+System.out.println(wrong); // ÄãºÃ£¬ÊÀ½ç（乱码）</code></pre></figure>
+<h3 id="3-2-不依赖-默认编码">3.2 不依赖&quot;默认编码&quot;</h3>
+<p><code>Files.readString(path)</code> 不带编码参数时使用系统默认编码。在不同操作系统、不同容器或不同 JVM 配置下，默认编码可能不同。一个在 macOS 上写入的文件在 Linux 容器下读取时，中文字符可能变成乱码。</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 不要依赖默认编码
+// String content = Files.readString(path);         // 使用默认编码
+String content = Files.readString(path, StandardCharsets.UTF_8); // 明确指定
+
+// 写入时也一样
+Files.writeString(path, &quot;内容&quot;, StandardCharsets.UTF_8);</code></pre></figure>
+<p><code>StandardCharsets.UTF_8</code>、<code>UTF_16</code>、<code>ISO_8859_1</code> 等定义在 <code>java.nio.charset.StandardCharsets</code> 类中。使用这些常量而非字符串 <code>&quot;UTF-8&quot;</code>，可以避免处理 <code>UnsupportedCharsetException</code>。</p>
+<h2 id="四-资源流管理">四、资源流管理</h2>
+<h3 id="4-1-files-lines-逐行读取">4.1 Files.lines 逐行读取</h3>
+<p>需要逐行处理文本（而非一次性读入内存）时，使用 <code>Files.lines</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Path path = Path.of(&quot;data.txt&quot;);
+try (Stream&lt;String&gt; lines = Files.lines(path, StandardCharsets.UTF_8)) {
+    long count = lines.filter(line -&gt; !line.isBlank()).count();
+    System.out.println(&quot;非空行数：&quot; + count);
+} // try-with-resources 自动关闭文件</code></pre></figure>
+<p><code>Files.lines</code> 返回的 Stream 持有文件句柄，必须在 try-with-resources 块中使用，确保 Stream 和文件资源在结束时被关闭。try-with-resources（第 11 章）在代码块结束时自动调用 <code>close()</code>。</p>
+<h3 id="4-2-一次性读取-vs-逐行读取">4.2 一次性读取 vs 逐行读取</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 小文件：Files.readString 把整个文件读入内存
+// 适用于配置文件、小文本等
 String content = Files.readString(path, StandardCharsets.UTF_8);
 
-Files.writeString(path, &quot;第一行\n&quot;, StandardCharsets.UTF_8);</code></pre></figure>
-<p><code>readString</code> 适合小文件；它会把完整内容读入内存。非常大的文件应逐行或流式处理，避免一次占用大量内存。</p>
-<p>写入前可判断文件是否存在：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">if (Files.exists(path)) {
-    System.out.println(&quot;文件已存在&quot;);
+// 大文件：Files.lines 逐行（或按批 buffer）处理
+// 适用于日志文件、CSV 等 GB 级文本
+try (Stream&lt;String&gt; lines = Files.lines(path, StandardCharsets.UTF_8)) {
+    lines.filter(line -&gt; line.contains(&quot;ERROR&quot;))
+         .limit(100) // 只取前 100 行
+         .forEach(System.out::println);
 }</code></pre></figure>
-<p>文件操作可能抛出 <code>IOException</code>。根据第 11 章的规则，当前方法要么捕获并处理，要么在声明中使用 <code>throws IOException</code> 交给调用方。</p>
-<h2 id="编码必须明确">编码必须明确</h2>
-<p>文本文件存的是字节，编码规定字节如何解释为字符。若写入使用一种编码、读取使用另一种编码，中文和特殊字符可能变成乱码。</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Files.writeString(path, &quot;你好&quot;, StandardCharsets.UTF_8);
-String text = Files.readString(path, StandardCharsets.UTF_8);</code></pre></figure>
-<p>不要依赖“默认编码”。默认值会随操作系统、容器和启动参数改变；接口、文件和数据库边界应写清 UTF-8 或协议规定的编码。</p>
-<h2 id="资源流何时关闭">资源流何时关闭</h2>
-<p>需要逐行读取时可用 try-with-resources：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">try (Stream&lt;String&gt; lines = Files.lines(path, StandardCharsets.UTF_8)) {
-    long count = lines.filter(line -&gt; !line.isBlank()).count();
-    System.out.println(count);
+<p>文件大于几十 MB 时优先使用 <code>Files.lines</code>，避免一次性占用过多堆内存。</p>
+<h3 id="4-3-bufferedreader">4.3 BufferedReader</h3>
+<p>如果要更精细地控制读取过程，使用 <code>Files.newBufferedReader</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+    String line;
+    while ((line = reader.readLine()) != null) {
+        if (line.isBlank()) continue;
+        System.out.println(line);
+    }
 }</code></pre></figure>
-<p><code>Files.lines</code> 返回的 Stream 持有文件资源，必须关闭。try-with-resources 在代码块结束时自动关闭它。第 14 章的 Stream 在此用于过滤行；本例中不能在 try 块外继续使用 <code>lines</code>。</p>
-<h2 id="日期-当地时间与时间点">日期、当地时间与时间点</h2>
-<p>Java 8 以后推荐 <code>java.time</code> API。选择类型前先问数据表达什么：</p>
-<div class="table-wrap"><table><thead><tr><th>类型</th><th>表示什么</th><th>例子</th></tr></thead><tbody><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">LocalDate</span></td><td>没有时间和时区的日期</td><td>生日、账单日期</td></tr><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">LocalDateTime</span></td><td>某地日历上的日期和时间，但没有时区</td><td>预约表单输入的“2026-07-13 09:00”</td></tr><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Instant</span></td><td>时间线上的唯一时刻</td><td>日志事件、数据库创建时间</td></tr><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">ZoneId</span></td><td>时区规则</td><td><code>Asia/Shanghai</code></td></tr></tbody></table></div>
-<p>创建日期：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">LocalDate birthday = LocalDate.of(2000, 1, 1);
-LocalDate today = LocalDate.now();</code></pre></figure>
-<p>将当地时间和时区转换为唯一时间点：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">LocalDateTime local = LocalDateTime.of(2026, 7, 13, 9, 0);
-Instant instant = local.atZone(ZoneId.of(&quot;Asia/Shanghai&quot;)).toInstant();</code></pre></figure>
-<p><code>LocalDateTime</code> 本身不能表示全球唯一时刻：同样的“9 点”在上海和伦敦对应不同 Instant。跨系统存储、日志排序和接口传输通常更适合 Instant 或带 offset 的时间表示。</p>
-<h2 id="解析与格式化时间">解析与格式化时间</h2>
-<p>标准 ISO 格式可直接解析：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">LocalDate date = LocalDate.parse(&quot;2026-07-13&quot;);</code></pre></figure>
-<p>自定义格式使用 <code>DateTimeFormatter</code>：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">DateTimeFormatter formatter = DateTimeFormatter.ofPattern(&quot;yyyy/MM/dd&quot;);
-LocalDate date = LocalDate.parse(&quot;2026/07/13&quot;, formatter);</code></pre></figure>
-<p>格式不匹配会抛出 <code>DateTimeParseException</code>。不要在不同接口中随意使用“看起来像日期”的字符串；先确定格式、时区和谁负责转换。</p>
-<h2 id="jdk-17-与后续版本怎样阅读">JDK 17 与后续版本怎样阅读</h2>
-<p>本课程全部可运行主线使用 JDK 17，不启用 preview feature。JDK 17 已包含 record、sealed class、<code>instanceof</code> 模式匹配等稳定能力。</p>
-<p>阅读其他项目时可能看到更高版本语法：</p>
-<div class="table-wrap"><table><thead><tr><th>能力</th><th>JDK 17 主线状态</th><th>阅读后续项目时的处理</th></tr></thead><tbody><tr><td>record、sealed class</td><td>可用</td><td>本课程已在第 9、10 章介绍</td></tr><tr><td>switch 模式匹配、record pattern</td><td>不作为 JDK 17 主线</td><td>先确认项目 JDK，不能直接复制到 17 工程</td></tr><tr><td>虚拟线程</td><td>JDK 21 稳定</td><td>第 34 章作为版本旁路讨论</td></tr></tbody></table></div>
-<p>遇到新语法的第一步不是尝试“让它编译”，而是查看项目的 JDK 版本和构建配置。版本边界是 Java 后端协作中的正常信息，不是语法能力高低的判断。</p>
-<h2 id="练习-读取活动日期">练习：读取活动日期</h2>
-<p>创建 UTF-8 文件 <code>events.txt</code>，每行写一个 <code>yyyy-MM-dd</code> 日期。读取后跳过空行，解析为 LocalDate，输出距离今天的天数。若某行格式错误，输出行内容并继续处理其他行。</p>
-<p>完成标准：显式使用 UTF-8；文件资源能关闭；能说明 LocalDate 与 Instant 为什么不互换；错误行不会终止全部处理。</p>
+<p><code>BufferedReader</code> 的 <code>readLine()</code> 不包含换行符，返回 <code>null</code> 表示读完。它的优点是可控（随时可以 break），缺点是需要手动管理读取循环。</p>
+<h2 id="五-java-time-日期时间-api">五、java.time 日期时间 API</h2>
+<p>Java 8 之前，日期时间操作主要依赖 <code>java.util.Date</code> 和 <code>java.util.Calendar</code>。这两个 API 存在多年但仍然不好用：月份从 0 开始、Date 既表示日期又表示时间、线程不安全等。Java 8 引入了 <code>java.time</code> 包，彻底改善了日期时间处理。</p>
+<h3 id="5-1-类型选择">5.1 类型选择</h3>
+<p>选择日期时间类型之前，先问数据要表达什么：</p>
+<div class="table-wrap"><table><thead><tr><th>类型</th><th>表示内容</th><th>是否含时区</th><th>典型使用场景</th></tr></thead><tbody><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">LocalDate</span></td><td>年-月-日</td><td>否</td><td>生日、账单日期、排班表</td></tr><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">LocalTime</span></td><td>时-分-秒-纳秒</td><td>否</td><td>营业时间、上课时间</td></tr><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">LocalDateTime</span></td><td>年-月-日 时-分-秒</td><td>否</td><td>表单输入的本地日期时间</td></tr><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">ZonedDateTime</span></td><td>日历日期 + 时间 + 时区规则</td><td>是</td><td>跨时区会议时间</td></tr><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">OffsetDateTime</span></td><td>日历日期 + 时间 + UTC 偏移</td><td>部分</td><td>API 响应、数据库时间戳</td></tr><tr><td><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Instant</span></td><td>时间线上的唯一时刻</td><td>UTC</td><td>日志时间戳、事件排序</td></tr></tbody></table></div>
+<h3 id="5-2-创建与操作">5.2 创建与操作</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// LocalDate：日期
+LocalDate today = LocalDate.now();
+LocalDate birthday = LocalDate.of(2000, 1, 1);
+
+System.out.println(birthday.getYear());   // 2000
+System.out.println(birthday.getMonth());  // JANUARY
+System.out.println(birthday.getDayOfMonth()); // 1
+
+// 日期计算，返回新的 LocalDate 实例
+LocalDate weekLater = today.plusDays(7);
+LocalDate nextMonth = today.plusMonths(1);
+LocalDate lastYear = today.minusYears(1);
+
+// LocalTime：时间
+LocalTime now = LocalTime.now();
+LocalTime classStart = LocalTime.of(9, 0);
+System.out.println(classStart.isAfter(now)); // true/false
+
+// LocalDateTime：日期 + 时间
+LocalDateTime meeting = LocalDateTime.of(2026, 7, 15, 14, 30);</code></pre></figure>
+<p>所有 <code>java.time</code> 类型都是不可变的。<code>plusDays</code>、<code>minusMonths</code> 等操作返回新实例，原始对象不变。</p>
+<h3 id="5-3-时间点与唯一时刻">5.3 时间点与唯一时刻</h3>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Instant</span> 表示时间线上的唯一时刻，以 Unix 纪元（1970-01-01T00:00:00Z）为起点：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Instant now = Instant.now();
+System.out.println(now); // 2026-07-14T08:00:00Z（UTC 时间）</code></pre></figure>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">LocalDateTime</span> 本身不能表示全球唯一时刻——同样的&quot;9:00&quot;在上海和伦敦对应不同的瞬间。跨系统存储、日志排序、API 传输优先使用 Instant 或带时区的类型。</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// LocalDateTime 转 Instant（附加时区）
+LocalDateTime localTime = LocalDateTime.of(2026, 7, 14, 9, 0);
+ZoneId shanghai = ZoneId.of(&quot;Asia/Shanghai&quot;);
+Instant shanghaiInstant = localTime.atZone(shanghai).toInstant();
+
+ZoneId london = ZoneId.of(&quot;Europe/London&quot;);
+Instant londonInstant = localTime.atZone(london).toInstant();
+
+// 两个 Instant 不相等，因为都是&quot;9点&quot;但上海比伦敦早 7-8 小时
+System.out.println(shanghaiInstant.equals(londonInstant)); // false</code></pre></figure>
+<h3 id="5-4-时区与偏移">5.4 时区与偏移</h3>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">ZoneId</span> 表示时区规则（包括夏令时的切换）。常见时区 ID 的格式是 <code>地区/城市</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">ZoneId zoneId = ZoneId.of(&quot;Asia/Shanghai&quot;);
+System.out.println(zoneId.getRules()); // 包含 UTC 偏移和夏令时规则</code></pre></figure>
+<p>如果需要知道当前 JVM 的时区：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">ZoneId systemZone = ZoneId.systemDefault();</code></pre></figure>
+<h3 id="5-5-duration-和-period">5.5 Duration 和 Period</h3>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Duration</span> 表示两个时间点之间的&quot;秒-纳秒&quot;差（适用于 Instant、LocalTime）：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Instant start = Instant.now();
+// ... 执行某些操作
+Instant end = Instant.now();
+Duration elapsed = Duration.between(start, end);
+System.out.println(elapsed.toMillis() + &quot; ms&quot;);</code></pre></figure>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">Period</span> 表示两个日期之间的&quot;年-月-日&quot;差（适用于 LocalDate）：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">LocalDate birthday = LocalDate.of(2000, 1, 1);
+LocalDate today = LocalDate.now();
+Period age = Period.between(birthday, today);
+System.out.println(age.getYears() + &quot; 年 &quot; + age.getMonths() + &quot; 月 &quot; + age.getDays() + &quot; 天&quot;);</code></pre></figure>
+<h2 id="六-解析与格式化">六、解析与格式化</h2>
+<h3 id="6-1-iso-标准格式解析">6.1 ISO 标准格式解析</h3>
+<p><code>java.time</code> 类型默认支持 ISO 8601 格式的解析和输出：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">LocalDate date = LocalDate.parse(&quot;2026-07-14&quot;);
+System.out.println(date); // 2026-07-14
+
+LocalTime time = LocalTime.parse(&quot;14:30:00&quot;);
+System.out.println(time); // 14:30
+
+Instant instant = Instant.parse(&quot;2026-07-14T08:00:00Z&quot;);
+System.out.println(instant); // 2026-07-14T08:00:00Z</code></pre></figure>
+<h3 id="6-2-自定义格式化">6.2 自定义格式化</h3>
+<p>使用 <span class="term" tabindex="0" data-tip="课程术语，详见术语表。">DateTimeFormatter</span> 表示自定义格式：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">DateTimeFormatter formatter = DateTimeFormatter.ofPattern(&quot;yyyy/MM/dd&quot;);
+LocalDate date = LocalDate.parse(&quot;2026/07/14&quot;, formatter);
+System.out.println(date.format(formatter)); // 2026/07/14</code></pre></figure>
+<p>常用格式模式：</p>
+<div class="table-wrap"><table><thead><tr><th>模式</th><th>含义</th><th>示例</th></tr></thead><tbody><tr><td><code>yyyy</code></td><td>四位年份</td><td>2026</td></tr><tr><td><code>MM</code></td><td>两位月份</td><td>07</td></tr><tr><td><code>dd</code></td><td>两位日期</td><td>14</td></tr><tr><td><code>HH</code></td><td>24 小时制小时</td><td>14</td></tr><tr><td><code>mm</code></td><td>分钟</td><td>30</td></tr><tr><td><code>ss</code></td><td>秒</td><td>00</td></tr><tr><td><code>yyyy-MM-dd</code></td><td>ISO 日期格式</td><td>2026-07-14</td></tr></tbody></table></div>
+<p>格式化不匹配会抛出 <span class="term" tabindex="0" data-tip="课程术语，详见术语表。">DateTimeParseException</span>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">DateTimeFormatter formatter = DateTimeFormatter.ofPattern(&quot;yyyy/MM/dd&quot;);
+// LocalDate.parse(&quot;2026-07-14&quot;, formatter); // DateTimeParseException</code></pre></figure>
+<h3 id="6-3-推荐的格式策略">6.3 推荐的格式策略</h3>
+<p>跨服务传输时间数据时，使用明确的格式约定：</p>
+<ul><li><strong>日期</strong>：<code>yyyy-MM-dd</code>（如 <code>2026-07-14</code>）</li><li><strong>时间点</strong>：ISO 8601 带时区（如 <code>2026-07-14T08:00:00Z</code> 或 <code>2026-07-14T16:00:00+08:00</code>）</li><li><strong>本地时间</strong>：<code>yyyy-MM-ddTHH:mm:ss</code></li></ul>
+<p>在同一应用中，不要在多个地方各自定义不同的格式。把格式化/解析逻辑集中在工具方法中。</p>
+<h2 id="七-jdk-17-与后续版本的差异">七、JDK 17 与后续版本的差异</h2>
+<h3 id="7-1-版本管理">7.1 版本管理</h3>
+<p>本课程所有可运行代码使用 JDK 17，不启用 preview feature。JDK 17 是长期支持版本（LTS），企业生产和课程示例都保持此版本。</p>
+<p>阅读他人代码或新项目时可能遇到 JDK 21 或更高版本的语法。以下是一些常见差异：</p>
+<div class="table-wrap"><table><thead><tr><th>能力</th><th>JDK 17</th><th>JDK 21（LTS）</th><th>课程处理方式</th></tr></thead><tbody><tr><td>record、sealed class</td><td>稳定</td><td>稳定</td><td>已在第 9、10 章系统讲解</td></tr><tr><td><code>instanceof</code> 模式匹配</td><td>稳定</td><td>稳定</td><td>已包含在第 6、10 章</td></tr><tr><td>switch 模式匹配</td><td>无</td><td>稳定</td><td>不进入 JDK 17 示例，阅读时了解即可</td></tr><tr><td>record pattern</td><td>无</td><td>稳定</td><td>不进入 JDK 17 示例</td></tr><tr><td>虚拟线程</td><td>preview</td><td>稳定</td><td>第 34 章作为版本旁路单独说明</td></tr><tr><td>字符串模板</td><td>无</td><td>preview (JDK 21)</td><td>不进入课程，关注 String 已有 API</td></tr><tr><td>结构化并发</td><td>preview</td><td>preview</td><td>超过本课程范围</td></tr></tbody></table></div>
+<h3 id="7-2-遇到新语法的处理步骤">7.2 遇到新语法的处理步骤</h3>
+<p>当你在其他项目或文档中看到不认识的 Java 语法时：</p>
+<ol><li>查看项目的 <code>pom.xml</code> 或 <code>build.gradle</code> 中的 <code>java.version</code> / <code>sourceCompatibility</code> 配置。</li><li>如果项目 JDK 是 21，尝试通过官方 JEP 索引搜索对应语法。</li><li>不要直接把高版本独有的语法复制进 JDK 17 项目——编译器会报错。</li><li>如果你的开发环境切换到 JDK 21，编译和运行需要更新 IDE 的项目 SDK 配置。</li></ol>
+<p>版本差异是 Java 后端协作中的正常信息，每个团队都有各自的项目 JDK 版本共识。知道当前项目用什么版本、什么版本有什么特性即可。</p>
+<h3 id="7-3-文本块-jdk-15-稳定-jdk-17-可用">7.3 文本块（JDK 15+ 稳定，JDK 17 可用）</h3>
+<p>文本块用三个双引号 <code>&quot;&quot;&quot;</code> 包裹多行字符串，JDK 17 已经稳定：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String json = &quot;&quot;&quot;
+    {
+        &quot;name&quot;: &quot;Java&quot;,
+        &quot;version&quot;: 17
+    }
+    &quot;&quot;&quot;;
+System.out.println(json);</code></pre></figure>
+<p>文本块自动去除缩进中的公共前导空白，不需要手动拼接换行符。在配置 JSON、SQL 或模板场景中使用文本块比字符串拼接可读性好很多。</p>
+<h2 id="八-练习">八、练习</h2>
+<h3 id="练习-1-安全文件读取">练习 1：安全文件读取</h3>
+<p>实现 <code>static Optional&lt;String&gt; readFirstLine(String pathStr)</code>：</p>
+<ul><li>使用 <code>Path.of</code> 和 <code>Files.lines</code>（try-with-resources）</li><li>文件存在且至少有一行：返回 <code>Optional.of(firstLine)</code></li><li>文件不存在或为空：返回 <code>Optional.empty()</code></li><li>其他 I/O 错误：打印堆栈后返回 <code>Optional.empty()</code></li><li>始终显式指定 UTF-8 编码</li></ul>
+<p>完成标准：对不存在的文件不抛异常；对空文件不抛异常；存在时返回第一行。</p>
+<h3 id="练习-2-活动日期过滤器">练习 2：活动日期过滤器</h3>
+<p>创建 <code>events.txt</code> 文件，每行一个日期（格式 <code>yyyy-MM-dd</code>），例如：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">2026-07-10
+2026-07-20
+not-a-date</code></pre></figure>
+<p>实现 <code>static List&lt;LocalDate&gt; readFutureDates(String pathStr, String format)</code>：</p>
+<ul><li>读取文件所有行，跳过空行</li><li>解析为 LocalDate，无法解析的行跳过并输出&quot;无法解析：行内容&quot;</li><li>筛选出日期在今天之后的行</li><li>对筛选结果按升序排序</li><li>返回 List&lt;LocalDate&gt;</li></ul>
+<p>完成标准：能处理格式错误的行而不中断全部处理；只返回未来的日期；不重复解析同一行。</p>
+<h3 id="练习-3-jdk-版本检查">练习 3：JDK 版本检查</h3>
+<p>实现一个简单的版本检查方法：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static String describeFeature(String featureName) {
+    // 输入 &quot;record&quot; → 返回 &quot;JDK 16 预览，JDK 17 稳定&quot;
+    // 输入 &quot;虚拟线程&quot; → 返回 &quot;JDK 21 稳定&quot;
+    // 输入 &quot;switch 模式匹配&quot; → 返回 &quot;JDK 21 预览，JDK 21 稳定&quot;
+    // 未识别的 feature → 返回 &quot;请在 JEP Index 中搜索&quot;
+}</code></pre></figure>
+<p>完成标准：至少包含第 9 章（record）、第 10 章（sealed class）、第 34 章（虚拟线程）、switch 模式匹配四个条目；使用 Map 存储。</p>
 <h2 id="常见误区">常见误区</h2>
 <h3 id="依赖默认编码">依赖默认编码</h3>
-<p>本机没有乱码不代表部署环境也正确。读写文本时明确使用 UTF-8。</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 不推荐
+Files.readString(path); // 使用系统默认编码</code></pre></figure>
+<p>在本机开发时可能永远不会看到乱码，因为默认编码通常是 UTF-8。但部署到使用不同编码的操作系统或容器时，问题会出现。读写文本文件始终使用 <code>StandardCharsets.UTF_8</code>。</p>
 <h3 id="把-localdatetime-当成时间点">把 LocalDateTime 当成时间点</h3>
-<p>没有时区的当地时间无法唯一定位到全球时间线。跨系统数据需要补充时区或转换为 Instant。</p>
-<h3 id="看到新-java-语法就复制">看到新 Java 语法就复制</h3>
-<p>代码能否编译取决于项目 JDK 和构建设置。课程主线是 17，后续版本能力必须单独确认。</p>
+<p><code>LocalDateTime</code> 没有时区概念。&quot;2026-07-14T09:00:00&quot; 在上海是北京时间上午 9 点，在伦敦是 UTC 时间上午 9 点。这两个是不同时间点，但 <code>LocalDateTime</code> 存储的数据相同。跨系统数据传输（特别是日志和 API 中）需要使用 <code>Instant</code> 或 <code>OffsetDateTime</code> 来无歧义地表示时间点。</p>
+<h3 id="在循环中频繁调用-files-方法">在循环中频繁调用 Files 方法</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 不推荐：每次循环都访问文件系统
+for (String id : ids) {
+    if (Files.exists(Path.of(id + &quot;.txt&quot;))) {
+        // ...
+    }
+}</code></pre></figure>
+<p>文件系统的 I/O 操作比内存操作慢数个数量级。如果需要频繁检查文件存在性，先读取目录列表（<code>Files.list</code> 或 <code>Files.newDirectoryStream</code>）再在内存中匹配。</p>
+<h3 id="看到不认识的语法就直接复制">看到不认识的语法就直接复制</h3>
+<p>JDK 版本在团队之间不一定一致。一个项目中 JDK 17 编译通过的代码，换到 JDK 21 可能新增一些特性仍然兼容，但反过来不成立。遇到陌生语法首先查看项目 JDK 版本配置。</p>
 <h2 id="本章小结">本章小结</h2>
-<p>Path 描述位置，Files 读写内容，编码应明确为 UTF-8；java.time 用不同类型区分日期、当地时间和时间点。至此，Java 语言及标准库基础模块完成，下一章开始从 HTTP 请求与响应进入 Web 后端。</p>
+<p>Path 描述文件路径并自动处理 OS 分隔符差异；Files 提供读写、复制、移动和删除操作。编码显式指定为 UTF-8 是最安全的做法，避免跨环境乱码。逐行处理大文件使用 <code>Files.lines</code> 配合 try-with-resources 确保文件资源自动关闭。java.time 包的 LocalDate、LocalTime、LocalDateTime、Instant、ZonedDateTime 和 Duration/Period 覆盖了日常所有日期时间场景，所有实例不可变。ISO 8601 格式是最好的默认交换格式，自定义格式使用 DateTimeFormatter。JDK 17 是课程主线，record、sealed class、instanceof 模式匹配已稳定可用；JDK 21 的切换模式匹配、虚拟线程等新能力需要最低版本标注。</p>
+<p>至此，Java 语言及标准库基础模块（第 3–16 章）全部完成。下一章将从 HTTP 请求与响应开始进入后端开发基础模块。</p>
 <h2 id="快速自测">快速自测</h2>
-<ol><li>为什么 <code>Files.lines</code> 要放进 try-with-resources？</li><li>LocalDateTime 为什么不能独立表示全球唯一时刻？</li><li>为什么不能把 JDK 21 的新语法直接复制到 JDK 17 项目？</li></ol>
-<p>参考答案：它持有文件资源，需要关闭；缺少时区；编译器和构建配置的语言版本不同。</p>
+<ol><li><code>Path.of(&quot;a&quot;, &quot;b&quot;)</code> 在 macOS 和 Windows 上分别产生什么路径字符串？</li><li>为什么 <code>Files.readString(path)</code> 不带编码参数不推荐？</li><li><code>LocalDateTime</code> 和 <code>Instant</code> 的主要区别是什么？</li><li>文本块用几个双引号开头和结尾？</li></ol>
+<p>参考答案：macOS 上 <code>a/b</code>，Windows 上 <code>a\b</code>；它会使用系统默认编码，跨环境可能有编码乱码风险；LocalDateTime 不含时区信息，Instant 是 UTC 时间线上的唯一时刻；三个。</p>
 <h2 id="参考文献">参考文献</h2>
-<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html" target="_blank" rel="noreferrer">Java SE 17 API: Files</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/package-summary.html" target="_blank" rel="noreferrer">Java SE 17 API: java.time</a>.</li><li>OpenJDK. <a href="https://openjdk.org/jeps/0" target="_blank" rel="noreferrer">JEP Index</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/15-optional.html">← 第 15 章<br><strong>Optional 与缺失值</strong></a><a href="../lessons/17-http-rest-contract.html">第 17 章 →<br><strong>HTTP 与 REST API 契约</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#用-path-表示文件位置">用 Path 表示文件位置</a><a class="" href="#用-files-读写小文本">用 Files 读写小文本</a><a class="" href="#编码必须明确">编码必须明确</a><a class="" href="#资源流何时关闭">资源流何时关闭</a><a class="" href="#日期-当地时间与时间点">日期、当地时间与时间点</a><a class="" href="#解析与格式化时间">解析与格式化时间</a><a class="" href="#jdk-17-与后续版本怎样阅读">JDK 17 与后续版本怎样阅读</a><a class="" href="#练习-读取活动日期">练习：读取活动日期</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#依赖默认编码">依赖默认编码</a><a class="sub" href="#把-localdatetime-当成时间点">把 LocalDateTime 当成时间点</a><a class="sub" href="#看到新-java-语法就复制">看到新 Java 语法就复制</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>
+<ul><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html" target="_blank" rel="noreferrer">Java SE 17 API: Files</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Path.html" target="_blank" rel="noreferrer">Java SE 17 API: Path</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/package-summary.html" target="_blank" rel="noreferrer">Java SE 17 API: java.time</a>.</li><li>Oracle. <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html" target="_blank" rel="noreferrer">Java SE 17 API: DateTimeFormatter</a>.</li><li>OpenJDK. <a href="https://openjdk.org/jeps/0" target="_blank" rel="noreferrer">JEP Index</a>.</li><li>Unicode Consortium. <a href="https://www.unicode.org/faq/utf_bom.html" target="_blank" rel="noreferrer">UTF-8 FAQ</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/15-optional.html">← 第 15 章<br><strong>Optional 与缺失值</strong></a><a href="../lessons/17-http-rest-contract.html">第 17 章 →<br><strong>HTTP 与 REST API 契约</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一-用-path-表示文件位置">一、用 Path 表示文件位置</a><a class="" href="#二-用-files-读写文件">二、用 Files 读写文件</a><a class="sub" href="#2-1-写入说明">2.1 写入说明</a><a class="sub" href="#2-2-文件存在性检查">2.2 文件存在性检查</a><a class="sub" href="#2-3-复制-移动与删除">2.3 复制、移动与删除</a><a class="sub" href="#2-4-i-o-异常">2.4 I/O 异常</a><a class="" href="#三-编码必须明确">三、编码必须明确</a><a class="sub" href="#3-1-编码是什么">3.1 编码是什么</a><a class="sub" href="#3-2-不依赖-默认编码">3.2 不依赖&quot;默认编码&quot;</a><a class="" href="#四-资源流管理">四、资源流管理</a><a class="sub" href="#4-1-files-lines-逐行读取">4.1 Files.lines 逐行读取</a><a class="sub" href="#4-2-一次性读取-vs-逐行读取">4.2 一次性读取 vs 逐行读取</a><a class="sub" href="#4-3-bufferedreader">4.3 BufferedReader</a><a class="" href="#五-java-time-日期时间-api">五、java.time 日期时间 API</a><a class="sub" href="#5-1-类型选择">5.1 类型选择</a><a class="sub" href="#5-2-创建与操作">5.2 创建与操作</a><a class="sub" href="#5-3-时间点与唯一时刻">5.3 时间点与唯一时刻</a><a class="sub" href="#5-4-时区与偏移">5.4 时区与偏移</a><a class="sub" href="#5-5-duration-和-period">5.5 Duration 和 Period</a><a class="" href="#六-解析与格式化">六、解析与格式化</a><a class="sub" href="#6-1-iso-标准格式解析">6.1 ISO 标准格式解析</a><a class="sub" href="#6-2-自定义格式化">6.2 自定义格式化</a><a class="sub" href="#6-3-推荐的格式策略">6.3 推荐的格式策略</a><a class="" href="#七-jdk-17-与后续版本的差异">七、JDK 17 与后续版本的差异</a><a class="sub" href="#7-1-版本管理">7.1 版本管理</a><a class="sub" href="#7-2-遇到新语法的处理步骤">7.2 遇到新语法的处理步骤</a><a class="sub" href="#7-3-文本块-jdk-15-稳定-jdk-17-可用">7.3 文本块（JDK 15+ 稳定，JDK 17 可用）</a><a class="" href="#八-练习">八、练习</a><a class="sub" href="#练习-1-安全文件读取">练习 1：安全文件读取</a><a class="sub" href="#练习-2-活动日期过滤器">练习 2：活动日期过滤器</a><a class="sub" href="#练习-3-jdk-版本检查">练习 3：JDK 版本检查</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#依赖默认编码">依赖默认编码</a><a class="sub" href="#把-localdatetime-当成时间点">把 LocalDateTime 当成时间点</a><a class="sub" href="#在循环中频繁调用-files-方法">在循环中频繁调用 Files 方法</a><a class="sub" href="#看到不认识的语法就直接复制">看到不认识的语法就直接复制</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>

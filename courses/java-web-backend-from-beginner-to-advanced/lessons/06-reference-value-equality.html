@@ -1,26 +1,26 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Java 的变量保存值，赋值和方法调用都会复制值；引用类型复制的是引用值，`==` 与 `equals` 回答的则是两类不同的相等问题。"><title>引用、值传递和相等性 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Java 的变量保存值，赋值和方法调用都会复制值；引用类型复制的是引用值，`==` 与 `equals` 回答的则是两类不同的相等问题。"><title>引用、值传递和相等性 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
 <body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 6 章 · Java 语言及标准库基础</div><h1>引用、值传递和相等性</h1><p class="lesson-summary">Java 的变量保存值，赋值和方法调用都会复制值；引用类型复制的是引用值，`==` 与 `equals` 回答的则是两类不同的相等问题。</p><div class="meta-row"><span class="pill">从变量和赋值开始逐节运行示例；本章会先补足方法传参所需的最小语法，不限制完成时间</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一-变量和值">一、变量和值</h2>
 <h3 id="1-1-变量是一个有类型的名字">1.1 变量是一个有类型的名字</h3>
 <p>先看一行最普通的 Java 代码：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int quantity = 2;</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int quantity = 2;</code></pre></figure>
 <p>这行代码做了三件事：</p>
 <ol><li><code>int</code> 规定变量能保存哪一类值。</li><li><code>quantity</code> 是变量名。</li><li><code>= 2</code> 把整数值 <code>2</code> 赋给这个变量。</li></ol>
 <p>可以把声明变量的基本格式写成：</p>
-<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">数据类型 变量名 = 初始值;</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">数据类型 变量名 = 初始值;</code></pre></figure>
 <p>变量不是值本身。它是程序中用来保存和读取值的位置，并且有确定的类型。后续再次赋值时，变量保存的值会被替换：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int quantity = 2;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int quantity = 2;
 quantity = 3;
 
 System.out.println(quantity); // 输出 3</code></pre></figure>
 <h3 id="1-2-基本类型变量直接保存基本值">1.2 基本类型变量直接保存基本值</h3>
 <p>Java 有八种基本类型。第 5 章已经介绍了它们，这里只看与本章有关的共同点：基本类型变量保存数值、字符或布尔值。</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int age = 20;          // 整数值
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int age = 20;          // 整数值
 double price = 19.9;   // 浮点值
 char level = 'A';      // 字符值
 boolean paid = false;  // 布尔值</code></pre></figure>
 <p>把一个基本类型变量赋给另一个变量时，值会被复制：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int first = 10;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int first = 10;
 int second = first;
 
 second = 20;
@@ -31,13 +31,13 @@ System.out.println(second); // 20</code></pre></figure>
 <h2 id="二-对象与引用">二、对象与引用</h2>
 <h3 id="2-1-引用类型变量保存引用值">2.1 引用类型变量保存引用值</h3>
 <p>String、数组以及后面要学习的自定义类都属于引用类型。引用类型变量保存的不是对象本体，而是一个能够指向对象的<span class="term" tabindex="0" data-tip="能指向对象的值；引用变量保存的是引用值，不是对象本体。">引用</span>值。</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String course = new String(&quot;Java&quot;);</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String course = new String(&quot;Java&quot;);</code></pre></figure>
 <p>这行代码可以分成两部分理解：</p>
 <ul><li><code>new String(&quot;Java&quot;)</code> 创建一个 String 对象。</li><li><code>course</code> 保存指向这个对象的引用值。</li></ul>
 <p>Java 语言规范没有要求这个引用值必须是程序员可以直接读取的内存地址。现阶段把它理解成“可以找到某个对象的值”就够了。引用不是对象本身，也不是 C 语言中可以做地址运算的指针。</p>
 <h3 id="2-2-引用赋值也会复制值">2.2 引用赋值也会复制值</h3>
 <p>引用类型仍然遵守普通赋值规则：右侧的值被复制给左侧变量。</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String first = new String(&quot;Java&quot;);
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String first = new String(&quot;Java&quot;);
 String second = first;</code></pre></figure>
 <p><code>second = first</code> 没有复制 String 对象。它复制的是 <code>first</code> 保存的引用值。结果是两个变量指向同一个对象：</p>
 <div class="diagram-card"><pre class="mermaid">flowchart LR
@@ -45,34 +45,34 @@ String second = first;</code></pre></figure>
     B[&quot;变量 second&quot;] --&gt; O</pre></div>
 <p>此时有两个变量，但只有一个 String 对象。像这种多个变量指向同一个对象的关系，有时也称为别名关系。</p>
 <p>可以用引用类型的 <code>==</code> 验证它们是否指向同一对象：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">System.out.println(first == second); // true</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">System.out.println(first == second); // true</code></pre></figure>
 <h3 id="2-3-null-表示当前没有指向对象">2.3 <code>null</code> 表示当前没有指向对象</h3>
 <p>引用类型变量还可以保存特殊值 <code>null</code>：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String name = null;</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String name = null;</code></pre></figure>
 <p>它表示 <code>name</code> 当前没有指向任何 String 对象。<code>null</code> 不是空字符串，也不是一个内容为空的对象。</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String empty = &quot;&quot;;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String empty = &quot;&quot;;
 
 System.out.println(name == null);  // true
 System.out.println(empty == null); // false</code></pre></figure>
 <p>对 <code>null</code> 调用实例方法会抛出 <code>NullPointerException</code>：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String name = null;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String name = null;
 System.out.println(name.length()); // 运行时抛出 NullPointerException</code></pre></figure>
 <p>本章先记住检查方式 <code>name == null</code>。第 11 章会系统讲异常，第 15 章会继续讨论如何表达“可能没有结果”。</p>
 <h2 id="三-方法传参所需的最小语法">三、方法传参所需的最小语法</h2>
 <p>值传递发生在方法调用时。为了不使用尚未解释的代码，这一节先把本章需要的方法语法讲清楚。</p>
 <h3 id="3-1-方法把一段操作命名">3.1 方法把一段操作命名</h3>
 <p>下面是一个最小方法：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static void printCourse(String name) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static void printCourse(String name) {
     System.out.println(name);
 }</code></pre></figure>
 <p>逐项看这段代码：</p>
 <div class="table-wrap"><table><thead><tr><th>代码</th><th>本章需要理解的含义</th></tr></thead><tbody><tr><td><code>static</code></td><td>这个方法可以直接从 <code>main</code> 方法调用。完整含义在第 8 章讲解</td></tr><tr><td><code>void</code></td><td>方法执行后不返回结果</td></tr><tr><td><code>printCourse</code></td><td>方法名</td></tr><tr><td><code>String name</code></td><td>方法接收一个 String 类型的参数，方法内部用 <code>name</code> 访问它</td></tr><tr><td><code>{ ... }</code></td><td>方法体，也就是调用时执行的语句</td></tr></tbody></table></div>
 <p>调用方法时这样写：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">printCourse(&quot;Java&quot;);</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">printCourse(&quot;Java&quot;);</code></pre></figure>
 <p>调用处写入的 <code>&quot;Java&quot;</code> 叫<span class="term" tabindex="0" data-tip="调用方法时实际传入的表达式或值。">实参</span>。方法声明中的 <code>String name</code> 叫<span class="term" tabindex="0" data-tip="方法声明中用于接收输入的局部变量。">形参</span>。调用发生时，实参的值会交给形参使用。</p>
 <h3 id="3-2-方法在类中的位置">3.2 方法在类中的位置</h3>
 <p>方法不能定义在 <code>main</code> 方法内部。一个可以直接运行的完整结构如下：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class MethodDemo {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class MethodDemo {
     public static void main(String[] args) {
         printCourse(&quot;Java&quot;); // 调用方法
     }
@@ -88,11 +88,11 @@ System.out.println(name.length()); // 运行时抛出 NullPointerException</code
 <p>形参是方法自己的局部变量。方法修改形参，首先改变的是这份复制得到的值，不会直接替换调用方变量保存的值。</p>
 <h3 id="4-2-基本类型传递的是基本值副本">4.2 基本类型传递的是基本值副本</h3>
 <p>先看基本类型：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static void changeNumber(int value) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static void changeNumber(int value) {
     value = 20;
 }</code></pre></figure>
 <p>调用它：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int number = 10;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int number = 10;
 changeNumber(number);
 
 System.out.println(number); // 10</code></pre></figure>
@@ -104,11 +104,11 @@ System.out.println(number); // 10</code></pre></figure>
     C -.&quot;不改变&quot;.-&gt; N</pre></div>
 <h3 id="4-3-引用类型传递的是引用值副本">4.3 引用类型传递的是引用值副本</h3>
 <p>引用类型没有换一套传参规则。方法复制的仍然是值，只是这次复制的是引用值。</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static void changeText(String value) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static void changeText(String value) {
     value = &quot;Spring&quot;;
 }</code></pre></figure>
 <p>调用它：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String course = &quot;Java&quot;;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String course = &quot;Java&quot;;
 changeText(course);
 
 System.out.println(course); // Java</code></pre></figure>
@@ -120,15 +120,15 @@ System.out.println(course); // Java</code></pre></figure>
 <p>因此，“基本类型是值传递，引用类型是引用传递”这句话不准确。两类参数都是值传递，区别只在于被复制的值是什么。</p>
 <h3 id="4-4-修改共同对象与替换形参是两件事">4.4 修改共同对象与替换形参是两件事</h3>
 <p>前面的 String 对象不可变。为了观察可变对象，先认识一个只用于演示的 JDK 类 <code>StringBuilder</code>。它是可修改的文本容器：<code>new StringBuilder(&quot;Java&quot;)</code> 创建对象，<code>append</code> 在原对象后追加内容。</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">StringBuilder text = new StringBuilder(&quot;Java&quot;);
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">StringBuilder text = new StringBuilder(&quot;Java&quot;);
 text.append(&quot; 17&quot;);
 
 System.out.println(text); // Java 17</code></pre></figure>
 <p>把它传给方法：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static void addVersion(StringBuilder value) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static void addVersion(StringBuilder value) {
     value.append(&quot; 17&quot;);
 }</code></pre></figure>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">StringBuilder course = new StringBuilder(&quot;Java&quot;);
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">StringBuilder course = new StringBuilder(&quot;Java&quot;);
 addVersion(course);
 
 System.out.println(course); // Java 17</code></pre></figure>
@@ -136,7 +136,7 @@ System.out.println(course); // Java 17</code></pre></figure>
 <p>对比下面两类动作：</p>
 <div class="table-wrap"><table><thead><tr><th>方法内部的动作</th><th>调用方是否能观察到</th><th>原因</th></tr></thead><tbody><tr><td><code>value.append(&quot; 17&quot;)</code></td><td>能</td><td>形参与调用方变量指向同一个可变对象</td></tr><tr><td><code>value = new StringBuilder(&quot;Spring&quot;)</code></td><td>不能</td><td>只替换形参自己保存的引用值</td></tr><tr><td>返回新对象，并由调用方重新赋值</td><td>能</td><td>调用方主动保存了返回的引用值</td></tr></tbody></table></div>
 <p>需要让调用方改用新对象时，使用返回值会更清楚：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">static String replaceCourse(String ignored) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">static String replaceCourse(String ignored) {
     return &quot;Spring&quot;;
 }
 
@@ -145,14 +145,14 @@ course = replaceCourse(course);</code></pre></figure>
 <h2 id="五-的比较规则">五、<code>==</code> 的比较规则</h2>
 <h3 id="5-1-基本类型的-比较值">5.1 基本类型的 <code>==</code> 比较值</h3>
 <p>对数值、字符和布尔值，<code>==</code> 比较两边的基本值是否相等：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">int first = 10;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">int first = 10;
 int second = 10;
 
 System.out.println(first == second); // true</code></pre></figure>
 <p>数值比较时还可能发生类型提升。例如 <code>10 == 10L</code> 的结果是 <code>true</code>，因为比较前 <code>int</code> 值会转换为 <code>long</code>。类型转换的规则已经在第 5 章讲过。</p>
 <h3 id="5-2-引用类型的-比较对象身份">5.2 引用类型的 <code>==</code> 比较对象身份</h3>
 <p>对引用类型，<code>==</code> 判断两个引用值是否指向同一个对象，或者是否同时为 <code>null</code>。它回答的是<span class="term" tabindex="0" data-tip="两个引用是否指向同一个对象，通常用 == 判断。">对象身份</span>问题。</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String first = new String(&quot;Java&quot;);
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String first = new String(&quot;Java&quot;);
 String second = first;
 String third = new String(&quot;Java&quot;);
 
@@ -163,7 +163,7 @@ System.out.println(first == third);  // false</code></pre></figure>
 <h3 id="6-1-equals-通常用于比较内容或业务值">6.1 <code>equals</code> 通常用于比较内容或业务值</h3>
 <p>很多引用类型会通过 <code>equals</code> 定义“内容相同”或“业务值相同”。这种规则在本课程中称为<span class="term" tabindex="0" data-tip="两个对象在业务含义上是否相等，通常由 equals 定义。">业务相等性</span>。</p>
 <p>String 的 <code>equals</code> 按字符序列比较：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String first = new String(&quot;Java&quot;);
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String first = new String(&quot;Java&quot;);
 String second = new String(&quot;Java&quot;);
 
 System.out.println(first == second);      // false
@@ -172,19 +172,19 @@ System.out.println(first.equals(second)); // true</code></pre></figure>
 <ul><li><code>first == second</code> 问的是“是不是同一个 String 对象”。</li><li><code>first.equals(second)</code> 问的是“字符内容是否相同”。</li></ul>
 <h3 id="6-2-string-内容比较不使用">6.2 String 内容比较不使用 <code>==</code></h3>
 <p>字符串字面量可能被 JVM 复用：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String first = &quot;Java&quot;;
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String first = &quot;Java&quot;;
 String second = &quot;Java&quot;;
 
 System.out.println(first == second); // 在这个例子中是 true</code></pre></figure>
 <p>这个结果来自字符串常量的复用，不代表 <code>==</code> 可以比较字符串内容。字符串来自 <code>new</code>、文件、数据库、HTTP 请求或运行时拼接时，身份可能不同。</p>
 <p>业务代码比较 String 内容时使用 <code>equals</code>：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String status = new String(&quot;PAID&quot;);
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String status = new String(&quot;PAID&quot;);
 
 if (status.equals(&quot;PAID&quot;)) {
     System.out.println(&quot;订单已支付&quot;);
 }</code></pre></figure>
 <p>如果变量可能为 <code>null</code>，可以把已知不会为 <code>null</code> 的常量放在前面：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">if (&quot;PAID&quot;.equals(status)) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">if (&quot;PAID&quot;.equals(status)) {
     System.out.println(&quot;订单已支付&quot;);
 }</code></pre></figure>
 <p><code>&quot;PAID&quot;</code> 一定是 String 对象，因此不会因为 <code>status</code> 为 <code>null</code> 而抛出 <code>NullPointerException</code>。</p>
@@ -202,28 +202,28 @@ if (status.equals(&quot;PAID&quot;)) {
 <p>这是后续设计值对象时偏好不可变数据的一个原因。此处先建立风险意识，不需要提前实现完整的 <code>equals</code>/<code>hashCode</code>。</p>
 <h2 id="八-final-引用与不可变对象">八、<code>final</code> 引用与不可变对象</h2>
 <p><code>final</code> 修饰引用变量时，限制的是变量不能再次保存另一个引用值：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">final StringBuilder text = new StringBuilder(&quot;Java&quot;);
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">final StringBuilder text = new StringBuilder(&quot;Java&quot;);
 text.append(&quot; 17&quot;); // 可以：修改的是对象</code></pre></figure>
 <p>下面的重新赋值不能编译：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">final StringBuilder text = new StringBuilder(&quot;Java&quot;);
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">final StringBuilder text = new StringBuilder(&quot;Java&quot;);
 text = new StringBuilder(&quot;Spring&quot;); // 编译错误</code></pre></figure>
 <p>所以，“引用不能重新赋值”和“对象不能修改”不是同一件事。String 自身不可变；StringBuilder 可变，即使保存它的变量带有 <code>final</code>，对象仍然可以变化。</p>
 <h2 id="九-后端代码中的简单应用">九、后端代码中的简单应用</h2>
 <p>基础规则掌握后，再看一个接近 Web 后端的场景。HTTP 请求中的状态值通常会被解析为 String。下面的判断存在风险：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">String status = new String(&quot;PAID&quot;); // 模拟从外部得到的新字符串对象
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String status = new String(&quot;PAID&quot;); // 模拟从外部得到的新字符串对象
 
 if (status == &quot;PAID&quot;) {
     System.out.println(&quot;执行已支付逻辑&quot;);
 }</code></pre></figure>
 <p>字符内容相同，但两个引用不一定指向同一个对象，这段分支可能不执行。改为内容比较：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">if (&quot;PAID&quot;.equals(status)) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">if (&quot;PAID&quot;.equals(status)) {
     System.out.println(&quot;执行已支付逻辑&quot;);
 }</code></pre></figure>
 <p>状态集合固定时，后续还会学习用 enum 表达状态。当前要解决的只有一件事：看到引用类型比较，先确认需要比较对象身份还是内容。</p>
 <h2 id="十-本章练习">十、本章练习</h2>
 <h3 id="10-1-预测输出">10.1 预测输出</h3>
 <p>下面的程序只使用本章已经解释过的 String、赋值、<code>==</code>、<code>equals</code> 和方法传参：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class ReferencePractice {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class ReferencePractice {
     public static void main(String[] args) {
         String course = new String(&quot;Java&quot;);
         String alias = course;

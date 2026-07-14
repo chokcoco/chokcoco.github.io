@@ -1,40 +1,139 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="类定义一类对象的数据与行为；构造器建立初始状态，方法维护规则，访问控制避免外部代码绕过这些规则。"><title>类、对象与业务规则封装 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
-<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 8 章 · Java 语言及标准库基础</div><h1>类、对象与业务规则封装</h1><p class="lesson-summary">类定义一类对象的数据与行为；构造器建立初始状态，方法维护规则，访问控制避免外部代码绕过这些规则。</p><div class="meta-row"><span class="pill">先分清“类是写法”和“对象是运行时创建出的具体数据”，再阅读字段和方法怎样协作。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="为什么变量和方法会聚在一起">为什么变量和方法会聚在一起</h2>
-<p>第 4 章的方法可以计算结果，第 7 章的数组可以保存数据。但当一份数据有自己的规则时，把相关变量散在 <code>main</code> 中会很难维护。例如一个订单项有商品名和数量，数量不能为负数；每个地方都直接修改整数，就无法保证规则一致。</p>
-<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">类</span>把“对象要保存的数据”和“允许怎样操作这些数据”写在一起。类本身不是具体订单项，而是一份创建订单项的定义；根据类创建出的每一个具体值叫<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">对象</span>。</p>
-<h2 id="定义第一个类">定义第一个类</h2>
-<p>先看一个只保存名字的类：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class Person {
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="类把字段和方法组织在一起；对象是类在运行时的具体实例；构造器、`private` 和业务方法共同维护对象的有效状态。"><title>类、对象与业务规则封装 | Java Web 后端入门到进阶</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"><script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">Java Web 后端入门到进阶</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 8 章 · Java 语言及标准库基础</div><h1>类、对象与业务规则封装</h1><p class="lesson-summary">类把字段和方法组织在一起；对象是类在运行时的具体实例；构造器、`private` 和业务方法共同维护对象的有效状态。</p><div class="meta-row"><span class="pill">本章是自定义类的第一次完整展开。先运行每一小段代码观察结果，再在最后组合成一个带规则的 OrderLine。</span><span class="pill">JDK 17 主线</span></div></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一-为什么需要类">一、为什么需要类</h2>
+<h3 id="1-1-散落的变量难以维护规则">1.1 散落的变量难以维护规则</h3>
+<p>第 4 章到第 7 章的变量、数组和方法已经能完成很多计算，但真实程序里数据通常带有规则。假设一个订单行包含商品名和数量，数量不能为负数。如果把这两个值散落在 <code>main</code> 方法中：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">String productName = &quot;Java 编程书&quot;;
+int quantity = 2;
+
+// 很多行之后……
+quantity = -5; // 数量变成了负数，但没有任何检查</code></pre></figure>
+<p>当程序变长时，每个读写 <code>quantity</code> 的地方都可能绕开这条规则。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">类</span>把相关数据和它允许的操作组织在一起，让规则集中维护。</p>
+<h3 id="1-2-类是创建对象的定义">1.2 类是创建对象的定义</h3>
+<p>可以把类理解成一份设计图。设计图不是具体的订单行，但它定义了每一个订单行应该保存哪些数据、允许哪些操作。根据类创建出的每一个具体实例叫<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">对象</span>。一个类可以创建很多对象，每个对象各自保存自己的数据：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-text">类：OrderLine（定义：商品名、数量、增加操作）
+         ↓
+对象 1：productName = &quot;书&quot;, quantity = 2
+对象 2：productName = &quot;笔&quot;, quantity = 5</code></pre></figure>
+<h2 id="二-最简单的类和一个对象">二、最简单的类和一个对象</h2>
+<h3 id="2-1-定义一个只有字段的类">2.1 定义一个只有字段的类</h3>
+<p>先看一个最简单的类：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class Person {
     String name;
+    int age;
+}</code></pre></figure>
+<p>这四行的含义逐项拆开：</p>
+<ul><li><code>public class Person</code> 声明一个公开类，类名为 <code>Person</code>。Java 文件名必须与 <code>public</code> 类名一致（<code>Person.java</code>）。</li><li><code>String name;</code> 声明一个<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">字段</span>。每个 Person 对象会保存自己的 <code>name</code> 值。</li><li><code>int age;</code> 是另一个字段。字段的类型就是前面学过的类型——这里是 <code>String</code> 和 <code>int</code>。</li></ul>
+<p>目前 <code>Person</code> 只有字段，没有方法。它已经可以创建对象了。</p>
+<h3 id="2-2-创建对象并访问字段">2.2 创建对象并访问字段</h3>
+<p>在 <code>main</code> 方法中创建 Person 对象：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class PersonDemo {
+    public static void main(String[] args) {
+        Person p = new Person();   // 创建一个 Person 对象
+
+        p.name = &quot;Ada&quot;;            // 设置字段值
+        p.age = 20;
+
+        System.out.println(p.name); // 控制台输出：Ada
+        System.out.println(p.age);  // 控制台输出：20
+    }
+}</code></pre></figure>
+<p><code>new Person()</code> 创建了一个 Person 对象。变量 <code>p</code> 保存的是这个对象的引用（第 6 章已经讲过引用）。<code>p.name</code> 使用点号访问 <code>p</code> 所指向对象的 <code>name</code> 字段。</p>
+<p>如果写 <code>Person q = p;</code>，两个变量就指向同一个对象，修改字段会从两边看到——这一点和第 6 章中两个变量指向同一个 StringBuilder 完全一样。</p>
+<h3 id="2-3-字段默认值">2.3 字段默认值</h3>
+<p>当用 <code>new Person()</code> 创建对象但没有给字段赋值时，Java 会给字段一个默认值：</p>
+<div class="table-wrap"><table><thead><tr><th>字段类型</th><th>默认值</th></tr></thead><tbody><tr><td><code>int</code>、<code>long</code>、<code>short</code>、<code>byte</code></td><td><code>0</code></td></tr><tr><td><code>double</code>、<code>float</code></td><td><code>0.0</code></td></tr><tr><td><code>boolean</code></td><td><code>false</code></td></tr><tr><td><code>char</code></td><td><code>'\u0000'</code>（空字符）</td></tr><tr><td>引用类型（String 等）</td><td><code>null</code></td></tr></tbody></table></div>
+<p>所以刚创建出来的 <code>Person</code> 对象中，<code>name</code> 是 <code>null</code>，<code>age</code> 是 <code>0</code>。如果直接调用 <code>p.name.length()</code> 会抛出 <code>NullPointerException</code>。因此构造器通常应该在创建对象时就设置好必要字段。</p>
+<h2 id="三-实例方法操作对象自己的数据">三、实例方法操作对象自己的数据</h2>
+<h3 id="3-1-把操作放进类">3.1 把操作放进类</h3>
+<p>类可以包含方法。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">实例方法</span>属于对象，能访问这个对象的字段：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class Person {
+    String name;
+    int age;
 
     void sayHello() {
-        System.out.println(&quot;你好，&quot; + name);
+        System.out.println(&quot;你好，我是 &quot; + name + &quot;，今年 &quot; + age + &quot; 岁。&quot;);
     }
 }</code></pre></figure>
-<p><code>name</code> 是<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">字段</span>，每个 Person 对象各自保存一份字段值。<code>sayHello</code> 是<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">实例方法</span>，它操作的是当前对象的字段。</p>
-<p>在另一个类的 <code>main</code> 中创建对象：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Person person = new Person();
-person.name = &quot;Ada&quot;;
-person.sayHello();</code></pre></figure>
-<p><code>new Person()</code> 创建一个 Person 对象；变量 <code>person</code> 保存该对象的引用。点号用于访问对象的字段或调用对象的方法。第 6 章的引用规则在这里开始有实际用途：两个变量若保存同一个对象引用，修改字段会被两边看到。</p>
-<h2 id="构造器让对象从有效状态开始">构造器让对象从有效状态开始</h2>
-<p>先创建再逐项赋值容易得到半成品对象。<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">构造器</span>在 <code>new</code> 时接收必要数据：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class Person {
+<p>调用方式与字段一样，用点号：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Person p = new Person();
+p.name = &quot;Ada&quot;;
+p.age = 20;
+p.sayHello(); // 控制台输出：你好，我是 Ada，今年 20 岁。</code></pre></figure>
+<p>方法内部的 <code>name</code> 和 <code>age</code> 没有前缀，它们指的就是“当前这个对象”的字段。调用 <code>p.sayHello()</code> 时，<code>name</code> 就是 <code>p</code> 的 <code>name</code>，也就是 <code>&quot;Ada&quot;</code>。</p>
+<h3 id="3-2-实例方法与-static-方法的区别">3.2 实例方法与 static 方法的区别</h3>
+<p>前面章节在 <code>main</code> 中直接调用的都是 <code>static</code> 方法。现在可以总结它们的区别：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class Calculator {
+    // 实例方法：需要先创建 Calculator 对象，访问对象的字段
+    public int add(int a, int b) {
+        return a + b;
+    }
+
+    // static 方法：直接用类名调用，不操作任何具体对象的字段
+    public static int subtract(int a, int b) {
+        return a - b;
+    }
+}</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Calculator calc = new Calculator();
+int sum = calc.add(3, 5);            // 实例方法，通过对象调用
+int diff = Calculator.subtract(8, 3); // static 方法，通过类名调用</code></pre></figure>
+<p>判断标准很简单：这个方法是否需要读取或修改某个特定对象的字段？需要就写成实例方法；只是根据参数做通用计算，就可以是 <code>static</code> 方法。</p>
+<h2 id="四-构造器让对象从有效状态开始">四、构造器让对象从有效状态开始</h2>
+<h3 id="4-1-没有构造器时的问题">4.1 没有构造器时的问题</h3>
+<p>回到 Person 的例子。创建对象后需要手动给字段赋值，中间可能有一段代码拿到了“名字还没设”的半成品对象：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Person p = new Person();
+// p.name 此时是 null
+// 如果这里调用了 p.sayHello()，输出会是 &quot;你好，我是 null，今年 0 岁。&quot;
+p.name = &quot;Ada&quot;;
+p.age = 20;</code></pre></figure>
+<p><span class="term" tabindex="0" data-tip="课程术语，详见术语表。">构造器</span>在 <code>new</code> 的时候被自动调用，可以接收参数并设置初始值，避免出现半成品对象。</p>
+<h3 id="4-2-编写第一个构造器">4.2 编写第一个构造器</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class Person {
     String name;
+    int age;
 
-    Person(String name) {
+    // 构造器
+    Person(String name, int age) {
         this.name = name;
+        this.age = age;
+    }
+
+    void sayHello() {
+        System.out.println(&quot;你好，我是 &quot; + name + &quot;，今年 &quot; + age + &quot; 岁。&quot;);
     }
 }</code></pre></figure>
-<p>构造器名与类名相同，没有返回值类型。<code>this.name</code> 表示当前对象的字段；右边的 <code>name</code> 是构造器参数。创建方式变为：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">Person person = new Person(&quot;Ada&quot;);</code></pre></figure>
-<p>构造器可以检查最基础的规则：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class OrderLine {
-    private final String productName;
-    private int quantity;
+<p>构造器的规则：</p>
+<ul><li>名称必须与类名完全相同。</li><li>没有返回值类型，连 <code>void</code> 都不写。</li><li><code>this.name</code> 表示当前对象的字段；右边的 <code>name</code> 是构造器参数。当参数名和字段名相同时，<code>this</code> 用来区分两者。</li></ul>
+<p>现在创建对象必须传参：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">Person p = new Person(&quot;Ada&quot;, 20); // 创建时直接设定字段
+p.sayHello(); // 控制台输出：你好，我是 Ada，今年 20 岁。</code></pre></figure>
+<p>如果尝试 <code>new Person()</code> 不带参数，编译器会报错，因为 Person 已经定义了自己的构造器，Java 不再自动提供无参构造器。</p>
+<h3 id="4-3-构造器可以检查规则">4.3 构造器可以检查规则</h3>
+<p>构造器不只是给字段赋值，它还应该拒绝无法构成有效对象的数据：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class OrderLine {
+    String productName;
+    int quantity;
 
-    public OrderLine(String productName, int quantity) {
+    OrderLine(String productName, int quantity) {
+        if (productName == null || productName.isBlank()) {
+            throw new IllegalArgumentException(&quot;商品名不能为空&quot;);
+        }
+        if (quantity &lt; 0) {
+            throw new IllegalArgumentException(&quot;数量不能为负数，收到：&quot; + quantity);
+        }
+        this.productName = productName;
+        this.quantity = quantity;
+    }
+}</code></pre></figure>
+<p><code>throw</code> 和 <code>IllegalArgumentException</code> 会在第 11 章系统讲解。现在只需要知道：构造器检查了数据，如果不满足条件，就不会创建出无效对象。这比创建后再检查可靠得多——因为无效对象根本不会出现。</p>
+<h3 id="4-4-多个构造器">4.4 多个构造器</h3>
+<p>一个类可以有多个构造器，用不同的参数列表区分：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class OrderLine {
+    String productName;
+    int quantity;
+
+    // 完整构造器
+    OrderLine(String productName, int quantity) {
         if (productName == null || productName.isBlank()) {
             throw new IllegalArgumentException(&quot;商品名不能为空&quot;);
         }
@@ -44,77 +143,251 @@ person.sayHello();</code></pre></figure>
         this.productName = productName;
         this.quantity = quantity;
     }
+
+    // 数量默认为 1 的便利构造器
+    OrderLine(String productName) {
+        this(productName, 1); // 调用上面的完整构造器
+    }
 }</code></pre></figure>
-<p>这里的 <code>throw</code> 和异常类型将在第 11 章系统讲解。现在关注目的：若没有合法商品名或数量，就不创建一个无效 OrderLine。</p>
-<h2 id="private-让规则留在类内部">private 让规则留在类内部</h2>
-<p>字段通常不应公开：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">private int quantity;</code></pre></figure>
-<p><code>private</code> 表示只有 OrderLine 类自己的代码能直接访问 <code>quantity</code>。外部代码不能写 <code>line.quantity = -1;</code>，而要调用类提供的方法。</p>
-<p>读取数量可以提供 getter：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public int getQuantity() {
+<p><code>this(productName, 1)</code> 在一个构造器里调用另一个构造器。<code>this(…)</code> 必须是构造器的第一条语句。这样就不需要把检查逻辑复制两份。</p>
+<h2 id="五-访问控制与封装">五、访问控制与封装</h2>
+<h3 id="5-1-private-隐藏字段">5.1 <code>private</code> 隐藏字段</h3>
+<p>目前 <code>OrderLine</code> 的字段没有修饰符，外部代码可以这样写：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">OrderLine line = new OrderLine(&quot;书&quot;, 2);
+line.quantity = -5; // 绕开了构造器的检查！</code></pre></figure>
+<p><code>private</code> 修饰符让字段只能在类自己的代码里访问：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class OrderLine {
+    private String productName;  // 只有 OrderLine 自己的代码能访问
+    private int quantity;
+    // ...
+}</code></pre></figure>
+<p>加上 <code>private</code> 后，<code>line.quantity = -5</code> 会直接编译错误。外部代码不能再直接读写这些字段。</p>
+<h3 id="5-2-getter-安全地暴露数据">5.2 Getter：安全地暴露数据</h3>
+<p>外部代码仍然需要读取数据时，可以提供<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">getter 方法</span>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public String getProductName() {
+    return productName;
+}
+
+public int getQuantity() {
     return quantity;
 }</code></pre></figure>
-<p>修改数量不必提供毫无约束的 setter。更贴近业务规则的写法是：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public void increase(int amount) {
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">OrderLine line = new OrderLine(&quot;书&quot;, 2);
+System.out.println(line.getQuantity()); // 控制台输出：2</code></pre></figure>
+<p>getter 是普通实例方法，命名惯例是 <code>get</code> + 首字母大写的字段名。对于 <code>boolean</code> 字段，惯例是 <code>is</code> + 字段名，如 <code>isActive()</code>。</p>
+<h3 id="5-3-不是每个字段都需要-setter">5.3 不是每个字段都需要 setter</h3>
+<p>很多人会习惯性地写：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public void setQuantity(int quantity) {
+    this.quantity = quantity;
+}</code></pre></figure>
+<p>如果 <code>setQuantity</code> 允许传入任何整数，外部代码仍然可以写 <code>line.setQuantity(-5)</code>，构造器里的检查形同虚设。更好的做法是只提供有意义的业务方法：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public void increase(int amount) {
     if (amount &lt;= 0) {
         throw new IllegalArgumentException(&quot;增加数量必须大于 0&quot;);
     }
-    quantity += amount;
-}</code></pre></figure>
-<p>类中始终应成立的条件称为<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">不变量</span>。OrderLine 的不变量之一是 <code>quantity &gt;= 0</code>。构造器与 <code>increase</code> 都在保护它；这比“先允许任何值、之后某处再检查”可靠得多。</p>
-<h2 id="static-与对象自身的区别">static 与对象自身的区别</h2>
-<p>前几章为了方便，从 <code>main</code> 中直接调用了 <code>static</code> 方法。<code>static</code> 成员属于类本身，而不是某一个对象：</p>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class PriceRule {
-    public static boolean isValidPrice(int cents) {
-        return cents &gt;= 0;
-    }
+    this.quantity += amount;
 }
 
-boolean valid = PriceRule.isValidPrice(100);</code></pre></figure>
-<p>调用时使用类名 <code>PriceRule</code>。相对地，<code>line.increase(2)</code> 操作的是某个具体 OrderLine 对象的数量。</p>
-<p>判断方法是否应该是 <code>static</code> 的一个简单标准：它是否需要读取或修改某个对象的字段？需要时是实例方法；只根据参数计算通用结果时，可以是 <code>static</code> 工具方法。</p>
-<h2 id="一个完整但很小的-orderline">一个完整但很小的 OrderLine</h2>
-<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="java">public class OrderLine {
-    private final String productName;
-    private int quantity;
+public void decrease(int amount) {
+    if (amount &lt;= 0) {
+        throw new IllegalArgumentException(&quot;减少数量必须大于 0&quot;);
+    }
+    if (this.quantity &lt; amount) {
+        throw new IllegalArgumentException(&quot;数量不足，当前：&quot; + this.quantity);
+    }
+    this.quantity -= amount;
+}</code></pre></figure>
+<p>外部代码只能通过 <code>increase</code> 和 <code>decrease</code> 修改数量。每个操作都带着自己的检查，不会出现负数。</p>
+<h3 id="5-4-不变量">5.4 不变量</h3>
+<p>类中始终应成立的条件叫<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">不变量</span>。OrderLine 的不变量之一是 <code>quantity &gt;= 0</code>。构造器和每个修改数量的方法都在维护它。</p>
+<p>设计类时的关键问题不是“字段用什么类型”，而是“这个对象有哪些条件必须一直成立”。把这些条件写进构造器和业务方法，比靠注释或约定可靠得多。</p>
+<h2 id="六-final-字段">六、<code>final</code> 字段</h2>
+<h3 id="6-1-一旦赋值就不能再改">6.1 一旦赋值就不能再改</h3>
+<p>第 6 章已经见过 <code>final</code> 变量。<code>final</code> 用在字段上表示该字段在构造器完成后不能再被修改：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class OrderLine {
+    private final String productName; // 构造器完成后不能改
+    private int quantity;             // 可以改
 
+    public OrderLine(String productName, int quantity) {
+        this.productName = productName;
+        this.quantity = quantity;
+    }
+    // productName 没有 setter——也不需要，因为它是 final
+}</code></pre></figure>
+<p><code>final</code> 字段必须在构造器结束前完成赋值。编译器会检查这一点——如果某个构造器路径没有给 <code>final</code> 字段赋值，编译会失败。</p>
+<h3 id="6-2-final-引用不等于对象不可变">6.2 <code>final</code> 引用不等于对象不可变</h3>
+<p><code>final String productName</code> 的意思是变量 <code>productName</code> 不能改为指向另一个 String 对象，但 String 本身不可变，所以这里没有问题。如果字段是 <code>final StringBuilder</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">private final StringBuilder log = new StringBuilder();
+
+public void appendLog(String entry) {
+    log.append(entry); // 可以：修改的是对象内部
+}</code></pre></figure>
+<p><code>log</code> 不能指向另一个 <code>StringBuilder</code>，但 <code>log</code> 指向的 <code>StringBuilder</code> 对象内部仍然可以变化。<code>final</code> 锁住的是引用变量，不锁住对象内容。</p>
+<h2 id="七-static-与实例成员">七、<code>static</code> 与实例成员</h2>
+<h3 id="7-1-实例成员每个对象有一份">7.1 实例成员每个对象有一份</h3>
+<p>实例字段和方法属于对象。每 <code>new</code> 一个对象，就多一套实例字段：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">OrderLine line1 = new OrderLine(&quot;书&quot;, 2);
+OrderLine line2 = new OrderLine(&quot;笔&quot;, 5);
+
+// line1 与 line2 各自保存自己的 productName 和 quantity</code></pre></figure>
+<h3 id="7-2-static-成员属于类本身">7.2 <code>static</code> 成员属于类本身</h3>
+<p><code>static</code> 字段只有一份，被这个类的所有对象共享：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class OrderLine {
+    private static int totalLinesCreated = 0; // 类的共享计数器
+
+    public OrderLine(String productName, int quantity) {
+        totalLinesCreated++; // 每创建一个对象，计数器加 1
+        // ...
+    }
+
+    public static int getTotalLinesCreated() {
+        return totalLinesCreated;
+    }
+}</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">OrderLine line1 = new OrderLine(&quot;书&quot;, 2);
+OrderLine line2 = new OrderLine(&quot;笔&quot;, 5);
+
+System.out.println(OrderLine.getTotalLinesCreated()); // 控制台输出：2</code></pre></figure>
+<p><code>static</code> 方法用类名调用，不需要先创建对象。在 <code>static</code> 方法内部，不能直接使用实例字段（因为没有“当前对象”这个概念）。</p>
+<h3 id="7-3-什么时候用-static">7.3 什么时候用 static</h3>
+<ul><li>方法不依赖任何具体对象的字段时，可以写成 <code>static</code> 工具方法。</li><li>字段需要被所有对象共享时，写成 <code>static</code> 字段，但要小心——多个对象同时修改同一个 <code>static</code> 字段可能引发并发问题（第 34 章会讲）。</li><li>不要把本应属于具体对象的字段写成 <code>static</code>。每个订单行的数量应该是实例字段，不是 <code>static</code> 字段。</li></ul>
+<h2 id="八-封装与可变性设计">八、封装与可变性设计</h2>
+<h3 id="8-1-不可变对象的优势">8.1 不可变对象的优势</h3>
+<p>如果一个对象在创建后，所有字段都不能被修改，它就是<span class="term" tabindex="0" data-tip="课程术语，详见术语表。">不可变对象</span>。String 是不可变的；第 4-7 章大量使用的 <code>&quot;Hello&quot;</code> 字面量指向的就是不可变对象。</p>
+<p>不可变对象的优点：</p>
+<ul><li>创建后状态固定，不需要担心某处修改影响了另一处。</li><li>可以在多处共享，不用担心被意外改变。</li><li>天然线程安全（第 34 章会进一步讨论）。</li></ul>
+<p>缺点也很明显：每次需要“变化”时只能创建新对象。对于会频繁变化的购物车数据，使用可变对象配合封装方法更合适。</p>
+<h3 id="8-2-可变对象需要封装来保证安全">8.2 可变对象需要封装来保证安全</h3>
+<p>当对象允许修改时，封装（<code>private</code> 字段 + 业务方法）是保证安全的主要手段。设计可变对象时问三个问题：</p>
+<ol><li>哪些字段可以被外部修改？哪些不行？</li><li>每次修改需要满足什么条件？</li><li>这些条件能不能在编译期或运行期被检查？</li></ol>
+<h2 id="九-一个完整的-orderline">九、一个完整的 OrderLine</h2>
+<p>下面把前面讨论的内容合成一个完整的类。它不是真实订单系统，但能展示一个带规则的类应该如何组织：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class OrderLine {
+    private final String productName;     // 创建后不能改
+    private int quantity;                 // 可通过 increase/decrease 修改
+    private static int totalCreated = 0;  // 所有 OrderLine 对象共享的计数器
+
+    // 完整构造器
     public OrderLine(String productName, int quantity) {
         if (productName == null || productName.isBlank()) {
             throw new IllegalArgumentException(&quot;商品名不能为空&quot;);
         }
         if (quantity &lt; 0) {
-            throw new IllegalArgumentException(&quot;数量不能为负数&quot;);
+            throw new IllegalArgumentException(&quot;数量不能为负数，收到：&quot; + quantity);
         }
         this.productName = productName;
         this.quantity = quantity;
+        totalCreated++; // 每创建一个有效对象，计数器加 1
     }
 
-    public void increase(int amount) {
-        if (amount &lt;= 0) {
-            throw new IllegalArgumentException(&quot;增加数量必须大于 0&quot;);
-        }
-        quantity += amount;
+    // 数量默认为 1 的便利构造器
+    public OrderLine(String productName) {
+        this(productName, 1);
+    }
+
+    // getter
+    public String getProductName() {
+        return productName;
     }
 
     public int getQuantity() {
         return quantity;
     }
+
+    public static int getTotalCreated() {
+        return totalCreated;
+    }
+
+    // 业务方法：增加数量
+    public void increase(int amount) {
+        if (amount &lt;= 0) {
+            throw new IllegalArgumentException(&quot;增加数量必须大于 0&quot;);
+        }
+        this.quantity += amount;
+    }
+
+    // 业务方法：减少数量
+    public void decrease(int amount) {
+        if (amount &lt;= 0) {
+            throw new IllegalArgumentException(&quot;减少数量必须大于 0&quot;);
+        }
+        if (this.quantity &lt; amount) {
+            throw new IllegalArgumentException(
+                &quot;数量不足，当前：&quot; + this.quantity + &quot;，想减少：&quot; + amount);
+        }
+        this.quantity -= amount;
+    }
+
+    // 格式化信息，便于打印
+    public String describe() {
+        return productName + &quot; × &quot; + quantity;
+    }
 }</code></pre></figure>
-<p><code>final</code> 表示 <code>productName</code> 在构造器赋值后不能再指向另一个字符串。它不等于整个对象不可变，因为 <code>quantity</code> 仍能通过 <code>increase</code> 改变。</p>
-<h2 id="练习-为计数器设计边界">练习：为计数器设计边界</h2>
-<p>创建 <code>Counter</code> 类：构造器接收初始值，初始值不能为负数；提供 <code>increment()</code> 与 <code>getValue()</code>；不要公开字段，也不要提供可把值改成任意整数的 setter。</p>
-<p>完成标准：能用 <code>new Counter(0)</code> 创建对象；外部代码只能通过方法改变状态；任何公开操作后计数器都不会小于 0。</p>
-<h2 id="常见误区">常见误区</h2>
-<h3 id="把类当成已经创建的对象">把类当成已经创建的对象</h3>
-<p><code>OrderLine</code> 是类型名；<code>new OrderLine(&quot;书&quot;, 1)</code> 才创建对象。变量保存的是对象引用，不是类定义本身。</p>
-<h3 id="为每个字段自动生成-setter">为每个字段自动生成 setter</h3>
-<p>setter 很方便，但会让外部代码绕开业务规则。先问“这个状态允许怎样改变”，再决定是否需要方法。</p>
-<h3 id="用-static-保存每个对象自己的状态">用 <code>static</code> 保存每个对象自己的状态</h3>
-<p><code>static</code> 字段由所有对象共享。订单项自己的数量应该是实例字段，而不是 static 字段。</p>
-<h2 id="本章小结">本章小结</h2>
-<p>类把数据和规则放在一起；对象是类在运行时的具体实例。构造器建立有效初始状态，private 字段和业务方法共同维护不变量。第 9 章会比较普通类、record 与 enum；第 10 章再让不同对象通过接口协作。</p>
-<h2 id="快速自测">快速自测</h2>
-<ol><li>构造器与普通方法有什么区别？</li><li>为什么 <code>quantity</code> 通常应为 private？</li><li><code>final String productName</code> 是否表示整个 OrderLine 都不可变？</li></ol>
-<p>参考答案：构造器在 <code>new</code> 时初始化对象且没有返回值类型；private 防止外部绕过规则直接修改字段；不是，<code>quantity</code> 仍可改变。</p>
+<p>测试它：</p>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class OrderLineDemo {
+    public static void main(String[] args) {
+        OrderLine line1 = new OrderLine(&quot;Java 编程书&quot;, 3);
+        OrderLine line2 = new OrderLine(&quot;马克笔&quot;); // 默认数量 1
+
+        System.out.println(line1.describe()); // 控制台输出：Java 编程书 × 3
+        System.out.println(line2.describe()); // 控制台输出：马克笔 × 1
+
+        line1.increase(2);
+        System.out.println(line1.describe()); // 控制台输出：Java 编程书 × 5
+
+        line1.decrease(1);
+        System.out.println(line1.describe()); // 控制台输出：Java 编程书 × 4
+
+        System.out.println(OrderLine.getTotalCreated()); // 控制台输出：2
+    }
+}</code></pre></figure>
+<h3 id="9-1-这段代码的设计选择">9.1 这段代码的设计选择</h3>
+<ul><li><code>productName</code> 是 <code>final</code>：订单行创建后，商品名不应该改变。</li><li><code>quantity</code> 不是 <code>final</code>：数量会变化，但变化只能通过 <code>increase</code> 和 <code>decrease</code> 完成。</li><li>没有 <code>setQuantity</code>：外部代码不能直接把数量设成任意值。</li><li><code>describe</code> 返回格式化字符串：让打印更方便，而不是让外部直接拼字段。</li></ul>
+<h2 id="十-本章练习">十、本章练习</h2>
+<h3 id="10-1-计数器类">10.1 计数器类</h3>
+<p>设计 <code>Counter</code> 类，满足以下要求：</p>
+<ul><li>构造器接收初始值，初始值不能为负数。</li><li>提供 <code>increment()</code> 方法，每次调用值加 1。</li><li>提供 <code>getValue()</code> 方法返回当前值。</li><li>不公开字段。</li></ul>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">// 预期的使用方式
+Counter c = new Counter(0);
+c.increment();
+c.increment();
+System.out.println(c.getValue()); // 应该输出：2</code></pre></figure>
+<h3 id="10-2-参考答案">10.2 参考答案</h3>
+<figure class="code-card"><div class="code-toolbar"><span>java</span><button class="copy-code" type="button">复制</button></div><pre><code class="language-java">public class Counter {
+    private int value;
+
+    public Counter(int initialValue) {
+        if (initialValue &lt; 0) {
+            throw new IllegalArgumentException(&quot;初始值不能为负数&quot;);
+        }
+        this.value = initialValue;
+    }
+
+    public void increment() {
+        this.value++;
+    }
+
+    public int getValue() {
+        return value;
+    }
+}</code></pre></figure>
+<h3 id="10-3-判分标准">10.3 判分标准</h3>
+<ul><li>字段是 <code>private</code>（2 分）</li><li>构造器检查了负数（2 分）</li><li><code>increment</code> 没有参数且每次加 1（2 分）</li><li><code>getValue</code> 只返回当前值而不修改状态（2 分）</li><li>没有提供把值设成任意整数的 setter（2 分）</li></ul>
+<h2 id="十一-常见误区">十一、常见误区</h2>
+<h3 id="11-1-把类名当成对象">11.1 把类名当成对象</h3>
+<p><code>OrderLine</code> 是类型名，是类的定义。<code>new OrderLine(&quot;书&quot;, 1)</code> 才创建了一个具体的对象。变量保存的是对象引用，不是类定义。</p>
+<h3 id="11-2-为每个字段自动生成-getter-和-setter">11.2 为每个字段自动生成 getter 和 setter</h3>
+<p>IDE 可以一键生成 getter 和 setter，但应该先想清楚这个字段允许怎样变化。setter 让外部可以任意改写，可能绕开构造器里的检查。</p>
+<h3 id="11-3-用-static-保存应该属于对象的数据">11.3 用 <code>static</code> 保存应该属于对象的数据</h3>
+<p>如果一个字段的值随对象不同而不同（如每个订单行的数量），它应该是实例字段。<code>static</code> 字段被所有对象共享，修改一个会影响所有。</p>
+<h3 id="11-4-在构造器里调用可被子类覆盖的方法">11.4 在构造器里调用可被子类覆盖的方法</h3>
+<p>这属于继承和多态的陷阱，第 10 章会展开。现在只需要知道：构造器里只做字段赋值和基本检查，不要调用复杂的实例方法。</p>
+<h2 id="十二-本章小结">十二、本章小结</h2>
+<p>类把字段和方法放在一起，是 Java 组织代码的基本单元。对象是类在运行时的具体实例，每个对象保存自己的字段值。构造器在 <code>new</code> 时初始化对象并检查规则；<code>private</code> 字段和业务方法共同维护不变量。</p>
+<p><code>static</code> 成员属于类本身，被所有对象共享；实例成员每个对象单独拥有一份。<code>final</code> 字段在构造器完成后不能再改变。</p>
+<p>第 9 章会比较普通类、record 和 enum，讨论不同场景下应该选择哪种类型声明方式。</p>
+<h2 id="十三-快速自测">十三、快速自测</h2>
+<ol><li>构造器与普通方法有哪两个最明显的区别？</li><li>为什么 <code>quantity</code> 字段通常应该设为 <code>private</code>？</li><li><code>final String productName</code> 是否表示整个 OrderLine 对象完全不可变？</li><li><code>static</code> 方法和实例方法在使用上有什么区别？</li><li>如果 OrderLine 提供了 <code>setQuantity(int quantity)</code> 且没有做检查，会有什么风险？</li></ol>
+<p>参考答案：</p>
+<ol><li>构造器名称与类名相同且没有返回值类型；构造器在 <code>new</code> 时自动调用，不能像普通方法一样通过对象显式调用。</li><li><code>private</code> 阻止外部代码绕开业务方法直接修改字段，从而保护不变量。</li><li>不是，<code>quantity</code> 不是 <code>final</code>，仍然可以通过 <code>increase</code>/<code>decrease</code> 改变。</li><li><code>static</code> 方法通过类名调用，不能直接访问实例字段；实例方法通过对象调用，可以访问该对象的字段。</li><li>外部代码可以传入负数，破坏 <code>quantity &gt;= 0</code> 的不变量，构造器中的检查形同虚设。</li></ol>
 <h2 id="参考文献">参考文献</h2>
-<ul><li>Oracle. <a href="https://docs.oracle.com/javase/specs/jls/se17/html/" target="_blank" rel="noreferrer">Java SE 17 Language Specification</a>.</li><li>OpenJDK. <a href="https://dev.java/learn/classes-objects/" target="_blank" rel="noreferrer">Learn Java: Objects</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/07-array-string-control-flow.html">← 第 7 章<br><strong>数组、字符串与控制流</strong></a><a href="../lessons/09-class-record-enum.html">第 9 章 →<br><strong>类、record 与 enum 的选择</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#为什么变量和方法会聚在一起">为什么变量和方法会聚在一起</a><a class="" href="#定义第一个类">定义第一个类</a><a class="" href="#构造器让对象从有效状态开始">构造器让对象从有效状态开始</a><a class="" href="#private-让规则留在类内部">private 让规则留在类内部</a><a class="" href="#static-与对象自身的区别">static 与对象自身的区别</a><a class="" href="#一个完整但很小的-orderline">一个完整但很小的 OrderLine</a><a class="" href="#练习-为计数器设计边界">练习：为计数器设计边界</a><a class="" href="#常见误区">常见误区</a><a class="sub" href="#把类当成已经创建的对象">把类当成已经创建的对象</a><a class="sub" href="#为每个字段自动生成-setter">为每个字段自动生成 setter</a><a class="sub" href="#用-static-保存每个对象自己的状态">用 static 保存每个对象自己的状态</a><a class="" href="#本章小结">本章小结</a><a class="" href="#快速自测">快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>
+<ul><li>Oracle. <a href="https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html" target="_blank" rel="noreferrer">The Java Language Specification, Java SE 17: Classes</a>.</li><li>Oracle. <a href="https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.3" target="_blank" rel="noreferrer">The Java Language Specification, Java SE 17: Fields</a>.</li><li>Oracle. <a href="https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html#jls-8.8" target="_blank" rel="noreferrer">The Java Language Specification, Java SE 17: Constructors</a>.</li><li>OpenJDK. <a href="https://dev.java/learn/classes-objects/" target="_blank" rel="noreferrer">Learn Java: Classes and Objects</a>.</li></ul><nav class="lesson-nav"><a href="../lessons/07-array-string-control-flow.html">← 第 7 章<br><strong>数组、字符串与控制流</strong></a><a href="../lessons/09-class-record-enum.html">第 9 章 →<br><strong>类、record 与 enum 的选择</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一-为什么需要类">一、为什么需要类</a><a class="sub" href="#1-1-散落的变量难以维护规则">1.1 散落的变量难以维护规则</a><a class="sub" href="#1-2-类是创建对象的定义">1.2 类是创建对象的定义</a><a class="" href="#二-最简单的类和一个对象">二、最简单的类和一个对象</a><a class="sub" href="#2-1-定义一个只有字段的类">2.1 定义一个只有字段的类</a><a class="sub" href="#2-2-创建对象并访问字段">2.2 创建对象并访问字段</a><a class="sub" href="#2-3-字段默认值">2.3 字段默认值</a><a class="" href="#三-实例方法操作对象自己的数据">三、实例方法操作对象自己的数据</a><a class="sub" href="#3-1-把操作放进类">3.1 把操作放进类</a><a class="sub" href="#3-2-实例方法与-static-方法的区别">3.2 实例方法与 static 方法的区别</a><a class="" href="#四-构造器让对象从有效状态开始">四、构造器让对象从有效状态开始</a><a class="sub" href="#4-1-没有构造器时的问题">4.1 没有构造器时的问题</a><a class="sub" href="#4-2-编写第一个构造器">4.2 编写第一个构造器</a><a class="sub" href="#4-3-构造器可以检查规则">4.3 构造器可以检查规则</a><a class="sub" href="#4-4-多个构造器">4.4 多个构造器</a><a class="" href="#五-访问控制与封装">五、访问控制与封装</a><a class="sub" href="#5-1-private-隐藏字段">5.1 private 隐藏字段</a><a class="sub" href="#5-2-getter-安全地暴露数据">5.2 Getter：安全地暴露数据</a><a class="sub" href="#5-3-不是每个字段都需要-setter">5.3 不是每个字段都需要 setter</a><a class="sub" href="#5-4-不变量">5.4 不变量</a><a class="" href="#六-final-字段">六、final 字段</a><a class="sub" href="#6-1-一旦赋值就不能再改">6.1 一旦赋值就不能再改</a><a class="sub" href="#6-2-final-引用不等于对象不可变">6.2 final 引用不等于对象不可变</a><a class="" href="#七-static-与实例成员">七、static 与实例成员</a><a class="sub" href="#7-1-实例成员每个对象有一份">7.1 实例成员每个对象有一份</a><a class="sub" href="#7-2-static-成员属于类本身">7.2 static 成员属于类本身</a><a class="sub" href="#7-3-什么时候用-static">7.3 什么时候用 static</a><a class="" href="#八-封装与可变性设计">八、封装与可变性设计</a><a class="sub" href="#8-1-不可变对象的优势">8.1 不可变对象的优势</a><a class="sub" href="#8-2-可变对象需要封装来保证安全">8.2 可变对象需要封装来保证安全</a><a class="" href="#九-一个完整的-orderline">九、一个完整的 OrderLine</a><a class="sub" href="#9-1-这段代码的设计选择">9.1 这段代码的设计选择</a><a class="" href="#十-本章练习">十、本章练习</a><a class="sub" href="#10-1-计数器类">10.1 计数器类</a><a class="sub" href="#10-2-参考答案">10.2 参考答案</a><a class="sub" href="#10-3-判分标准">10.3 判分标准</a><a class="" href="#十一-常见误区">十一、常见误区</a><a class="sub" href="#11-1-把类名当成对象">11.1 把类名当成对象</a><a class="sub" href="#11-2-为每个字段自动生成-getter-和-setter">11.2 为每个字段自动生成 getter 和 setter</a><a class="sub" href="#11-3-用-static-保存应该属于对象的数据">11.3 用 static 保存应该属于对象的数据</a><a class="sub" href="#11-4-在构造器里调用可被子类覆盖的方法">11.4 在构造器里调用可被子类覆盖的方法</a><a class="" href="#十二-本章小结">十二、本章小结</a><a class="" href="#十三-快速自测">十三、快速自测</a><a class="" href="#参考文献">参考文献</a></aside></div><footer class="site-footer">Java Web 后端入门到进阶</footer></div></body></html>
