@@ -1,0 +1,7 @@
+/* Theme system: all themes loaded, active theme chosen via data-theme on <html>.
+   Default (no attribute) = guardnet. Set data-theme="evergreen" for the finance style.
+   The runtime switcher in theme-switcher.js handles toggling + persistence. */
+
+/* Design tokens — must be listed before component rules. */
+@import url("./themes/guardnet.css");
+@import url("./themes/evergreen.css");

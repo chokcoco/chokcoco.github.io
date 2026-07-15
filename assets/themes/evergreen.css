@@ -1,0 +1,81 @@
+/* Evergreen Finance theme — warm cream + dark green fintech aesthetic.
+   Activated by [data-theme="evergreen"] on <html>. */
+
+[data-theme="evergreen"] {
+  color-scheme: light;
+
+  /* Fonts */
+  --font-sans: "Georgia", "Cooper BT W01 Light", "Songti SC", "Noto Serif SC", serif;
+  --font-display: "Cooper BT W01 Medium", "Cooper BT W01 Light", "Georgia", serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
+  /* Page & text */
+  --page: #FDF5EB;
+  --ink: #08150C;
+  --muted: #6b6258;
+  --muted-strong: #44403c;
+  --content-text: #292524;
+  --emphasis-text: #08150C;
+  --table-text: #44403c;
+  --quote-text: #1c2e1f;
+  --footer-text: #94918a;
+
+  /* Surfaces */
+  --surface: #ffffff;
+  --surface-raised: #EBE4DC;
+  --surface-soft: #F4F1EC;
+  --surface-translucent: rgba(255, 255, 255, .82);
+  --surface-glass: rgba(255, 255, 255, .90);
+  --surface-table: #F4F1EC;
+  --surface-table-head: #EBE4DC;
+  --surface-diagram: #FDF5EB;
+  --surface-tooltip: #1a2e1f;
+  --surface-inline-code: #EBE4DC;
+
+  /* Lines */
+  --line: rgba(8, 21, 12, .12);
+  --line-soft: rgba(8, 21, 12, .07);
+  --line-strong: rgba(34, 197, 94, .45);
+  --line-accent-soft: rgba(34, 197, 94, .18);
+  --line-accent: rgba(34, 197, 94, .30);
+  --row-hover: rgba(8, 21, 12, .02);
+  --inline-code-line: rgba(8, 21, 12, .10);
+
+  /* Accent — emerald */
+  --accent: #08150C;
+  --accent-strong: #1a2e1f;
+  --accent-deep: #056949;
+  --accent-soft: rgba(5, 105, 73, .14);
+
+  /* Signal */
+  --signal: #056949;
+  --signal-soft: rgba(5, 105, 73, .10);
+  --lab-glow: rgba(5, 105, 73, .12);
+
+  /* Code */
+  --code: #1a2e1f;
+  --code-text: #e8f0e3;
+  --code-comment: #7a9080;
+  --code-string: #b9d58f;
+  --code-keyword: #d8a1ff;
+  --code-number: #88b7ff;
+  --inline-code-text: #056949;
+
+  /* Buttons */
+  --button-ink: #FDF5EB;
+  --button-text: #08150C;
+
+  /* Progress */
+  --progress-start: #056949;
+
+  /* Decorative */
+  --page-glow: rgba(5, 105, 73, .10);
+  --mark: rgba(8, 21, 12, .035);
+
+  /* Radii — evergreen uses slightly tighter corners */
+  --radius-xl: 18px;
+  --radius-lg: 14px;
+  --radius-md: 12px;
+  --radius-pill: 999px;
+  --shadow: 0 12px 48px rgba(8, 21, 12, .10);
+}

@@ -1,0 +1,200 @@
+@import url("./theme.css");
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 12% 4%, var(--page-glow), transparent 30rem),
+    var(--page);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.72;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+a { color: var(--accent); text-underline-offset: 4px; }
+a:hover { color: var(--accent-strong); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.app { width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px 40px 84px; }
+.topbar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 64px;
+  padding: 8px 0 18px;
+  border-bottom: 1px solid var(--line);
+}
+.brand { color: var(--ink); font-size: 16px; font-weight: 500; letter-spacing: -.03em; }
+.topbar nav { display: flex; gap: 22px; flex-wrap: wrap; font-size: 13px; }
+.topbar nav a { color: var(--muted); text-decoration: none; }
+.topbar nav a:hover { color: var(--ink); }
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 530px;
+  padding: 126px 0 78px;
+  border-bottom: 1px solid var(--line);
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 30%;
+  right: -170px;
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  background: var(--accent-deep);
+  filter: blur(100px);
+  opacity: .38;
+}
+.hero::after {
+  content: "STUDIO";
+  position: absolute;
+  z-index: -1;
+  right: 0;
+  bottom: -56px;
+  color: var(--mark);
+  font-size: clamp(120px, 19vw, 260px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.08em;
+}
+.eyebrow { color: var(--accent); font-size: 12px; letter-spacing: .15em; text-transform: uppercase; }
+h1 {
+  max-width: 1040px;
+  margin: 16px 0 24px;
+  font-size: clamp(44px, 6.5vw, 88px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -.055em;
+}
+h2 { margin: 78px 0 26px; font-size: clamp(30px, 4vw, 52px); font-weight: 400; line-height: 1.1; letter-spacing: -.04em; }
+.lead { max-width: 840px; color: var(--muted-strong); font-size: clamp(17px, 2vw, 21px); line-height: 1.72; }
+
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 20px 0 92px; }
+.stat {
+  min-height: 150px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.stat strong { display: block; margin-bottom: 32px; font-size: 28px; font-weight: 400; letter-spacing: -.035em; }
+.stat span { color: var(--muted); font-size: 12px; }
+
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.course-card {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: 390px;
+  overflow: hidden;
+  flex-direction: column;
+  padding: 30px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  color: var(--ink);
+}
+.course-card::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: -170px;
+  bottom: -170px;
+  width: 310px;
+  height: 310px;
+  border-radius: 50%;
+  background: var(--accent-deep);
+  filter: blur(82px);
+  opacity: .25;
+}
+.course-card:nth-child(2n)::before { top: -220px; left: 48%; right: auto; bottom: auto; transform: translateX(-50%); opacity: .32; }
+.course-card:hover { border-color: var(--line-strong); }
+.course-card.featured { border-color: var(--line-accent); }
+.course-card h3 { max-width: 520px; margin: 20px 0 10px; font-size: clamp(24px, 2.5vw, 34px); font-weight: 400; line-height: 1.25; letter-spacing: -.035em; }
+.course-card > p { max-width: 560px; margin: 0; color: var(--muted); font-size: 14px; }
+.meta { display: flex; gap: 8px; flex-wrap: wrap; margin: auto 0 22px; padding-top: 42px; }
+.pill { width: max-content; padding: 5px 10px; border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--surface-translucent); color: var(--muted); font-size: 11px; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 14px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--button-ink);
+  font-size: 12px;
+  text-decoration: none;
+}
+.button:hover { background: var(--accent-strong); color: var(--button-ink); }
+.button.secondary { border-color: var(--line); background: transparent; color: var(--muted-strong); }
+.button.secondary:hover { border-color: var(--line-strong); color: var(--ink); }
+
+.flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.flow article {
+  min-height: 220px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.flow strong { display: block; margin-bottom: 82px; color: var(--ink); font-size: 18px; font-weight: 400; }
+.flow p { margin: 0; color: var(--muted); font-size: 13px; }
+
+@media (max-width: 900px) {
+  .app { padding-inline: 24px; }
+  .stats, .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 680px) {
+  .app { padding: 14px 16px 56px; }
+  .topbar { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .topbar nav { gap: 16px; }
+  .hero { min-height: 0; padding: 72px 0 52px; }
+  .hero::before { right: -280px; width: 440px; height: 440px; }
+  .stats, .grid, .flow { grid-template-columns: 1fr; }
+  .course-card { min-height: 360px; padding: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Display font for headings and brand — uses --font-display (serif in evergreen, sans in guardnet) */
+h1, h2, h3, h4,
+.brand, .eyebrow,
+.hero h1, .hero .lead,
+.stat strong, .flow strong, .course-card h3 {
+  font-family: var(--font-display, var(--font-sans));
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  flex: 0 0 auto;
+  padding: 5px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  color: var(--muted-strong);
+  font: 11px/1.5 var(--font-sans);
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+  white-space: nowrap;
+}
+.theme-toggle:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+@media (max-width: 680px) {
+  .theme-toggle { font-size: 10px; padding: 4px 10px; }
+}
