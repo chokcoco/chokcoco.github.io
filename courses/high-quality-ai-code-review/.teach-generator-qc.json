@@ -1,0 +1,28 @@
+{
+  "requiredPaths": [
+    "workspace/MISSION.md",
+    "workspace/RESOURCES.md",
+    "workspace/COURSE-GENERATION-SPEC.md",
+    "workspace/COURSE-BLUEPRINT.md",
+    "workspace/NOTES.md",
+    "index.html",
+    "course.json",
+    "lessons",
+    "markdown",
+    "reference/glossary.md",
+    "reference/glossary.html",
+    "assets/course.css",
+    "assets/course.js"
+  ],
+  "contentRoots": [
+    "index.html",
+    "course.json",
+    "lessons",
+    "markdown",
+    "reference",
+    "assets"
+  ],
+  "forbiddenMermaidTypes": ["mindmap"],
+  "allowedExternalUrlPrefixes": ["https://cdn.jsdelivr.net/npm/mermaid@10/"],
+  "unregisteredExternalUrlSeverity": "error"
+}

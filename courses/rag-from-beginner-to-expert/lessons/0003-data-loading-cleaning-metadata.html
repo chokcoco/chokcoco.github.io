@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>资料进入知识库：加载、清洗、元数据和版本 | RAG 从入门到精通</title>
+  <script src="../assets/theme-switcher.js"></script>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
+  <script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="../index.html">RAG 从入门到精通</a>
+      <nav>
+        <a href="../index.html">课程首页</a>
+        <a href="../reference/0001-course-blueprint.html">课程蓝图</a>
+        <a href="../reference/0002-rag-glossary.html">术语表</a>
+      </nav>
+    </header>
+    
+    <div class="layout">
+      <main>
+<section class="hero">
+  <div class="eyebrow">第 3 章 · 约 60 分钟</div>
+  <h1>资料进入知识库：加载、清洗、元数据和版本</h1>
+  <p class="summary">第二章我们把文档契约定住了。现在要面对更真实的一面：企业资料很少乖乖躺在一个干净文件夹里。FAQ 有重复答案，客诉工单带口语和情绪，制度文档有版本差异，某些内容还带权限。第 3 章不急着检索，先把资料治理到“可以放心入库”的程度。</p>
+  <div class="meta"><span class="pill">识别资料噪声</span><span class="pill">保留来源和版本</span><span class="pill">设计权限字段</span><span class="pill">生成 ingest 脚本</span></div>
+</section>
+<section id="goals" class="card">
+  <h2>这一章先把资料管住</h2>
+  <ul><li>识别资料噪声</li><li>保留来源和版本</li><li>设计权限字段</li><li>生成 ingest 脚本</li></ul>
+</section>
+<section id="mess" class="section">
+  <h2>真实资料进来时，通常没那么体面</h2>
+  <p>如果只看教程里的 demo，资料总是干净的：一段制度、一条 FAQ、一个标准答案。可真到公司里，资料常常长得很别扭。同一条退款规则在 FAQ 里写了一遍，在客服手册里又写了一遍；历史工单里有有用结论，也夹着用户情绪、客服口头承诺和一些已经过期的处理办法。</p>
+  <p>这一步如果偷懒，后面检索会很难看。模型可能找到过期规则，也可能把只允许主管看的客诉处理记录拿去回答一线客服。第 3 章做的事情不花哨：把原始资料整理成可靠的入库物料。它更像厨房备菜，刀工不好，后面再会炒也救不回来。</p>
+  <p>先补两份原始资料。一个是 FAQ，一个是历史工单摘要。你会看到它们的权限不同：FAQ 给客服可见，客诉工单摘要只给主管角色可见。这不是形式主义，后面的权限过滤会直接吃这个字段。</p>
+  <div class="code-stack">
+    <figure class="code-card"><figcaption>data/raw/product-faq.md：FAQ 适合保留问法和标准答案</figcaption><pre><code class="language-markdown" data-language="markdown">---
+title: 产品 FAQ
+section: 会员与发票
+version: 2026-01
+permission: support
+updated_at: 2026-01-18
+owner: product-ops
+---
+
+# 会员与发票
+
+## Q: 年度会员可以开发票吗？
+
+A: 可以。用户需要在订单完成后 30 天内进入“订单中心 - 发票管理”提交发票信息。
+
+## Q: 发票抬头填错了怎么办？
+
+A: 如果发票尚未开具，用户可以自行修改。已经开具的发票需要提交客服工单，由财务在 3 个工作日内处理。</code></pre></figure>
+    <figure class="code-card"><figcaption>data/raw/complaint-tickets.md：历史工单要保留场景，但不能照搬情绪</figcaption><pre><code class="language-markdown" data-language="markdown">---
+title: 历史客诉工单摘要
+section: 退款争议
+version: 2026-01
+permission: support-lead
+updated_at: 2026-01-20
+owner: customer-success
+---
+
+# 退款争议
+
+## 工单 CS-1024
+
+用户购买年度会员后第 5 天申请退款，订单使用了 40 元优惠券。
+处理结论：允许退款，但退款金额需要扣除优惠券抵扣部分。客服回复中不能承诺具体到账时间。
+
+## 工单 CS-1088
+
+用户购买年度会员后已经使用 5 次专属权益，再申请全额退款。
+处理结论：转交二线客服复核。客服不得直接承诺全额退款。</code></pre></figure>
+  </div>
+</section>
+<section id="cleaning" class="section">
+  <h2>清洗不是越狠越好</h2>
+  <p>初学者容易把“数据清洗”理解成删得越干净越好。这个想法有点危险。RAG 里的资料不是训练集，很多结构本身就有意义：Markdown 标题告诉你章节，列表告诉你步骤，空行告诉你段落边界。清洗时把这些都抹平，后面分块就只能靠字数硬切。</p>
+  <p>所以这里用一版很克制的清洗：统一换行，去掉行尾空格，压缩过多空行，删除明确标注为 private 的内部批注。其他东西先保留。遇到不确定的内容，不要让脚本自作聪明。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>src/ingest/normalize-text.js：先做克制的清洗</figcaption><pre><code class="language-javascript" data-language="javascript">export function normalizeText(text) {
+  return text
+    // 统一换行，避免不同系统导出的文件出现 \r\n / \r 混用。
+    .replace(/\r\n?/g, &quot;\n&quot;)
+    // 去掉行尾空格。保留段落换行，因为 Markdown 标题和列表还要用。
+    .replace(/[ \t]+$/gm, &quot;&quot;)
+    // 连续 3 个以上空行压成 2 个，减少噪声，但不破坏段落结构。
+    .replace(/\n{3,}/g, &quot;\n\n&quot;)
+    .trim();
+}
+
+export function stripPrivateNotes(text) {
+  // 内部批注可以留在原始文件，但不应该进入面向客服检索的知识库。
+  return text.replace(/&lt;!--\s*private:[\s\S]*?--&gt;/g, &quot;&quot;).trim();
+}</code></pre></figure></div>
+</section>
+<section id="metadata" class="section">
+  <h2>元数据是检索时的方向盘</h2>
+  <p>很多人第一次做 RAG，只保存 <code>text</code>。一开始确实能跑，问一句退费政策，系统能找回几段文字。可只要项目稍微真实一点，问题就来了：用户是什么角色？这段资料是不是最新版？答案引用的是 FAQ 还是历史工单？出了错找谁维护？</p>
+  <p>这些问题都不是模型能凭空解决的。元数据要在入库前就补齐，而且缺字段要直接报错。这里我们先把权限范围收窄到几个明确值，避免后面出现 <code>Support</code>、<code>support_user</code>、<code>客服</code> 这类混乱写法。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>src/ingest/metadata.js：元数据不是额外负担，是后面检索的方向盘</figcaption><pre><code class="language-javascript" data-language="javascript">const allowedPermissions = new Set([&quot;public&quot;, &quot;support&quot;, &quot;support-lead&quot;, &quot;internal&quot;]);
+
+export function normalizeMetadata(meta, source) {
+  const normalized = {
+    title: meta.title?.trim(),
+    section: (meta.section || meta.title || &quot;&quot;).trim(),
+    version: meta.version?.trim(),
+    permission: (meta.permission || &quot;internal&quot;).trim(),
+    updated_at: meta.updated_at?.trim(),
+    owner: (meta.owner || &quot;unknown&quot;).trim()
+  };
+
+  const missing = Object.entries(normalized)
+    .filter(([, value]) =&gt; !value)
+    .map(([key]) =&gt; key);
+
+  if (missing.length) {
+    throw new Error(`${source} 缺少元数据：${missing.join(&quot;, &quot;)}`);
+  }
+
+  if (!allowedPermissions.has(normalized.permission)) {
+    throw new Error(`${source} 的 permission 不合法：${normalized.permission}`);
+  }
+
+  return normalized;
+}</code></pre></figure></div>
+</section>
+<section id="dedupe" class="section">
+  <h2>重复资料会让模型变得“很有信心地摇摆”</h2>
+  <p>重复内容不只是浪费空间。更麻烦的是，两个重复片段如果版本不同，检索时可能一起被找出来。模型看到两个相似但不完全一致的规则，就会开始混合答案。用户看起来得到了一句完整回复，实际上是两份资料拼出来的。</p>
+  <p>第 3 章先做一个简单指纹去重。它不追求识别所有近似重复，只处理“内容几乎一样”的情况。更复杂的近似去重可以放到后面迭代，不要一开始就把项目做成数据治理平台。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>src/ingest/dedupe.js：重复资料不要等到检索时才处理</figcaption><pre><code class="language-javascript" data-language="javascript">import { createHash } from &quot;node:crypto&quot;;
+
+export function contentFingerprint(text) {
+  const normalized = text
+    .toLowerCase()
+    .replace(/\s+/g, &quot; &quot;)
+    .replace(/[，。！？、,.!?]/g, &quot;&quot;)
+    .trim();
+
+  return createHash(&quot;sha256&quot;).update(normalized).digest(&quot;hex&quot;).slice(0, 16);
+}
+
+export function removeDuplicateDocuments(documents) {
+  const seen = new Map();
+  const kept = [];
+  const duplicates = [];
+
+  for (const document of documents) {
+    const fingerprint = contentFingerprint(document.text);
+    const existing = seen.get(fingerprint);
+
+    if (existing) {
+      duplicates.push({
+        current: document.id,
+        duplicate_of: existing.id,
+        reason: &quot;same_normalized_content&quot;
+      });
+      continue;
+    }
+
+    seen.set(fingerprint, document);
+    kept.push({ ...document, fingerprint });
+  }
+
+  return { kept, duplicates };
+}</code></pre></figure></div>
+</section>
+<section id="pipeline" class="section">
+  <h2>把导入过程写成能复盘的流水线</h2>
+  <p>现在把清洗、元数据校验和去重串起来。这里有个小习惯值得保留：导入脚本不要只输出 <code>documents.jsonl</code>，还要输出 <code>import-report.json</code>。以后系统答错了，你至少知道当时入库了几份资料、跳过了哪些重复项。</p>
+  <p>这份报告不面向用户，面向开发者和课程练习。它让“资料有没有正确进入系统”这件事可以被检查，而不是靠感觉。</p>
+  <div class="code-stack">
+    <figure class="code-card"><figcaption>src/ingest/build-corpus.js：加入清洗、元数据校验和导入报告</figcaption><pre><code class="language-javascript" data-language="javascript">import { mkdir, readFile, readdir, writeFile } from &quot;node:fs/promises&quot;;
+import { join } from &quot;node:path&quot;;
+import { parseFrontmatter } from &quot;./frontmatter.js&quot;;
+import { normalizeText, stripPrivateNotes } from &quot;./normalize-text.js&quot;;
+import { normalizeMetadata } from &quot;./metadata.js&quot;;
+import { removeDuplicateDocuments } from &quot;./dedupe.js&quot;;
+import { assertDocumentShape } from &quot;../rag/schema.js&quot;;
+
+const rawDir = &quot;data/raw&quot;;
+const outputDir = &quot;data/processed&quot;;
+
+function toDocument({ file, meta, body }) {
+  const cleanText = normalizeText(stripPrivateNotes(body));
+  const metadata = normalizeMetadata(meta, join(rawDir, file));
+
+  return assertDocumentShape({
+    id: `${file.replace(/\.md$/, &quot;&quot;)}#${metadata.version}`,
+    source: join(rawDir, file),
+    ...metadata,
+    text: cleanText
+  });
+}
+
+export async function buildCorpus() {
+  const files = (await readdir(rawDir)).filter((file) =&gt; file.endsWith(&quot;.md&quot;));
+  const documents = [];
+
+  for (const file of files) {
+    const markdown = await readFile(join(rawDir, file), &quot;utf8&quot;);
+    const parsed = parseFrontmatter(markdown, file);
+    documents.push(toDocument({ file, ...parsed }));
+  }
+
+  const { kept, duplicates } = removeDuplicateDocuments(documents);
+  await mkdir(outputDir, { recursive: true });
+
+  await writeFile(
+    join(outputDir, &quot;documents.jsonl&quot;),
+    kept.map((doc) =&gt; JSON.stringify(doc)).join(&quot;\n&quot;) + &quot;\n&quot;,
+    &quot;utf8&quot;
+  );
+
+  await writeFile(
+    join(outputDir, &quot;import-report.json&quot;),
+    JSON.stringify({ input: documents.length, kept: kept.length, duplicates }, null, 2),
+    &quot;utf8&quot;
+  );
+
+  return { input: documents.length, kept: kept.length, duplicates: duplicates.length };
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const result = await buildCorpus();
+  console.log(`输入 ${result.input} 份资料，入库 ${result.kept} 份，重复 ${result.duplicates} 份。`);
+}</code></pre></figure>
+    <figure class="code-card"><figcaption>验收命令：检查文档和导入报告</figcaption><pre><code class="language-bash" data-language="bash">npm run ingest
+
+# documents.jsonl 应该保留 source、version、permission、owner
+cat data/processed/documents.jsonl
+
+# import-report.json 用来检查是否有重复资料被跳过
+cat data/processed/import-report.json</code></pre></figure>
+  </div>
+</section>
+<section id="practice" class="task">
+  <h2>练一下</h2>
+  <p>故意复制一份 `refund-policy.md`，改个文件名但不改正文。运行 `npm run ingest`，看看 `import-report.json` 是否能识别重复。再把其中一份的 `permission` 改成不存在的值，确认脚本会报错。</p>
+</section>
+<section id="quiz" class="quiz">
+  <h2>快速自测</h2>
+  <div class="quiz-question"><p>为什么不把历史工单原文直接塞进知识库？</p><button data-answer="true">会带入噪声</button><button data-answer="false">会删除脚本</button><button data-answer="false">会关闭浏览器</button><div class="quiz-result" aria-live="polite"></div><p class="lead">历史工单常有情绪、口语和个人信息，适合整理成摘要后再入库。</p></div><div class="quiz-question"><p>permission 字段在后面最直接服务什么？</p><button data-answer="true">权限过滤</button><button data-answer="false">图片压缩</button><button data-answer="false">端口扫描</button><div class="quiz-result" aria-live="polite"></div><p class="lead">检索时不仅要看相关性，还要按用户角色过滤可见资料。</p></div><div class="quiz-question"><p>import-report.json 的价值是什么？</p><button data-answer="true">复盘入库过程</button><button data-answer="false">替代向量库</button><button data-answer="false">训练浏览器</button><div class="quiz-result" aria-live="polite"></div><p class="lead">导入报告能告诉你输入多少、保留多少、跳过哪些重复资料。</p></div>
+</section>
+<section id="summary" class="callout">
+  <h2>这一章先收到这里</h2>
+  <p>第 3 章做的事看起来不像“智能”，但它决定了后面 RAG 的上限。资料清洗、元数据、去重、导入报告，都是为了让系统知道自己吃进了什么。下一章开始，我们把这些文档切成 chunk，让它们变成真正可以被检索的知识单元。</p>
+</section>
+<section id="sources" class="source-box">
+  <h2>本章参考资料</h2>
+  <ul class="source-list"><li><a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter1/02_preparation.md">Datawhale All-in-RAG: 开发 RAG 的准备工作</a><span>社区教程，用于项目环境和入门路径设计。</span></li><li><a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter1/03_get_start_rag.md">Datawhale All-in-RAG: 四步构建 RAG</a><span>社区教程，用于主线项目的最小闭环。</span></li><li><a href="https://developers.openai.com/api/docs/guides/retrieval">OpenAI Docs: Retrieval</a><span>用于校准文件检索、向量存储和检索产品化表达。</span></li></ul>
+</section>
+<nav class="footer-nav">
+  <a href="./0002-project-bootstrap-and-data-contract.html">上一章：项目骨架</a>
+  <a href="./0004-chunking-with-structure.html">下一章：结构化分块</a>
+</nav></main>
+      <aside class="side"><nav class="toc"><strong>本章目录</strong>
+    <a href="#goals">学习目标</a>
+    <a href="#mess">资料现实</a>
+    <a href="#cleaning">克制清洗</a>
+    <a href="#metadata">元数据</a>
+    <a href="#dedupe">去重</a>
+    <a href="#pipeline">导入流水线</a>
+    <a href="#practice">练一下</a>
+    <a href="#quiz">快速自测</a>
+    <a href="#sources">参考资料</a>
+  </nav></aside>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>为什么需要 RAG：从闭卷回答到有据可查 | RAG 从入门到精通</title>
+  <script src="../assets/theme-switcher.js"></script>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
+  <script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="../index.html">RAG 从入门到精通</a>
+      <nav>
+        <a href="../index.html">课程首页</a>
+        <a href="../reference/0001-course-blueprint.html">课程蓝图</a>
+        <a href="../reference/0002-rag-glossary.html">术语表</a>
+      </nav>
+    </header>
+    
+    <div class="layout">
+      <main>
+<section class="hero">
+  <div class="eyebrow">第 1 章 · 约 60 分钟</div>
+  <h1>为什么需要 RAG：从闭卷回答到有据可查</h1>
+  <p class="summary">如果只用一句话说清这门课，我会这样说：我们要做一个小型企业知识库，让模型回答客户问题前先查资料，并且把证据交出来。第一章先不碰复杂框架。先把问题想明白：为什么普通聊天不够，为什么搜索也不够，RAG 到底补上了哪一块。</p>
+  <div class="meta"><span class="pill">解释 RAG 的位置</span><span class="pill">区分 Prompt、搜索、RAG、微调</span><span class="pill">看懂课程项目路线</span><span class="pill">写出第一版 AI 生码提示词</span></div>
+</section>
+<section id="goals" class="card">
+  <h2>这一章先拿到什么</h2>
+  <ul><li>解释 RAG 的位置</li><li>区分 Prompt、搜索、RAG、微调</li><li>看懂课程项目路线</li><li>写出第一版 AI 生码提示词</li></ul>
+</section>
+<section id="problem" class="section">
+  <h2>先把这个麻烦看完整</h2>
+  <p>假设一家科技公司有三类资料：产品 FAQ、退款制度、历史客诉工单。客服问模型：“用户买了年度会员，使用 3 天后申请退款，应该怎么处理？”</p>
+  <p>如果只是普通聊天，模型大概率会给一个听上去挺像样的答案。它可能会说“可以退款”“请联系客服”“一般 3 到 7 个工作日到账”。这些话不一定错，但问题在于：公司制度里有没有 3 天这个条件？优惠券要不要扣减？客服能不能承诺到账时间？如果用户已经用了会员权益，是否要转二线复核？</p>
+  <p>RAG 要解决的不是“让模型说得更漂亮”。它要解决的是：回答之前，系统先把相关资料找出来，回答之后，还能让人看到它依据了哪几段资料。你可以把它理解成把模型从闭卷考试拉回开卷考试，而且试卷旁边要写出处。</p>
+</section>
+<section id="evidence" class="section">
+  <h2>RAG 的核心是证据链，不是向量数据库</h2>
+  <p>[[RAG]] 的完整名字是 Retrieval-Augmented Generation。Retrieval 是检索，Generation 是生成。先找资料，再回答。这句话很短，但里面有一个容易被忽略的前提：资料必须能被系统找到，也必须能被人核对。</p>
+  <p>很多教程一上来就讲向量数据库。向量库当然重要，后面我们也会认真讲。但企业里更早遇到的问题往往不是“向量库选哪个”，而是资料有没有来源、版本、权限、负责人。没有这些东西，系统即使找到了片段，也很难判断它能不能用。</p>
+  <p>所以我们从第一章就定一个数据形状。它还不是最终实现，只是把“证据链”这件事落在字段上：每个片段至少要知道自己来自哪里、属于哪一节、什么版本、谁能看。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>先看一个片段应该携带哪些信息</figcaption><pre><code class="language-javascript" data-language="javascript">const evidenceChunk = {
+  id: &quot;refund-policy#2026-01#annual-refund&quot;,
+  source: &quot;data/raw/refund-policy.md&quot;,
+  title: &quot;会员退款制度&quot;,
+  section: &quot;年度会员退款&quot;,
+  version: &quot;2026-01&quot;,
+  permission: &quot;support&quot;,
+  updated_at: &quot;2026-01-15&quot;,
+  text: &quot;年度会员购买后 7 天内可申请退款；已使用优惠券的订单，需要按优惠券规则扣减。&quot;
+};
+
+// 后面的检索、引用、权限过滤，都会依赖这类字段。
+// 如果这里只剩 text，系统就很难解释“为什么这样回答”。</code></pre></figure></div>
+</section>
+<section id="choice" class="section">
+  <h2>Prompt、搜索、RAG、微调，其实在管四件不同的事</h2>
+  <p>初学者很容易把它们排成一条升级路线：Prompt 不行就 RAG，RAG 不行就微调。这样想省事，但会把项目带偏。</p>
+  <p>Prompt 更像答题规范，解决“怎么答”的问题。搜索解决“在哪里找”的问题，但它不会自动替你组织成带引用的客服回复。RAG 把找资料、组上下文、生成答案连成一条链。微调更重，它适合长期改变模型的行为习惯，比如固定标注风格、固定分类口径，而不是追每周更新的退款制度。</p>
+  <table><thead><tr><th>场景</th><th>优先方案</th><th>原因</th></tr></thead><tbody><tr><td>只是想让回答格式稳定</td><td>Prompt</td><td>事实已经在输入里，先约束表达</td></tr><tr><td>想查公开网页资料</td><td>搜索</td><td>人工确认或简单摘要可能够用</td></tr><tr><td>要回答企业制度、FAQ、工单</td><td>RAG</td><td>资料会更新，还需要引用和权限</td></tr><tr><td>要模型长期学会固定标注风格</td><td>微调</td><td>目标是改变模型行为，不是补资料</td></tr></tbody></table>
+  <p>这张表的用法很简单：先问事实从哪里来，再问资料会不会变，最后问答案是否需要引用。如果答案依赖企业内部资料，而且资料会更新，RAG 通常就是更自然的起点。</p>
+</section>
+<section id="map" class="card">
+  <h2>把一次 RAG 回答拆开看</h2>
+  <p>一条最小 RAG 链路可以拆成 6 步。每一步后面都会变成代码，也都会产生日志。这样答错时才有地方查。</p>
+  <pre class="mermaid">flowchart LR
+  A[&quot;客户或客服问题&quot;] --&gt; B[&quot;检索相关资料&quot;]
+  B --&gt; C[&quot;按权限和业务域过滤&quot;]
+  C --&gt; D[&quot;组装上下文包&quot;]
+  D --&gt; E[&quot;LLM 生成回答&quot;]
+  E --&gt; F[&quot;返回答案和引用&quot;]
+  F --&gt; G[&quot;记录日志与评测&quot;]</pre>
+</section>
+<section id="project" class="section">
+  <h2>课程项目先搭出轮廓，不急着堆工具</h2>
+  <p>这门课后面只围绕一个项目：科技公司内部知识库 / 客诉答疑 RAG。我们会先用虚构资料，但资料结构按真实企业来：产品说明、退款制度、历史工单、测试用例模板、权限字段、版本号。</p>
+  <p>第一阶段不接真实模型，也不接向量数据库。听起来像退一步，其实是在保护学习节奏。先把目录、输入、输出和验收方式站住，再替换更复杂的部件。否则一出错，你会分不清是 API、检索、分块、Prompt 还是数据结构的问题。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>第 1 章先定下来的项目骨架</figcaption><pre><code class="language-text" data-language="text">rag-customer-support/
+  README.md                 # 写清楚项目目标、运行命令和当前限制
+  package.json              # 先只放 npm scripts，不急着装一堆依赖
+  data/
+    raw/                    # 原始资料，尽量保持可读、可追溯
+      refund-policy.md
+      product-faq.md
+      complaint-tickets.md
+    processed/              # 机器处理后的中间产物，方便检查
+      documents.jsonl
+      chunks.jsonl
+  src/
+    adapters/               # 模型调用放这里，后续替换供应商不动主链路
+      llm.mock.js
+      llm.openai-compatible.js
+    ingest/
+      build-corpus.js
+    rag/
+      retrieve.js
+      answer.js
+      citations.js
+    eval/
+      eval-cases.json
+      run-eval.js
+    server.js
+  public/
+    index.html</code></pre></figure></div>
+</section>
+<section id="prompt" class="section">
+  <h2>让 AI 生码可以，但要给它边界</h2>
+  <p>后面的实践会借助 Codex 或 Claude Code。这里有个小经验：不要让 AI “帮我写一个 RAG 系统”。这个指令太大，它会把框架、依赖、文件结构和业务规则混在一起，生成一堆看似完整但很难验收的代码。</p>
+  <p>更好的做法是把目标、阶段、数据字段、拒答规则和验收命令写清楚。你让 AI 写代码，但项目的边界由你来定。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>给 Codex 或 Claude Code 的第一版总控提示词</figcaption><pre><code class="language-markdown" data-language="markdown">你是我的 RAG 项目结对编程助手。请按阶段帮我完成一个本地可运行的客诉答疑知识库。
+
+项目目标：
+1. 使用 Node.js 和原生模块优先，不急着引入重型框架。
+2. 资料来源放在 data/raw，处理结果写入 data/processed。
+3. 第一阶段只实现 mock LLM 和关键词检索，保证没有 API key 也能跑通。
+4. 后续再替换为 OpenAI-compatible API、embedding 和向量索引。
+5. 每次只生成一个阶段的文件，并告诉我运行什么命令验收。
+
+硬性要求：
+- 每个知识片段保留 source、title、section、version、permission、updated_at。
+- 回答必须返回 answer、citations、confidence、missing_info。
+- 如果资料不足，必须说明缺少什么资料，不要编。
+- 代码要有少量必要注释，避免为了注释而注释。
+
+请先生成 package.json、README.md、src/rag/answer.js 和 src/adapters/llm.mock.js。</code></pre></figure></div>
+</section>
+<section id="mock" class="section">
+  <h2>先用 mock 模型跑通链路</h2>
+  <p>第一章的代码故意“不智能”。我们先写一个 mock LLM：有资料就基于第一段资料回答，没资料就拒答。它的价值不是效果，而是逼我们把返回结构想清楚。</p>
+  <p>注意返回里的 <code>citations</code>、<code>missing_info</code> 和 <code>confidence</code>。这些字段后面会变得很重要。企业知识库不是只返回一句话，它还要告诉你这句话靠不靠谱，靠的是哪份资料。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>src/adapters/llm.mock.js，先用假模型压住系统形状</figcaption><pre><code class="language-javascript" data-language="javascript">export async function generateWithMockLLM({ question, contexts }) {
+  // 先处理“没有资料”的情况。RAG 系统宁可拒答，也不要编一个顺口答案。
+  if (!contexts.length) {
+    return {
+      answer: &quot;我没有找到足够资料，暂时不能回答这个问题。&quot;,
+      confidence: &quot;low&quot;,
+      missing_info: [&quot;缺少与问题相关的知识片段&quot;],
+      citations: []
+    };
+  }
+
+  // 第一章只取第一个片段生成演示回答。后面会加入排序、引用校验和真实模型。
+  const first = contexts[0];
+  return {
+    answer: [
+      `根据《${first.title}》的资料，${first.text}`,
+      &quot;这只是 mock 回答，用来验证 RAG 链路的数据结构。后续章节会替换为真实模型。&quot;
+    ].join(&quot;\n&quot;),
+    confidence: &quot;medium&quot;,
+    missing_info: [],
+    citations: [
+      {
+        source: first.source,
+        title: first.title,
+        section: first.section,
+        chunk_id: first.id
+      }
+    ]
+  };
+}</code></pre></figure></div>
+</section>
+<section id="run" class="section">
+  <h2>最后补一个可以运行的入口</h2>
+  <p>有了 mock LLM，还需要一个入口把问题、上下文、回答结构串起来。下面的 <code>answer.js</code> 会打印完整 JSON。初学阶段不要怕 JSON 长，它比一句漂亮答案更适合调试。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>package.json 的第一版，先让项目跑起来</figcaption><pre><code class="language-json" data-language="json">{
+  &quot;name&quot;: &quot;rag-customer-support&quot;,
+  &quot;version&quot;: &quot;0.1.0&quot;,
+  &quot;type&quot;: &quot;module&quot;,
+  &quot;private&quot;: true,
+  &quot;scripts&quot;: {
+    &quot;ask&quot;: &quot;node src/rag/answer.js&quot;,
+    &quot;ingest&quot;: &quot;node src/ingest/build-corpus.js&quot;,
+    &quot;eval&quot;: &quot;node src/eval/run-eval.js&quot;,
+    &quot;serve&quot;: &quot;node src/server.js&quot;
+  },
+  &quot;dependencies&quot;: {}
+}</code></pre></figure><figure class="code-card"><figcaption>src/rag/answer.js，第一章只跑通问答形状</figcaption><pre><code class="language-javascript" data-language="javascript">import { generateWithMockLLM } from &quot;../adapters/llm.mock.js&quot;;
+
+// 第一章先用一段手写上下文演示。第二章开始会把它换成 data/processed 里的真实中间产物。
+const demoContexts = [
+  {
+    id: &quot;refund-policy#001&quot;,
+    source: &quot;data/raw/refund-policy.md&quot;,
+    title: &quot;会员退款制度&quot;,
+    section: &quot;年度会员退款&quot;,
+    version: &quot;2026-01&quot;,
+    permission: &quot;support&quot;,
+    text: &quot;年度会员购买后 7 天内可申请退款；已使用优惠券的订单，需要按优惠券规则扣减。&quot;
+  }
+];
+
+export async function answerQuestion(question, contexts = demoContexts) {
+  const response = await generateWithMockLLM({ question, contexts });
+  return {
+    question,
+    ...response,
+    // debug 字段不是给最终用户看的，是给开发者复盘链路用的。
+    debug: {
+      retrieved_count: contexts.length,
+      context_ids: contexts.map((item) =&gt; item.id)
+    }
+  };
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const question = process.argv.slice(2).join(&quot; &quot;) || &quot;年度会员用了优惠券还能退款吗？&quot;;
+  const result = await answerQuestion(question);
+  console.log(JSON.stringify(result, null, 2));
+}</code></pre></figure></div>
+</section>
+<section id="practice" class="task">
+  <h2>练一下</h2>
+  <p>把上面的 4 段代码交给 AI 生码工具，让它生成项目。运行 `npm run ask -- 年度会员用了优惠券还能退款吗？`，你应该看到 answer、citations、debug 三块内容。第一章不追求智能，先确认系统形状是可检查的。</p>
+</section>
+<section id="quiz" class="quiz">
+  <h2>快速自测</h2>
+  <div class="quiz-question"><p>RAG 最先解决的是哪类问题？</p><button data-answer="true">回答缺少企业资料</button><button data-answer="false">页面颜色不统一</button><button data-answer="false">服务器端口冲突</button><div class="quiz-result" aria-live="polite"></div><p class="lead">RAG 的核心是把外部资料接入回答流程，尤其适合企业私有资料和频繁更新的知识。</p></div><div class="quiz-question"><p>只想让模型按 JSON 格式回答，优先改什么？</p><button data-answer="true">Prompt</button><button data-answer="false">向量库</button><button data-answer="false">微调集</button><div class="quiz-result" aria-live="polite"></div><p class="lead">格式约束通常先从 Prompt 做起，不要一上来就搭 RAG 或微调。</p></div><div class="quiz-question"><p>企业 RAG 为什么要保存引用？</p><button data-answer="true">方便核对答案</button><button data-answer="false">减少文件大小</button><button data-answer="false">提高页面亮度</button><div class="quiz-result" aria-live="polite"></div><p class="lead">引用让答案可追溯。答错时也能追查是资料、检索还是生成出了问题。</p></div>
+</section>
+<section id="summary" class="callout">
+  <h2>收个口</h2>
+  <p>这一章先把地基打好：RAG 不是一个更会聊天的按钮，而是一条证据链。它让模型先看资料，再组织答案。下一章开始，我们会从空目录把项目搭出来，并把“资料应该长什么样”这件事定下来。</p>
+</section>
+<section id="sources" class="source-box">
+  <h2>本章参考资料</h2>
+  <ul class="source-list"><li><a href="https://arxiv.org/abs/2005.11401">Lewis et al., Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</a><span>RAG 原始论文，解释参数化知识和非参数化知识的结合。</span></li><li><a href="https://developers.openai.com/api/docs/guides/retrieval">OpenAI Docs: Retrieval</a><span>用于校准文件检索、向量存储和检索产品化表达。</span></li><li><a href="https://developers.llamaindex.ai/python/framework/understanding/rag/">LlamaIndex Docs: Introduction to RAG</a><span>用于解释私有数据如何进入 RAG 查询流程。</span></li><li><a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter1/01_RAG_intro.md">Datawhale All-in-RAG: RAG 简介</a><span>社区教程，作为课程层级和小白表达的重要参考。</span></li><li><a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter1/03_get_start_rag.md">Datawhale All-in-RAG: 四步构建 RAG</a><span>社区教程，用于主线项目的最小闭环。</span></li></ul>
+</section>
+<nav class="footer-nav">
+  <a href="../index.html">回到课程首页</a>
+  <a href="./0002-project-bootstrap-and-data-contract.html">下一章：项目骨架</a>
+</nav></main>
+      <aside class="side"><nav class="toc"><strong>本章目录</strong>
+    <a href="#goals">学习目标</a>
+    <a href="#problem">真实麻烦</a>
+    <a href="#evidence">证据链</a>
+    <a href="#choice">选型判断</a>
+    <a href="#map">流程图</a>
+    <a href="#project">项目轮廓</a>
+    <a href="#prompt">生码边界</a>
+    <a href="#mock">Mock 模型</a>
+    <a href="#run">运行入口</a>
+    <a href="#practice">练一下</a>
+    <a href="#quiz">快速自测</a>
+    <a href="#sources">参考资料</a>
+  </nav></aside>
+    </div>
+  </div>
+</body>
+</html>

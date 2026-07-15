@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="把 AI 放进代码审查之前，先分清它该接管哪些重复劳动，哪些判断仍必须由人负责。"><title>为什么今天需要 AI Code Review | 如何实现高质量的 AI Code Review</title><script src="../assets/theme-switcher.js"></script><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">如何实现高质量的 AI Code Review</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 1 章 · 55–70 分钟</div><h1>为什么今天需要 AI Code Review</h1><p class="lesson-summary">把 AI 放进代码审查之前，先分清它该接管哪些重复劳动，哪些判断仍必须由人负责。</p><a class="source-link" href="../markdown/01-why-ai-code-review.md">查看 Markdown 版本</a></section><div class="lesson-layout"><main class="lesson-content"><h2 id="先看一次普通的合并请求">先看一次普通的合并请求</h2>
+<p>一名开发者提交了 26 个文件的改动：前端新增批量操作，后端增加一个异步接口，还顺手重构了日志。自动测试通过，lint 没有报错。审查者在半小时里留下四条评论：一个变量名不清楚，一处错误信息不统一，两处空值保护缺失。两天后，测试环境仍然发现了一个问题：异步任务在失败分支里没有释放锁，后续请求一直等待。</p>
+<p>这类经历很容易导向两个相反的结论。有人会说，人工审查太慢，应该让 AI 全部接手；也有人会说，AI 连业务语义都不懂，代码审查只能依靠资深工程师。两种说法都把问题压扁了。真正需要回答的是：<strong>不同审查手段分别能看到什么证据，付出多少成本，在哪些条件下容易失效。</strong></p>
+<p><span class="term" tabindex="0" data-tip="在代码合入主干前后，由人或工具检查设计、正确性、可维护性、测试、风险与团队约定的活动。">Code Review（CR）</span> 是对代码改动进行判断和反馈的活动。它不等同于&quot;找 Bug&quot;。Google 的工程实践把设计、功能、复杂度、测试、命名、注释、风格和文档都列为审查对象；Bacchelli 与 Bird 对现代代码审查的研究还发现，<strong>开发者同时把知识传递和团队协作视为重要结果</strong>——这意味着审查不只是&quot;发现缺陷&quot;，也是团队认知的同步机制。[1][2]</p>
+<p>课程里会频繁出现 <span class="term" tabindex="0" data-tip="开发者请求把一个分支的改动合入另一个分支的协作对象；GitHub 常称 Pull Request（PR）。">Merge Request（MR）</span>。它是一份合并请求：开发者请团队把一个分支的改动合入目标分支。GitHub 常用 Pull Request（PR）这个名称。MR 不只是 diff 页面，还承载需求说明、提交记录、自动检查、讨论、批准和最终合并状态。<strong>AI CR 如果只拿到几行 diff，看到的只是这个协作对象的一小部分</strong>——这是后续所有上下文增强策略的出发点。</p>
+<h2 id="人工-cr-没有消失-但吞吐矛盾在加剧">人工 CR 没有消失，但吞吐矛盾在加剧</h2>
+<p>现代代码审查的基本矛盾是：<strong>高质量判断需要上下文和注意力，研发流程却希望反馈更早、更快、更稳定。</strong></p>
+<p>人工审查擅长处理模糊目标。例如，&quot;这个缓存会不会让结算金额过期&quot;&quot;这个接口是否破坏了另一个团队的兼容承诺&quot;&quot;为了赶发布日期暂时接受这段重复代码是否合理&quot;。这些问题需要业务责任和风险取舍。审查者在判断代码时，同时也在判断团队愿意承担什么风险。</p>
+<p>但同一个审查者也有注意力上限。小改动容易快速理解，大改动需要在多个文件、调用链和需求之间来回切换。等待审查拉长反馈周期；审查者忙于交付时，评论集中在容易看见的命名和格式；改动越晚被检查，返工时已经叠加的代码和测试就越多。</p>
+<p><strong>还有一类成本很容易被忽视：资深工程师不断重复解释已经稳定的规则。</strong>&quot;错误日志必须记录原始 error&quot;&quot;并发资源需要在所有退出路径释放&quot;&quot;组件库已经处理空值，不要额外包一层&quot;&quot;某目录只能调用领域服务，不能直接查存储&quot;。前两条可能适合静态分析或 AI，后两条依赖仓库约定。关键不在于谁来执行，而在于：<strong>规则如果只存在于某个人的记忆里，审查吞吐就受这个人的时间限制。</strong></p>
+<p>所以本课程所说的&quot;AI 替代人工&quot;有严格边界：<strong>替代的是人工审查中的重复扫描、证据收集和第一轮反馈，不是替代代码所有者的责任。</strong> 准确的目标是让机器扩大覆盖，让人把注意力用在高风险和高语境判断上。</p>
+<h2 id="code-review-的六个阶段">Code Review 的六个阶段</h2>
+<p>下面的演进不是一条所有团队都按年份经历的线性历史，也不是新阶段彻底淘汰旧阶段。<strong>成熟系统通常同时保留多种手段，只是把不同问题交给更合适的执行者。</strong></p>
+<figure class="diagram-card"><pre class="mermaid">flowchart LR
+  A[&quot;人工逐行审查&quot;] --&gt; B[&quot;格式与规则自动化&quot;]
+  B --&gt; C[&quot;远端 Diff AI 审查&quot;]
+  C --&gt; D[&quot;本地仓库上下文审查&quot;]
+  D --&gt; E[&quot;Harness 驱动审查&quot;]
+  E --&gt; F[&quot;指标与反馈闭环&quot;]</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<h3 id="阶段一-人工逐行审查">阶段一：人工逐行审查</h3>
+<p>最初的核心对象是补丁和讨论。人阅读改动，结合需求和经验给出评论。它的优点是判断弹性大，可以追问作者，也能处理架构取舍。缺点同样明显：<strong>结果依赖参与者时间、经验和注意力，重复规则消耗大量审查容量。</strong></p>
+<p>人工审查还承担教学功能。资深工程师指出一处错误时，可能顺便解释模块边界和历史原因。这个过程能传播知识，却难以规模化。<strong>把所有低级扫描都留给资深工程师，既昂贵，也会让真正需要讨论的设计问题淹没在评论列表里。</strong></p>
+<h3 id="阶段二-格式-规则和静态分析自动化">阶段二：格式、规则和静态分析自动化</h3>
+<p>lint、格式化器、类型检查、编译器、安全扫描和 <span class="term" tabindex="0" data-tip="不运行程序，依据语法、类型、数据流或预定义规则检查代码。">静态分析</span> 把一部分问题变成确定性判断。<strong>只要规则可编码、输入可获得，机器就能快速、稳定地执行。</strong> 例如未使用变量、危险 API、明显空指针路径、依赖漏洞或不符合格式规范的代码，都可能在提交前被拦截。</p>
+<p>这一步的价值不是&quot;工具比人聪明&quot;，而是<strong>让确定性问题不再占用人类注意力</strong>。它也是 <span class="term" tabindex="0" data-tip="把质量检查提前到编码、提交或合并请求阶段，让问题在进入后续测试和发布前暴露。">Shift-Left</span> 的典型实践：把质量检查提前到编码、提交或 MR 阶段，而不是等到集成测试或线上事故才发现。</p>
+<p><strong>规则工具的边界在于它必须提前知道要找什么。</strong> 某个函数虽然类型正确，却在业务上用了错误的 error 变量；某段并发代码虽然语法合法，却把锁释放放在了不完整的分支；某个建议虽然符合通用防御式编程，却违背了团队组件的推荐用法——这些问题需要比模式匹配更宽的语义判断。</p>
+<h3 id="阶段三-远端-diff-ai-审查">阶段三：远端 Diff AI 审查</h3>
+<p>大语言模型让审查系统可以读自然语言与代码，给出解释性评论。最容易落地的形态是把 MR diff、少量规则和 Prompt 发给远端模型，再把结果写回 MR。它部署简单，能覆盖规则工具难以编码的问题，也能在很短时间内完成第一轮扫描。</p>
+<p>CodeReviewer 这类研究把自动代码审查拆成代码改动质量估计、评论生成和代码修复三个任务。[4] 这个拆分很重要：<strong>发现问题、解释问题和产生可用修复不是同一种能力。</strong> 一个系统能生成流畅评论，不代表定位正确；能给出修复片段，也不代表修复符合仓库约束。</p>
+<p>只看 diff 的 AI 审查经常遇到上下文缺口。调用函数的约定可能在另一个文件，类型定义可能由生成代码提供，需求约束可能写在任务系统，测试可能说明一个看似奇怪的分支是刻意设计。<strong>模型收到的信息不够时，仍可能给出语言流畅的建议。结果就是&quot;看起来合理，实际上不适用&quot;。</strong> 这是第 4 章采纳率诊断的核心起点。</p>
+<h3 id="阶段四-本地仓库上下文审查">阶段四：本地仓库上下文审查</h3>
+<p>下一步是让审查器进入真实工作区。它可以搜索符号、读取关联文件、查看测试、运行命令，再结合项目规则判断 diff。GitHub 的官方文档也把全项目上下文、自定义指令、仓库级说明、Agent skills 和 MCP 上下文作为提高审查相关性的手段。[5]</p>
+<p>本地上下文减少了部分误报，却引入新的工程问题：模型该读哪些文件，如何避免把整个仓库塞进上下文，怎样限制命令权限，如何证明每个文件都检查过，任务失败后从哪里恢复。<strong>模型有了工具，只说明它&quot;可以&quot;行动，不说明它&quot;必然&quot;按完整流程行动。</strong> 这是第 6、7 章要深入讨论的核心矛盾。</p>
+<h3 id="阶段五-harness-驱动审查">阶段五：Harness 驱动审查</h3>
+<p><span class="term" tabindex="0" data-tip="包围模型的工程运行支架，负责上下文、工具、状态、权限、验证、恢复和观测。">Harness</span> 是包围模型的工程运行支架。它把一次大审查变成外部可控制的过程：服务端创建 Session，筛选文件并切分 Batch；Agent 只能领取当前任务；提交结果后由程序检查结构和工作量；状态机决定下一步是继续、重审、扩展检查还是汇总。</p>
+<p><strong>这里发生了一个关键转变。Prompt 仍然重要，但流程正确性不再完全寄托在模型&quot;记住所有要求&quot;。</strong> 批次、状态、下一步许可、重试和结果验证被写进代码与数据模型。模型负责擅长的语义分析，确定性程序负责计数、权限、状态与失败恢复。这是第 2 章要拆开讲的核心架构。</p>
+<h3 id="阶段六-指标与反馈闭环">阶段六：指标与反馈闭环</h3>
+<p>系统上线后，问题从&quot;能不能评论&quot;变成&quot;评论是否有用、漏掉多少、为何变差&quot;。这要求记录开发者是否采纳、哪些建议被拒绝、测试后来发现哪些应召回问题、不同仓库和问题类型表现如何。反馈再进入规则、测试集、上下文策略和质量门。</p>
+<p>BitsAI-CR 的工业实践使用规则检查、二次过滤、规则分类、反馈飞轮和评估指标，说明生产 AICR 往往是组合系统，而不是一次模型调用。[6] 课程不会照搬其公开数字，因为模型、团队、语言和统计口径都不同。我们关心的是工程结构：<strong>先检测，再验证，用反馈持续校准。</strong> 这是第 3 章要建立的度量体系和后续所有优化的前提。</p>
+<h2 id="为什么是今天-代码生成改变了输入规模">为什么是今天：代码生成改变了输入规模</h2>
+<p>过去，代码产出速度在很大程度上受人工输入限制。AI 生码工具提高了创建和修改代码的速度，也让&quot;一次改很多文件&quot;变得更常见。<strong>代码写得更快，不会自动让需求更清楚、架构更一致或测试更充分。</strong> 审查入口因此承受更大的数量和速度压力。</p>
+<p>如果生成端每小时产生多次改动，而审查仍等待少数资深工程师排队，质量系统会出现三个后果。第一，反馈变晚，错误在更多改动上叠加。第二，审查者会采用抽查或只看关键文件，覆盖难以稳定。第三，<strong>生码平台缺少一个可以程序化调用的质量门，生成结果只能直接进入测试或等待人工。</strong></p>
+<p>AI CR 的现实价值就在这里：它可以在提交前、本地工作区、MR 创建时或生码任务结束后立即运行，给出第一轮语义检查，并把高风险问题和证据交给人。<strong>远端服务化后，同一套能力还能被 CI、开发平台和其他生码 Agent 调用。</strong> 第 8 章会专门讨论服务化，当前只需记住：AICR 的调用方不再只有&quot;正在看 MR 的人&quot;。</p>
+<p>这并不意味着评论越多越好。假设系统每次都报告几十个低价值问题，开发者会快速学会忽略它；假设系统只报告一两条极有把握的问题，采纳率可能很好，却漏掉大量真正缺陷。<strong>高质量 AICR 必须同时处理噪音与遗漏，这正是后续采纳率和召回率两条主线。</strong></p>
+<h2 id="四类审查者怎样分工">四类审查者怎样分工</h2>
+<p>用&quot;AI 能不能审查代码&quot;来提问太宽。更实用的做法是<strong>先看问题特征，再选择执行者。</strong></p>
+<div class="table-wrap"><table><thead><tr><th>问题特征</th><th>首选手段</th><th>原因</th><th>需要升级的条件</th></tr></thead><tbody><tr><td>规则明确、可确定计算、无需业务语境</td><td>lint / 编译 / 静态分析</td><td>快、稳定、可阻断，结果易复现</td><td>规则难表达或误报随上下文变化</td></tr><tr><td>需要跨少量文件理解代码意图，有清楚证据</td><td>AI CR</td><td>语义覆盖广，可解释并给出候选修复</td><td>涉及高风险、所有权或含糊业务取舍</td></tr><tr><td>需要需求、组织承诺、架构责任或风险接受</td><td>人工审查</td><td>人能承担决策责任并处理含糊目标</td><td>可先让 AI 收集证据和列出冲突点</td></tr><tr><td>既有可编码底线，又有上下文例外</td><td>组合审查</td><td>工具守底线，AI 查语境，人做终局判断</td><td>需要明确谁有阻断权和如何处理冲突</td></tr></tbody></table></div>
+<p><strong>一个常见错误是把容易自动化的问题全部交给 AI。</strong> 例如格式、导入顺序和已知危险函数，本可由确定性工具快速判断，却被模型用自然语言重复评论。这样既增加成本，也让结果存在随机性。<strong>另一个错误是把高风险决策自动化：AI 说&quot;没有问题&quot;就允许涉及权限或资金的改动直接合并。</strong> 模型输出应该成为证据的一部分，而不是责任的替代物。</p>
+<p>2025 年的一项研究尝试组合静态分析与 LLM，报告混合策略能改善评论的相关性与完整性。[7] Ericsson 的经验报告也采用 LLM 与静态程序分析的轻量组合，并让有经验开发者参与初步评估。[8] 这些公开证据与我们的工程判断一致：<strong>规则和模型不是竞争关系，它们覆盖不同的可判定空间。</strong></p>
+<h2 id="从真实问题样本看-适合谁审">从真实问题样本看&quot;适合谁审&quot;</h2>
+<p>下面的场景来自脱敏后的教学样本。它们不代表行业分布，也不用于计算生产指标。目的只是练习分工。</p>
+<h3 id="场景一-未使用变量">场景一：未使用变量</h3>
+<p>代码声明了变量却从未读取。编译器或 lint 可以确定判断，首选确定性工具。AI 再评论只会重复已有信号。人工一般无需参与，除非未使用代码暴露了更大的需求遗漏。</p>
+<h3 id="场景二-goroutine-中锁释放位置不完整">场景二：goroutine 中锁释放位置不完整</h3>
+<p>锁只在成功分支释放，错误分支提前返回。数据流分析可能发现，AI 也可以沿控制流解释后果。<strong>适合&quot;静态分析 + AI&quot;组合：前者提供稳定告警，后者解释并检查相邻代码是否存在约定。</strong> 若锁保护的是高风险共享状态，应由人确认修复。</p>
+<h3 id="场景三-日志记录了错误的-error-变量">场景三：日志记录了错误的 error 变量</h3>
+<p>当前分支检查 <code>saveErr</code>，日志却打印上一个步骤的 <code>queryErr</code>。类型系统通常不报错，局部语义却明显矛盾。AI 对这类跨几行的变量关系很有优势，也适合补充自定义静态规则。<strong>评论应包含具体变量和控制流证据，不能只说&quot;错误处理可能有问题&quot;</strong>——这种模糊评论本身就是采纳率杀手。</p>
+<h3 id="场景四-重复方法定义">场景四：重复方法定义</h3>
+<p>如果语言或构建系统会直接报错，交给编译器；如果是不同文件中语义重复、导致维护分叉，AI 可搜索符号并提示。是否合并方法仍要看模块边界，可能需要人判断。</p>
+<h3 id="场景五-建议增加空值保护-但业务入口保证非空">场景五：建议增加空值保护，但业务入口保证非空</h3>
+<p>这是一类典型拒绝评论。单看当前函数，防御式检查似乎合理；结合入口契约，它可能重复甚至隐藏上游错误。<strong>AI 只有读取契约、调用方或测试后才有资格判断。</strong> 证据仍冲突时，应交给代码所有者。</p>
+<h3 id="场景六-方法内部已经处理失败">场景六：方法内部已经处理失败</h3>
+<p>AI 在调用处建议重复捕获，但被调用方法已转换错误并记录必要信息。<strong>这说明审查器只看了 diff，没追踪实现。</strong> 解决办法不是让 Prompt 更强硬，而是让系统提供符号搜索和相关文件上下文，并在提交评论前复核。</p>
+<h3 id="场景七-组件库推荐的写法看起来违反通用规则">场景七：组件库推荐的写法看起来违反通用规则</h3>
+<p>通用规则要求显式传值，项目组件却约定缺省值触发受控行为。<strong>AI 若不知道组件文档，会把正确代码判为问题。</strong> 这类案例应沉淀为项目级规则或路径级说明。人工负责确认规则，AI 负责在后续审查中一致执行。</p>
+<h3 id="场景八-修复方向正确-建议代码不可用">场景八：修复方向正确，建议代码不可用</h3>
+<p>AI 正确发现竞争条件，却给出会阻塞事件循环的修复。这里<strong>&quot;发现&quot;与&quot;修复&quot;必须分开评分。</strong> 评论可以保留问题证据，但修复建议要经过复核；高风险改动由人决定。</p>
+<h3 id="场景九-接口改变了权限边界">场景九：接口改变了权限边界</h3>
+<p>代码本身可以运行，测试也通过，但新接口把原本只在后台使用的能力暴露给普通用户。AI 可以追踪鉴权调用、列出缺失测试，<strong>却不能代表产品和安全负责人接受风险。</strong> 必须人工审查，并且适合设置强制审批规则。</p>
+<h3 id="场景十-命名不够清楚">场景十：命名不够清楚</h3>
+<p>AI 能快速指出含糊命名，但价值依赖团队语境。如果只是个人偏好，不应形成阻断评论；如果名称掩盖了单位、时区或状态语义，就可能导致真实缺陷。<strong>审查器应说明歧义如何影响阅读或调用，而不是只给一个替换词。</strong></p>
+<p>把十个场景放在一起可以看到，执行者不是按&quot;简单/复杂&quot;一刀切。选择标准至少包括：<strong>规则能否确定表达、需要多少上下文、错误后果、是否涉及责任决策、结果能否自动验证。</strong></p>
+<h2 id="ai-cr-的职责边界">AI CR 的职责边界</h2>
+<p>一套健康的 AICR 系统应该明确三种权限。</p>
+<p><strong>建议权</strong>：AI 可以报告候选问题、证据、严重度和修复方向。大多数语义评论停留在这里。开发者可以采纳、拒绝或标记无法判断。</p>
+<p><strong>阻断权</strong>：只有规则清楚、误报经过校准、失败成本足够高的检查才适合阻断合并。阻断可以来自测试、静态分析或经过验证的 AI 质量门，<strong>但必须有申诉和人工覆盖路径。</strong> 否则系统会用&quot;安全&quot;名义制造不可解释的流程堵塞。</p>
+<p><strong>决策权</strong>：架构例外、业务风险、数据兼容、发布时间与技术债取舍属于责任主体。AI 可以准备材料，不能替负责人签字。GitHub 的官方 Code Review 文档也明确写道，Copilot 不保证发现 PR 中的所有问题，可能犯错，使用者应仔细验证反馈并补充人工审查。[5]</p>
+<figure class="diagram-card"><pre class="mermaid">flowchart TD
+  I[&quot;候选问题&quot;] --&gt; D{&quot;能否确定验证?&quot;}
+  D -- &quot;是&quot; --&gt; R{&quot;规则成熟且误报可控?&quot;}
+  R -- &quot;是&quot; --&gt; G[&quot;自动检查，可配置阻断&quot;]
+  R -- &quot;否&quot; --&gt; S[&quot;AI 建议 + 人工确认&quot;]
+  D -- &quot;否&quot; --&gt; C{&quot;是否涉及责任与风险接受?&quot;}
+  C -- &quot;是&quot; --&gt; H[&quot;人工决策，AI 提供证据&quot;]
+  C -- &quot;否&quot; --&gt; A[&quot;AI 分析，保留反馈入口&quot;]</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<p>边界还要体现在产品交互中。如果 AI 评论被当成普通审查意见，开发者可以讨论、解决和隐藏；如果系统允许一键应用修复，就应保留变更 diff 和测试结果；如果支持自动重审，就要避免重复提交已解决评论。官方产品已经暴露出这些工程细节：GitHub Copilot 的评论不计入必需批准，也不会直接阻止合并；它允许自定义仓库规则和反馈，并提示重审可能重复评论。[5]</p>
+<h2 id="shift-left-不是把所有门都移到最左边">Shift-Left 不是把所有门都移到最左边</h2>
+<p>Shift-Left 常被理解成&quot;越早检查越好&quot;。更准确的定义是：<strong>把能够在早期获得足够证据的检查提前。</strong> 格式、类型和局部语义可以在编辑器或提交前运行；依赖真实集成环境的行为仍应留给集成测试；需要线上流量才能判断的问题要依靠灰度和监控。</p>
+<p>AICR 适合位于提交前和 MR 阶段，因为此时 diff、仓库和作者意图基本可得，修改成本又比测试后更低。它还可以成为生码任务的质量门：Agent 完成代码后先触发 AICR，处理高置信问题，再把代码交给人。<strong>但&quot;左移&quot;不能让同一个 AI 同时写代码、审自己、宣布通过并自动发布——生成者与评价者需要一定分离，关键状态要由外部系统维护。</strong></p>
+<p>这套思想在课程中被称为 <strong>CR Shift-Left</strong>。它不是一个单独模型，而是一组对象和流程：Session 保存一次审查，Batch 控制工作量，Issue 保存候选问题，状态机规定下一步，MCP 暴露领取任务与提交结果的工具，指标和记忆把反馈带回下一轮。第 2 章会沿一条真实请求逐站拆解。</p>
+<h2 id="本课程接下来怎样推进">本课程接下来怎样推进</h2>
+<p>第 1 章只建立了边界：人工、规则工具与 AI 各有职责；高质量不等于评论数量；AICR 必须同时面对噪音与遗漏。</p>
+<p>第 2 章把模型放进一个可执行系统。你会看到 Prompt 为什么仍然必要，却不足以控制长流程；也会看到 Session、Batch、File、Issue、状态机、MCP 和 Agent 怎样交接。第 3 章先建立度量语言，定义采纳率、召回率与 F1，并揭示分母变化如何改变结论。<strong>这是后续所有优化的前提：没有稳定口径，&quot;优化&quot;很容易退化成展示几条漂亮评论。</strong> 随后四章分别诊断和改造采纳率、召回率，最后进入远端服务化。这条路线刻意把指标放在改造之前——也只有先分清 AI 和人的责任，后续的自动采纳、质量门和远端接入才不会扩大错误权限。</p>
+<h2 id="路线检查">路线检查</h2>
+<p>回到章首的 26 文件 MR，可以这样分工：lint 处理格式和确定性规则；静态分析检查可编码的数据流与资源释放；AI 在仓库上下文中扫描错误变量、跨文件约定和候选风险；人工集中判断异步设计、业务契约和是否接受风险。测试环境发现的锁问题还应进入评估集，检查下一版 AICR 能否召回。</p>
+<p>如果你面对一个新问题，可以依次问五个问题：<strong>它能否被确定性规则表达？需要哪些仓库或业务上下文？报告错误的成本是什么？谁有权接受风险？结果如何验证和回流？</strong> 能够回答这五问，就不会把&quot;采用 AI&quot;误写成&quot;增加一次模型调用&quot;。</p>
+<h2 id="参考文献">参考文献</h2>
+<ol><li>Alberto Bacchelli, Christian Bird. <a href="https://doi.org/10.1109/ICSE.2013.6606617" target="_blank" rel="noreferrer">Expectations, outcomes, and challenges of modern code review</a>. ICSE, 2013.</li><li>Google Engineering Practices. <a href="https://google.github.io/eng-practices/review/reviewer/standard.html" target="_blank" rel="noreferrer">The Standard of Code Review</a>；<a href="https://google.github.io/eng-practices/review/reviewer/looking-for.html" target="_blank" rel="noreferrer">What to look for in a code review</a>.</li><li>Shane McIntosh 等. <a href="https://doi.org/10.1145/2597073.2597076" target="_blank" rel="noreferrer">The impact of code review coverage and code review participation on software quality</a>. MSR, 2014.</li><li>Zhiyu Li 等. <a href="https://arxiv.org/abs/2203.09095" target="_blank" rel="noreferrer">Automating Code Review Activities by Large-Scale Pre-training</a>. ESEC/FSE, 2022.</li><li>GitHub Docs. <a href="https://docs.github.com/en/copilot/concepts/agents/code-review" target="_blank" rel="noreferrer">About GitHub Copilot code review</a>.</li><li>Tao Sun 等. <a href="https://arxiv.org/abs/2501.15134" target="_blank" rel="noreferrer">BitsAI-CR: Automated Code Review via LLM in Practice</a>. 2025.</li><li>Imen Jaoua 等. <a href="https://arxiv.org/abs/2502.06633" target="_blank" rel="noreferrer">Combining Large Language Models with Static Analyzers for Code Review Generation</a>. MSR, 2025.</li><li>Shweta Ramesh 等. <a href="https://arxiv.org/abs/2507.19115" target="_blank" rel="noreferrer">Automated Code Review Using Large Language Models at Ericsson: An Experience Report</a>. ICSME, 2025.</li></ol><nav class="lesson-nav"><span></span><a href="../lessons/02-prompt-to-harness.html">第 2 章 →<br><strong>从 Prompt 到 Harness：整体架构与核心思路</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#先看一次普通的合并请求"><span class="toc-num">1.1</span>先看一次普通的合并请求</a><a class="" href="#人工-cr-没有消失-但吞吐矛盾在加剧"><span class="toc-num">1.2</span>人工 CR 没有消失，但吞吐矛盾在加剧</a><a class="" href="#code-review-的六个阶段"><span class="toc-num">1.3</span>Code Review 的六个阶段</a><a class="sub" href="#阶段一-人工逐行审查"><span class="toc-num">1.3.1</span>阶段一：人工逐行审查</a><a class="sub" href="#阶段二-格式-规则和静态分析自动化"><span class="toc-num">1.3.2</span>阶段二：格式、规则和静态分析自动化</a><a class="sub" href="#阶段三-远端-diff-ai-审查"><span class="toc-num">1.3.3</span>阶段三：远端 Diff AI 审查</a><a class="sub" href="#阶段四-本地仓库上下文审查"><span class="toc-num">1.3.4</span>阶段四：本地仓库上下文审查</a><a class="sub" href="#阶段五-harness-驱动审查"><span class="toc-num">1.3.5</span>阶段五：Harness 驱动审查</a><a class="sub" href="#阶段六-指标与反馈闭环"><span class="toc-num">1.3.6</span>阶段六：指标与反馈闭环</a><a class="" href="#为什么是今天-代码生成改变了输入规模"><span class="toc-num">1.4</span>为什么是今天：代码生成改变了输入规模</a><a class="" href="#四类审查者怎样分工"><span class="toc-num">1.5</span>四类审查者怎样分工</a><a class="" href="#从真实问题样本看-适合谁审"><span class="toc-num">1.6</span>从真实问题样本看&quot;适合谁审&quot;</a><a class="sub" href="#场景一-未使用变量"><span class="toc-num">1.6.1</span>场景一：未使用变量</a><a class="sub" href="#场景二-goroutine-中锁释放位置不完整"><span class="toc-num">1.6.2</span>场景二：goroutine 中锁释放位置不完整</a><a class="sub" href="#场景三-日志记录了错误的-error-变量"><span class="toc-num">1.6.3</span>场景三：日志记录了错误的 error 变量</a><a class="sub" href="#场景四-重复方法定义"><span class="toc-num">1.6.4</span>场景四：重复方法定义</a><a class="sub" href="#场景五-建议增加空值保护-但业务入口保证非空"><span class="toc-num">1.6.5</span>场景五：建议增加空值保护，但业务入口保证非空</a><a class="sub" href="#场景六-方法内部已经处理失败"><span class="toc-num">1.6.6</span>场景六：方法内部已经处理失败</a><a class="sub" href="#场景七-组件库推荐的写法看起来违反通用规则"><span class="toc-num">1.6.7</span>场景七：组件库推荐的写法看起来违反通用规则</a><a class="sub" href="#场景八-修复方向正确-建议代码不可用"><span class="toc-num">1.6.8</span>场景八：修复方向正确，建议代码不可用</a><a class="sub" href="#场景九-接口改变了权限边界"><span class="toc-num">1.6.9</span>场景九：接口改变了权限边界</a><a class="sub" href="#场景十-命名不够清楚"><span class="toc-num">1.6.10</span>场景十：命名不够清楚</a><a class="" href="#ai-cr-的职责边界"><span class="toc-num">1.7</span>AI CR 的职责边界</a><a class="" href="#shift-left-不是把所有门都移到最左边"><span class="toc-num">1.8</span>Shift-Left 不是把所有门都移到最左边</a><a class="" href="#本课程接下来怎样推进"><span class="toc-num">1.9</span>本课程接下来怎样推进</a><a class="" href="#路线检查"><span class="toc-num">1.10</span>路线检查</a><a class="" href="#参考文献"><span class="toc-num">1.11</span>参考文献</a></aside></div><footer class="site-footer">如何实现高质量的 AI Code Review · 人工审核稿</footer></div></body></html>

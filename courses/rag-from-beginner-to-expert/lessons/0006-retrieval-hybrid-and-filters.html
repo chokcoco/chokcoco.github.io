@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>检索第一版：关键词、语义、混合检索和权限过滤 | RAG 从入门到精通</title>
+  <script src="../assets/theme-switcher.js"></script>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
+  <script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="../index.html">RAG 从入门到精通</a>
+      <nav>
+        <a href="../index.html">课程首页</a>
+        <a href="../reference/0001-course-blueprint.html">课程蓝图</a>
+        <a href="../reference/0002-rag-glossary.html">术语表</a>
+      </nav>
+    </header>
+    
+    <div class="layout">
+      <main>
+<section class="hero">
+  <div class="eyebrow">第 6 章 · 约 75 分钟</div>
+  <h1>检索第一版：关键词、语义、混合检索和权限过滤</h1>
+  <p class="summary">前面几章我们把资料、分块和向量都讲过了。到这里，很多人会自然冒出一个想法：既然已经有 embedding，是不是直接用向量搜索就够了？不太够。RAG 里的检索不是单纯“找相似”，而是尽量把真正能回答问题的材料找出来。第 6 章先不写项目代码，我们把检索这件事拆开看。</p>
+  <div class="meta"><span class="pill">理解召回</span><span class="pill">区分关键词与语义检索</span><span class="pill">理解混合检索</span><span class="pill">看懂权限和元数据过滤</span></div>
+</section>
+<section id="goals" class="card">
+  <h2>这一章先掌握 4 个判断</h2>
+  <ul><li>理解召回</li><li>区分关键词与语义检索</li><li>理解混合检索</li><li>看懂权限和元数据过滤</li></ul>
+</section>
+<section id="opening" class="section">
+  <h2>检索，不是“搜一下”这么简单</h2>
+  <p>在普通搜索里，我们常常默认：输入关键词，返回结果。但 RAG 的检索更挑剔。它要找的不是“包含某个词的页面”，而是能被模型拿来回答问题的证据片段。</p>
+  <p>这两件事差别很大。比如用户问“用了券还能退全款吗”，制度里写的是“优惠券抵扣部分需要扣减”。关键词检索可能会漏；向量检索可能能找到。可如果用户问“API 401 是什么原因”，关键词里的 <code>401</code> 又很关键，纯语义检索反而可能跑偏。</p>
+  <p>所以，检索这章不要先想工具。先想判断：这个问题需要精确词，还是需要语义理解？需要按权限过滤吗？资料有没有版本差异？这些判断，比你选哪个向量库更早。</p>
+  <pre class="mermaid">flowchart LR
+  A[&quot;用户问题&quot;] --&gt; B[&quot;查询理解&quot;]
+  B --&gt; C1[&quot;关键词检索&quot;]
+  B --&gt; C2[&quot;语义检索&quot;]
+  B --&gt; C3[&quot;元数据过滤&quot;]
+  C1 --&gt; D[&quot;候选片段池&quot;]
+  C2 --&gt; D
+  C3 --&gt; D
+  D --&gt; E[&quot;合并与去重&quot;]
+  E --&gt; F[&quot;交给下一章排序/重排&quot;]</pre>
+</section>
+<section id="keyword" class="section">
+  <h2>知识点一：关键词检索守住精确词</h2>
+  <p>关键词检索的代表是 BM25、倒排索引、TF-IDF 这一类方法。它们的思路很朴素：问题里有哪些词，文档里有没有这些词，这些词常不常见，文档是不是过长。听起来老派，但非常有用。</p>
+  <p>因为真实业务里有大量不能被“语义差不多”替代的东西：错误码、产品型号、合同编号、接口字段、版本号、人名、地名。用户问 <code>ERR-0421</code>，你不能因为另一段资料语义上也在讲“登录失败”就把它排前面。</p>
+  <p>它的痛点也明显。用户说“年卡”，资料写“年度会员”；用户说“用了券”，资料写“优惠券抵扣”。如果没有同义词表或 query 改写，关键词检索会错过。</p>
+</section>
+<section id="semantic" class="section">
+  <h2>知识点二：语义检索补上表达差异</h2>
+  <p>语义检索用 embedding 把问题和片段放进同一个向量空间。它擅长处理“字面不同，但意思接近”的情况。上一章已经讲过向量，这一章只看它在检索里的作用：召回那些关键词不完全重合、但确实相关的片段。</p>
+  <p>这里有个容易误解的点：语义检索不是更高级的关键词检索，也不是关键词检索的替代品。它更像另一种视角。它会看懂“退款”和“退钱”的接近，也可能忽略“2026-01”和“2025-12”这种对业务很关键的差别。</p>
+  <table><thead><tr><th>检索方式</th><th>最擅长</th><th>最容易失败</th></tr></thead><tbody><tr><td>关键词检索</td><td>产品型号、术语、编号、精确词</td><td>同义表达、口语化问法</td></tr><tr><td>语义检索</td><td>意思相近但字面不同的问题</td><td>专有名词、短代码、精确数字</td></tr><tr><td>元数据过滤</td><td>权限、版本、业务域、时间范围</td><td>元数据缺失或标注不一致</td></tr><tr><td>混合检索</td><td>同时需要精确词和语义理解</td><td>融合权重和排序解释会更复杂</td></tr></tbody></table>
+</section>
+<section id="hybrid" class="section">
+  <h2>知识点三：混合检索不是堆功能，而是补短板</h2>
+  <p>混合检索就是把关键词检索和语义检索一起用。常见做法是两路召回，然后把结果融合起来。融合可以按分数加权，也可以按排名融合。初学阶段不必背公式，先理解它为什么出现：单一路线都容易漏。</p>
+  <p>如果问题包含错误码、型号、字段名，关键词那一路通常更可靠。如果问题是口语化表达、同义表达，语义那一路更有机会。混合检索把两路结果放在一个候选池里，下一章再排序、重排、去重。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>混合检索的最小思路，不是完整代码</figcaption><pre><code class="language-text" data-language="text">候选片段 = []
+
+关键词结果 = 搜索包含关键术语的片段
+语义结果 = 搜索语义最接近的片段
+
+候选片段 += 关键词结果
+候选片段 += 语义结果
+
+候选片段 = 按权限、版本、业务域过滤
+候选片段 = 合并重复片段
+
+返回候选片段给排序阶段</code></pre></figure></div>
+</section>
+<section id="filters" class="section">
+  <h2>知识点四：元数据过滤是边界，不是优化项</h2>
+  <p>很多教程把 metadata filter 当成检索优化技巧。企业场景里，它更像边界。用户没有权限看的片段，不应该进入候选池；已经过期的制度，不应该和最新版平起平坐；只适用于海外业务的政策，也不该回答国内客服问题。</p>
+  <p>注意，这和“相关性”是两套逻辑。一个片段可以非常相关，但用户没有权限；也可以语义相似，但版本过期。RAG 系统如果只追求相似度，很容易把这些边界踩穿。</p>
+  <table><thead><tr><th>用户问题</th><th>关键词会怎样</th><th>语义会怎样</th><th>更稳的做法</th></tr></thead><tbody><tr><td>API 返回 401 是什么意思？</td><td>能命中 401</td><td>也许会泛化到权限问题</td><td>关键词优先，语义补充</td></tr><tr><td>用了券还能退全款吗？</td><td>可能漏掉“优惠券抵扣”</td><td>更容易命中退款规则</td><td>语义优先，关键词补充</td></tr><tr><td>2026-01 版本退款制度</td><td>能命中版本号</td><td>版本号语义不强</td><td>元数据过滤先行</td></tr><tr><td>客服主管能看历史争议工单吗？</td><td>能命中工单</td><td>可能找到相似客服话术</td><td>权限过滤必须先做</td></tr></tbody></table>
+</section>
+<section id="practice" class="task">
+  <h2>练一下</h2>
+  <p>不用写代码。拿出 5 个你熟悉的企业问题，给每个问题标注：更依赖关键词、语义、元数据，还是混合检索。标注完以后再问自己：如果它答错，最可能是漏召回，还是召回了没权限/过期资料？</p>
+</section>
+<section id="quiz" class="quiz">
+  <h2>快速自测</h2>
+  <div class="quiz-question"><p>为什么不能只依赖向量检索？</p><button data-answer="true">精确词会丢</button><button data-answer="false">页面会变暗</button><button data-answer="false">文件会变大</button><div class="quiz-result" aria-live="polite"></div><p class="lead">型号、错误码、版本号这类信息往往更适合关键词或元数据过滤。</p></div><div class="quiz-question"><p>混合检索主要混合什么能力？</p><button data-answer="true">精确与语义</button><button data-answer="false">颜色与动画</button><button data-answer="false">前端与后端</button><div class="quiz-result" aria-live="polite"></div><p class="lead">它把关键词的精确匹配和向量的语义泛化放在一起使用。</p></div><div class="quiz-question"><p>权限过滤应该尽量放在哪个阶段？</p><button data-answer="true">候选进入前</button><button data-answer="false">答案生成后</button><button data-answer="false">页面渲染时</button><div class="quiz-result" aria-live="polite"></div><p class="lead">用户没权限看的片段不该进入候选池，更不该交给模型。</p></div>
+</section>
+<section id="summary" class="callout">
+  <h2>这一章收个口</h2>
+  <p>第 6 章要记住一句朴素的话：检索不是为了找“看起来像”的文字，而是为了尽量不漏掉能回答问题的证据。关键词检索守住精确词，语义检索补上表达差异，元数据过滤负责边界。下一章会处理另一个麻烦：找到了很多候选片段以后，怎样把真正该看的排到前面。</p>
+</section>
+<section id="sources" class="source-box">
+  <h2>本章参考资料</h2>
+  <ul class="source-list"><li><a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter4/11_hybrid_search.md">Datawhale All-in-RAG: 混合检索</a><span>社区教程，用于 dense、sparse、hybrid 检索。</span></li><li><a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter3/10_index_optimization.md">Datawhale All-in-RAG: 索引优化</a><span>社区教程，用于元数据、句子窗口和结构化索引。</span></li><li><a href="https://github.com/ali-bahrainian/RAG_best_practices">RAG Best Practices</a><span>社区项目，用于参数实验、chunk、top_k、query expansion 等实践意识。</span></li></ul>
+</section>
+<nav class="footer-nav">
+  <a href="./0005-embedding-vector-index.html">上一章：Embedding 和向量索引</a>
+  <a href="./0007-ranking-reranking-context-pack.html">下一章：排序、重排和上下文包</a>
+</nav></main>
+      <aside class="side"><nav class="toc"><strong>本章目录</strong>
+    <a href="#goals">学习目标</a>
+    <a href="#opening">检索问题</a>
+    <a href="#keyword">关键词检索</a>
+    <a href="#semantic">语义检索</a>
+    <a href="#hybrid">混合检索</a>
+    <a href="#filters">元数据过滤</a>
+    <a href="#practice">练一下</a>
+    <a href="#quiz">快速自测</a>
+    <a href="#sources">参考资料</a>
+  </nav></aside>
+    </div>
+  </div>
+</body>
+</html>

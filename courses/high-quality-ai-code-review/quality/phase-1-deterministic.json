@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0",
+  "tool": "teach-generator/validate-course",
+  "generatedAt": "2026-07-15T11:50:43.364Z",
+  "courseRoot": "/Users/qi.qiao/Documents/Playground/ai-course-studio/courses/high-quality-ai-code-review",
+  "repositoryRoot": "/Users/qi.qiao/Documents/Playground/ai-course-studio",
+  "configPath": "/Users/qi.qiao/Documents/Playground/ai-course-studio/courses/high-quality-ai-code-review/.teach-generator-qc.json",
+  "contentHash": "222ad5f77c7fad1a7ea4d4d67f613d38e9eceedd7fc094e6ab45e1d9aad2b38f",
+  "passed": true,
+  "decision": "phase1_passed",
+  "counts": {
+    "error": 0,
+    "warning": 0
+  },
+  "checkedFiles": 36,
+  "hashedFiles": 43,
+  "issues": [],
+  "limitations": [
+    "不访问网络，因此不判断外部 URL 当前是否可达。",
+    "不安装 Mermaid 或 HTML 解析器，因此只检查可稳定判定的结构和禁用图类型，不保证完整语法正确。",
+    "不执行课程中的任意代码命令；声称可运行的示例仍需单独运行或测试。",
+    "不判断事实是否被来源真正支持、内容是否讲透或语言是否自然；这些项目进入第二阶段评价量规。"
+  ]
+}

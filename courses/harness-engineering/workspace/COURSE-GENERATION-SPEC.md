@@ -1,6 +1,6 @@
 # Course Generation Spec: Harness Engineering
 
-状态：正式生成阶段 v0.3；本轮生成第 3–13 章、实验仓库与整课质量报告。
+状态：整课质检阶段 v0.4；第 3–13 章、实验仓库与语义报告已生成。
 
 ## Current scope
 

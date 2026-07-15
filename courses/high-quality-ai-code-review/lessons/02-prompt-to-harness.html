@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="沿一次真实审查请求拆开入口、状态机、批次、MCP、Agent 与结果验证的职责。"><title>从 Prompt 到 Harness：整体架构与核心思路 | 如何实现高质量的 AI Code Review</title><script src="../assets/theme-switcher.js"></script><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">如何实现高质量的 AI Code Review</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 2 章 · 80–100 分钟</div><h1>从 Prompt 到 Harness：整体架构与核心思路</h1><p class="lesson-summary">沿一次真实审查请求拆开入口、状态机、批次、MCP、Agent 与结果验证的职责。</p><a class="source-link" href="../markdown/02-prompt-to-harness.md">查看 Markdown 版本</a></section><div class="lesson-layout"><main class="lesson-content"><h2 id="一个-prompt-为什么控制不了完整审查">一个 Prompt 为什么控制不了完整审查</h2>
+<p>设想一条很长的指令：先检查环境，再读取全部改动；按文件依赖分组，每组审查后提交结构化结果；高风险问题要复核；所有批次完成后检查遗漏，最后生成总结。模型读懂这段话并不困难。困难在于任务运行几十分钟后，系统怎样知道它真的完成了每一步。</p>
+<p>如果模型直接回复“已检查所有文件”，这句话是自我报告，不是完成证据。它可能跳过后段文件，可能把两个步骤合并，也可能在上下文变长后只给概括性意见。<strong>Prompt 可以表达期望，却无法独立保存事务状态</strong>、核对文件集合、阻止越级调用、恢复中断任务或让多个执行者共享进度。</p>
+<p>这不意味着 Prompt 没用。Prompt 负责把当前任务、规则、上下文和输出格式告诉模型。问题在于我们曾让它同时承担四种职责：说明目标、保存进度、控制流程、验收结果。后面三种职责更适合确定性程序。</p>
+<p><span class="term" tabindex="0" data-tip="包围模型的工程运行支架，负责上下文、工具、状态、权限、验证、恢复和观测。">Harness</span> 的作用，就是把这些工程职责从 Prompt 中拿出来。它是围绕模型的一套运行支架：准备上下文，暴露工具，保存状态，限定权限，验证结果，处理失败并记录指标。模型仍负责代码语义分析；系统不再把完整流程寄托在模型的工作记忆里。</p>
+<p>Anthropic 的工程文章区分了 workflow 与 agent：<span class="term" tabindex="0" data-tip="由代码预先规定路径，模型和工具在固定节点执行的工作流。">Workflow</span> 由预定义代码路径编排模型和工具，<span class="term" tabindex="0" data-tip="能根据目标、当前状态与工具结果，动态决定下一步动作的模型驱动系统。">Agent</span> 则由模型动态决定过程与工具使用。[1] 本课程案例是混合结构。宏观审查路径由状态机规定，因此更像 workflow；在每个批次内部，Agent 可以搜索仓库、阅读关联文件并决定分析方法。这个区分能避免一个误解：采用 Agent，不等于把所有控制权交给模型。</p>
+<h2 id="先画出系统边界">先画出系统边界</h2>
+<p>一条本地 AICR 请求至少涉及四层。为了公开教学，下面把与业务无关的入口合并为“CLI/调用方”，保留实现中的核心服务和工具名。</p>
+<figure class="diagram-card"><pre class="mermaid">flowchart LR
+  U[&quot;开发者 / 生码 Agent&quot;] --&gt; C[&quot;CLI 或调用入口&quot;]
+  C --&gt; P[&quot;Planner / CR Server&quot;]
+  P --&gt; DB[&quot;Session / Batch / File / Issue&quot;]
+  P --&gt; M[&quot;MCP Server&quot;]
+  M --&gt; A[&quot;审查 Agent&quot;]
+  A --&gt; W[&quot;本地仓库与工具&quot;]
+  A --&gt; M
+  M --&gt; P
+  P --&gt; V[&quot;Verifier / Extension Checks&quot;]
+  V --&gt; DB
+  DB --&gt; S[&quot;汇总与反馈&quot;]</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<p>调用方负责发起任务和携带必要身份、仓库、分支或 MR 信息。Planner 负责创建审查计划、推进状态、切分批次和决定下一步。MCP Server 把后端能力转换为模型可调用的工具。Agent 阅读当前 Prompt，在工作区内分析代码，再提交结构化结果。Verifier 和扩展检查不相信“我完成了”，而是检查结果格式、工作量和后续复核条件。</p>
+<p>这里的 Server 不是“更大的模型”。它是确定性控制面。Agent 也不是数据库状态的所有者。只要这条边界明确，系统就能回答三个重要问题：谁可以推进状态，谁可以生成问题，谁可以判定流程完成。</p>
+<p>MCP 官方规范采用 Host–Client–Server 架构。Host 管理多个 Client、权限和生命周期；每个 Client 与一个特定 Server 保持 1:1 有状态会话；Server 暴露 tools、resources 和 prompts，并通过能力协商声明支持什么。[2] 课程案例没有机械复制规范名词，但遵守相同方向：模型侧通过受控工具访问后端能力，而不是直接修改审查数据库。</p>
+<h2 id="一次请求怎样穿过系统">一次请求怎样穿过系统</h2>
+<p>下面沿一条正常请求走一遍。先只看交接，不急着记状态编号。</p>
+<h3 id="入口-创建或复用任务">入口：创建或复用任务</h3>
+<p>开发者在本地工作区触发 AICR。入口校验参数，识别仓库和改动范围，然后调用 Setup。远端模式还会处理异步任务、仓库准备和回调，第 8 章再展开。</p>
+<p>入口不应每次都无条件创建新任务。同一份改动可能因为页面刷新、网络重试或外部平台重复回调而被多次触发。系统需要内容哈希和会话状态来判断：复用已完成结果、继续未完成 Session，还是创建新 Session。幂等从入口开始，不能等 Agent 已经运行后再补。</p>
+<h3 id="setup-把模糊改动变成可审查对象">Setup：把模糊改动变成可审查对象</h3>
+<p><code>setupSession</code> 做的工作比“调用模型”更基础：创建或更新 Session，收集改动文件，过滤不需要审查的类型，计算内容哈希，尝试复用历史文件结果，再调用批次分配器生成 Batch。完成后，Session 进入 ready 状态，<code>current_step</code> 仍表示未正式开始，<code>allowed_next_step</code> 指向 0。</p>
+<p>文件过滤必须可追溯。依赖锁文件、生成产物、二进制资源或超大文件可能被排除，但排除不能悄悄发生。否则最终“完成 100% 审查”只覆盖了过滤后的集合，读者却以为覆盖了 MR 全部文件。好的 Setup 会保存原始集合、有效集合和排除原因。</p>
+<p>历史复用也有边界。文件路径相同不代表内容相同；内容相同但规则版本改变，也未必可以复用。<strong>当前实现使用内容哈希和 Session 状态参与判断</strong>。工程上还应考虑模型、Prompt、规则与工具版本，把它们纳入结果有效性的定义。</p>
+<h3 id="planner-只下发当前任务">Planner：只下发当前任务</h3>
+<p>Setup 完成后，Planner 不把全流程一次性塞给 Agent。它读取 <code>allowed_next_step</code>，调用相应处理函数，生成当前阶段的 Prompt。Agent 每次拿到的不是“请自行完成一切”，而是明确的下一项工作和结构化提交要求。</p>
+<p>在批次审查阶段，Planner 还会读取当前 <code>current_batch_index</code>，只提供当前 Batch 的文件、规则与上下文。完成一个 Batch 后，服务端才决定继续下一个、进入扩展检查、回退重审或生成汇总。</p>
+<h3 id="mcp-bridge-把状态转换为工具契约">MCP Bridge：把状态转换为工具契约</h3>
+<p>模型无法直接调用 Egg Service。MCP Server 注册两个核心工具：</p>
+<ul><li><code>cr_shift_left_batch_review</code>：根据 <code>session_id</code> 领取或继续当前允许的审查任务。</li><li><code>cr_shift_left_post_batch_results</code>：提交 <code>batch_results</code>，扩展阶段还可携带 <code>extension_results</code>。</li></ul>
+<p>工具名不是重点，契约才是。领取工具只需要 Session ID，服务端根据状态返回当前 Prompt；提交工具要求每条结果包含文件、行号、评分、分类、内容及可选代码片段。Agent 不传“下一步应该是 3”，也不直接把 <code>current_batch_index</code> 加一。状态推进权留在后端。</p>
+<h3 id="agent-在批次内部执行语义工作">Agent：在批次内部执行语义工作</h3>
+<p>Agent 收到当前批次后读取改动，必要时搜索定义、调用方和测试。它可以根据代码决定先看哪个文件，也可以用工具补足上下文。这是模型应有的自由：在受控工作单元里选择分析路径。</p>
+<p>Agent 产出的是候选 Issue，而不是最终真理。一个候选问题至少要回答：问题在哪，现有代码是什么，风险为何成立，严重度和类别是什么，怎样改进。高质量评论还要区分“必须修复的正确性问题”和“可选的维护建议”。这些字段让后端能够检查完整性，也让后续指标有稳定对象。</p>
+<h3 id="提交与验证-先验收-再推进">提交与验证：先验收，再推进</h3>
+<p>Agent 调用提交工具后，Processor 根据当前状态解释 payload。如果状态是 2，<code>batch_results</code> 会进入验证；如果缺少预期结果，实现会降级回 Step 1，而不是假装完成。验证通过后保存 Issue、更新 Batch 和 Session，再决定下一个状态。</p>
+<p>验证不等同于让另一个模型说“看起来不错”。可确定检查优先写成代码：字段是否完整，文件是否属于当前批次，行号是否合理，是否重复提交，审查耗时与问题密度是否落在配置范围，包含高风险修复建议时字段是否齐全。<strong>模型复核适合处理语义相关性，不能替代这些机械约束</strong>。</p>
+<h3 id="汇总-从多批结果生成可读结论">汇总：从多批结果生成可读结论</h3>
+<p>所有批次和必要扩展检查结束后，状态进入 3。汇总从数据库中的结构化 Issue 生成，而不是要求模型回忆此前对话。它可以按风险和类别组织问题，链接文件位置，说明覆盖和排除项，并为指标与反馈保留 Issue ID。</p>
+<figure class="diagram-card"><pre class="mermaid">sequenceDiagram
+  participant U as 调用方
+  participant S as Setup/Planner
+  participant D as 状态数据
+  participant M as MCP Server
+  participant A as Agent
+  participant V as Verifier
+  U-&gt;&gt;S: 创建审查请求
+  S-&gt;&gt;D: 创建 Session、File、Batch
+  U-&gt;&gt;M: batch_review(session_id)
+  M-&gt;&gt;S: processSession()
+  S-&gt;&gt;D: 读取 allowed_next_step
+  S--&gt;&gt;M: 当前阶段 Prompt
+  M--&gt;&gt;A: 当前批次与规则
+  A-&gt;&gt;A: 搜索、阅读、分析
+  A-&gt;&gt;M: post_batch_results(...)
+  M-&gt;&gt;S: 结构化结果
+  S-&gt;&gt;V: 验证当前提交
+  V--&gt;&gt;S: pass / retry / extension
+  S-&gt;&gt;D: 保存 Issue 并推进状态
+  S--&gt;&gt;A: 下一批、扩展检查或汇总</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<p>这张图不是实现证据。证据来自 <code>setup.ts</code>、<code>processor.ts</code>、两个 MCP Tool、<code>verifier.ts</code> 与数据模型。图的作用是把它们组织成一条可复述的请求链。</p>
+<h2 id="五个核心数据对象">五个核心数据对象</h2>
+<p>只看服务调用容易误以为状态都存在 Prompt 里。真正让任务可恢复的是持久对象。</p>
+<h3 id="session-一次审查的总账">Session：一次审查的总账</h3>
+<p><span class="term" tabindex="0" data-tip="一次完整审查任务的顶层状态对象，承载请求范围、当前步骤、统计与生命周期。">Session</span> 保存顶层生命周期：执行模式、状态、当前步骤、下一步许可、当前批次、文件数、行数、批次数、完成数、问题数、开始和结束时间。它还是外部请求与内部对象的关联点。</p>
+<p>Session 不应该塞入所有结果详情。它保存汇总和指针，具体文件、批次和问题使用独立对象。这样更新一个 Issue 不必重写整份会话，也便于按批次恢复。</p>
+<h3 id="file-审查范围的快照">File：审查范围的快照</h3>
+<p>File 对象记录路径、diff 规模、内容哈希、过滤或复用状态，以及它属于哪个 Session。它回答“本次到底要审什么”。如果只把文件列表写在 Prompt 中，任务中断后很难证明哪些文件已经处理。</p>
+<p>内容哈希让系统区分“同一路径的新内容”和“可以复用的相同内容”。但哈希只证明字节关系，不能证明规则环境相同。课程后续会把版本维度纳入评估讨论。</p>
+<h3 id="batch-受控工作单元">Batch：受控工作单元</h3>
+<p><span class="term" tabindex="0" data-tip="从一次大审查中切分出的工作单元，包含有限文件或 diff 工作量。">Batch</span> 把多个 File 组织为一次 Agent 可以处理的工作量。当前实现主要以约 800–1200 diff 行作为理想范围，同时结合语义分组、拆分、合并、去重和完整性检查。旧设计材料曾出现 800–1500，这属于版本差异，不应混成一个固定行业阈值。</p>
+<p>Batch 要保存索引、文件集合、工作量、状态、重试与结果统计。它让系统可以说“第 4 批失败，重新执行第 4 批”，而不是整次审查从头开始。</p>
+<h3 id="issue-可反馈-可度量的问题单元">Issue：可反馈、可度量的问题单元</h3>
+<p><span class="term" tabindex="0" data-tip="AI CR 产出的一条候选问题，通常包含位置、描述、严重度、证据与修复建议。">Issue</span> 是一条候选审查问题。位置、评分、类别、描述、现有代码、改进代码、采纳状态和有效性围绕它组织。后续采纳率的分子分母，本质上是在筛选 Issue。</p>
+<p>Issue 必须有稳定标识。开发者拒绝一条评论、最终代码采纳建议、测试发现漏报，都需要关联到具体对象。若结果只存在一段汇总文本中，数据闭环就无法建立。</p>
+<h3 id="pendingtask-与-memoryrule-跨执行与跨会话状态">PendingTask 与 MemoryRule：跨执行与跨会话状态</h3>
+<p>远端模式使用 PendingTask 表达排队、认领、执行、回调和终态；MemoryRule 保存由历史反馈形成的规则。前者让一次任务跨进程恢复，后者让不同 Session 共享经过筛选的经验。第 8 章和第 5/7 章分别展开。</p>
+<figure class="diagram-card"><pre class="mermaid">erDiagram
+  SESSION ||--o{ FILE : contains
+  SESSION ||--o{ BATCH : plans
+  BATCH }o--o{ FILE : groups
+  BATCH ||--o{ ISSUE : produces
+  SESSION ||--o{ ISSUE : aggregates
+  SESSION ||--o| PENDING_TASK : executes_as
+  MEMORY_RULE }o--o{ ISSUE : learned_from</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<p>ER 图省略了真实表名、组织字段和大量实现列，只表达教学关系。关系不是说每个数据库都必须这样设计；它说明这些对象分别解决范围、工作量、结果、异步生命周期和跨任务反馈。</p>
+<h2 id="allowednextstep-把建议变成许可"><code>allowed_next_step</code>：把建议变成许可</h2>
+<p>当前主链是 <code>0 → 1 → 2 → 2.x → 3</code>。它不是进度百分比，而是服务端允许执行的动作类型。</p>
+<div class="table-wrap"><table><thead><tr><th>状态</th><th>含义</th><th>谁执行主要工作</th><th>进入下一状态前的证据</th></tr></thead><tbody><tr><td><code>0</code></td><td>前置与环境检查</td><td>Server 读取配置，Agent 按提示确认环境</td><td>Session 可运行，配置和身份满足条件</td></tr><tr><td><code>1</code></td><td>下发并执行当前批次审查</td><td>Server 选 Batch，Agent 分析代码</td><td>有当前批次及明确提交契约</td></tr><tr><td><code>2</code></td><td>接收并验证批次结果</td><td>Server / Verifier</td><td>结构、范围和质量检查通过，或得到重试理由</td></tr><tr><td><code>2.x</code></td><td>执行条件化扩展检查</td><td>Agent + 扩展检查编排器</td><td>recheck、记忆、过滤等当前所需检查完成</td></tr><tr><td><code>3</code></td><td>生成最终汇总</td><td>Server / Agent 按持久结果汇总</td><td>所有必要批次和扩展检查已达到终态</td></tr></tbody></table></div>
+<p><code>current_step</code> 表示当前记录到的阶段，<code>allowed_next_step</code> 表示允许的下一动作。二者分开能表达“刚完成 Step 1，下一次提交必须按 Step 2 解释”。如果只保存一个 <code>status=running</code>，服务端收到 payload 时不知道它是批次结果、扩展结果还是重复请求。</p>
+<p>下面是 <code>processor.ts</code> 的简化节选。无关日志、监控和字段已移除，状态值与分发关系保持不变。</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">// 简化节选：状态由服务端读取，调用方不能自选处理分支
+const session = await getSession(sessionId);
+
+switch (session.allowed_next_step) {
+  case &quot;0&quot;:
+    return executeStep0(session);
+  case &quot;1&quot;:
+    return executeStep1(session);
+  case &quot;2&quot;:
+    return handleStep2(session, batchResults);
+  case &quot;2.x&quot;:
+    return handleStep2x(session, extensionResults);
+  case &quot;3&quot;:
+    return executeStep3(session);
+  default:
+    return { error: &quot;INVALID_STEP&quot; };
+}</code></pre></figure>
+<p>这个 switch 的价值不在语法，而在所有权：Processor 从数据库读取状态，再选择处理函数。Agent 即使在 Prompt 中写“请进入汇总”，也不能绕过未完成的批次。</p>
+<h3 id="正常状态循环">正常状态循环</h3>
+<p>一次 Batch 的常见循环是 <code>1 → 2 → 1</code>。Step 1 下发任务并把许可推进到 2；Agent 提交结果；Step 2 验证通过，若还有批次就增加索引并回到 1。所有批次完成后，系统可能进入 <code>2.x</code> 或 <code>3</code>。</p>
+<h3 id="缺失结果时的降级">缺失结果时的降级</h3>
+<p>如果状态为 2，调用却没有 <code>batch_results</code>，当前实现不会生成空结果并继续。<code>handleStep2</code> 会把 Batch 状态回退为 pending，把 <code>allowed_next_step</code> 设回 1，再重新下发审查。<code>2.x</code> 缺少扩展结果时也会清理扩展状态并回退。</p>
+<p>这是一个实用的失败处理原则：payload 与当前状态不匹配时，选择可解释的恢复点。恢复动作必须幂等，避免重复保存 Issue 或跳过 Batch。</p>
+<h3 id="扩展状态为什么写成-2-x">扩展状态为什么写成 <code>2.x</code></h3>
+<p>扩展检查不是单个固定步骤。它可以根据问题、模式和配置进入 recheck、negative memory、接口契约、任务说明、positive memory、filter 或 fix。把它统一标成 <code>2.x</code>，再由 <code>extension_check_state</code> 保存内部子状态，能让主链保持稳定，同时允许检查序列演进。</p>
+<p>这种设计也有代价。日志和指标必须同时记录主状态与子状态，否则所有扩展耗时都堆在 <code>2.x</code>。工具 payload 也要明确当前期望哪种扩展结果，不能让 Agent 猜。</p>
+<h2 id="链式-prompt-每一步只承担当前责任">链式 Prompt：每一步只承担当前责任</h2>
+<p>Harness 并没有消灭 Prompt，而是改变 Prompt 的粒度。<code>promptBuilder.ts</code> 会根据环境检查、当前批次、验证反馈、扩展检查和汇总生成不同提示。每份 Prompt 都可以包含四类信息：当前事实、当前任务、可用工具、提交契约。</p>
+<p>“当前事实”包括 Session ID、批次索引、文件范围、规则和已知上下文。“当前任务”只描述这一阶段要完成的判断。“可用工具”告诉 Agent 如何搜索和提交。“提交契约”规定字段、何时调用工具以及不能自行宣布的状态。</p>
+<p>链式 Prompt 的优点是局部可调试。如果某一批没有按格式提交，可以检查对应阶段的提示和工具 schema；如果高风险复核遗漏，可以检查扩展阶段；如果汇总不完整，可以对照数据库 Issue。单一巨型 Prompt 失败时，很难知道是理解、记忆、工具还是状态出了问题。</p>
+<p>它也有风险。不同 Prompt 可能重复或冲突，旧规则可能残留，阶段切换时必要上下文可能丢失。因此 Prompt 需要版本管理和契约测试。至少应验证状态名、工具名、必填字段和禁止越级指令与代码一致。</p>
+<h2 id="harness-的四层职责">Harness 的四层职责</h2>
+<p>为了设计新系统，可以把职责压缩成四层，而不是照抄类名。</p>
+<h3 id="planner-决定做什么">Planner：决定做什么</h3>
+<p>Planner 根据改动范围与当前状态决定批次、顺序和下一任务。它维护全局完成条件，但不替 Agent 阅读每一行代码。Planner 的输出必须可持久化：任务列表、状态转换和失败原因不能只存在于一次模型回复。</p>
+<h3 id="team-lead-verifier-决定是否算完成">Team Lead / Verifier：决定是否算完成</h3>
+<p>Verifier 负责验收。确定性条件写成程序，语义条件可以调用独立复核。它不能只看“输出是否很长”，而要检查当前工作单元是否完整、证据字段是否可用、结果是否与文件范围一致。</p>
+<h3 id="bridge-mcp-控制怎样访问能力">Bridge / MCP：控制怎样访问能力</h3>
+<p>Bridge 把后端能力暴露为窄工具。工具参数越清楚，越容易校验和审计。不要提供一个万能 <code>execute(action, payload)</code> 让模型自行拼动作；也不要让工具直接接受“目标状态”。工具应围绕业务动作设计，例如领取当前批次、提交当前结果。</p>
+<h3 id="executor-agent-完成语义分析">Executor / Agent：完成语义分析</h3>
+<p>Executor 在受限工作区中读取代码、调用搜索和测试工具，生成候选 Issue。它的自治范围由批次、权限与停止条件共同决定。模型更强可以改善这一层，却不能取消其他三层。</p>
+<figure class="diagram-card"><pre class="mermaid">flowchart TB
+  P[&quot;Planner：选择任务与状态&quot;] --&gt; B[&quot;Bridge：暴露窄工具契约&quot;]
+  B --&gt; E[&quot;Executor：分析当前批次&quot;]
+  E --&gt; T[&quot;Verifier：检查完成证据&quot;]
+  T -- &quot;通过&quot; --&gt; P
+  T -- &quot;不通过&quot; --&gt; R[&quot;重试 / 降级 / 熔断&quot;]
+  R --&gt; P</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<p>Anthropic 所说的 orchestrator-workers 与 evaluator-optimizer 模式可作为公共参照：中央编排者动态拆解任务，工作者执行；评价者依据清楚标准给反馈并循环改进。[1] 本案例与它们相似，但状态机、数据库和 MCP 工具让流程具备持久与恢复能力。不要因为结构相似，就声称某篇文章证明了当前实现最优。</p>
+<h2 id="正常路径之外的六个失败点">正常路径之外的六个失败点</h2>
+<p>架构是否可靠，取决于失败时还能否解释和恢复。</p>
+<h3 id="失败点一-setup-范围不完整">失败点一：Setup 范围不完整</h3>
+<p>文件过滤错误或 diff 获取失败，会让后续所有步骤在错误集合上“成功”。应记录总文件、有效文件、排除文件和原因，并在汇总展示覆盖边界。</p>
+<h3 id="失败点二-批次不均衡">失败点二：批次不均衡</h3>
+<p>一个 Batch 太大，Agent 容易概括；太小则上下文被切碎，跨文件关系丢失。当前 800–1200 行只是案例实现的主要理想范围，不是通用答案。分批还要考虑语义依赖、文件类型和仓库基线。</p>
+<h3 id="失败点三-重复领取或重复提交">失败点三：重复领取或重复提交</h3>
+<p>网络重试可能重复调用工具。领取动作应返回同一当前任务，提交动作应根据 Session、Batch 和结果标识去重。只靠前端按钮禁用无法保证幂等。</p>
+<h3 id="失败点四-状态与-payload-不匹配">失败点四：状态与 payload 不匹配</h3>
+<p>状态是 2，Agent 却提交扩展结果；状态是 <code>2.x</code>，调用方没有 extension payload。Processor 必须拒绝或回退，日志要记录期望与实际，不要把未知字段悄悄丢弃后推进。</p>
+<h3 id="失败点五-验证门被配置关闭">失败点五：验证门被配置关闭</h3>
+<p>实现包含耗时、密度、内容长度和高风险建议检查，但兜底配置中部分阈值是 0 或近似关闭值，运行时又可能被数据库热配置覆盖。架构图上有 Verifier，不代表每个质量门在所有环境都生效。第 7 章会区分设计目标、默认值和运行值。</p>
+<h3 id="失败点六-扩展检查循环不终止">失败点六：扩展检查循环不终止</h3>
+<p>recheck 或 fix 如果不断返回需要继续，任务会卡在 <code>2.x</code>。每个子状态需要重试上限、超时、熔断和可人工接管的终态。失败不是 <code>running</code> 的另一种写法，必须有明确分类。</p>
+<h2 id="怎样观察这条链路">怎样观察这条链路</h2>
+<p>没有可观测性，状态机只是在数据库里移动字符串。每次处理至少应绑定 Session 级 trace，并记录阶段名、Batch 索引、开始结束时间、结果数量、验证结论和错误类别。</p>
+<p>当前实现把 <code>allowed_next_step</code> 转换为类似 <code>processor_step_2_x</code> 的阶段名，并在 MCP 工具调用处记录领取和提交阶段。这让监控可以回答“卡在哪个状态”“某个工具失败还是审查超时”“重试是否集中在特定 Batch”。远端执行器还需要队列等待和仓库准备指标。</p>
+<p>日志不能记录全部 Prompt、令牌和业务代码而不设边界。公开或多租户系统应脱敏仓库地址、账号、任务文本和代码片段。更适合长期保留的是哈希、版本、计数、状态与错误分类；需要原文排障时使用受控采样和访问审计。</p>
+<h2 id="源码观察-从三处验证架构">源码观察：从三处验证架构</h2>
+<p>阅读真实仓库时，不必从目录第一行读到最后一行。沿请求链抓三个观察点即可建立骨架。</p>
+<p>第一处看 <code>setup.ts</code> 的 <code>setupSession</code>。记录它创建哪些对象，如何过滤文件、计算哈希、复用历史结果和生成 Batch。检查完成时写入的 Session 状态。</p>
+<p>第二处看 <code>processor.ts</code> 的 <code>processSession</code>。确认 switch 的输入来自数据库 Session，不来自 Agent 参数；再追踪 Step 1 怎样选择批次、Step 2 怎样验证、缺失 payload 怎样回退、什么时候进入 <code>2.x</code> 与 3。</p>
+<p>第三处看两个 MCP 工具。<code>cr_shift_left_batch_review</code> 只传 <code>session_id</code> 并调用 Processor；<code>cr_shift_left_post_batch_results</code> 传结构化结果，同样把处理权交给 Processor。工具本身不重写状态机，这是 Bridge 应有的薄度。</p>
+<p>完成这三处后，再按问题进入 <code>batchAllocator.ts</code>、<code>verifier.ts</code>、<code>extensionChecker.ts</code>、<code>promptBuilder.ts</code> 和数据模型。这样阅读的依据是因果链，而不是文件大小。</p>
+<h2 id="状态预测练习">状态预测练习</h2>
+<p>在做状态预测前，还需要补一层容易被架构图隐藏的设计：Batch 怎样形成，以及工具契约怎样证明“当前批次”没有被越界处理。</p>
+<h3 id="分批不是按行数机械切片">分批不是按行数机械切片</h3>
+<p>最简单的分批方法是把 diff 每 1000 行截断。它会制造两个问题。第一，一个组件的类型、实现和测试可能被切进三个批次，Agent 在每批都只看到不完整语义。第二，某个 900 行生成文件可能独占一个 Batch，真正需要审查的十几个小文件却被挤到另一个超载批次。</p>
+<p>当前 <code>batchAllocator.ts</code> 采用多阶段思路。先按目录、文件关系和语义线索形成初始组，再根据工作量拆分过大的组、合并过小的组，最后做去重和完整性校验。约 800–1200 diff 行是主要理想范围，不是第一优先级压倒所有语义关系的硬切线。</p>
+<p>分批结果至少要满足三个不变量。每个有效 File 必须属于某个 Batch；同一个 File 不应在普通审查阶段被无意重复分配；所有 Batch 的文件并集应等于 Setup 认定的有效文件集合。三个不变量都可以由程序检查，不需要模型判断。</p>
+<p>跨 Batch 依赖无法完全消除。可采用两种补偿。一种是在 Prompt 中附带只读的关联摘要或符号信息，让当前批次知道外部契约；另一种在所有批次完成后执行扩展检查，专门查跨批次冲突。补偿信息要受预算控制，否则分批在物理上存在，模型上下文却仍然承载全仓库。</p>
+<p>Batch 大小还会影响指标。大 Batch 可能让后段文件漏检，小 Batch 增加调用次数、成本和重复评论。后续做召回率实验时，应把批次规模作为实验变量记录，而不是只看最终 F1。若同时改模型、Prompt、批次和规则，就无法知道提升来自哪里。</p>
+<h3 id="工具-schema-是协议-不只是参数校验">工具 schema 是协议，不只是参数校验</h3>
+<p>领取工具输入只有 <code>session_id</code>，意味着调用者不能指定“我要第 8 批”。服务端依据 Session 返回当前允许的任务。这个设计缩小了越权面：即使 Agent 记错索引，也不能绕过前七批。</p>
+<p>提交工具中的 <code>batch_results</code> 是数组，每项包含文件路径、行号、评分、类别和问题内容，并允许带现有代码、改进代码等字段。schema 能阻止字段类型明显错误，却不能证明语义真实。例如 Agent 可以提交一个属于其他批次的合法路径，也可以给不存在的行号。服务端仍需把 payload 与当前 Batch、diff 和文件快照交叉检查。</p>
+<p>扩展检查复用同一提交入口，是为了让 Processor 统一读取状态并解释 payload。它也要求错误信息足够清楚：是当前状态不接收 <code>batch_results</code>，还是 <code>extension_results</code> 缺少当前子检查字段。模糊的“参数错误”会让 Agent 盲目重试。</p>
+<p>一个稳健的工具响应不只返回 Prompt。机器可读部分还可以包含 <code>session_status</code>、当前 Batch、下一步类型、验证是否通过和稳定错误码；面向 Agent 的自然语言说明负责解释动作。把所有信息塞进一段文字，会让调用方再次依赖模型解析状态。</p>
+<h3 id="状态转换需要并发保护">状态转换需要并发保护</h3>
+<p>本地单人运行也可能出现并发：用户重复点击、MCP 超时后重试、旧请求晚到。两个提交同时读取 <code>allowed_next_step=2</code>，都验证并保存，就可能重复 Issue、重复增加完成数，甚至把索引推进两次。</p>
+<p>常见防护是带条件更新：只有数据库仍处于期望状态和版本时才提交转换。也可以为 Session 增加版本号，更新时使用 compare-and-swap；Issue 使用 Session、Batch 与内容指纹组成唯一键；完成计数从 Batch 状态聚合，而不是无条件 <code>+1</code>。课程案例的远端 PendingTask 使用软认领和同仓库分支串行处理类似问题，第 8 章会详细讨论。</p>
+<p>状态机设计还要列出非法转换。<code>1 → 3</code> 不应因为 Agent 提前总结而发生；完成态不应重新接受普通结果；失败恢复只能回到明确检查点。把非法转换写成测试，比在 Prompt 里强调“绝对不要跳步”可靠。</p>
+<h3 id="结果保存要先于下一任务下发">结果保存要先于下一任务下发</h3>
+<p>假设 Step 2 验证通过后先返回下一批 Prompt，异步保存 Issue 随后失败。Agent 已开始下一批，数据库却仍认为上一批未完成。恢复时可能重复审查，也可能丢结果。</p>
+<p>较安全的顺序是：验证 payload，事务性保存 Issue 与 Batch 状态，更新 Session 的下一步许可，提交成功后再返回新 Prompt。跨数据库或外部系统无法单事务时，使用幂等事件和可重放的 outbox，而不是假设网络调用一定成功。</p>
+<p>这条顺序解释了为什么“链式对话”不等于状态机。对话可以把下一段文字发出来，<strong>只有持久提交才能证明上一阶段已经形成可恢复事实</strong>。</p>
+<h2 id="两种替代架构及其边界">两种替代架构及其边界</h2>
+<p>理解 Harness 不必把当前实现当唯一答案。比较替代方案更容易看清选择条件。</p>
+<p>第一种是无状态 PR Bot：每次收到 webhook，就取 diff、调用模型、发布评论。它组件少、反馈快，适合小改动和可容忍失败的建议型场景。缺点是难以恢复长任务，跨批完成证明弱，重复触发和上下文选择需要额外处理。若团队只想给 5 个文件的 MR 做非阻断提示，这可能是更合适的起点。</p>
+<p>第二种是完全自治 Agent：给仓库、目标和工具，让模型自行规划、审查、复核并总结。它对未知任务有弹性，也减少显式流程代码；但完成证明、成本上限、权限和可复现性更难控制。高风险或规模化服务通常仍需要外部超时、预算、状态和人工批准。</p>
+<p>当前混合 Harness 位于两者之间：Server 固定主状态和完成条件，Agent 在批次内部保持自治。它付出的代价是更多数据对象、迁移、监控和契约维护。只有当任务规模、自动化调用或恢复要求确实存在时，这些代价才合理。</p>
+<p>下面不是标准答案式测验，而是检查你是否掌握状态所有权。</p>
+<p>情况一：Session 的 <code>allowed_next_step</code> 是 1，当前批次索引为 3。调用领取工具后，服务端应下发第 3 批任务，并把后续期望调整为提交结果。Agent 无权自行把索引改成 4。</p>
+<p>情况二：状态是 2，但提交调用没有 <code>batch_results</code>。当前实现回退到 Step 1，把当前 Batch 恢复为 pending，再次下发审查。它不会把空数组当成“没有发现问题”，因为“未提交结果”和“审查后确认零问题”语义不同。</p>
+<p>情况三：状态是 <code>2.x</code>，扩展检查返回完成。Processor 应根据 <code>extension_check_state</code> 判断还有没有下一个扩展子任务；有则继续 <code>2.x</code>，无则进入下一个 Batch 或状态 3。Agent 的文字总结不能代替这个判断。</p>
+<p>情况四：所有 Batch 标记完成，但有一个 File 从未属于任何 Batch。即使状态准备进入 3，完整性检查也应阻止汇总或标记范围缺陷。完成批次数不等于文件覆盖完整。</p>
+<p>如果能解释这四种情况，你已经抓住 Harness 的核心：模型产生语义判断，外部系统保存事实并决定许可。</p>
+<h2 id="从-prompt-only-迁移到-harness-的最小路径">从 Prompt-only 迁移到 Harness 的最小路径</h2>
+<p>新团队不必一次建设全部组件。可以按风险逐层外置。</p>
+<p>先把输出变成稳定 schema，让每条 Issue 有位置、类别、严重度、证据和建议。随后增加 Session，保存请求、状态和结果。再把大改动切成 Batch，由服务端发放当前批次。之后加入确定性验证、重试和终态。最后再扩展记忆、自动采纳、远端队列和复杂复核。</p>
+<p>每一步都应该解决一个可观察问题。若当前任务只有几个文件、失败可人工重跑，完整状态机可能得不偿失；若需要长时间运行、跨几十个文件、被外部平台自动调用，持久状态和幂等就不是“高级功能”，而是基本正确性。</p>
+<p>这一判断也符合公开工程建议：先使用能满足任务的最简单方案，只在性能与可靠性需要时增加 agentic 复杂度。[1] 简单不是少写代码，而是让每个组件都有清楚失败模式。一个 300 行万能 Prompt 往往比五个窄接口更难验证。</p>
+<h2 id="参考文献">参考文献</h2>
+<ol><li>Anthropic. <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noreferrer">Building effective agents</a>. 2024-12-19.</li><li>Model Context Protocol. <a href="https://modelcontextprotocol.io/specification/2025-06-18/architecture" target="_blank" rel="noreferrer">Architecture, Specification 2025-06-18</a>.</li><li>GitHub Docs. <a href="https://docs.github.com/en/copilot/concepts/agents/code-review" target="_blank" rel="noreferrer">About GitHub Copilot code review</a>；<a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review" target="_blank" rel="noreferrer">Using GitHub Copilot code review</a>.</li><li>GitLab Docs. <a href="https://docs.gitlab.com/user/project/merge_requests/duo_in_merge_requests/" target="_blank" rel="noreferrer">GitLab Duo in merge requests</a>.</li><li>Nelson F. Liu 等. <a href="https://arxiv.org/abs/2307.03172" target="_blank" rel="noreferrer">Lost in the Middle: How Language Models Use Long Contexts</a>. TACL, 2023.</li></ol><nav class="lesson-nav"><a href="../lessons/01-why-ai-code-review.html">← 第 1 章<br><strong>为什么今天需要 AI Code Review</strong></a><a href="../lessons/03-metrics-adoption-recall-f1.html">第 3 章 →<br><strong>先建立度量：采纳率、召回率与 F1-Score</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#一个-prompt-为什么控制不了完整审查"><span class="toc-num">2.1</span>一个 Prompt 为什么控制不了完整审查</a><a class="" href="#先画出系统边界"><span class="toc-num">2.2</span>先画出系统边界</a><a class="" href="#一次请求怎样穿过系统"><span class="toc-num">2.3</span>一次请求怎样穿过系统</a><a class="sub" href="#入口-创建或复用任务"><span class="toc-num">2.3.1</span>入口：创建或复用任务</a><a class="sub" href="#setup-把模糊改动变成可审查对象"><span class="toc-num">2.3.2</span>Setup：把模糊改动变成可审查对象</a><a class="sub" href="#planner-只下发当前任务"><span class="toc-num">2.3.3</span>Planner：只下发当前任务</a><a class="sub" href="#mcp-bridge-把状态转换为工具契约"><span class="toc-num">2.3.4</span>MCP Bridge：把状态转换为工具契约</a><a class="sub" href="#agent-在批次内部执行语义工作"><span class="toc-num">2.3.5</span>Agent：在批次内部执行语义工作</a><a class="sub" href="#提交与验证-先验收-再推进"><span class="toc-num">2.3.6</span>提交与验证：先验收，再推进</a><a class="sub" href="#汇总-从多批结果生成可读结论"><span class="toc-num">2.3.7</span>汇总：从多批结果生成可读结论</a><a class="" href="#五个核心数据对象"><span class="toc-num">2.4</span>五个核心数据对象</a><a class="sub" href="#session-一次审查的总账"><span class="toc-num">2.4.1</span>Session：一次审查的总账</a><a class="sub" href="#file-审查范围的快照"><span class="toc-num">2.4.2</span>File：审查范围的快照</a><a class="sub" href="#batch-受控工作单元"><span class="toc-num">2.4.3</span>Batch：受控工作单元</a><a class="sub" href="#issue-可反馈-可度量的问题单元"><span class="toc-num">2.4.4</span>Issue：可反馈、可度量的问题单元</a><a class="sub" href="#pendingtask-与-memoryrule-跨执行与跨会话状态"><span class="toc-num">2.4.5</span>PendingTask 与 MemoryRule：跨执行与跨会话状态</a><a class="" href="#allowednextstep-把建议变成许可"><span class="toc-num">2.5</span>allowednextstep：把建议变成许可</a><a class="sub" href="#正常状态循环"><span class="toc-num">2.5.1</span>正常状态循环</a><a class="sub" href="#缺失结果时的降级"><span class="toc-num">2.5.2</span>缺失结果时的降级</a><a class="sub" href="#扩展状态为什么写成-2-x"><span class="toc-num">2.5.3</span>扩展状态为什么写成 2.x</a><a class="" href="#链式-prompt-每一步只承担当前责任"><span class="toc-num">2.6</span>链式 Prompt：每一步只承担当前责任</a><a class="" href="#harness-的四层职责"><span class="toc-num">2.7</span>Harness 的四层职责</a><a class="sub" href="#planner-决定做什么"><span class="toc-num">2.7.1</span>Planner：决定做什么</a><a class="sub" href="#team-lead-verifier-决定是否算完成"><span class="toc-num">2.7.2</span>Team Lead / Verifier：决定是否算完成</a><a class="sub" href="#bridge-mcp-控制怎样访问能力"><span class="toc-num">2.7.3</span>Bridge / MCP：控制怎样访问能力</a><a class="sub" href="#executor-agent-完成语义分析"><span class="toc-num">2.7.4</span>Executor / Agent：完成语义分析</a><a class="" href="#正常路径之外的六个失败点"><span class="toc-num">2.8</span>正常路径之外的六个失败点</a><a class="sub" href="#失败点一-setup-范围不完整"><span class="toc-num">2.8.1</span>失败点一：Setup 范围不完整</a><a class="sub" href="#失败点二-批次不均衡"><span class="toc-num">2.8.2</span>失败点二：批次不均衡</a><a class="sub" href="#失败点三-重复领取或重复提交"><span class="toc-num">2.8.3</span>失败点三：重复领取或重复提交</a><a class="sub" href="#失败点四-状态与-payload-不匹配"><span class="toc-num">2.8.4</span>失败点四：状态与 payload 不匹配</a><a class="sub" href="#失败点五-验证门被配置关闭"><span class="toc-num">2.8.5</span>失败点五：验证门被配置关闭</a><a class="sub" href="#失败点六-扩展检查循环不终止"><span class="toc-num">2.8.6</span>失败点六：扩展检查循环不终止</a><a class="" href="#怎样观察这条链路"><span class="toc-num">2.9</span>怎样观察这条链路</a><a class="" href="#源码观察-从三处验证架构"><span class="toc-num">2.10</span>源码观察：从三处验证架构</a><a class="" href="#状态预测练习"><span class="toc-num">2.11</span>状态预测练习</a><a class="sub" href="#分批不是按行数机械切片"><span class="toc-num">2.11.1</span>分批不是按行数机械切片</a><a class="sub" href="#工具-schema-是协议-不只是参数校验"><span class="toc-num">2.11.2</span>工具 schema 是协议，不只是参数校验</a><a class="sub" href="#状态转换需要并发保护"><span class="toc-num">2.11.3</span>状态转换需要并发保护</a><a class="sub" href="#结果保存要先于下一任务下发"><span class="toc-num">2.11.4</span>结果保存要先于下一任务下发</a><a class="" href="#两种替代架构及其边界"><span class="toc-num">2.12</span>两种替代架构及其边界</a><a class="" href="#从-prompt-only-迁移到-harness-的最小路径"><span class="toc-num">2.13</span>从 Prompt-only 迁移到 Harness 的最小路径</a><a class="" href="#参考文献"><span class="toc-num">2.14</span>参考文献</a></aside></div><footer class="site-footer">如何实现高质量的 AI Code Review · 人工审核稿</footer></div></body></html>

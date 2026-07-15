@@ -1,11 +1,11 @@
 {
   "schemaVersion": "1.0",
   "tool": "teach-generator/validate-course",
-  "generatedAt": "2026-07-10T07:36:32.507Z",
+  "generatedAt": "2026-07-15T11:50:43.384Z",
   "courseRoot": "/Users/qi.qiao/Documents/Playground/ai-course-studio/courses/harness-engineering",
   "repositoryRoot": "/Users/qi.qiao/Documents/Playground/ai-course-studio",
   "configPath": "/Users/qi.qiao/Documents/Playground/ai-course-studio/courses/harness-engineering/.teach-generator-qc.json",
-  "contentHash": "0097b3ba693f9014e539177e91cd8723ed2fd917d68e94c6ea97db8ce09601ab",
+  "contentHash": "c94595ecf416ea2d0699ac15d6da6369f7f3ec6ae7696abaebb3f88a485c2e6d",
   "passed": true,
   "decision": "phase1_passed",
   "counts": {

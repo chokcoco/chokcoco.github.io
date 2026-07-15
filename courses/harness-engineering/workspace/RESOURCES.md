@@ -1,6 +1,6 @@
 # Harness Engineering Resources
 
-状态：来源包 v0.2，访问日期 2026-07-10。用户教材、企业内部材料与样章核心来源已登记。
+状态：来源包 v0.3，访问日期 2026-07-10。整课来源、技术版本与电商案例来源已登记。
 
 ## Source policy
 
@@ -161,7 +161,7 @@
 
 ## Tooling note
 
-本轮通过 OpenAI 官方网站重新核验第 1–2 章使用的 Harness Engineering、Codex agent loop 和 App Server 资料。后续涉及具体产品配置时，优先使用官方文档或官方源码，并记录访问日期。
+本轮重新核验了 Harness Engineering、agent loop、App Server、长时任务、编排、React、Vite、Spring Boot、优惠组合、库存预占和幂等重试的一手资料。后续涉及具体产品配置时，仍优先使用官方文档或官方源码，并记录访问日期。
 
 ## Full-course implementation sources verified on 2026-07-10
 

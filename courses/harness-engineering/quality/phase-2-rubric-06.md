@@ -2,7 +2,7 @@
 
 - 量规：通用课程评价量规 1.0
 - 审校范围：`lessons/06-build-agent-first-repository.md`
-- 第一阶段内容哈希：`0097b3ba693f9014e539177e91cd8723ed2fd917d68e94c6ea97db8ce09601ab`
+- 第一阶段内容哈希：`0c8f2b26cb58a39540a26768e553bf68b37c6dab5a23609e745dc2a7872f7f12`
 - 第一阶段结果：0 error，0 warning
 - 审校日期：2026-07-10
 

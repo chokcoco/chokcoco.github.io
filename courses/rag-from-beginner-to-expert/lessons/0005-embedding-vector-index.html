@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Embedding 和向量索引：把文字放进可搜索的语义空间 | RAG 从入门到精通</title>
+  <script src="../assets/theme-switcher.js"></script>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
+  <script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="../index.html">RAG 从入门到精通</a>
+      <nav>
+        <a href="../index.html">课程首页</a>
+        <a href="../reference/0001-course-blueprint.html">课程蓝图</a>
+        <a href="../reference/0002-rag-glossary.html">术语表</a>
+      </nav>
+    </header>
+    
+    <div class="layout">
+      <main>
+<section class="hero">
+  <div class="eyebrow">第 5 章 · 约 75 分钟</div>
+  <h1>Embedding 和向量索引：把文字放进可搜索的语义空间</h1>
+  <p class="summary">上一章，我们已经把文档切成了 chunk。现在问题来了：用户不会总按资料原文提问。资料里写的是“优惠券抵扣部分需要扣减”，用户问的可能是“用了券还能退全款吗”。只靠关键词，系统有时能碰上，有时就错过。第 5 章要做的事，就是把 chunk 和问题都变成向量，再用相似度把它们找回来。</p>
+  <div class="meta"><span class="pill">解释向量相似度</span><span class="pill">理解同一模型空间</span><span class="pill">搭建本地向量索引</span><span class="pill">设计可替换接口</span></div>
+</section>
+<section id="goals" class="card">
+  <h2>这一章要把“能切”推进到“能搜”</h2>
+  <ul><li>解释向量相似度</li><li>理解同一模型空间</li><li>搭建本地向量索引</li><li>设计可替换接口</li></ul>
+</section>
+<section id="keyword-problem" class="section">
+  <h2>先看关键词检索的尴尬时刻</h2>
+  <p>假设 chunk 里写着：“已经使用优惠券的订单，需要按优惠券规则扣减。”用户问：“用了券还能退全款吗？”这两个句子明明在问同一件事，但关键词重合并不多。你要是只搜“全款”，可能什么也找不到；只搜“券”，又可能把发票、活动、优惠说明都拉回来。</p>
+  <p>这就是 [[embedding]] 出场的地方。它不是把文字翻译成另一种语言，而是把文字变成一串数字。数字本身人类读不懂，但可以计算距离。两个句子意思越接近，向量方向通常越接近。先别急着觉得玄，我们用最小代码把这个过程拆开。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>先看一个 chunk 进入向量索引后的样子</figcaption><pre><code class="language-javascript" data-language="javascript">const vectorRecord = {
+  id: &quot;refund-policy#2026-01#chunk-001&quot;,
+  document_id: &quot;refund-policy#2026-01&quot;,
+  source: &quot;data/raw/refund-policy.md&quot;,
+  title: &quot;会员退款制度&quot;,
+  section_path: [&quot;年度会员退款&quot;],
+  permission: &quot;support&quot;,
+  version: &quot;2026-01&quot;,
+  text: &quot;年度会员购买后 7 天内可申请退款。已经使用优惠券的订单，需要按优惠券规则扣减。&quot;,
+  embedding_model: &quot;mock-hash-embedding-v1&quot;,
+  embedding: [0.12, -0.04, 0.31, 0.08]
+};
+
+// 真实项目里的 embedding 维度通常会高得多，可能是几百到几千维。
+// 课程里先用短向量示意，重点是看懂它和原始 chunk 的关系。</code></pre></figure></div>
+</section>
+<section id="mental-model" class="section">
+  <h2>理解向量，有一个小技巧</h2>
+  <p>可以把每个 chunk 想成地图上的一个点。问“优惠券退款”，它会落在退款制度附近；问“发票抬头填错”，它会落在发票 FAQ 附近。向量检索做的事，就是把用户问题也放到这张地图上，然后找离它最近的几个点。</p>
+  <p>这张地图有两个规矩要记住。第一，chunk 和 query 必须用同一个 embedding 模型生成，地图才是同一张。第二，向量库里不能只存 embedding，还要带回原文和元数据。否则你只知道“这个点很近”，却不知道它来自哪里、谁能看、能不能引用。</p>
+  <pre class="mermaid">flowchart LR
+  A[&quot;chunks.jsonl&quot;] --&gt; B[&quot;Embedding 模型&quot;]
+  B --&gt; C[&quot;vectors.jsonl / 向量索引&quot;]
+  D[&quot;用户问题&quot;] --&gt; E[&quot;同一个 Embedding 模型&quot;]
+  E --&gt; F[&quot;问题向量&quot;]
+  F --&gt; G[&quot;相似度计算&quot;]
+  C --&gt; G
+  G --&gt; H[&quot;Top-K 候选片段&quot;]
+  H --&gt; I[&quot;下一章进入检索过滤&quot;]</pre>
+</section>
+<section id="features" class="section">
+  <h2>技巧一：先做教学版 embedding，别一上来接 API</h2>
+  <p>这一章我们先写一个很朴素的 mock embedding。它会把文本拆成相邻字符窗口，再把这些窗口塞进固定长度的数组。这个算法不聪明，甚至有点粗糙。但它有一个好处：不需要 API key，也不会因为网络或额度问题打断学习。</p>
+  <p>这里要说清楚：mock embedding 不是拿来证明检索效果的，它是拿来证明链路形状的。只要链路形状对了，后面把模型换成真实 embedding，项目结构不用推翻。</p>
+  <div class="code-stack">
+    <figure class="code-card"><figcaption>src/embedding/text-features.js：先把文字切成稳定的小特征</figcaption><pre><code class="language-javascript" data-language="javascript">export function normalizeForEmbedding(text) {
+  return text
+    .toLowerCase()
+    .replace(/[\r\n]+/g, &quot; &quot;)
+    .replace(/[，。！？、,.!?;；:：()（）&quot;“”]/g, &quot; &quot;)
+    .replace(/\s+/g, &quot; &quot;)
+    .trim();
+}
+
+export function charWindows(text, size = 2) {
+  const normalized = normalizeForEmbedding(text);
+  const compact = normalized.replace(/\s+/g, &quot;&quot;);
+  const windows = [];
+
+  for (let index = 0; index &lt;= compact.length - size; index += 1) {
+    windows.push(compact.slice(index, index + size));
+  }
+
+  // 文本太短时，至少保留原文。否则空向量会让相似度计算失去意义。
+  return windows.length ? windows : [compact || &quot;__empty__&quot;];
+}</code></pre></figure>
+    <figure class="code-card"><figcaption>src/embedding/mock-embedding.js：教学用 embedding，不假装它很聪明</figcaption><pre><code class="language-javascript" data-language="javascript">import { createHash } from &quot;node:crypto&quot;;
+import { charWindows } from &quot;./text-features.js&quot;;
+
+const DIMENSIONS = 64;
+const MODEL_NAME = &quot;mock-hash-embedding-v1&quot;;
+
+function bucketForToken(token) {
+  const hash = createHash(&quot;sha256&quot;).update(token).digest();
+  return hash.readUInt32BE(0) % DIMENSIONS;
+}
+
+function normalizeVector(vector) {
+  const length = Math.sqrt(vector.reduce((sum, value) =&gt; sum + value * value, 0));
+  if (!length) return vector;
+  return vector.map((value) =&gt; Number((value / length).toFixed(6)));
+}
+
+export function embedTextMock(text) {
+  const vector = Array.from({ length: DIMENSIONS }, () =&gt; 0);
+
+  for (const token of charWindows(text, 2)) {
+    vector[bucketForToken(token)] += 1;
+  }
+
+  return {
+    model: MODEL_NAME,
+    dimensions: DIMENSIONS,
+    embedding: normalizeVector(vector)
+  };
+}
+
+export function embedManyMock(texts) {
+  return texts.map((text) =&gt; embedTextMock(text));
+}</code></pre></figure>
+  </div>
+</section>
+<section id="similarity" class="section">
+  <h2>技巧二：相似度不是“包含关系”，而是方向关系</h2>
+  <p>关键词搜索像是在问：“你有没有这个词？”向量搜索更像是在问：“你们的方向像不像？”这也是为什么 RAG 里常见余弦相似度。它不太关心向量有多长，更关心两个向量夹角接近不接近。</p>
+  <p>下面的函数很短，但很值得手敲一遍。写完它，你会发现“语义检索”至少在工程上并不神秘：生成向量，算分，排序。真正难的是数据、模型和业务边界，不是这几行数学。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>src/vector/math.js：余弦相似度其实就是看两个方向像不像</figcaption><pre><code class="language-javascript" data-language="javascript">export function cosineSimilarity(left, right) {
+  if (left.length !== right.length) {
+    throw new Error(&quot;向量维度不一致，不能计算相似度。&quot;);
+  }
+
+  let dot = 0;
+  let leftLength = 0;
+  let rightLength = 0;
+
+  for (let index = 0; index &lt; left.length; index += 1) {
+    dot += left[index] * right[index];
+    leftLength += left[index] * left[index];
+    rightLength += right[index] * right[index];
+  }
+
+  const denominator = Math.sqrt(leftLength) * Math.sqrt(rightLength);
+  return denominator === 0 ? 0 : dot / denominator;
+}</code></pre></figure></div>
+</section>
+<section id="build-index" class="section">
+  <h2>技巧三：向量索引不是只存一串数字</h2>
+  <p>现在把上一章的 <code>chunks.jsonl</code> 变成 <code>vectors.jsonl</code>。请注意，每条记录除了 embedding，还保留了 title、source、section_path、permission、version 和 text。很多初学者会把向量索引理解成“向量数据库里只要有向量就行”，这会把后面的引用和权限过滤全弄丢。</p>
+  <p>这里仍然用 JSONL 做本地索引。它慢，但是透明。等第 6 章再谈真正的检索策略时，你已经知道每条向量记录到底应该长什么样。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>src/vector/build-vector-index.js：把 chunks.jsonl 转成 vectors.jsonl</figcaption><pre><code class="language-javascript" data-language="javascript">import { mkdir, readFile, writeFile } from &quot;node:fs/promises&quot;;
+import { join } from &quot;node:path&quot;;
+import { embedTextMock } from &quot;../embedding/mock-embedding.js&quot;;
+
+const inputFile = &quot;data/processed/chunks.jsonl&quot;;
+const outputDir = &quot;data/index&quot;;
+const vectorFile = join(outputDir, &quot;vectors.jsonl&quot;);
+const manifestFile = join(outputDir, &quot;vector-index-manifest.json&quot;);
+
+function toVectorRecord(chunk) {
+  const result = embedTextMock([
+    chunk.title,
+    chunk.section_path.join(&quot; / &quot;),
+    chunk.text
+  ].join(&quot;\n&quot;));
+
+  return {
+    id: chunk.id,
+    document_id: chunk.document_id,
+    source: chunk.source,
+    title: chunk.title,
+    section_path: chunk.section_path,
+    permission: chunk.permission,
+    version: chunk.version,
+    text: chunk.text,
+    embedding_model: result.model,
+    embedding: result.embedding
+  };
+}
+
+export async function buildVectorIndex() {
+  const lines = (await readFile(inputFile, &quot;utf8&quot;)).trim().split(&quot;\n&quot;).filter(Boolean);
+  const chunks = lines.map((line) =&gt; JSON.parse(line));
+  const records = chunks.map(toVectorRecord);
+
+  await mkdir(outputDir, { recursive: true });
+  await writeFile(vectorFile, records.map((record) =&gt; JSON.stringify(record)).join(&quot;\n&quot;) + &quot;\n&quot;, &quot;utf8&quot;);
+  await writeFile(
+    manifestFile,
+    JSON.stringify({
+      input: inputFile,
+      output: vectorFile,
+      count: records.length,
+      model: records[0]?.embedding_model || &quot;unknown&quot;,
+      dimensions: records[0]?.embedding.length || 0
+    }, null, 2),
+    &quot;utf8&quot;
+  );
+
+  return { count: records.length, vectorFile, manifestFile };
+}
+
+if (import.meta.url === &quot;file://&quot; + process.argv[1]) {
+  const result = await buildVectorIndex();
+  console.log(&quot;已生成 &quot; + result.count + &quot; 条向量记录：&quot; + result.vectorFile);
+}</code></pre></figure></div>
+</section>
+<section id="search" class="section">
+  <h2>技巧四：先全量扫描，确认排序真的发生了</h2>
+  <p>如果只有几十个 chunk，没必要一开始就搬出向量数据库。全量扫描慢归慢，但它能把逻辑摊开：问题向量生成、权限过滤、相似度计算、按分数排序、取前几个结果。等这些都对了，再换成 HNSW、IVF 或托管向量库，心里会踏实得多。</p>
+  <p>这段代码里还有一个小细节：权限过滤放在排序前。因为用户没有权限看的片段，就算再相似，也不应该进入候选列表。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>src/vector/search-vector-index.js：先做最朴素的全量扫描</figcaption><pre><code class="language-javascript" data-language="javascript">import { readFile } from &quot;node:fs/promises&quot;;
+import { embedTextMock } from &quot;../embedding/mock-embedding.js&quot;;
+import { cosineSimilarity } from &quot;./math.js&quot;;
+
+const vectorFile = &quot;data/index/vectors.jsonl&quot;;
+
+function canRead(record, role) {
+  const visible = {
+    public: [&quot;public&quot;],
+    support: [&quot;public&quot;, &quot;support&quot;],
+    &quot;support-lead&quot;: [&quot;public&quot;, &quot;support&quot;, &quot;support-lead&quot;],
+    internal: [&quot;public&quot;, &quot;support&quot;, &quot;support-lead&quot;, &quot;internal&quot;]
+  };
+
+  return (visible[role] || visible.public).includes(record.permission);
+}
+
+export async function searchVectorIndex(query, { topK = 5, role = &quot;support&quot; } = {}) {
+  const queryEmbedding = embedTextMock(query).embedding;
+  const records = (await readFile(vectorFile, &quot;utf8&quot;))
+    .trim()
+    .split(&quot;\n&quot;)
+    .filter(Boolean)
+    .map((line) =&gt; JSON.parse(line));
+
+  return records
+    .filter((record) =&gt; canRead(record, role))
+    .map((record) =&gt; ({
+      ...record,
+      score: cosineSimilarity(queryEmbedding, record.embedding)
+    }))
+    .sort((left, right) =&gt; right.score - left.score)
+    .slice(0, topK)
+    .map((record) =&gt; ({
+      id: record.id,
+      title: record.title,
+      section_path: record.section_path,
+      permission: record.permission,
+      score: Number(record.score.toFixed(4)),
+      text: record.text
+    }));
+}
+
+if (import.meta.url === &quot;file://&quot; + process.argv[1]) {
+  const query = process.argv.slice(2).join(&quot; &quot;) || &quot;用了优惠券还能退全款吗&quot;;
+  console.log(JSON.stringify(await searchVectorIndex(query), null, 2));
+}</code></pre></figure></div>
+</section>
+<section id="adapter" class="section">
+  <h2>真实 embedding 怎么接？只替换 adapter</h2>
+  <p>等你要接真实模型时，不要把整个索引脚本重写一遍。保留 <code>build-vector-index.js</code> 的主体，把 <code>embedTextMock</code> 换成真实 adapter。这个边界很重要。RAG 项目里，模型供应商、向量库、重排模型都可能替换，主链路不能跟着乱。</p>
+  <p>下面是 OpenAI-compatible 写法。它把 endpoint、model、key 都放到环境变量里。课程默认不运行它，先让你知道真实接入点应该放在哪里。</p>
+  <div class="code-stack">
+    <figure class="code-card"><figcaption>src/embedding/openai-compatible.js：真实 embedding adapter 只替换边界</figcaption><pre><code class="language-javascript" data-language="javascript">const endpoint = process.env.EMBEDDING_API_URL || &quot;https://api.openai.com/v1/embeddings&quot;;
+const model = process.env.EMBEDDING_MODEL || &quot;text-embedding-3-small&quot;;
+
+export async function embedTextOpenAICompatible(text) {
+  if (!process.env.EMBEDDING_API_KEY) {
+    throw new Error(&quot;缺少 EMBEDDING_API_KEY。教学项目默认走 mock embedding。&quot;);
+  }
+
+  const response = await fetch(endpoint, {
+    method: &quot;POST&quot;,
+    headers: {
+      &quot;content-type&quot;: &quot;application/json&quot;,
+      authorization: &quot;Bearer &quot; + process.env.EMBEDDING_API_KEY
+    },
+    body: JSON.stringify({
+      model,
+      input: text
+    })
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(&quot;Embedding API 调用失败：&quot; + response.status + &quot; &quot; + detail);
+  }
+
+  const payload = await response.json();
+  const embedding = payload.data?.[0]?.embedding;
+
+  if (!Array.isArray(embedding)) {
+    throw new Error(&quot;Embedding API 返回格式不符合预期。&quot;);
+  }
+
+  return {
+    model,
+    dimensions: embedding.length,
+    embedding
+  };
+}</code></pre></figure>
+    <figure class="code-card"><figcaption>package.json：补上 index 和 search 命令</figcaption><pre><code class="language-json" data-language="json">{
+  &quot;scripts&quot;: {
+    &quot;ingest&quot;: &quot;node src/ingest/build-corpus.js&quot;,
+    &quot;chunk&quot;: &quot;node src/chunk/build-chunks.js&quot;,
+    &quot;index&quot;: &quot;node src/vector/build-vector-index.js&quot;,
+    &quot;search&quot;: &quot;node src/vector/search-vector-index.js&quot;,
+    &quot;check:index&quot;: &quot;npm run ingest &amp;&amp; npm run chunk &amp;&amp; npm run index &amp;&amp; npm run search -- 用了优惠券还能退全款吗&quot;
+  }
+}</code></pre></figure>
+  </div>
+</section>
+<section id="practice" class="task">
+  <h2>练一下</h2>
+  <p>运行 `npm run check:index`。然后分别搜索 `年度会员退款`、`用了券还能退全款吗`、`发票抬头错了怎么办`。观察分数和命中片段：mock embedding 能让链路跑通，但它并不理解真正语义，这个差距要记住。</p>
+</section>
+<section id="quiz" class="quiz">
+  <h2>快速自测</h2>
+  <div class="quiz-question"><p>为什么查询和 chunk 要用同一个 embedding 模型？</p><button data-answer="true">向量空间一致</button><button data-answer="false">文件更小一点</button><button data-answer="false">页面更好看</button><div class="quiz-result" aria-live="polite"></div><p class="lead">不同模型生成的向量不在同一个语义空间里，拿来直接比较没有意义。</p></div><div class="quiz-question"><p>mock embedding 在本课程里主要用来做什么？</p><button data-answer="true">验证链路形状</button><button data-answer="false">替代所有模型</button><button data-answer="false">训练大模型</button><div class="quiz-result" aria-live="polite"></div><p class="lead">mock 版本不追求真实效果，它帮助我们先把索引、搜索、过滤和验收跑通。</p></div><div class="quiz-question"><p>向量索引里为什么还要保留 text 和 metadata？</p><button data-answer="true">方便引用过滤</button><button data-answer="false">降低屏幕亮度</button><button data-answer="false">减少目录数量</button><div class="quiz-result" aria-live="polite"></div><p class="lead">搜索命中的是向量记录，但回答和权限判断仍然要依赖原文、来源和权限字段。</p></div>
+</section>
+<section id="summary" class="callout">
+  <h2>这一章最后再捋一下</h2>
+  <p>第 5 章把 chunk 推进到了可搜索的语义空间。我们没有一上来接真实向量库，而是先用 mock embedding 看清楚四件事：同一模型空间、向量归一化、相似度排序、metadata 不能丢。下一章会继续往前走，把关键词检索、语义检索和权限过滤合在一起，做出第一版真正能用的 retrieve。</p>
+</section>
+<section id="sources" class="source-box">
+  <h2>本章参考资料</h2>
+  <ul class="source-list"><li><a href="https://developers.openai.com/api/docs/guides/embeddings">OpenAI Docs: Vector embeddings</a><span>用于解释 embedding、语义相似度和向量检索。</span></li><li><a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter3/06_vector_embedding.md">Datawhale All-in-RAG: 向量嵌入</a><span>社区教程，用于 embedding 和检索基础。</span></li><li><a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter3/08_vector_db.md">Datawhale All-in-RAG: 向量数据库</a><span>社区教程，用于索引和向量库选型。</span></li></ul>
+</section>
+<nav class="footer-nav">
+  <a href="./0004-chunking-with-structure.html">上一章：结构化分块</a>
+  <a href="./0006-retrieval-hybrid-and-filters.html">下一章：检索第一版</a>
+</nav></main>
+      <aside class="side"><nav class="toc"><strong>本章目录</strong>
+    <a href="#goals">学习目标</a>
+    <a href="#keyword-problem">关键词尴尬</a>
+    <a href="#mental-model">向量地图</a>
+    <a href="#features">Mock embedding</a>
+    <a href="#similarity">相似度</a>
+    <a href="#build-index">构建索引</a>
+    <a href="#search">向量搜索</a>
+    <a href="#adapter">真实 adapter</a>
+    <a href="#practice">练一下</a>
+    <a href="#quiz">快速自测</a>
+    <a href="#sources">参考资料</a>
+  </nav></aside>
+    </div>
+  </div>
+</body>
+</html>

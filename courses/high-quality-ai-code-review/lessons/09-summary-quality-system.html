@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="九个章节的核心机制重组为一条可迁移的落地路线，以及从今天开始可以做的第一件事。"><title>总结：从单次审查到可持续质量系统 | 如何实现高质量的 AI Code Review</title><script src="../assets/theme-switcher.js"></script><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><header class="topbar"><a class="brand" href="../index.html">如何实现高质量的 AI Code Review</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">第 9 章 · 55–70 分钟</div><h1>总结：从单次审查到可持续质量系统</h1><p class="lesson-summary">九个章节的核心机制重组为一条可迁移的落地路线，以及从今天开始可以做的第一件事。</p><a class="source-link" href="../markdown/09-summary-quality-system.md">查看 Markdown 版本</a></section><div class="lesson-layout"><main class="lesson-content"><h2 id="课程回望-我们到底建了什么">课程回望：我们到底建了什么</h2>
+<p>九章走完回头看：**<strong>这节课没有教你&quot;怎样写一段更好的 Code Review Prompt&quot;，它教你的是怎样把 AI 审查建成一套完整的工程系统</strong>。**</p>
+<p>第一章把 AI CR 放到它的历史坐标里——人工 CR 的覆盖率瓶颈、静态规则的表达力边界、远端 Diff 审查的上下文缺失。理解了这些，才能理解为什么&quot;让模型看代码&quot;和&quot;让模型做好审查&quot;之间隔着一整套工程体系。</p>
+<p>第二章拆开了这套体系的骨架。**<strong>Harness 不是 Prompt 的包装，而是把流程控制从模型手中拿出来的外部引擎</strong>。** 状态机、批次分配、MCP 工具链、扩展检查——各自有明确的职责边界。</p>
+<p>第三章先停下来，建立了度量语言。采纳率、召回率、F1-Score 不是三个公式，而是一整套判断&quot;改了什么、漏了什么、代价是什么&quot;的分析框架。**<strong>没有这一章，后面所有的优化都不知道自己在优化什么</strong>。**</p>
+<p>第四、五章攻采纳率。从 44 条拒绝样本诊断出七种根因，然后依次用规则分层、上下文增强、Recheck 二次验证、负向记忆提炼和历史过滤把它们解决。<strong>每加一层机制，都要检查 Recall 是否下降——不能通过沉默提升采纳率。</strong></p>
+<p>第六、七章攻召回率。**<strong>把&quot;AI 偷懒&quot;还原为输出衰减、步骤遗漏和流程控制失效</strong>**，用三次失败实验证明了 Prompt 和 AI 自管理都不够。然后用语义分批控制衰减、状态机防止跳过、质量门验证产出、memory_pos 和 memory_distiller 把漏报变成下一次审查的知识。</p>
+<p>第八章把本地能力扩展为远端服务。Mirror + Worktree 解决了 Git 工作区隔离，UnifiedExecutor 用 CAS 认领和 p-limit 管理分布式并发，ExternalCallback 把结构化结果回传给生码平台和 CI 流水线。**<strong>审查能力从个人工具变成了基础设施</strong>。**</p>
+<figure class="diagram-card"><pre class="mermaid">flowchart TD
+  CH1[&quot;第 1 章: 为什么需要 AI CR&quot;] --&gt; CH2[&quot;第 2 章: Harness 架构&quot;]
+  CH2 --&gt; CH3[&quot;第 3 章: 度量体系&quot;]
+  CH3 --&gt; CH4[&quot;第 4 章: 采纳率诊断&quot;]
+  CH4 --&gt; CH5[&quot;第 5 章: 采纳率提升&quot;]
+  CH3 --&gt; CH6[&quot;第 6 章: 召回率诊断&quot;]
+  CH6 --&gt; CH7[&quot;第 7 章: 召回率提升&quot;]
+  CH5 --&gt; CH8[&quot;第 8 章: 远端云服务&quot;]
+  CH7 --&gt; CH8
+  CH8 --&gt; CH9[&quot;第 9 章: 落地路线&quot;]</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<h2 id="四个可以带走的工程原则">四个可以带走的工程原则</h2>
+<p>不是每个团队都需要复刻这套系统的全部组件。但下面四条原则，建议在任何 AI 审查实践初期就建立。</p>
+<p><strong>第一条：</strong>Prompt 是必要条件，但不是充分条件<strong>。</strong> 模型的能力决定审查的上限，Harness 的工程质量决定审查的下限。Prompt 能告诉模型检查什么，但不能告诉模型怎样持续检查。课程中三次失败实验的同一个结论——加强 Prompt 不解决衰减，AI 自管流程会产生幻觉和退化，人工拆分不可持续——全部指向这个原则。</p>
+<p><strong>第二条：</strong>先建立度量，再优化<strong>。</strong> 不要在没有采纳率和召回率基线的情况下做任何&quot;改进&quot;。不知道当前 Precision 是多少，就不知道新规则是否减少了误报还是误杀了真问题。不知道 Recall 的分母构造，就不知道新增的审查覆盖是真实发现还是冗余报告。<strong>指标不是事后报表，而是实验设计的前置条件。</strong></p>
+<p><strong>第三条：</strong>每个过滤动作都要检查 Recall<strong>。</strong> 规则过滤、Recheck 标记无效、负向记忆静默——每一次减少报告数量的操作，都要在固定样本上验证是否同时也减少了应报告的问题。采纳率可以靠少说话提升，那不是工程改进。</p>
+<p><strong>第四条：</strong>能力不等于默认启用<strong>。</strong> 课程代码中反复出现的模式：verifier 的阈值默认关闭、memory_pos 不在默认扩展检查列表、负向规则提炼源默认不含 recheck。**<strong>代码有这项能力，不代表部署后它就生效</strong>。** 部署 = 代码部署 + 配置部署 + 验证部署。只看代码的人以为质量门在运行，只看文档的人以为阈值已校准，实际行为由数据库配置决定。</p>
+<h2 id="六层架构的可迁移版本">六层架构的可迁移版本</h2>
+<p>把课程的完整系统抽象掉具体实现，可以得到六层架构。它可以作为任何团队启动 AI CR 建设时的参考蓝图。</p>
+<p><strong>规则层</strong>定义审查的范围和标准。不一定要从零开始——可以从公开的安全规范、团队历史事故复盘和现有 lint 规则中提取。关键是每条规则必须有分类（安全/健壮性/规范/性能/可维护性）、有严重度分级（5-2 分）、有触发条件和排除条件、有版本号和变更记录。</p>
+<p><strong>上下文层</strong>决定模型能看到什么信息。最小集合是 diff 本身、diff 关联的同一文件中未改动代码、被调用函数的签名和文档。逐步扩展可以加上接口定义、需求描述、历史 Issue 和相关模块结构。<strong>上下文的质量比数量重要——给一堆不相关的文件不如精确地给两三个关键符号。</strong></p>
+<p><strong>流程层</strong>用外部状态机驱动审查。最小实现可以是&quot;查询任务 → 执行审查 → 提交结果 → 查询下一个任务&quot;的四步循环，配合一个数据库字段记录当前步骤。不需要一开始就实现完整的 0→1→2→2.x→3 状态链。</p>
+<p><strong>验证层</strong>在流程步骤之间插入可配置的检查。必填字段完整性是最低要求。时间验证和密度验证需要基线数据——<strong>没有基线时先记录不阻断</strong>，收集足够数据后再设定阈值。</p>
+<p><strong>反馈层</strong>收集独立于 AI 输出的真值。人工 CR 记录、测试 Bug 归因、用户拒绝原因标注——这三条通路分别覆盖&quot;人类发现了什么 AI 没发现&quot;&quot;测试发现了什么&quot;&quot;AI 报告了什么但不对&quot;。**<strong>反馈的质量决定度量体系的质量，度量体系的质量决定优化决策的质量</strong>。**</p>
+<p><strong>服务层</strong>决定审查能力的交付方式。本地 CLI 适合个人开发者，远端 API 适合平台集成。两者可以共享同一套核心逻辑，只在入口和 Git 工作区管理上有差异。<strong>不要一开始就追求远端化——先让本地模式跑通全链路，再考虑服务化。</strong></p>
+<figure class="diagram-card"><pre class="mermaid">flowchart TD
+  R[&quot;规则层: 审查范围与标准&quot;] --&gt; C[&quot;上下文层: 模型能看到的信息&quot;]
+  C --&gt; P[&quot;流程层: 外部状态机驱动&quot;]
+  P --&gt; V[&quot;验证层: 可配置质量门&quot;]
+  V --&gt; F[&quot;反馈层: 独立真值采集&quot;]
+  F --&gt; S[&quot;服务层: 本地 CLI + 远端 API&quot;]
+  F -. &quot;规则更新&quot; .-&gt; R
+  F -. &quot;上下文调整&quot; .-&gt; C
+  V -. &quot;阈值校准&quot; .-&gt; V</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<h2 id="90-天落地路线">90 天落地路线</h2>
+<p>不要试图一次性实现六层。下面是按优先级排列的三阶段路线。</p>
+<p><strong>第一个 30 天：跑通最小闭环。</strong> 选择一个小型仓库（不超过 50 个文件），搭建最小 Harness——一个脚本或简单服务，能接收 diff、调用 LLM 审查、保存结构化结果。<strong>目标是让系统跑起来，不是让系统完美。</strong> 这个阶段不需要分批算法、不需要质量门、不需要记忆提炼——只要能生成 Issue 列表。</p>
+<p>并行做一件关键的事：<strong>开始记录反馈。</strong> 为每条 Issue 增加一个采纳状态字段。开发者标记&quot;采纳&quot;或&quot;拒绝&quot;时记录原因。不需要自动检测，不需要 LCS 对比——人工点击就够了。</p>
+<p><strong>第二个 30 天：建立度量和诊断。</strong> 用第一个月积累的反馈数据，计算采纳率基线。人工抽查 AI 没有报告但开发者在 MR 评论中发现的问题，建立召回率的初步分母。用第 6 章的衰减诊断信号检查审查质量——问题密度、描述长度、上下文引用的趋势。如果发现明显的后段衰减，引入第 7 章的批次分配和简单的时间验证。</p>
+<p><strong>这个阶段结束时的里程碑是能回答三个问题：</strong> 当前采纳率多少、当前召回率大概多少、主要噪音和漏报类型是什么。</p>
+<p><strong>第三个 30 天：建立反馈闭环。</strong> 从重复出现的拒绝模式开始，提炼第一批负向规则。从高频漏报开始，提炼第一批遗漏规则。接入测试 Bug 数据，建立 should_recall 的判定逻辑。如果团队有多个仓库或平台需要审查能力，评估是否需要远端服务——但远端化是一个独立项目，不在这个 30 天的范围。</p>
+<figure class="diagram-card"><pre class="mermaid">gantt
+  title 90 天 AI CR 落地路线
+  dateFormat  YYYY-MM-DD
+  section 第一阶段
+  最小闭环: 搭建审查流水线           :a1, 2026-07-15, 10d
+  反馈记录: Issue 采纳状态 + 拒绝原因  :a2, 2026-07-20, 15d
+  section 第二阶段
+  采纳率基线: 统计 + 分层分析        :b1, 2026-08-14, 7d
+  召回率摸底: 人工抽查 + 初步分母    :b2, 2026-08-14, 10d
+  衰减诊断: 审查完成度信号检查      :b3, 2026-08-18, 12d
+  section 第三阶段
+  负向规则: 从拒绝模式提炼          :c1, 2026-09-14, 10d
+  遗漏规则: 从漏报 + Bug 提炼       :c2, 2026-09-14, 10d
+  反馈闭环: Bug 归因 + 回调通路     :c3, 2026-09-20, 10d</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<h2 id="几个容易被跳过的关键决策">几个容易被跳过的关键决策</h2>
+<p>在课程案例的演进中，有几个决策当时看起来不那么关键，事后看却是正确方向的重要支撑。</p>
+<p><strong>第一个决策：用 Issue 级而非 MR 级做采纳率单位。</strong> 初期有人提议用&quot;这个 MR 是否有 AI 发现的有效问题&quot;做二分类统计。这个指标看起来更直观，但它把&quot;一次审查发现 10 个问题但只采纳 3 个&quot;和&quot;一次审查发现 1 个问题并采纳&quot;视为同等。Issue 级的粒度让采纳率成为 Precision 的有效代理，也为后续的拒绝原因分类和根因诊断提供了基础。</p>
+<p><strong>第二个决策：把自动采纳检测和正式采纳率分开。</strong> LCS 自动检测能快速判断建议代码是否出现在最终文件中，但它不是语义等价判断。自动检测的 2/3 状态和部分采纳的 60–69 状态当前都不进入正式指标分母。这个选择减少了数据量，但避免了&quot;机械采纳&quot;污染指标。团队计划在未来校准自动检测的准确率后，逐步将特定区间的自动状态纳入正式口径。</p>
+<p><strong>第三个决策：不把提炼流程捆死在自动触发上。</strong> memoryDistiller 可以按定时任务自动运行，但当前设计中保留了人工审核节点——pending 状态的规则不直接生效，需要人工确认为 confirmed。<strong>这个节点在生产效率和规则质量之间做了平衡。</strong> 全自动化可能让一条错误规则迅速扩散到所有审查；全人工审核可能让规则产出速度跟不上代码变化。pending + confirmed 的两阶段是当前团队的共识。</p>
+<p><strong>第四个决策：Quality Gate 的默认关闭。</strong> verifier 的阈值默认值为 0 和 999，这看起来像是&quot;没做完&quot;。但团队刻意选择了这个设计——<strong>质量门应该根据实际数据校准后开启，而不是用一个静态阈值假设所有仓库和语言都适用。</strong> 从关闭到开启的过程本身就是一个数据驱动的决策过程：先记录数据、再确定基线、再逐步收紧。</p>
+<h2 id="跨章节系统检查清单">跨章节系统检查清单</h2>
+<p><strong>采纳率体系</strong>：是否定义了分母口径（哪些状态纳入，哪些排除）？是否区分了人工反馈、自动检测和外部反馈？是否保留了 is_valid 的 null 处理策略？是否对 4 分和 5 分问题分别做了分层统计？是否监控无效率、无法判断率和未验证率？</p>
+<p><strong>召回率体系</strong>：是否建立了独立于 AI 输出的真值集合？人工 CR 遗漏和测试 Bug 是否进入了 should_recall 判定流程？Bug 的角色归属是否存在偏差？是否区分了含 Bug 和不含 Bug 两种召回率口径？</p>
+<p><strong>审查质量</strong>：是否按 Batch 位置分层统计了问题密度和描述长度？是否监控了上下文引用率的变化趋势？是否追踪了质量门的重试次数和熔断比例？是否对强制通过的 Batch 做了后续人工抽查？</p>
+<p><strong>规则与记忆</strong>：是否明确了每条规则的适用条件、排除条件和证据要求？是否记录了规则的创建时间、来源、确认状态和过期时间？规则上线前是否在固定 Benchmark 上做回放验证？规则变更是否可追溯、可回退？</p>
+<p><strong>服务与监控</strong>：远端服务是否实现了 content_hash 去重和 Session 复用？是否处理了 Mirror 维护、Worktree 清理和磁盘空间监控？是否实现了分布式 CAS 认领和僵尸任务恢复？回调是否覆盖了成功、失败、运行中和系统错误四种状态？四维监控是否全部覆盖？</p>
+<h2 id="从课程到你的仓库">从课程到你的仓库</h2>
+<p>课程讲的是一个系统的实现，但它的价值在于你能把什么带走。</p>
+<p><strong>如果你只有一个下午</strong>，带走第三章的度量框架。为你的仓库建立采纳率、召回率和 F1-Score 的口径——定义分母、明确排除项、区分自动和人工反馈、记录状态版本。<strong>没有度量，后面的所有优化都缺少方向。</strong></p>
+<p><strong>如果你有一周</strong>，加上第四章和第五章的采纳率诊断和降噪闭环。从拒绝样本开始，找出最高频的拒绝类型，从规则和上下文入手做定向改进。<strong>不要一次改五样东西——每次只改变一个变量，在固定样本上检查 Precision 和 Recall 的变化。</strong></p>
+<p><strong>如果你有一个月</strong>，加上第六章和第七章的召回率诊断和提升。检查大型任务的衰减模式，引入批次分配和基本的质量验证。建立人工 CR 遗漏和测试 Bug 到记忆提炼的通路。你会看到这两个数字之间的关系：采纳率提升可能降低 Recall（更严格的过滤），Recall 提升可能降低 Precision（更多的候选建议）。F1 是平衡点，但最终决策取决于你的业务风险偏好。</p>
+<p><strong>如果你有一个季度</strong>，加上第八章的远端服务化。让你的审查能力不再受限于个人开发者的 CLI。<strong>但远端化之前，确认本地模式的采纳率和召回率已经稳定——服务化的基础是能力可靠，不是接口可用。</strong></p>
+<h2 id="四个关键决策复盘-详细版">四个关键决策复盘（详细版）</h2>
+<p><strong>决策一：用 Issue 级而非 MR 级做采纳率单位。</strong> MR 级二分类太粗糙——一次审查发现 10 个问题但只采纳 3 个，和发现 1 个采纳 1 个，MR 级视为同等。Issue 级让每条建议有独立反馈，让拒绝原因分类和根因诊断成为可能。</p>
+<p><strong>决策二：把自动采纳检测和正式采纳率分开。</strong> LCS 能判断建议代码是否出现在最终文件，但不是语义等价判断。短代码冲撞、等价改写、变量重命名都可能产生假阳性。当前 2/3/60-69 不进入正式分母，避免了&quot;机械采纳&quot;污染指标。未来校准后逐步纳入特定区间。</p>
+<p><strong>决策三：提炼流程保留 pending+confirmed 两阶段。</strong> 全自动化可能让一条错误规则迅速扩散；全人工审核可能让规则产出跟不上代码变化。两阶段在生产效率和规则质量之间做了平衡。</p>
+<p><strong>决策四：Quality Gate 默认关闭。</strong> verifier 阈值默认 0 和 999 不是&quot;没做完&quot;——它确保数据库加载失败时服务仍能运行。质量门应该根据实际数据校准后开启，从关闭到开启的过程本身就是数据驱动的决策：先记录、再定基线、再逐步收紧。</p>
+<h2 id="从课程到你的仓库的行动路线">从课程到你的仓库的行动路线</h2>
+<p>一个下午：建立度量口径——定义分母、明确排除项、区分反馈来源。没有度量，后面所有优化都缺少方向。</p>
+<p>一周：加上采纳率诊断和降噪闭环。从拒绝样本找出最高频类型，一次只改一个变量，在固定样本上检查变化。</p>
+<p>一个月：加上召回率诊断和提升。检查大型任务衰减，引入批次分配和基本验证。你会看到采纳率和召回率之间的张力——F1 是平衡点但最终决策取决于业务风险偏好。</p>
+<p>一个季度：加上远端服务化。但远端化之前，确认本地模式的指标已稳定。服务化的基础是能力可靠，不是接口可用。</p>
+<h2 id="课程能给你什么-不能给你什么">课程能给你什么，不能给你什么</h2>
+<p>这门课能给的是：一套经过验证的 AI Code Review 工程方法——从架构设计到指标口径、从采纳率诊断到召回率提升、从本地部署到远端服务化。每一步都有可追溯的代码事实和可复算的实验结果。它不是纸上谈兵，而是真实系统一年多的演进记录。</p>
+<p>这门课不能给的是：一个可以直接部署到你仓库的完整系统。你的语言栈、你的业务约束、你的团队结构和你的质量要求都不一样。九章的知识需要你根据自己的情况裁剪和组合。但这门课给了你判断力——你知道什么时候需要状态机、什么时候需要质量门、什么时候需要远端化；你也知道哪些&quot;优化&quot;可能只是让数字变好看的陷阱。</p>
+<p>最终，AI Code Review 不是一个技术问题。它是一组工程决策的总和：谁有建议权、谁有阻断权、谁来承担错误决策的后果、怎么验证&quot;变好了&quot;不是自欺欺人。课程教了你怎样做出这些决策，而不是替你做出它们。</p>
+<h2 id="给不同角色的阅读建议">给不同角色的阅读建议</h2>
+<p>如果你是研发工程师，重点读第 2-3 章（架构与度量）和第 5、7 章（采纳率与召回率提升）。这些章节告诉你，当审查系统出现问题时，从哪里开始诊断，以及每项工程决策如何影响最终的指标数字。</p>
+<p>如果你是 TL 或架构师，重点读第 1 章的六阶段演进、第 2 章的 Harness 职责分层、第 8 章的远端服务部署拓扑。这些章节帮你判断团队的 AI CR 建设当前处于哪个阶段，下一步该投资什么能力。</p>
+<p>如果你是研发效能或质量平台工程师，重点读第 3 章的指标体系、第 5 章的规则版本化与 Recheck 编排、第 7 章的质量门设计、第 8 章的远端服务运维。这些是你搭建平台级 AICR 服务时需要解决的核心工程问题。</p>
+<h2 id="最后的话">最后的话</h2>
+<p>AI Code Review 正在从&quot;让模型看代码&quot;走向&quot;让系统保证质量&quot;。这个过渡不取决于模型能力有多强——今天的模型能力已经足够在大多数场景中发挥作用。**<strong>它取决于工程体系有多完整</strong>：有没有可复算的度量、有没有可验证的流程控制、有没有持续学习的反馈闭环、有没有可以把能力交付给任何系统的服务层。**</p>
+<p>课程分析的系统从采纳率约 10% 起步，经过规则建设、上下文增强、Recheck、负向记忆、分批审查、质量门和记忆提炼，达到了采纳率约 60%、召回率约 40% 的水平。这条路线不是&quot;只有大团队才能做&quot;的工程——它的每一步都是可独立验证、可逐步叠加的。</p>
+<p>你的仓库不需要复刻这套系统的全部组件。但你的仓库值得有一套自己的度量、一条自己的反馈通路、一个自己的质量门。**<strong>从今天开始，从记录第一条 Issue 的采纳状态开始</strong>。**</p>
+<h2 id="参考文献">参考文献</h2>
+<ol><li>Alberto Bacchelli, Christian Bird. <a href="https://doi.org/10.1109/ICSE.2013.6606617" target="_blank" rel="noreferrer">Expectations, outcomes, and challenges of modern code review</a>. ICSE, 2013.</li><li>Google Engineering Practices. <a href="https://google.github.io/eng-practices/review/reviewer/standard.html" target="_blank" rel="noreferrer">The Standard of Code Review</a>.</li><li>Zhiyu Li 等. <a href="https://arxiv.org/abs/2203.09095" target="_blank" rel="noreferrer">Automating Code Review Activities by Large-Scale Pre-training</a>. ESEC/FSE, 2022.</li><li>Tao Sun 等. <a href="https://arxiv.org/abs/2501.15134" target="_blank" rel="noreferrer">BitsAI-CR: Automated Code Review via LLM in Practice</a>. 2025.</li><li>Hong Yi Lin 等. <a href="https://arxiv.org/abs/2503.16167" target="_blank" rel="noreferrer">CodeReviewQA: The Code Review Comprehension Assessment for Large Language Models</a>. Findings of ACL, 2025.</li><li>Imen Jaoua 等. <a href="https://arxiv.org/abs/2502.06633" target="_blank" rel="noreferrer">Combining Large Language Models with Static Analyzers for Code Review Generation</a>. MSR, 2025.</li><li>Shweta Ramesh 等. <a href="https://arxiv.org/abs/2507.19115" target="_blank" rel="noreferrer">Automated Code Review Using Large Language Models at Ericsson: An Experience Report</a>. ICSME, 2025.</li><li>GitHub Docs. <a href="https://docs.github.com/en/copilot/concepts/agents/code-review" target="_blank" rel="noreferrer">About GitHub Copilot code review</a>.</li><li>GitLab Docs. <a href="https://docs.gitlab.com/user/project/merge_requests/duo_in_merge_requests/" target="_blank" rel="noreferrer">GitLab Duo in merge requests</a>.</li><li>Anthropic. <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noreferrer">Building effective agents</a>. 2024-12-19.</li><li>MCP Architecture. <a href="https://modelcontextprotocol.io/specification/2025-06-18/architecture" target="_blank" rel="noreferrer">Specification 2025-06-18</a>.</li><li>scikit-learn. <a href="https://scikit-learn.org/stable/modules/model_evaluation.html" target="_blank" rel="noreferrer">Model evaluation</a>.</li><li>Nelson F. Liu 等. <a href="https://arxiv.org/abs/2307.03172" target="_blank" rel="noreferrer">Lost in the Middle: How Language Models Use Long Contexts</a>. TACL, 2023.</li><li>Git. <a href="https://git-scm.com/docs/git-worktree" target="_blank" rel="noreferrer">git-worktree</a>.</li></ol>
+<p>本课程基于团队超过一年的 AI Code Review 工程实践。所有代码片段为教学化节选。课程中的阶段指标来自团队内部分享，经教学化脱敏处理后使用，不构成对任意团队或技术栈的通用预估。</p><nav class="lesson-nav"><a href="../lessons/08-remote-ai-cr-service.html">← 第 8 章<br><strong>远端 AI Code Review 云服务</strong></a><a href="../index.html">返回课程目录 →</a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#课程回望-我们到底建了什么"><span class="toc-num">9.1</span>课程回望：我们到底建了什么</a><a class="" href="#四个可以带走的工程原则"><span class="toc-num">9.2</span>四个可以带走的工程原则</a><a class="" href="#六层架构的可迁移版本"><span class="toc-num">9.3</span>六层架构的可迁移版本</a><a class="" href="#90-天落地路线"><span class="toc-num">9.4</span>90 天落地路线</a><a class="" href="#几个容易被跳过的关键决策"><span class="toc-num">9.5</span>几个容易被跳过的关键决策</a><a class="" href="#跨章节系统检查清单"><span class="toc-num">9.6</span>跨章节系统检查清单</a><a class="" href="#从课程到你的仓库"><span class="toc-num">9.7</span>从课程到你的仓库</a><a class="" href="#四个关键决策复盘-详细版"><span class="toc-num">9.8</span>四个关键决策复盘（详细版）</a><a class="" href="#从课程到你的仓库的行动路线"><span class="toc-num">9.9</span>从课程到你的仓库的行动路线</a><a class="" href="#课程能给你什么-不能给你什么"><span class="toc-num">9.10</span>课程能给你什么，不能给你什么</a><a class="" href="#给不同角色的阅读建议"><span class="toc-num">9.11</span>给不同角色的阅读建议</a><a class="" href="#最后的话"><span class="toc-num">9.12</span>最后的话</a><a class="" href="#参考文献"><span class="toc-num">9.13</span>参考文献</a></aside></div><footer class="site-footer">如何实现高质量的 AI Code Review · 人工审核稿</footer></div></body></html>

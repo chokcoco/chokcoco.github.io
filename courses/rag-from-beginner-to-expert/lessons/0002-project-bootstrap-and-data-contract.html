@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>从空目录开始：项目骨架、资料格式和 AI 生码边界 | RAG 从入门到精通</title>
+  <script src="../assets/theme-switcher.js"></script>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
+  <script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="../index.html">RAG 从入门到精通</a>
+      <nav>
+        <a href="../index.html">课程首页</a>
+        <a href="../reference/0001-course-blueprint.html">课程蓝图</a>
+        <a href="../reference/0002-rag-glossary.html">术语表</a>
+      </nav>
+    </header>
+    
+    <div class="layout">
+      <main>
+<section class="hero">
+  <div class="eyebrow">第 2 章 · 约 60 分钟</div>
+  <h1>从空目录开始：项目骨架、资料格式和 AI 生码边界</h1>
+  <p class="summary">第一章我们把 RAG 的位置说清楚了：它不是聊天包装，而是一条证据链。第二章开始动手。别急着上向量库，也别急着让 AI 一次写完系统。先把项目骨架和数据契约定住。契约定得清楚，后面让 Codex 或 Claude Code 写代码时，才不会每一章都改一遍数据结构。</p>
+  <div class="meta"><span class="pill">建立项目目录</span><span class="pill">准备 mock 模型适配器</span><span class="pill">设计 documents.jsonl</span><span class="pill">写可复用的生码提示词</span></div>
+</section>
+<section id="goals" class="card">
+  <h2>这一章要交付什么</h2>
+  <ul><li>建立项目目录</li><li>准备 mock 模型适配器</li><li>设计 documents.jsonl</li><li>写可复用的生码提示词</li></ul>
+</section>
+<section id="contract" class="section">
+  <h2>先别急着“智能”，先让资料有规矩</h2>
+  <p>很多 RAG 项目卡住，不是因为模型不够强，而是因为资料进入系统时太随意。今天一个 PDF，明天一个飞书页面，后天又来一份客服 Excel。只要它们进系统后都变成一团纯文本，后面就很难做权限、引用和评测。</p>
+  <p>第二章先定一个朴素但够用的数据契约：原始资料放在 <code>data/raw</code>，处理结果写到 <code>data/processed/documents.jsonl</code>。每条文档必须带来源、标题、章节、版本、权限和更新时间。你可以把这些字段理解成资料的身份证。没有身份证，系统就算把它找回来了，也不知道它是谁。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>package.json：先用脚本定义项目动作</figcaption><pre><code class="language-json" data-language="json">{
+  &quot;name&quot;: &quot;rag-customer-support&quot;,
+  &quot;version&quot;: &quot;0.1.0&quot;,
+  &quot;type&quot;: &quot;module&quot;,
+  &quot;private&quot;: true,
+  &quot;scripts&quot;: {
+    &quot;ingest&quot;: &quot;node src/ingest/build-corpus.js&quot;,
+    &quot;ask&quot;: &quot;node src/rag/answer.js&quot;,
+    &quot;eval&quot;: &quot;node src/eval/run-eval.js&quot;,
+    &quot;serve&quot;: &quot;node src/server.js&quot;,
+    &quot;check&quot;: &quot;npm run ingest &amp;&amp; npm run ask -- 年度会员用了优惠券还能退款吗？&quot;
+  },
+  &quot;dependencies&quot;: {}
+}</code></pre></figure></div>
+</section>
+<section id="readme" class="section">
+  <h2>README 不是摆设，它是项目的第一份契约</h2>
+  <p>对初学者来说，README 最容易被忽略。可是在 AI 生码项目里，它反而很重要。你每次让 Codex 或 Claude Code 改代码，它都会根据当前文件理解项目边界。README 写得清楚，AI 就少一点自由发挥。</p>
+  <p>这里的 README 不写宏大愿景，只写当前边界、目录约定和命令。等后面接真实模型、向量检索、前端页面时，再逐步加。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>README.md：给人看，也给 AI 生码工具看</figcaption><pre><code class="language-markdown" data-language="markdown"># 客诉答疑 RAG 知识库
+
+这个项目用来学习 RAG 的完整链路。第一版不依赖外部 API，先用 mock LLM 和本地文件跑通。
+
+## 当前边界
+
+- 原始资料放在 data/raw。
+- 处理后的文档写入 data/processed/documents.jsonl。
+- 每条文档必须保留 source、title、section、version、permission、updated_at。
+- 回答必须带 citations。没有资料时拒答。
+
+## 常用命令
+
+```bash
+npm run ingest
+npm run ask -- 年度会员用了优惠券还能退款吗？
+npm run check
+```</code></pre></figure></div>
+</section>
+<section id="raw-doc" class="section">
+  <h2>原始资料也要稍微整理一下</h2>
+  <p>RAG 不喜欢来路不明的资料。我们先用 Markdown 做原始资料，因为它对人友好，也方便后面按标题和段落切分。文件开头的 <code>frontmatter</code> 保存元数据，正文保存制度内容。</p>
+  <p>注意这里没有写成客服话术，而是写成制度事实。话术可以后面在生成阶段处理；知识库里最好先保存相对稳定、可引用的事实。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>data/raw/refund-policy.md：一份适合入库的原始资料</figcaption><pre><code class="language-markdown" data-language="markdown">---
+title: 会员退款制度
+section: 年度会员退款
+version: 2026-01
+permission: support
+updated_at: 2026-01-15
+owner: customer-success
+---
+
+# 年度会员退款
+
+年度会员购买后 7 天内可申请退款。已经使用优惠券的订单，需要按优惠券规则扣减。
+
+客服不能承诺具体到账时间，只能说明“通常 3 到 7 个工作日到账，以支付渠道处理结果为准”。
+
+如果用户已经使用年度会员权益超过 3 次，需要转交二线客服复核。</code></pre></figure></div>
+</section>
+<section id="parser" class="section">
+  <h2>解析脚本要“挑剔”一点</h2>
+  <p>如果资料缺字段，脚本应该直接报错，而不是默默吞掉。课程前期你可能会觉得报错烦，但企业知识库最怕静默失败。静默失败的意思是：系统表面跑通了，实际上资料没入库、字段错位、权限丢失，最后模型还给了一个很自信的答案。</p>
+  <p>下面这个解析器很短，只做一件事：把 Markdown 的 frontmatter 和正文拆开。它不追求兼容所有格式，先服务我们的学习项目。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>src/ingest/frontmatter.js：解析资料头部元数据</figcaption><pre><code class="language-javascript" data-language="javascript">export function parseFrontmatter(markdown, source) {
+  const match = markdown.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+
+  if (!match) {
+    throw new Error(`${source} 缺少 frontmatter。每份资料都要写清 title、version 和 permission。`);
+  }
+
+  const meta = {};
+  for (const line of match[1].split(&quot;\n&quot;)) {
+    const index = line.indexOf(&quot;:&quot;);
+    if (index === -1) continue;
+    const key = line.slice(0, index).trim();
+    const value = line.slice(index + 1).trim();
+    meta[key] = value;
+  }
+
+  return {
+    meta,
+    body: match[2].trim()
+  };
+}</code></pre></figure></div>
+</section>
+<section id="schema" class="section">
+  <h2>越早校验，越少返工</h2>
+  <p>数据契约不能只写在文档里，还要写进代码。<code>assertDocumentShape</code> 会检查每条文档是否带齐字段。后面做 chunk、检索、引用时，它们都默认这些字段存在。</p>
+  <p>这也是给 AI 生码工具加护栏。AI 可以继续写 ingest、chunk、retrieve，但只要输出不符合 schema，脚本就会拦下来。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>src/rag/schema.js：别等到检索时才发现资料缺字段</figcaption><pre><code class="language-javascript" data-language="javascript">const requiredDocumentFields = [
+  &quot;id&quot;,
+  &quot;source&quot;,
+  &quot;title&quot;,
+  &quot;section&quot;,
+  &quot;version&quot;,
+  &quot;permission&quot;,
+  &quot;updated_at&quot;,
+  &quot;text&quot;
+];
+
+export function assertDocumentShape(document) {
+  const missing = requiredDocumentFields.filter((field) =&gt; !document[field]);
+
+  if (missing.length) {
+    throw new Error(`文档 ${document.source || &quot;(unknown)&quot;} 缺少字段：${missing.join(&quot;, &quot;)}`);
+  }
+
+  if (document.text.length &lt; 20) {
+    throw new Error(`文档 ${document.id} 正文太短，可能是解析失败。`);
+  }
+
+  return document;
+}</code></pre></figure></div>
+</section>
+<section id="ingest" class="section">
+  <h2>把 raw 资料变成 documents.jsonl</h2>
+  <p>现在可以写第一条真正的数据流水线了。它读取 <code>data/raw</code> 下的 Markdown，解析元数据，校验字段，然后写出 JSONL。JSONL 的好处是简单：一行一条记录，用编辑器也能看，用脚本也好处理。</p>
+  <p>这一章只做到 document 级别，不做分块。分块会在第 4 章展开。先把资料从“文件”变成“可检查的记录”，这是更稳的顺序。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>src/ingest/build-corpus.js：把 raw 资料写成 documents.jsonl</figcaption><pre><code class="language-javascript" data-language="javascript">import { mkdir, readFile, readdir, writeFile } from &quot;node:fs/promises&quot;;
+import { join } from &quot;node:path&quot;;
+import { parseFrontmatter } from &quot;./frontmatter.js&quot;;
+import { assertDocumentShape } from &quot;../rag/schema.js&quot;;
+
+const rawDir = &quot;data/raw&quot;;
+const outputDir = &quot;data/processed&quot;;
+const outputFile = join(outputDir, &quot;documents.jsonl&quot;);
+
+function toDocument({ file, meta, body }) {
+  const id = `${file.replace(/\.md$/, &quot;&quot;)}#${meta.version || &quot;draft&quot;}`;
+
+  return assertDocumentShape({
+    id,
+    source: join(rawDir, file),
+    title: meta.title,
+    section: meta.section || meta.title,
+    version: meta.version,
+    permission: meta.permission || &quot;internal&quot;,
+    updated_at: meta.updated_at,
+    owner: meta.owner || &quot;unknown&quot;,
+    text: body
+  });
+}
+
+export async function buildCorpus() {
+  const files = (await readdir(rawDir)).filter((file) =&gt; file.endsWith(&quot;.md&quot;));
+  const documents = [];
+
+  for (const file of files) {
+    const source = join(rawDir, file);
+    const markdown = await readFile(source, &quot;utf8&quot;);
+    const parsed = parseFrontmatter(markdown, source);
+    documents.push(toDocument({ file, ...parsed }));
+  }
+
+  await mkdir(outputDir, { recursive: true });
+  const lines = documents.map((doc) =&gt; JSON.stringify(doc)).join(&quot;\n&quot;);
+  await writeFile(outputFile, lines + &quot;\n&quot;, &quot;utf8&quot;);
+
+  return { count: documents.length, outputFile };
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const result = await buildCorpus();
+  console.log(`已生成 ${result.count} 条文档：${result.outputFile}`);
+}</code></pre></figure><figure class="code-card"><figcaption>验收命令：第二章先验数据，不验智能</figcaption><pre><code class="language-bash" data-language="bash"># 1. 创建目录
+mkdir -p data/raw data/processed src/ingest src/rag
+
+# 2. 放入 refund-policy.md、frontmatter.js、schema.js、build-corpus.js
+
+# 3. 运行入库脚本
+npm run ingest
+
+# 4. 检查输出。每一行都应该是一条完整 JSON 文档
+cat data/processed/documents.jsonl</code></pre></figure></div>
+</section>
+<section id="practice" class="task">
+  <h2>练一下</h2>
+  <p>新增一份 `product-faq.md`，照着 `refund-policy.md` 写 frontmatter 和正文。再运行 `npm run ingest`。如果脚本报缺字段，不要绕过校验，先把资料补完整。</p>
+</section>
+<section id="quiz" class="quiz">
+  <h2>快速自测</h2>
+  <div class="quiz-question"><p>为什么第二章先定数据契约？</p><button data-answer="true">减少后续返工</button><button data-answer="false">增加页面动画</button><button data-answer="false">替代模型调用</button><div class="quiz-result" aria-live="polite"></div><p class="lead">RAG 后续每个环节都会消费这些字段。契约不稳，检索、引用、权限和评测都会跟着返工。</p></div><div class="quiz-question"><p>permission 字段主要服务什么？</p><button data-answer="true">权限过滤</button><button data-answer="false">字体选择</button><button data-answer="false">端口配置</button><div class="quiz-result" aria-live="polite"></div><p class="lead">企业知识库不能只看相关性，还要看用户有没有资格看到这段资料。</p></div><div class="quiz-question"><p>documents.jsonl 为什么适合做中间产物？</p><button data-answer="true">便于逐行检查</button><button data-answer="false">能自动训练模型</button><button data-answer="false">会提高网速</button><div class="quiz-result" aria-live="polite"></div><p class="lead">JSONL 一行一条记录，适合调试、追加和被后续脚本继续处理。</p></div>
+</section>
+<section id="summary" class="callout">
+  <h2>这一章收在这里</h2>
+  <p>第二章的重点不是写很多代码，而是把“资料进入系统时必须长什么样”定下来。RAG 后面的检索、引用、权限、评测都吃这份结构。下一章会继续往前走：真实企业资料通常不干净，我们要开始处理噪声、重复、版本和权限。</p>
+</section>
+<section id="sources" class="source-box">
+  <h2>本章参考资料</h2>
+  <ul class="source-list"><li><a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter1/02_preparation.md">Datawhale All-in-RAG: 开发 RAG 的准备工作</a><span>社区教程，用于项目环境和入门路径设计。</span></li><li><a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter1/03_get_start_rag.md">Datawhale All-in-RAG: 四步构建 RAG</a><span>社区教程，用于主线项目的最小闭环。</span></li><li><a href="https://docs.langchain.com/oss/python/langchain/rag">LangChain Docs: Build a RAG agent</a><span>用于对照 indexing、retrieval、generation 的工程拆分。</span></li></ul>
+</section>
+<nav class="footer-nav">
+  <a href="./0001-why-rag-and-project-map.html">上一章：为什么需要 RAG</a>
+  <a href="./0003-data-loading-cleaning-metadata.html">下一章：资料进入知识库</a>
+</nav></main>
+      <aside class="side"><nav class="toc"><strong>本章目录</strong>
+    <a href="#goals">学习目标</a>
+    <a href="#contract">数据契约</a>
+    <a href="#readme">README</a>
+    <a href="#raw-doc">原始资料</a>
+    <a href="#parser">解析脚本</a>
+    <a href="#schema">Schema 校验</a>
+    <a href="#ingest">入库脚本</a>
+    <a href="#practice">练一下</a>
+    <a href="#quiz">快速自测</a>
+    <a href="#sources">参考资料</a>
+  </nav></aside>
+    </div>
+  </div>
+</body>
+</html>

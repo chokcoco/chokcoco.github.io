@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>分块不是切字数：让 chunk 能独立回答小问题 | RAG 从入门到精通</title>
+  <script src="../assets/theme-switcher.js"></script>
+  <link rel="stylesheet" href="../assets/course.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="../assets/code-highlight.js"></script>
+  <script defer src="../assets/quiz.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="../index.html">RAG 从入门到精通</a>
+      <nav>
+        <a href="../index.html">课程首页</a>
+        <a href="../reference/0001-course-blueprint.html">课程蓝图</a>
+        <a href="../reference/0002-rag-glossary.html">术语表</a>
+      </nav>
+    </header>
+    
+    <div class="layout">
+      <main>
+<section class="hero">
+  <div class="eyebrow">第 4 章 · 约 75 分钟</div>
+  <h1>分块不是切字数：让 chunk 能独立回答小问题</h1>
+  <p class="summary">现在资料已经能干净入库了。下一步是分块。分块听起来像切文本，实际更像拆说明书：每一块都要小到能被检索命中，又要完整到能回答一个小问题。切得太大，向量会变得含糊；切得太碎，模型拿到的上下文又不够。</p>
+  <div class="meta"><span class="pill">理解 chunk 语义边界</span><span class="pill">比较固定分块和结构分块</span><span class="pill">处理表格和步骤文本</span><span class="pill">写分块可视化检查</span></div>
+</section>
+<section id="goals" class="card">
+  <h2>这一章把文档切成可检索单元</h2>
+  <ul><li>理解 chunk 语义边界</li><li>比较固定分块和结构分块</li><li>处理表格和步骤文本</li><li>写分块可视化检查</li></ul>
+</section>
+<section id="problem" class="section">
+  <h2>分块坏了，后面会一起坏</h2>
+  <p>分块这件事很容易被低估。很多人直接按 500 字一刀切，系统也能跑。但一问“年度会员用了优惠券还能退多少钱”，检索回来一大段混着发票、退款、账号注销的文本，模型就只能在里面猜重点。</p>
+  <p>好的 chunk 要像一张小卡片：自己能回答一个小问题，又能说明自己来自哪份文档、哪一节、哪个版本。它不能小到只剩半句话，也不能大到塞进三四个主题。这个尺度没有绝对标准，所以第 4 章除了生成 chunk，还会写一个抽检脚本。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>先看 chunk 的目标形状</figcaption><pre><code class="language-javascript" data-language="javascript">const chunk = {
+  id: &quot;refund-policy#2026-01#chunk-001&quot;,
+  document_id: &quot;refund-policy#2026-01&quot;,
+  source: &quot;data/raw/refund-policy.md&quot;,
+  title: &quot;会员退款制度&quot;,
+  section_path: [&quot;年度会员退款&quot;],
+  permission: &quot;support&quot;,
+  version: &quot;2026-01&quot;,
+  text: &quot;年度会员购买后 7 天内可申请退款。已经使用优惠券的订单，需要按优惠券规则扣减。&quot;,
+  token_estimate: 43,
+  prev_chunk_id: null,
+  next_chunk_id: &quot;refund-policy#2026-01#chunk-002&quot;
+};
+
+// chunk 不是随手切出来的一段文字。
+// 它要保留文档身份、章节路径、权限和前后关系。</code></pre></figure></div>
+</section>
+<section id="compare" class="section">
+  <h2>先别从字数开始，从边界开始</h2>
+  <p>字数只是预算，不是边界。真正的边界通常藏在标题、列表、步骤和问答结构里。比如 FAQ 的一个 Q/A，天然就是一个知识单元；退款制度里的“年度会员退款”也是一个相对完整的小节。先尊重这些结构，再用 token 预算兜底，会比直接按长度硬切稳得多。</p>
+  <table><thead><tr><th>做法</th><th>短期看起来</th><th>真实问题</th></tr></thead><tbody><tr><td>固定每 500 字切一块</td><td>实现最快</td><td>容易把多个主题混在一个 chunk 里</td></tr><tr><td>只按标题切</td><td>结构清楚</td><td>长章节可能太大，检索命中后噪声仍然多</td></tr><tr><td>标题结构 + 句子打包 + 少量重叠</td><td>代码稍多</td><td>更适合教程项目，也更接近真实系统</td></tr></tbody></table>
+</section>
+<section id="sections" class="section">
+  <h2>先按 Markdown 标题拆出章节</h2>
+  <p>第三章我们保留了 Markdown 结构，现在它开始派上用场。下面的函数会把文档按标题切成小节。它故意不处理所有 Markdown 语法，因为当前项目只需要先抓住一个关键：标题是比字数更可靠的语义边界。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>src/chunk/markdown-sections.js：先按 Markdown 标题拆出章节</figcaption><pre><code class="language-javascript" data-language="javascript">export function splitMarkdownSections(document) {
+  const lines = document.text.split(&quot;\n&quot;);
+  const sections = [];
+  let current = {
+    path: [document.section],
+    lines: []
+  };
+
+  for (const line of lines) {
+    const heading = line.match(/^(#{1,6})\s+(.+)$/);
+
+    if (heading) {
+      if (current.lines.join(&quot;\n&quot;).trim()) {
+        sections.push({ ...current, text: current.lines.join(&quot;\n&quot;).trim() });
+      }
+
+      current = {
+        path: [heading[2].trim()],
+        lines: []
+      };
+      continue;
+    }
+
+    current.lines.push(line);
+  }
+
+  if (current.lines.join(&quot;\n&quot;).trim()) {
+    sections.push({ ...current, text: current.lines.join(&quot;\n&quot;).trim() });
+  }
+
+  return sections;
+}</code></pre></figure></div>
+</section>
+<section id="packing" class="section">
+  <h2>再用句子和预算打包</h2>
+  <p>标题切完以后，有的小节仍然很长。这时再用句子打包。这里的 <code>estimateTokens</code> 是近似估算，不是模型 tokenizer。课程项目先用它就够了，因为我们现在要学的是分块思想：控制长度、保留句子完整、给边界一点 overlap。</p>
+  <p>overlap 不要开太大。它的作用是补边界信息，不是复制整段上下文。开得过大，后面检索会拿回一堆高度相似的 chunk，重排和去重又要额外处理。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>src/chunk/text-splitter.js：用近似 token 控制块大小</figcaption><pre><code class="language-javascript" data-language="javascript">export function estimateTokens(text) {
+  // 中文、英文、数字混合时，精确 token 需要依赖模型 tokenizer。
+  // 教学项目先用近似值：中文字符和英文词都会贡献 token。
+  const chineseChars = text.match(/[\u4e00-\u9fff]/g)?.length || 0;
+  const words = text.match(/[a-zA-Z0-9_]+/g)?.length || 0;
+  return chineseChars + words;
+}
+
+export function splitBySentences(text) {
+  return text
+    .split(/(?&lt;=[。！？!?])\s*/)
+    .map((item) =&gt; item.trim())
+    .filter(Boolean);
+}
+
+export function packSentences(sentences, { maxTokens = 180, overlapSentences = 1 } = {}) {
+  const chunks = [];
+  let buffer = [];
+
+  for (const sentence of sentences) {
+    const candidate = [...buffer, sentence].join(&quot;&quot;);
+
+    if (buffer.length &amp;&amp; estimateTokens(candidate) &gt; maxTokens) {
+      chunks.push(buffer.join(&quot;&quot;));
+      buffer = overlapSentences &gt; 0 ? buffer.slice(-overlapSentences) : [];
+    }
+
+    buffer.push(sentence);
+  }
+
+  if (buffer.length) chunks.push(buffer.join(&quot;&quot;));
+  return chunks;
+}</code></pre></figure></div>
+</section>
+<section id="build" class="section">
+  <h2>生成 chunks.jsonl，并保留前后关系</h2>
+  <p>现在把 <code>documents.jsonl</code> 转成 <code>chunks.jsonl</code>。每个 chunk 继续携带文档来源、权限、版本和章节路径。这里多了 <code>prev_chunk_id</code> 和 <code>next_chunk_id</code>，后面做上下文扩展时会用到：命中一个片段后，可以按需把前后片段也带进来。</p>
+  <div class="code-stack"><figure class="code-card"><figcaption>src/chunk/build-chunks.js：把 documents.jsonl 转成 chunks.jsonl</figcaption><pre><code class="language-javascript" data-language="javascript">import { readFile, writeFile } from &quot;node:fs/promises&quot;;
+import { join } from &quot;node:path&quot;;
+import { splitMarkdownSections } from &quot;./markdown-sections.js&quot;;
+import { estimateTokens, packSentences, splitBySentences } from &quot;./text-splitter.js&quot;;
+
+const inputFile = &quot;data/processed/documents.jsonl&quot;;
+const outputFile = &quot;data/processed/chunks.jsonl&quot;;
+
+function toChunk(document, section, text, index, total) {
+  const chunkId = `${document.id}#chunk-${String(index + 1).padStart(3, &quot;0&quot;)}`;
+
+  return {
+    id: chunkId,
+    document_id: document.id,
+    source: document.source,
+    title: document.title,
+    section_path: section.path,
+    permission: document.permission,
+    version: document.version,
+    text,
+    token_estimate: estimateTokens(text),
+    prev_chunk_id: index &gt; 0 ? `${document.id}#chunk-${String(index).padStart(3, &quot;0&quot;)}` : null,
+    next_chunk_id: index &lt; total - 1 ? `${document.id}#chunk-${String(index + 2).padStart(3, &quot;0&quot;)}` : null
+  };
+}
+
+export async function buildChunks() {
+  const lines = (await readFile(inputFile, &quot;utf8&quot;)).trim().split(&quot;\n&quot;).filter(Boolean);
+  const documents = lines.map((line) =&gt; JSON.parse(line));
+  const chunks = [];
+
+  for (const document of documents) {
+    const parts = [];
+    for (const section of splitMarkdownSections(document)) {
+      const packed = packSentences(splitBySentences(section.text), {
+        maxTokens: 180,
+        overlapSentences: 1
+      });
+
+      packed.forEach((text) =&gt; parts.push({ section, text }));
+    }
+
+    parts.forEach((part, index) =&gt; {
+      chunks.push(toChunk(document, part.section, part.text, index, parts.length));
+    });
+  }
+
+  await writeFile(outputFile, chunks.map((chunk) =&gt; JSON.stringify(chunk)).join(&quot;\n&quot;) + &quot;\n&quot;, &quot;utf8&quot;);
+  return { count: chunks.length, outputFile };
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const result = await buildChunks();
+  console.log(`已生成 ${result.count} 个 chunk：${result.outputFile}`);
+}</code></pre></figure></div>
+</section>
+<section id="inspect" class="section">
+  <h2>分块之后一定要抽检</h2>
+  <p>分块没有一次就完美的。你需要看几个信号：有没有太短的块，有没有太长的块，有没有丢来源和章节路径。抽检脚本不复杂，但它会把“我觉得还行”变成“我看到了这几个异常”。这就是工程项目和演示项目的区别。</p>
+  <div class="code-stack">
+    <figure class="code-card"><figcaption>src/chunk/inspect-chunks.js：分块之后一定要抽检</figcaption><pre><code class="language-javascript" data-language="javascript">import { readFile } from &quot;node:fs/promises&quot;;
+
+const file = &quot;data/processed/chunks.jsonl&quot;;
+
+export async function inspectChunks() {
+  const chunks = (await readFile(file, &quot;utf8&quot;))
+    .trim()
+    .split(&quot;\n&quot;)
+    .filter(Boolean)
+    .map((line) =&gt; JSON.parse(line));
+
+  const tooShort = chunks.filter((chunk) =&gt; chunk.token_estimate &lt; 20);
+  const tooLong = chunks.filter((chunk) =&gt; chunk.token_estimate &gt; 220);
+  const missingSource = chunks.filter((chunk) =&gt; !chunk.source || !chunk.section_path?.length);
+
+  return {
+    total: chunks.length,
+    too_short: tooShort.map((chunk) =&gt; chunk.id),
+    too_long: tooLong.map((chunk) =&gt; chunk.id),
+    missing_source: missingSource.map((chunk) =&gt; chunk.id),
+    preview: chunks.slice(0, 3).map((chunk) =&gt; ({
+      id: chunk.id,
+      title: chunk.title,
+      section_path: chunk.section_path,
+      token_estimate: chunk.token_estimate,
+      text: chunk.text.slice(0, 80)
+    }))
+  };
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  console.log(JSON.stringify(await inspectChunks(), null, 2));
+}</code></pre></figure>
+    <figure class="code-card"><figcaption>package.json：补上 chunk 和 inspect 命令</figcaption><pre><code class="language-json" data-language="json">{
+  &quot;scripts&quot;: {
+    &quot;ingest&quot;: &quot;node src/ingest/build-corpus.js&quot;,
+    &quot;chunk&quot;: &quot;node src/chunk/build-chunks.js&quot;,
+    &quot;inspect:chunks&quot;: &quot;node src/chunk/inspect-chunks.js&quot;,
+    &quot;check:data&quot;: &quot;npm run ingest &amp;&amp; npm run chunk &amp;&amp; npm run inspect:chunks&quot;
+  }
+}</code></pre></figure>
+  </div>
+</section>
+<section id="practice" class="task">
+  <h2>练一下</h2>
+  <p>把 `maxTokens` 从 180 改成 60，再运行 `npm run check:data`。观察 `inspect:chunks` 的 preview：哪些块变得太碎？再把它改成 320，看看块里是否开始混入多个主题。</p>
+</section>
+<section id="quiz" class="quiz">
+  <h2>快速自测</h2>
+  <div class="quiz-question"><p>chunk 太大最容易带来什么问题？</p><button data-answer="true">语义变稀</button><button data-answer="false">端口变小</button><button data-answer="false">字体变亮</button><div class="quiz-result" aria-live="polite"></div><p class="lead">一个块里混太多主题，向量会变得笼统，检索时不够精准。</p></div><div class="quiz-question"><p>为什么要保留 section_path？</p><button data-answer="true">帮助引用定位</button><button data-answer="false">压缩图片</button><button data-answer="false">隐藏权限</button><div class="quiz-result" aria-live="polite"></div><p class="lead">section_path 能让模型和用户知道片段来自哪一节，也方便生成引用。</p></div><div class="quiz-question"><p>overlap 的作用更接近什么？</p><button data-answer="true">补边界信息</button><button data-answer="false">删除重复文件</button><button data-answer="false">替代权限</button><div class="quiz-result" aria-live="polite"></div><p class="lead">相邻块保留少量重叠，可以减少句子被切断后的上下文损失。</p></div>
+</section>
+<section id="summary" class="callout">
+  <h2>临走前再看一眼</h2>
+  <p>第 4 章只做一件事：让 chunk 成为真正能被检索和引用的知识单元。好的分块不会只看字数，它会尽量尊重文档结构、句子边界、权限和来源。下一章我们再把这些 chunk 转成 embedding，进入向量索引。</p>
+</section>
+<section id="sources" class="source-box">
+  <h2>本章参考资料</h2>
+  <ul class="source-list"><li><a href="https://github.com/datawhalechina/all-in-rag/blob/main/docs/chapter2/05_text_chunking.md">Datawhale All-in-RAG: 文本分块</a><span>社区教程，用于分块策略和细节展开。</span></li><li><a href="https://github.com/ali-bahrainian/RAG_best_practices">RAG Best Practices</a><span>社区项目，用于参数实验、chunk、top_k、query expansion 等实践意识。</span></li></ul>
+</section>
+<nav class="footer-nav">
+  <a href="./0003-data-loading-cleaning-metadata.html">上一章：资料入库</a>
+  <a href="./0005-embedding-vector-index.html">下一章：Embedding 和向量索引</a>
+</nav></main>
+      <aside class="side"><nav class="toc"><strong>本章目录</strong>
+    <a href="#goals">学习目标</a>
+    <a href="#problem">分块问题</a>
+    <a href="#compare">边界判断</a>
+    <a href="#sections">标题拆分</a>
+    <a href="#packing">句子打包</a>
+    <a href="#build">生成 chunk</a>
+    <a href="#inspect">抽检</a>
+    <a href="#practice">练一下</a>
+    <a href="#quiz">快速自测</a>
+    <a href="#sources">参考资料</a>
+  </nav></aside>
+    </div>
+  </div>
+</body>
+</html>

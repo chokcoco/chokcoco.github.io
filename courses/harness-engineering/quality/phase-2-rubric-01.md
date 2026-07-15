@@ -2,7 +2,7 @@
 
 - 量规：通用课程评价量规 1.0
 - 审校范围：`lessons/01-what-harness-engineering-changes.md`
-- 第一阶段内容哈希：`15b8202f558472619e4129b6c71ed66a6a0ca1679ded89e74378bc59cd251bfb`
+- 第一阶段内容哈希：`0c8f2b26cb58a39540a26768e553bf68b37c6dab5a23609e745dc2a7872f7f12`
 - 第一阶段结果：0 error，0 warning
 - 审校日期：2026-07-10
 

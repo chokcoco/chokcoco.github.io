@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "slug": "high-quality-ai-code-review",
+  "title": "如何实现高质量的 AI Code Review",
+  "subtitle": "从一次模型评论到可度量、可恢复、可演进的审查系统",
+  "description": "面向有研发经验的全栈工程师，以真实工程实现为线索，讲清 AI Code Review 的职责边界、Harness 架构、采纳率与召回率评估，以及远端服务化方法。",
+  "duration": "12–16 小时",
+  "status": "manual-review",
+  "lessons": [
+    {
+      "number": 1,
+      "title": "为什么今天需要 AI Code Review",
+      "time": "55–70 分钟",
+      "summary": "把 AI 放进代码审查之前，先分清它该接管哪些重复劳动，哪些判断仍必须由人负责。",
+      "status": "available",
+      "href": "lessons/01-why-ai-code-review.html",
+      "markdown": "lessons/01-why-ai-code-review.md"
+    },
+    {
+      "number": 2,
+      "title": "从 Prompt 到 Harness：整体架构与核心思路",
+      "time": "80–100 分钟",
+      "summary": "沿一次真实审查请求拆开入口、状态机、批次、MCP、Agent 与结果验证的职责。",
+      "status": "available",
+      "href": "lessons/02-prompt-to-harness.html",
+      "markdown": "lessons/02-prompt-to-harness.md"
+    },
+    {
+      "number": 3,
+      "title": "先建立度量：采纳率、召回率与 F1-Score",
+      "time": "85–105 分钟",
+      "summary": "从 TP、FP、FN 到真实状态枚举，建立一套可复算、能解释排除项的 AICR 指标口径。",
+      "status": "available",
+      "href": "lessons/03-metrics-adoption-recall-f1.html",
+      "markdown": "lessons/03-metrics-adoption-recall-f1.md"
+    },
+    {
+      "number": 4,
+      "title": "采纳率低：问题为什么看起来对，却没人采用",
+      "time": "80–100 分钟",
+      "summary": "从拒绝样本定位规则、上下文、可执行性与重复建议造成的噪音。",
+      "status": "available",
+      "href": "lessons/04-low-adoption-diagnosis.html",
+      "markdown": "lessons/04-low-adoption-diagnosis.md"
+    },
+    {
+      "number": 5,
+      "title": "提升采纳率：规则、上下文、复核与负向记忆",
+      "time": "85–105 分钟",
+      "summary": "把项目规则、上下文、二次复核和反馈记忆连成持续降噪的闭环。",
+      "status": "available",
+      "href": "lessons/05-improve-adoption-loop.html",
+      "markdown": "lessons/05-improve-adoption-loop.md"
+    },
+    {
+      "number": 6,
+      "title": "召回率低：大型任务中 AI 为什么会\"偷懒\"",
+      "time": "80–100 分钟",
+      "summary": "把所谓偷懒还原为可观察的输出衰减、步骤遗漏和流程控制失效。",
+      "status": "available",
+      "href": "lessons/06-why-ai-lazy.html",
+      "markdown": "lessons/06-why-ai-lazy.md"
+    },
+    {
+      "number": 7,
+      "title": "提升召回率：分批、状态机、质检与数据回流",
+      "time": "90–110 分钟",
+      "summary": "用外部完成证明、质量门和漏报回流推动每一批审查真正结束。",
+      "status": "available",
+      "href": "lessons/07-improve-recall-loop.html",
+      "markdown": "lessons/07-improve-recall-loop.md"
+    },
+    {
+      "number": 8,
+      "title": "远端 AI Code Review 云服务",
+      "time": "90–110 分钟",
+      "summary": "补齐异步任务、Git 工作区、并发、幂等、回调与监控，把本地能力变成服务。",
+      "status": "available",
+      "href": "lessons/08-remote-ai-cr-service.html",
+      "markdown": "lessons/08-remote-ai-cr-service.md"
+    },
+    {
+      "number": 9,
+      "title": "总结：从单次审查到可持续质量系统",
+      "time": "55–70 分钟",
+      "summary": "把目标、执行、验证、度量、反馈和服务化重组为可迁移的落地路线。",
+      "status": "available",
+      "href": "lessons/09-summary-quality-system.html",
+      "markdown": "lessons/09-summary-quality-system.md"
+    }
+  ],
+  "references": [
+    {
+      "title": "AI Code Review 术语表",
+      "href": "reference/glossary.html",
+      "markdown": "reference/glossary.md"
+    }
+  ]
+}

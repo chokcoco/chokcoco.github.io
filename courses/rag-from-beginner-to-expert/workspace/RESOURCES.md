@@ -2,6 +2,8 @@
 
 ## Knowledge
 
+- [Mermaid 10 browser bundle](https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js)
+  课程 HTML 的架构图与流程图渲染依赖。仅用于页面展示，不作为课程事实来源。
 - [Paper: "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks" - Lewis et al.](https://arxiv.org/abs/2005.11401)
   RAG 概念的经典论文来源。Use for: 解释 RAG 的原始动机、parametric memory 与 non-parametric memory 的区别、为什么检索能改善知识密集型任务。
 - [OpenAI Docs: Retrieval](https://developers.openai.com/api/docs/guides/retrieval)
