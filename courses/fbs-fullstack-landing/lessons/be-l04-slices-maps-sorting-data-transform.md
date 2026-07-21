@@ -1,3 +1,8 @@
+---
+title: Slices Maps Sorting Data Transform
+render_with_liquid: false
+---
+
 # slice、map、排序与数据转换
 
 > 预计学习时间：120–160 分钟
