@@ -1,0 +1,450 @@
+{
+    "schemaVersion": 1,
+    "slug": "fbs-fullstack-landing",
+    "title": "FBS 前后端转全栈 Landing",
+    "subtitle": "从真实仓库代码读懂并打通一条前后端请求链",
+    "description": "面向已有一端研发经验的 FBS 工程师，以当前前后端仓库为事实基线，学习另一端真正会用到的语言、框架、工程结构与开发方法。40 章已全部开放。",
+    "duration": "模块一至六约 64–84 小时",
+    "status": "published",
+    "kicker": "FBS 内部 · 前后端转全栈",
+    "mark": "FBS",
+    "compactLessonTitles": true,
+    "audience": "FBS 前端 / 后端研发",
+    "progressNote": "全部 40 章已开放：覆盖前端语言与工程、Go 语言基础、Web 后端同步/进阶开发链路。以 ASN 纵向切片收束。",
+    "catalogIntro": "40 章从 JavaScript/TypeScript、三类前端工程进入 Go、Chassis、Wire、数据、跨服务与安全边界，并以前后端纵向切片收束。",
+    "lessons": [
+        {
+            "number": 1,
+            "code": "FE-L01",
+            "title": "JavaScript 数据、类型与相等性：先读懂仓库判断分支",
+            "time": "90–130 分钟",
+            "summary": "从 FBS 权限判断与路由守卫出发，建立变量、基本/引用类型、空值、隐式转换与相等性规则，能独立解释仓库中的条件分支并修复空值边界问题。",
+            "status": "available",
+            "href": "lessons/fe-l01-js-data-types-equality.html",
+            "markdown": "lessons/fe-l01-js-data-types-equality.md"
+        },
+        {
+            "number": 2,
+            "code": "FE-L02",
+            "title": "函数、作用域、闭包与模块：跟上组件外的调用链",
+            "time": "100–140 分钟",
+            "summary": "理解 JavaScript 函数是一等值、词法作用域决定变量可见性、闭包捕获外部变量、ES Module 组织代码边界——从 createApi 工厂、Vuex action 和 request interceptor 读懂组件外的调用链。",
+            "status": "available",
+            "href": "lessons/fe-l02-functions-scope-closure-modules.html",
+            "markdown": "lessons/fe-l02-functions-scope-closure-modules.md"
+        },
+        {
+            "number": 3,
+            "code": "FE-L03",
+            "title": "Promise、async/await 与事件循环：读懂请求和页面副作用",
+            "time": "110–150 分钟",
+            "summary": "理解 Promise 状态、await 暂停语义、微任务执行顺序和错误传播——能读懂 FBS 页面中的任何异步请求、初始化 action 和并发组合，并修复常见漏 await 和漏错误处理问题。",
+            "status": "available",
+            "href": "lessons/fe-l03-promise-async-eventloop.html",
+            "markdown": "lessons/fe-l03-promise-async-eventloop.md"
+        },
+        {
+            "number": 4,
+            "code": "FE-L04",
+            "title": "JavaScript 常用对象与 Web 数据处理",
+            "time": "100–140 分钟",
+            "summary": "掌握 FBS 高频使用的 Array、Object、String、Date、URL/URLSearchParams 和 JSON 方法——能独立完成列表筛选、查询参数构造、接口数据转换和时间处理，理解可变性、时区和精度边界。",
+            "status": "available",
+            "href": "lessons/fe-l04-js-objects-web-data.html",
+            "markdown": "lessons/fe-l04-js-objects-web-data.md"
+        },
+        {
+            "number": 5,
+            "code": "FE-L05",
+            "title": "TypeScript：从接口数据到组件 Props 的类型链",
+            "time": "110–150 分钟",
+            "summary": "读懂并编写 FBS 仓库中的 TypeScript 类型——接口、联合类型、泛型、类型收窄和工具类型——能为未类型化的 API 加最小类型并通过 type-check，理解类型只在编译期存在。",
+            "status": "available",
+            "href": "lessons/fe-l05-typescript-type-chain.html",
+            "markdown": "lessons/fe-l05-typescript-type-chain.md"
+        },
+        {
+            "number": 6,
+            "code": "FE-L06",
+            "title": "浏览器与框架语法桥：DOM、事件、JSX、Vue SFC",
+            "time": "110–150 分钟",
+            "summary": "区分 JavaScript 语言、浏览器 Web API、React JSX 和 Vue SFC 四种语法层——能读懂表单、事件、条件渲染、列表渲染和组件 Props/Emits，将同一交互在 React 和 Vue 片段中逐项对应。",
+            "status": "available",
+            "href": "lessons/fe-l06-browser-framework-syntax-bridge.html",
+            "markdown": "lessons/fe-l06-browser-framework-syntax-bridge.md"
+        },
+        {
+            "number": 7,
+            "code": "FE-W01",
+            "title": "启动三类 FBS 前端工程并建立仓库地图",
+            "time": "130–180 分钟",
+            "summary": "掌握 FBS 三个前端仓库的 Node 版本、包管理器、MMC/Webpack 构建工具和 dev server 启动方式，能选择一仓完成完整启动并获得可核验的页面结果，另两仓能解释命令与运行边界。",
+            "status": "available",
+            "href": "lessons/fe-w01-start-three-frontend-projects.html",
+            "markdown": "lessons/fe-w01-start-three-frontend-projects.md"
+        },
+        {
+            "number": 8,
+            "code": "FE-W02",
+            "title": "组件、样式、表单与表格：按现有组件库做页面",
+            "time": "110–150 分钟",
+            "summary": "能在 FBS 的 React 16、Vue 3 或 React 18 项目中拆解组件树、传递 Props/Emits、处理表单事件，并优先复用 EDS/SSC UI 组件库——交付一个符合仓库模式的带校验字段小组件。",
+            "status": "available",
+            "href": "lessons/fe-w02-components-styles-forms-tables.html",
+            "markdown": "lessons/fe-w02-components-styles-forms-tables.md"
+        },
+        {
+            "number": 9,
+            "code": "FE-W03",
+            "title": "路由、菜单与页面入口：让页面真正可访问",
+            "time": "110–150 分钟",
+            "summary": "能在 FBS 三个前端仓库中从浏览器 URL 反查路由定义、找到页面入口、理解菜单与权限的关系——完成一个不破坏宿主的新路由注册并验证直达、刷新和无权限三种路径。",
+            "status": "available",
+            "href": "lessons/fe-w03-routes-menus-page-entries.html",
+            "markdown": "lessons/fe-w03-routes-menus-page-entries.md"
+        },
+        {
+            "number": 10,
+            "code": "FE-W04",
+            "title": "状态管理：Redux/Recoil、Vuex 与宿主状态",
+            "time": "110–150 分钟",
+            "summary": "能追踪当前 seller/shop 从初始化到页面的完整数据流，读懂 Redux/Thunk、Vuex module、Recoil atom 和 RTK 的读法与不可变更新规则——画出一个状态的来源、写入、派生与消费链。",
+            "status": "available",
+            "href": "lessons/fe-w04-state-management-redux-vuex-recoil.html",
+            "markdown": "lessons/fe-w04-state-management-redux-vuex-recoil.md"
+        },
+        {
+            "number": 11,
+            "code": "FE-W05",
+            "title": "API、代理、错误与前后端契约",
+            "time": "120–160 分钟",
+            "summary": "沿入库列表请求拆开 API 函数、请求实例、宿主代理、业务错误与联调证据，能够独立定位一次前后端契约问题。",
+            "status": "available",
+            "href": "lessons/fe-w05-api-proxy-errors-contract.html",
+            "markdown": "lessons/fe-w05-api-proxy-errors-contract.md"
+        },
+        {
+            "number": 12,
+            "code": "FE-W06",
+            "title": "权限、i18n、时间、文件与 PII：页面功能的准入项",
+            "time": "120–160 分钟",
+            "summary": "能在写 FBS 页面时同步处理权限检查、多语言翻译、时区转换、文件上传下载和 PII 敏感信息边界——以新增字段+导出需求为主线，逐项加载仓库规则，用反例验证。",
+            "status": "available",
+            "href": "lessons/fe-w06-permission-i18n-time-file-pii.html",
+            "markdown": "lessons/fe-w06-permission-i18n-time-file-pii.md"
+        },
+        {
+            "number": 13,
+            "code": "FE-W07",
+            "title": "前端纵向切片：为入库列表增加一个受控能力",
+            "time": "150–200 分钟",
+            "summary": "整合模块二的组件、路由、状态、API、权限、i18n 和文件处理能力，在真实仓库中完成一个从需求分析到可运行验证的小型前端切片。",
+            "status": "available",
+            "href": "lessons/fe-w07-frontend-vertical-slice.html",
+            "markdown": "lessons/fe-w07-frontend-vertical-slice.md"
+        },
+        {
+            "number": 14,
+            "code": "FE-A01",
+            "title": "三种应用生命周期与宿主边界",
+            "time": "120–160 分钟",
+            "summary": "能区分 Portal SPA、Vue MMF、React 18 MMF 三种形态的加载链路，解释关键对象、宿主交接信息、失败点和观测方法。",
+            "status": "available",
+            "href": "lessons/fe-a01-three-app-lifecycles-host-boundaries.html",
+            "markdown": "lessons/fe-a01-three-app-lifecycles-host-boundaries.md"
+        },
+        {
+            "number": 15,
+            "code": "FE-A02",
+            "title": "微前端与远端组件：Module Federation、qiankun、MMF",
+            "time": "120–160 分钟",
+            "summary": "能区分三种接入机制的用途与边界，从远端 InboundComponent 追踪产物与消费链，评估修改公共组件时对各消费者的影响。",
+            "status": "available",
+            "href": "lessons/fe-a02-micro-frontends-remote-components.html",
+            "markdown": "lessons/fe-a02-micro-frontends-remote-components.md"
+        },
+        {
+            "number": 16,
+            "code": "FE-A03",
+            "title": "Vue/React 共存、共享依赖与版本迁移",
+            "time": "120–160 分钟",
+            "summary": "能处理 React 16/18、Vue 3 跨框架共存，理解宿主 Vuex 注入、axios external 和全局依赖注入，定位依赖缺失故障并提出兼容改法。",
+            "status": "available",
+            "href": "lessons/fe-a03-vue-react-coexistence-deps-migration.html",
+            "markdown": "lessons/fe-a03-vue-react-coexistence-deps-migration.md"
+        },
+        {
+            "number": 17,
+            "code": "FE-A04",
+            "title": "测试、静态检查、构建与产物边界",
+            "time": "120–160 分钟",
+            "summary": "能按仓库选择 lint、type-check、test 与 build 命令，理解三仓的构建配置和产物消费者，为一个 diff 输出可复核的开发准出清单。",
+            "status": "available",
+            "href": "lessons/fe-a04-testing-linting-build-artifacts.html",
+            "markdown": "lessons/fe-a04-testing-linting-build-artifacts.md"
+        },
+        {
+            "number": 18,
+            "code": "FE-A05",
+            "title": "前端观测与系统化排错",
+            "time": "130–170 分钟",
+            "summary": "能用四层模型分层定位白屏、路由 404、权限拒绝、请求失败和 MMF 宿入异常五类高频问题，完成两份故障诊断记录。",
+            "status": "available",
+            "href": "lessons/fe-a05-observability-systematic-debugging.html",
+            "markdown": "lessons/fe-a05-observability-systematic-debugging.md"
+        },
+        {
+            "number": 19,
+            "code": "FE-A06",
+            "title": "前端改动影响分析与开发交接",
+            "time": "120–160 分钟",
+            "summary": "能从需求和 diff 判断影响的仓库、路由、组件、权限、翻译和构建配置，整理 reviewer 可复核的跨仓影响摘要和开发交接清单。",
+            "status": "available",
+            "href": "lessons/fe-a06-impact-analysis-dev-handoff.html",
+            "markdown": "lessons/fe-a06-impact-analysis-dev-handoff.md"
+        },
+        {
+            "number": 20,
+            "code": "BE-L01",
+            "title": "Go 工具链、模块与版本边界",
+            "time": "120–160 分钟",
+            "summary": "能读懂 FBS 三个后端仓库的 go.mod，理解 Go 的模块/包组织方式，掌握编译和测试的最小命令，知道 Go 1.15 与 1.20 版本差异对课程示例的限制。",
+            "status": "available",
+            "href": "lessons/be-l01-go-toolchain-modules-versions.html",
+            "markdown": "lessons/be-l01-go-toolchain-modules-versions.md"
+        },
+        {
+            "number": 21,
+            "code": "BE-L02",
+            "title": "值、指针、struct、tag 与数据边界",
+            "time": "120–160 分钟",
+            "summary": "能阅读 Go 的零值、指针、struct 定义、组合和 tag，理解 HTTP 请求 DTO 与数据库对象为何不同，修复字段 tag 或零值语义问题。",
+            "status": "available",
+            "href": "lessons/be-l02-values-pointers-structs-tags.html",
+            "markdown": "lessons/be-l02-values-pointers-structs-tags.md"
+        },
+        {
+            "number": 22,
+            "code": "BE-L03",
+            "title": "方法、接口、嵌入与依赖倒置",
+            "time": "120–160 分钟",
+            "summary": "能阅读 Go 的方法集、接口满足、struct 嵌入和构造函数，从 FBS 的 handler/service interface 出发找到运行时实现并写最小 fake。",
+            "status": "available",
+            "href": "lessons/be-l03-methods-interfaces-embedding-di.html",
+            "markdown": "lessons/be-l03-methods-interfaces-embedding-di.md"
+        },
+        {
+            "number": 23,
+            "code": "BE-L04",
+            "title": "slice、map、排序与数据转换",
+            "time": "120–160 分钟",
+            "summary": "能安全处理 Go 的 slice 和 map——理解 append、拷贝、去重、排序、nil/empty 差异和共享底层数组风险，编写不修改输入的转换函数和 table-driven test。",
+            "status": "available",
+            "href": "lessons/be-l04-slices-maps-sorting-data-transform.html",
+            "markdown": "lessons/be-l04-slices-maps-sorting-data-transform.md"
+        },
+        {
+            "number": 24,
+            "code": "BE-L05",
+            "title": "error、defer、panic/recover 与资源生命周期",
+            "time": "130–170 分钟",
+            "summary": "能区分 Go 的业务错误、包装错误、panic 与恢复，理解 FBS 的 errcode 错误码体系，正确关闭资源、回滚事务并保留错误上下文。",
+            "status": "available",
+            "href": "lessons/be-l05-errors-defer-panic-resources.html",
+            "markdown": "lessons/be-l05-errors-defer-panic-resources.md"
+        },
+        {
+            "number": 25,
+            "code": "BE-L06",
+            "title": "context、时间、JSON、HTTP、I/O 与文件",
+            "time": "130–170 分钟",
+            "summary": "能沿 context.Context 传递取消/超时信息，使用 Go 标准库处理 JSON 序列化、HTTP 客户端调用、时间处理和文件操作，为调用链补齐 context 与超时。",
+            "status": "available",
+            "href": "lessons/be-l06-context-time-json-http-io.html",
+            "markdown": "lessons/be-l06-context-time-json-http-io.md"
+        },
+        {
+            "number": 26,
+            "code": "BE-L07",
+            "title": "goroutine、channel、sync 与并发边界",
+            "time": "140–180 分钟",
+            "summary": "能阅读 Go 的 goroutine、channel、WaitGroup、Mutex 和 worker pool 模式，从 FBS 的异步批处理代码出发识别数据竞争和 goroutine 泄漏，使用 race detector 和测试修复并发问题。",
+            "status": "available",
+            "href": "lessons/be-l07-goroutines-channels-sync-concurrency.html",
+            "markdown": "lessons/be-l07-goroutines-channels-sync-concurrency.md"
+        },
+        {
+            "number": 27,
+            "code": "BE-W01",
+            "title": "启动三类 FBS 后端进程并建立仓库地图",
+            "time": "150–200 分钟",
+            "summary": "识别主服务、敏感数据服务和 Tax 的版本、职责与进程入口，选择一条最小 build/test 路径并交付可复核的仓库地图。",
+            "status": "available",
+            "href": "lessons/be-w01-start-three-backend-processes.html",
+            "markdown": "lessons/be-w01-start-three-backend-processes.md"
+        },
+        {
+            "number": 28,
+            "code": "BE-W02",
+            "title": "Chassis HTTP 接口：从路由到请求与响应",
+            "time": "130–180 分钟",
+            "summary": "沿同一入库列表接口追踪 Chassis 路由、SC wrapper、参数绑定、灰度分支、handler 与统一响应，建立可验证的后端改动方法。",
+            "status": "available",
+            "href": "lessons/be-w02-chassis-http-route-request-response.html",
+            "markdown": "lessons/be-w02-chassis-http-route-request-response.md"
+        },
+        {
+            "number": 29,
+            "code": "BE-W03",
+            "title": "Wire 与分层：把 handler 接到应用、领域和基础设施",
+            "time": "160–220 分钟",
+            "summary": "沿 ASN 接口还原 access、application、domain、infra 的依赖图，用 provider set 与生成代码核对一次可测试的依赖变更。",
+            "status": "available",
+            "href": "lessons/be-w03-wire-layered-architecture.html",
+            "markdown": "lessons/be-w03-wire-layered-architecture.md"
+        },
+        {
+            "number": 30,
+            "code": "BE-W04",
+            "title": "MySQL、GORM/Scorm、仓储与事务",
+            "time": "180–240 分钟",
+            "summary": "沿 ASN 条件进入 repository，区分领域条件、表模型与 ORM 查询，并用失败实验验证事务、锁、分页和回滚边界。",
+            "status": "available",
+            "href": "lessons/be-w04-mysql-gorm-scorm-repository-transactions.html",
+            "markdown": "lessons/be-w04-mysql-gorm-scorm-repository-transactions.md"
+        },
+        {
+            "number": 31,
+            "code": "BE-W05",
+            "title": "服务调用、HTTP/gRPC 契约与超时",
+            "time": "180–240 分钟",
+            "summary": "拆解业务 client、HTTP/gRPC adapter、protobuf、deadline 与错误转换，用 fake 验证慢响应、空响应和远端错误。",
+            "status": "available",
+            "href": "lessons/be-w05-service-calls-http-grpc-timeouts.html",
+            "markdown": "lessons/be-w05-service-calls-http-grpc-timeouts.md"
+        },
+        {
+            "number": 32,
+            "code": "BE-W06",
+            "title": "鉴权、错误码、PII 与接口安全边界",
+            "time": "180–240 分钟",
+            "summary": "从联系人字段的数据分类进入身份、权限、敏感服务与最小返回，用越权、非法参数和日志扫描验证安全边界。",
+            "status": "available",
+            "href": "lessons/be-w06-auth-errors-pii-security.html",
+            "markdown": "lessons/be-w06-auth-errors-pii-security.md"
+        },
+        {
+            "number": 33,
+            "code": "BE-W07",
+            "title": "后端纵向切片：为入库请求增加一个受控能力",
+            "time": "220–300 分钟",
+            "summary": "以 ASN 列表筛选为主线，整合契约、route/DTO、application/domain、repository、Wire、安全、测试和前端联调证据。",
+            "status": "available",
+            "href": "lessons/be-w07-backend-vertical-slice.html",
+            "markdown": "lessons/be-w07-backend-vertical-slice.md"
+        },
+        {
+            "number": 34,
+            "code": "BE-A01",
+            "title": "Apollo 与 Chassis 配置：环境差异、热更新和开关",
+            "time": "130–180 分钟",
+            "summary": "区分静态配置、Apollo 动态配置和环境变量，沿三个仓库的真实 config struct 和热更新代码，学会从配置读取、非法值防护到功能开关的完整设计方法。",
+            "status": "available",
+            "href": "lessons/be-a01-apollo-chassis-config.html",
+            "markdown": "lessons/be-a01-apollo-chassis-config.md"
+        },
+        {
+            "number": 35,
+            "code": "BE-A02",
+            "title": "Redis/Codis 与缓存一致性",
+            "time": "140–200 分钟",
+            "summary": "先理解缓存在后端架构中解决什么问题、有哪些通用模式与风险，再沿三个仓库的真实 Redis/Codis 调用代码，学会判断缓存是否必要、设计 key 和 TTL、处理穿透与降级。",
+            "status": "available",
+            "href": "lessons/be-a02-redis-codis-cache-consistency.html",
+            "markdown": "lessons/be-a02-redis-codis-cache-consistency.md"
+        },
+        {
+            "number": 36,
+            "code": "BE-A03",
+            "title": "Saturn 定时任务与异步任务",
+            "time": "150–210 分钟",
+            "summary": "从“服务为什么需要后台任务”开始，讲清定时任务和异步任务在后端架构中的角色，沿三个仓库真实的任务注册、执行和幂等代码，学会设计和诊断 Saturn 任务。",
+            "status": "available",
+            "href": "lessons/be-a03-saturn-scheduled-async-tasks.html",
+            "markdown": "lessons/be-a03-saturn-scheduled-async-tasks.md"
+        },
+        {
+            "number": 37,
+            "code": "BE-A04",
+            "title": "Kafka 消息链路与事件边界",
+            "time": "140–200 分钟",
+            "summary": "从消息队列的核心概念和 Kafka 在 FBS 架构中的角色出发，沿真实 producer/consumer 代码学会消息兼容设计、重复处理、失败应对，以及 Kafka 与 Saturn 的边界。",
+            "status": "available",
+            "href": "lessons/be-a04-kafka-message-pipeline.html",
+            "markdown": "lessons/be-a04-kafka-message-pipeline.md"
+        },
+        {
+            "number": 38,
+            "code": "BE-A05",
+            "title": "可靠性：幂等、事务、重试、并发与降级组合",
+            "time": "150–210 分钟",
+            "summary": "以业务不变量为锚点，学习如何依据业务需求组合数据库事务、唯一约束、幂等键、锁、重试和降级，而不是不分场合地把所有手段全部堆上去。",
+            "status": "available",
+            "href": "lessons/be-a05-reliability-idempotency-transactions-retry.html",
+            "markdown": "lessons/be-a05-reliability-idempotency-transactions-retry.md"
+        },
+        {
+            "number": 39,
+            "code": "BE-A06",
+            "title": "日志、指标、链路与系统化排错",
+            "time": "140–200 分钟",
+            "summary": "建立可观测性的系统性认知：结构化日志、request ID 传递、Prometheus 指标上报和健康检查。用五步排错法定位接口、数据库、缓存、任务和消息问题。",
+            "status": "available",
+            "href": "lessons/be-a06-logging-metrics-diagnostics.html",
+            "markdown": "lessons/be-a06-logging-metrics-diagnostics.md"
+        },
+        {
+            "number": 40,
+            "code": "BE-A07",
+            "title": "后端改动影响分析、测试与开发交接",
+            "time": "140–200 分钟",
+            "summary": "学会从需求和 diff 出发，按六个维度系统化判断后端改动的影响范围，选择测试策略，并整理 reviewer 可复核的开发交接材料。",
+            "status": "available",
+            "href": "lessons/be-a07-impact-analysis-testing-handoff.html",
+            "markdown": "lessons/be-a07-impact-analysis-testing-handoff.md"
+        }
+    ],
+    "references": [
+        {
+            "title": "FBS 全栈 Landing 术语表",
+            "href": "reference/glossary.html",
+            "markdown": "reference/glossary.md"
+        }
+    ],
+    "modules": [
+        {
+            "prefix": "FE-L",
+            "title": "模块一：前端语言及标准库基础"
+        },
+        {
+            "prefix": "FE-W",
+            "title": "模块二：Web 前端开发"
+        },
+        {
+            "prefix": "FE-A",
+            "title": "模块三：Web 前端进阶"
+        },
+        {
+            "prefix": "BE-L",
+            "title": "模块四：后端语言及标准库基础"
+        },
+        {
+            "prefix": "BE-W",
+            "title": "模块五：Web 后端开发"
+        },
+        {
+            "prefix": "BE-A",
+            "title": "模块六：Web 后端进阶"
+        }
+    ]
+}

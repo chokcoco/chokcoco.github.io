@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="能从 FBS 前端需求和 diff 判断影响的仓库、路由、组件、权限、翻译和构建配置——整理一份 reviewer 可复核的跨仓影响摘要、测试结果和开发交接清单。"><title>前端改动影响分析与开发交接 | FBS 前后端转全栈 Landing</title><script src="../assets/theme-switcher.js"></script><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><div class="lesson-page-grid"><aside class="chapter-nav" aria-label="课程章节导航"><button class="chapter-nav-toggle" type="button" aria-expanded="true" aria-controls="chapter-nav-content"><span aria-hidden="true">◀</span><span class="chapter-nav-toggle-label">收起</span></button><div class="chapter-nav-content" id="chapter-nav-content"><div class="chapter-nav-heading"><strong>课程章节</strong><span>第 19 / 40 章</span></div><nav class="chapter-nav-list"><section class="chapter-nav-module"><h2>模块一：前端语言及标准库基础</h2><a href="../lessons/fe-l01-js-data-types-equality.html"><span class="chapter-nav-code">FE-L01</span><span class="chapter-nav-title">JavaScript 数据、类型与相等性：先读懂仓库判断分支</span></a><a href="../lessons/fe-l02-functions-scope-closure-modules.html"><span class="chapter-nav-code">FE-L02</span><span class="chapter-nav-title">函数、作用域、闭包与模块：跟上组件外的调用链</span></a><a href="../lessons/fe-l03-promise-async-eventloop.html"><span class="chapter-nav-code">FE-L03</span><span class="chapter-nav-title">Promise、async/await 与事件循环：读懂请求和页面副作用</span></a><a href="../lessons/fe-l04-js-objects-web-data.html"><span class="chapter-nav-code">FE-L04</span><span class="chapter-nav-title">JavaScript 常用对象与 Web 数据处理</span></a><a href="../lessons/fe-l05-typescript-type-chain.html"><span class="chapter-nav-code">FE-L05</span><span class="chapter-nav-title">TypeScript：从接口数据到组件 Props 的类型链</span></a><a href="../lessons/fe-l06-browser-framework-syntax-bridge.html"><span class="chapter-nav-code">FE-L06</span><span class="chapter-nav-title">浏览器与框架语法桥：DOM、事件、JSX、Vue SFC</span></a></section>
+<section class="chapter-nav-module"><h2>模块二：Web 前端开发</h2><a href="../lessons/fe-w01-start-three-frontend-projects.html"><span class="chapter-nav-code">FE-W01</span><span class="chapter-nav-title">启动三类 FBS 前端工程并建立仓库地图</span></a><a href="../lessons/fe-w02-components-styles-forms-tables.html"><span class="chapter-nav-code">FE-W02</span><span class="chapter-nav-title">组件、样式、表单与表格：按现有组件库做页面</span></a><a href="../lessons/fe-w03-routes-menus-page-entries.html"><span class="chapter-nav-code">FE-W03</span><span class="chapter-nav-title">路由、菜单与页面入口：让页面真正可访问</span></a><a href="../lessons/fe-w04-state-management-redux-vuex-recoil.html"><span class="chapter-nav-code">FE-W04</span><span class="chapter-nav-title">状态管理：Redux/Recoil、Vuex 与宿主状态</span></a><a href="../lessons/fe-w05-api-proxy-errors-contract.html"><span class="chapter-nav-code">FE-W05</span><span class="chapter-nav-title">API、代理、错误与前后端契约</span></a><a href="../lessons/fe-w06-permission-i18n-time-file-pii.html"><span class="chapter-nav-code">FE-W06</span><span class="chapter-nav-title">权限、i18n、时间、文件与 PII：页面功能的准入项</span></a><a href="../lessons/fe-w07-frontend-vertical-slice.html"><span class="chapter-nav-code">FE-W07</span><span class="chapter-nav-title">前端纵向切片：为入库列表增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块三：Web 前端进阶</h2><a href="../lessons/fe-a01-three-app-lifecycles-host-boundaries.html"><span class="chapter-nav-code">FE-A01</span><span class="chapter-nav-title">三种应用生命周期与宿主边界</span></a><a href="../lessons/fe-a02-micro-frontends-remote-components.html"><span class="chapter-nav-code">FE-A02</span><span class="chapter-nav-title">微前端与远端组件：Module Federation、qiankun、MMF</span></a><a href="../lessons/fe-a03-vue-react-coexistence-deps-migration.html"><span class="chapter-nav-code">FE-A03</span><span class="chapter-nav-title">Vue/React 共存、共享依赖与版本迁移</span></a><a href="../lessons/fe-a04-testing-linting-build-artifacts.html"><span class="chapter-nav-code">FE-A04</span><span class="chapter-nav-title">测试、静态检查、构建与产物边界</span></a><a href="../lessons/fe-a05-observability-systematic-debugging.html"><span class="chapter-nav-code">FE-A05</span><span class="chapter-nav-title">前端观测与系统化排错</span></a><a href="../lessons/fe-a06-impact-analysis-dev-handoff.html" class="is-current" aria-current="page"><span class="chapter-nav-code">FE-A06</span><span class="chapter-nav-title">前端改动影响分析与开发交接</span></a></section>
+<section class="chapter-nav-module"><h2>模块四：后端语言及标准库基础</h2><a href="../lessons/be-l01-go-toolchain-modules-versions.html"><span class="chapter-nav-code">BE-L01</span><span class="chapter-nav-title">Go 工具链、模块与版本边界</span></a><a href="../lessons/be-l02-values-pointers-structs-tags.html"><span class="chapter-nav-code">BE-L02</span><span class="chapter-nav-title">值、指针、struct、tag 与数据边界</span></a><a href="../lessons/be-l03-methods-interfaces-embedding-di.html"><span class="chapter-nav-code">BE-L03</span><span class="chapter-nav-title">方法、接口、嵌入与依赖倒置</span></a><a href="../lessons/be-l04-slices-maps-sorting-data-transform.html"><span class="chapter-nav-code">BE-L04</span><span class="chapter-nav-title">slice、map、排序与数据转换</span></a><a href="../lessons/be-l05-errors-defer-panic-resources.html"><span class="chapter-nav-code">BE-L05</span><span class="chapter-nav-title">error、defer、panic/recover 与资源生命周期</span></a><a href="../lessons/be-l06-context-time-json-http-io.html"><span class="chapter-nav-code">BE-L06</span><span class="chapter-nav-title">context、时间、JSON、HTTP、I/O 与文件</span></a><a href="../lessons/be-l07-goroutines-channels-sync-concurrency.html"><span class="chapter-nav-code">BE-L07</span><span class="chapter-nav-title">goroutine、channel、sync 与并发边界</span></a></section>
+<section class="chapter-nav-module"><h2>模块五：Web 后端开发</h2><a href="../lessons/be-w01-start-three-backend-processes.html"><span class="chapter-nav-code">BE-W01</span><span class="chapter-nav-title">启动三类 FBS 后端进程并建立仓库地图</span></a><a href="../lessons/be-w02-chassis-http-route-request-response.html"><span class="chapter-nav-code">BE-W02</span><span class="chapter-nav-title">Chassis HTTP 接口：从路由到请求与响应</span></a><a href="../lessons/be-w03-wire-layered-architecture.html"><span class="chapter-nav-code">BE-W03</span><span class="chapter-nav-title">Wire 与分层：把 handler 接到应用、领域和基础设施</span></a><a href="../lessons/be-w04-mysql-gorm-scorm-repository-transactions.html"><span class="chapter-nav-code">BE-W04</span><span class="chapter-nav-title">MySQL、GORM/Scorm、仓储与事务</span></a><a href="../lessons/be-w05-service-calls-http-grpc-timeouts.html"><span class="chapter-nav-code">BE-W05</span><span class="chapter-nav-title">服务调用、HTTP/gRPC 契约与超时</span></a><a href="../lessons/be-w06-auth-errors-pii-security.html"><span class="chapter-nav-code">BE-W06</span><span class="chapter-nav-title">鉴权、错误码、PII 与接口安全边界</span></a><a href="../lessons/be-w07-backend-vertical-slice.html"><span class="chapter-nav-code">BE-W07</span><span class="chapter-nav-title">后端纵向切片：为入库请求增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块六：Web 后端进阶</h2><a href="../lessons/be-a01-apollo-chassis-config.html"><span class="chapter-nav-code">BE-A01</span><span class="chapter-nav-title">Apollo 与 Chassis 配置：环境差异、热更新和开关</span></a><a href="../lessons/be-a02-redis-codis-cache-consistency.html"><span class="chapter-nav-code">BE-A02</span><span class="chapter-nav-title">Redis/Codis 与缓存一致性</span></a><a href="../lessons/be-a03-saturn-scheduled-async-tasks.html"><span class="chapter-nav-code">BE-A03</span><span class="chapter-nav-title">Saturn 定时任务与异步任务</span></a><a href="../lessons/be-a04-kafka-message-pipeline.html"><span class="chapter-nav-code">BE-A04</span><span class="chapter-nav-title">Kafka 消息链路与事件边界</span></a><a href="../lessons/be-a05-reliability-idempotency-transactions-retry.html"><span class="chapter-nav-code">BE-A05</span><span class="chapter-nav-title">可靠性：幂等、事务、重试、并发与降级组合</span></a><a href="../lessons/be-a06-logging-metrics-diagnostics.html"><span class="chapter-nav-code">BE-A06</span><span class="chapter-nav-title">日志、指标、链路与系统化排错</span></a><a href="../lessons/be-a07-impact-analysis-testing-handoff.html"><span class="chapter-nav-code">BE-A07</span><span class="chapter-nav-title">后端改动影响分析、测试与开发交接</span></a></section></nav></div></aside><div class="lesson-page-main"><header class="topbar"><a class="brand" href="../index.html">FBS 前后端转全栈 Landing</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">FE-A06 · 120–160 分钟</div><h1>前端改动影响分析与开发交接</h1><p class="lesson-summary">能从 FBS 前端需求和 diff 判断影响的仓库、路由、组件、权限、翻译和构建配置——整理一份 reviewer 可复核的跨仓影响摘要、测试结果和开发交接清单。</p><a class="source-link" href="../markdown/fe-a06-impact-analysis-dev-handoff.md">查看 Markdown 版本</a></section><div class="lesson-layout"><main class="lesson-content"><h2 id="这一章解决什么问题">这一章解决什么问题</h2>
+<p>模块二的最后一章（FE-W07）教你完成了一个完整的前端切片。但那是单仓库改动——你只需要考虑 SC Vue 一个仓库中的文件。真实的 FBS 前端需求很少只涉及一个仓库。改了一个 API 类型定义，Portal 和 SC React 都可能受影响；增了一个远端组件的 Props，两个宿主都要验证。</p>
+<p>本章教你从需求出发，系统化地评估改动的影响范围。你会学会建立仓库地图、判断影响面、加载仓库规则、分析实际 diff、选择准出检查，最后整理一份 reviewer 可以直接复核的开发交接材料。这套流程不只适用于大型改动——每个 MR 都可以用它来确保在提交之前已经想清楚了影响面。</p>
+<blockquote><p>本章基于三个前端仓库的 release 分支（2026-07-20）。</p></blockquote>
+<h2 id="影响分析的思维框架">影响分析的思维框架</h2>
+<h3 id="从需求出发的五问">从需求出发的五问</h3>
+<p>接到一个 FBS 前端需求时，先问自己五个问题：</p>
+<div class="table-wrap"><table><thead><tr><th>问题</th><th>目的</th><th>去哪里找答案</th></tr></thead><tbody><tr><td>这个功能在哪个页面上？</td><td>确定涉及哪个仓库</td><td>需求文档 + 浏览器 URL 反查路由</td></tr><tr><td>涉及哪些前端能力？</td><td>确定影响的代码模块</td><td>需求拆解 + 仓库代码搜索</td></tr><tr><td>影响哪些消费者？</td><td>确定跨仓影响</td><td>搜索组件的 import/require 引用</td></tr><tr><td>需要什么前置依赖？</td><td>确定阻塞项</td><td>后端接口、权限码、翻译 key</td></tr><tr><td>怎么验证改对了？</td><td>建立验收标准</td><td>用例定义 + 自动化检查</td></tr></tbody></table></div>
+<h3 id="影响分析的三个层次">影响分析的三个层次</h3>
+<div class="table-wrap"><table><thead><tr><th>层次</th><th>范围</th><th>典型改动</th></tr></thead><tbody><tr><td><strong>本文件</strong></td><td>修改的单个文件</td><td>组件内部状态调整、样式修改</td></tr><tr><td><strong>本仓</strong></td><td>修改文件所在仓库的其他文件</td><td>组件 Props 变化影响的消费者、路由变化影响的导航</td></tr><tr><td><strong>跨仓</strong></td><td>其他前端仓库</td><td>API 类型共享、远端组件 Props、翻译 key 共享</td></tr></tbody></table></div>
+<p>大多数改动只到&quot;本仓&quot;层。当改动涉及以下几类时，才需要做跨仓影响分析：</p>
+<ul><li>修改了 <code>src/api/*.js</code> 中的接口类型定义（Portal 和 SC 仓库可能共享接口定义或接口契约）。</li><li>修改了 SC React 远端组件的 Props（影响 Portal 的消费代码）。</li><li>新增或修改了共享常量（如权限码、枚举值）。</li><li>修改了 i18n key 的命名规则（影响所有仓库的翻译文件）。</li></ul>
+<h2 id="仓库地图与影响定位">仓库地图与影响定位</h2>
+<h3 id="以入库功能为例的影响地图">以入库功能为例的影响地图</h3>
+<p>假设需求是&quot;为入库列表增加一个新的筛选字段&quot;，以 SC Vue 为主仓库的影响分析：</p>
+<div class="table-wrap"><table><thead><tr><th>影响级别</th><th>具体文件/仓库</th><th>改动类型</th></tr></thead><tbody><tr><td>本文件</td><td><code>src/views/inbound/IBT/list/searchForm.vue</code></td><td>新增筛选字段</td></tr><tr><td>本仓</td><td><code>src/api/inbound.js</code></td><td>确认参数传递方式（可能不需要修改）</td></tr><tr><td>本仓</td><td><code>src/views/inbound/IBT/list/list.vue</code></td><td>如果需要新增列展示</td></tr><tr><td>跨仓</td><td>Portal <code>src/views/InboundManagement/</code></td><td>Portal 也有入库列表，可能需要同步改动</td></tr><tr><td>跨仓</td><td>SC React 远端 InboundComponent</td><td>如果远端组件提供了入库列表，需要同步 Props</td></tr><tr><td>依赖</td><td>后端 API</td><td>确认后端是否支持新筛选参数</td></tr><tr><td>依赖</td><td>Transify 平台</td><td>新增翻译 key</td></tr></tbody></table></div>
+<h3 id="三种需求类型的典型影响面">三种需求类型的典型影响面</h3>
+<p><strong>页面级改动</strong>（新增页面、修改页面布局）：</p>
+<ul><li>影响面：路由、菜单、组件、权限、i18n。</li><li>跨仓：通常不影响——每个仓库的页面独立。</li></ul>
+<p><strong>能力级改动</strong>（新增 API 函数、修改共享组件）：</p>
+<ul><li>影响面：API 类型定义、组件 Props、消费者代码。</li><li>跨仓：可能影响——通过搜索引用确定。</li></ul>
+<p><strong>基础设施级改动</strong>（升级依赖、修改构建配置、调整 ESLint 规则）：</p>
+<ul><li>影响面：所有使用该依赖/配置的仓库。</li><li>跨仓：大概率影响——需要逐仓验证。</li></ul>
+<h2 id="加载仓库规则">加载仓库规则</h2>
+<h3 id="每个仓库的编码规则">每个仓库的编码规则</h3>
+<p>在开始改代码之前，先读对应仓库的编码规则。三个仓库都有 <code>.agents/skills/coding/</code> 目录，包含以下主题的规则文件：</p>
+<div class="table-wrap"><table><thead><tr><th>规则文件</th><th>作用</th><th>何时必读</th></tr></thead><tbody><tr><td><code>repo-guide-route-rule</code></td><td>路由注册约定</td><td>新增路由时</td></tr><tr><td><code>repo-guide-api-rule</code></td><td>API 函数写法</td><td>新增 API 函数时</td></tr><tr><td><code>repo-guide-permission-rule</code></td><td>权限控制约定</td><td>新增权限控制时</td></tr><tr><td><code>repo-guide-i18n-rule</code></td><td>翻译 key 命名</td><td>新增文案时</td></tr><tr><td><code>repo-guide-store-rule</code></td><td>Store 使用约定</td><td>新增状态时</td></tr><tr><td><code>repo-guide-component-library-rule</code></td><td>组件库使用约定</td><td>使用 EDS/SSC UI 时</td></tr><tr><td><code>repo-guide-pii-rule</code></td><td>PII 数据处理</td><td>处理敏感数据时</td></tr><tr><td><code>repo-guide-time-rule</code></td><td>时间处理约定</td><td>处理日期时间时</td></tr><tr><td><code>repo-guide-file-operation-rule</code></td><td>文件操作约定</td><td>上传下载时</td></tr></tbody></table></div>
+<p>不要求全部读完——只读与当前改动相关的规则。如果改动涉及多个主题，读对应的规则文件即可。</p>
+<h3 id="仓库编码规则的优先级">仓库编码规则的优先级</h3>
+<p>当规则与直觉冲突时，<strong>规则优先</strong>。例如，你可能习惯用 <code>fetch</code> 发请求，但规则要求使用 <code>app.request.clone()</code>——遵守规则。仓库规则是团队经验的结晶，违反规则通常会导致隐蔽的 bug（如跨域问题、Cookie 缺失、监控断点）。</p>
+<h2 id="分析实际-diff">分析实际 diff</h2>
+<h3 id="生成影响清单">生成影响清单</h3>
+<p>在提交 MR 之前，用 <code>git diff</code> 生成改动文件列表，然后逐文件标注影响级别：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">git diff --stat origin/release</code></pre></figure>
+<p>对于每个修改的文件，回答三个问题：</p>
+<ol><li>这个文件被谁 import/require？（用 <code>rg &quot;import.*from.*文件名&quot;</code> 反查）</li><li>这个文件的修改改变了什么接口/类型/行为？</li><li>这个改变是否向后兼容？</li></ol>
+<h3 id="向后兼容性检查清单">向后兼容性检查清单</h3>
+<div class="table-wrap"><table><thead><tr><th>改变</th><th>向后兼容？</th><th>如果不兼容，需要协调什么</th></tr></thead><tbody><tr><td>新增可选 Props</td><td>是</td><td>无需协调</td></tr><tr><td>新增必填 Props</td><td>否</td><td>所有消费者都需要传入新 Props</td></tr><tr><td>修改 Props 类型</td><td>否</td><td>所有消费者都需要更新类型</td></tr><tr><td>删除 Props</td><td>否</td><td>所有消费者都需要移除该 Props</td></tr><tr><td>修改 API URL</td><td>否</td><td>后端路由同步调整</td></tr><tr><td>修改 API 响应字段名</td><td>否</td><td>所有消费者需要更新字段名</td></tr><tr><td>新增 export</td><td>是</td><td>无需协调</td></tr><tr><td>修改 export 签名</td><td>否</td><td>所有 import 方需要更新</td></tr></tbody></table></div>
+<p>如果不兼容，在 MR 描述中明确标注为 <strong>破坏性变更</strong>，并列出受影响方。</p>
+<h2 id="准出检查与测试矩阵">准出检查与测试矩阵</h2>
+<h3 id="按改动类型选择检查">按改动类型选择检查</h3>
+<div class="table-wrap"><table><thead><tr><th>改动类型</th><th>lint</th><th>type-check</th><th>test</th><th>build</th></tr></thead><tbody><tr><td>组件样式修改</td><td>必须</td><td>—</td><td>—</td><td>—</td></tr><tr><td>新增组件</td><td>必须</td><td>必须</td><td>建议</td><td>—</td></tr><tr><td>修改 API 类型</td><td>必须</td><td>必须</td><td>建议</td><td>—</td></tr><tr><td>新增路由</td><td>必须</td><td>必须</td><td>—</td><td>建议</td></tr><tr><td>新增依赖</td><td>必须</td><td>必须</td><td>—</td><td>必须</td></tr><tr><td>修改构建配置</td><td>必须</td><td>必须</td><td>—</td><td>必须</td></tr></tbody></table></div>
+<h3 id="跨仓验证矩阵">跨仓验证矩阵</h3>
+<p>当改动涉及跨仓影响时：</p>
+<div class="table-wrap"><table><thead><tr><th>验证项</th><th>Portal</th><th>SC Vue</th><th>SC React</th></tr></thead><tbody><tr><td>页面正常渲染</td><td>如果影响</td><td>如果影响</td><td>如果影响</td></tr><tr><td>API 请求正常</td><td>验证</td><td>验证</td><td>验证</td></tr><tr><td>console 无新增 error</td><td>验证</td><td>验证</td><td>验证</td></tr><tr><td>远端组件兼容</td><td>验证</td><td>—</td><td>验证</td></tr><tr><td>i18n 正确</td><td>验证</td><td>验证</td><td>验证</td></tr></tbody></table></div>
+<h2 id="开发交接材料">开发交接材料</h2>
+<h3 id="mr-描述模板">MR 描述模板</h3>
+<p>每次提交 MR 时，按以下结构填写描述：</p>
+<figure class="code-card"><div class="code-toolbar"><span>markdown</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="markdown">## 改动目的
+[一句话说明这个 MR 要解决什么问题]
+
+## 改动范围
+- [仓库名]：[修改的文件和原因]
+- [如果是跨仓]：[列出受影响的仓库和改动类型]
+
+## 影响分析
+- [ ] 本仓影响：[列出影响的本仓文件]
+- [ ] 跨仓影响：[列出影响的其他仓库] 或 [无]
+- [ ] 破坏性变更：[是/否，如果是，列出详情]
+- [ ] 权限变更：[是/否]
+- [ ] i18n 变更：[是/否]
+- [ ] API 契约变更：[是/否]
+
+## 验证结果
+- [ ] lint 通过
+- [ ] type-check 通过
+- [ ] 页面正常渲染
+- [ ] console 无新增 error
+- [ ] [如有跨仓] 受影响仓库验证通过
+
+## 截图/录屏
+[附上功能变更前后的截图对比]</code></pre></figure>
+<h3 id="给-reviewer-的信息">给 reviewer 的信息</h3>
+<p>除了 MR 描述，以下信息也应在 MR 中提供：</p>
+<ol><li><strong>自测记录</strong>：你在本地验证了什么、怎么验证的。</li><li><strong>已知限制</strong>：哪些场景你没法测试（如特定地区、特定权限）。</li><li><strong>阻塞项</strong>：如果 MR 依赖尚未上线的后端接口或 i18n 审批。</li></ol>
+<p>Reviewer 最怕的是&quot;看起来没问题但我不确定你有没有测过&quot;。越详细的自测记录，reviewer 越有信心 approve。</p>
+<h2 id="常见错误">常见错误</h2>
+<h3 id="在-mr-中贴完整-diff-但不说明影响">在 MR 中贴完整 diff 但不说明影响</h3>
+<p>Reviewer 需要的是&quot;这些改动影响了谁&quot;，不是&quot;这些文件改了&quot;。如果 diff 超过 200 行，必须附影响分析。</p>
+<h3 id="跨仓改动只测了主仓库">跨仓改动只测了主仓库</h3>
+<p>改了远端组件后，只在 SC React 中测了，Portal 没测——这是最常见的跨仓遗漏。如果时间不够同时测两个宿主，至少在 MR 中标注&quot;Portal 未验证，请 reviewer 关注&quot;，而不是悄悄合并。</p>
+<h3 id="验收只验了正常路径">验收只验了正常路径</h3>
+<p>少了一个必填字段的校验、网络失败的降级、空列表的展示——这些边界情况才是 bug 的来源。至少验证：正常、空态、错误态、无权限态。</p>
+<h3 id="mr-描述太简略">MR 描述太简略</h3>
+<p><code>&quot;fix: update component&quot;</code> 这样的 MR 描述对 reviewer 毫无帮助。描述应该回答：为什么改、改了什么、影响了谁、怎么验证的。</p>
+<h2 id="实际案例分析-跨仓需求的完整影响评估">实际案例分析：跨仓需求的完整影响评估</h2>
+<h3 id="案例场景">案例场景</h3>
+<p>假设需求为&quot;在入库列表（IR List）中增加一个'优先仓类型'筛选字段和对应列展示，字段名为 <code>priority_whs_type</code>&quot;。这个功能需要在 SC Vue 实现，但 Portal 和 SC React 也有入库列表页面。</p>
+<h3 id="第一步-确定涉及页面和仓库">第一步：确定涉及页面和仓库</h3>
+<p>通过搜索三个仓库中的入库列表页面：</p>
+<ul><li>SC Vue：<code>src/views/inbound/IBT/list/</code></li><li>Portal：<code>src/views/InboundManagement/InboundRequest/List</code></li><li>SC React：远端 <code>InboundComponent</code></li></ul>
+<p>这三个页面都可能需要展示这个新字段，但本次需求可能只要求在 SC Vue 实现。分析时应明确标注&quot;Portal 和 SC React 当前不做改动，但需确认未来如果同步时的影响&quot;。</p>
+<h3 id="第二步-逐仓列出改动清单">第二步：逐仓列出改动清单</h3>
+<p><strong>SC Vue（主仓库）</strong>：</p>
+<div class="table-wrap"><table><thead><tr><th>文件</th><th>改动</th><th>影响级别</th></tr></thead><tbody><tr><td><code>src/views/inbound/IBT/list/searchForm.vue</code></td><td>新增下拉选择组件</td><td>本文件</td></tr><tr><td><code>src/views/inbound/IBT/list/list.vue</code></td><td>新增表格列定义</td><td>本文件</td></tr><tr><td><code>src/api/inbound.js</code></td><td>确认参数传递（可能无需改动）</td><td>本仓</td></tr></tbody></table></div>
+<p><strong>Portal（暂不改动）</strong>：</p>
+<div class="table-wrap"><table><thead><tr><th>文件</th><th>未来如需同步的改动</th></tr></thead><tbody><tr><td><code>src/views/InboundManagement/InboundRequest/List/index.tsx</code></td><td>新增筛选字段和列</td></tr><tr><td><code>src/apis/inbound.ts</code></td><td>新增参数类型</td></tr></tbody></table></div>
+<p><strong>SC React（暂不改动）</strong>：</p>
+<div class="table-wrap"><table><thead><tr><th>文件</th><th>未来如需同步的改动</th></tr></thead><tbody><tr><td><code>projects/fbs-sc-remote-component/src/InboundComponent/</code></td><td>新增 Props 和筛选字段</td></tr></tbody></table></div>
+<h3 id="第三步-评估依赖项">第三步：评估依赖项</h3>
+<div class="table-wrap"><table><thead><tr><th>依赖项</th><th>状态</th><th>应对</th></tr></thead><tbody><tr><td>后端 API 支持 <code>priority_whs_type</code> 参数</td><td>需确认</td><td>与后端对齐 API 文档，确认字段名和值类型</td></tr><tr><td>后端 API 响应包含 <code>priority_whs_type</code> 字段</td><td>需确认</td><td>确认响应结构</td></tr><tr><td>Transify 翻译 key</td><td>需新增</td><td><code>priorityWhsType</code>、选项 label 等</td></tr><tr><td>权限码</td><td>无需新增</td><td>复用现有入库列表查看权限</td></tr></tbody></table></div>
+<h3 id="第四步-准出检查计划">第四步：准出检查计划</h3>
+<div class="table-wrap"><table><thead><tr><th>检查</th><th>SC Vue 验证结果</th></tr></thead><tbody><tr><td>lint</td><td>待验证</td></tr><tr><td>type-check</td><td>待验证</td></tr><tr><td>正常筛选</td><td>待验证</td></tr><tr><td>清除筛选</td><td>待验证</td></tr><tr><td>空结果</td><td>待验证</td></tr><tr><td>console 无 error</td><td>待验证</td></tr><tr><td>Portal 不受影响</td><td>确认（未改动 Portal）</td></tr><tr><td>SC React 不受影响</td><td>确认（未改动 SC React）</td></tr></tbody></table></div>
+<h2 id="团队协作中的开发交接">团队协作中的开发交接</h2>
+<h3 id="何时需要正式交接">何时需要正式交接</h3>
+<p>以下情况建议做正式的开发交接（不只是提交 MR）：</p>
+<ol><li>跨仓库的大型需求——修改影响到两个以上仓库。</li><li>新增了共享组件或修改了共享依赖。</li><li>引入了新的技术方案（如新的状态管理方式、新的构建配置）。</li><li>有破坏性变更——需要通知所有消费者同步更新。</li></ol>
+<h3 id="交接材料清单">交接材料清单</h3>
+<p>一套完整的开发交接材料应包括：</p>
+<ol><li><strong>需求文档链接</strong>：PRD 或 TD 的原始需求。</li><li><strong>架构决策记录</strong>：为什么选择这个技术方案而不是其他方案。</li><li><strong>MR 链接</strong>：所有相关仓库的 MR。</li><li><strong>影响分析报告</strong>：本章第六节的 MR 描述模板。</li><li><strong>自测记录</strong>：验证了什么、怎么验证的、结果如何。</li><li><strong>已知问题</strong>：有哪些场景未验证、有哪些暂时无法解决的问题。</li><li><strong>后续建议</strong>：未来需要关注的技术债、即将废弃的旧代码、计划中的迁移步骤。</li></ol>
+<h3 id="从-完成开发-到-完成交接">从&quot;完成开发&quot;到&quot;完成交接&quot;</h3>
+<p>很多前端开发者认为自己&quot;完成了开发&quot;就是&quot;写完了代码 + 本地跑通了&quot;。但在 FBS 的多仓库环境中，真正的&quot;完成&quot;包括：</p>
+<ol><li>代码写完了。</li><li>本仓验证过了（正常路径 + 边界路径）。</li><li>跨仓影响分析过了。</li><li>MR 描述写清楚了。</li><li>阻塞项标注了。</li><li>Reviewer 能够根据你的描述独立判断是否可以合并。</li></ol>
+<p>缺少最后两步的 MR 会增加 reviewer 的负担——他们需要自己推断影响面、自己猜测验证范围、自己判断遗留风险。这不是&quot;懒得写&quot;，这是把本属于开发者的分析工作转嫁给了 reviewer。</p>
+<h2 id="测试策略与验证矩阵">测试策略与验证矩阵</h2>
+<h3 id="按风险等级分配测试工作量">按风险等级分配测试工作量</h3>
+<div class="table-wrap"><table><thead><tr><th>风险等级</th><th>特征</th><th>测试深度</th></tr></thead><tbody><tr><td>低</td><td>样式微调、文案修改</td><td>目视检查 + lint</td></tr><tr><td>中</td><td>组件逻辑修改、新增 API 调用</td><td>手动测试 + lint + type-check</td></tr><tr><td>高</td><td>跨仓影响、破坏性变更、权限变更</td><td>手动测试 + lint + type-check + 双宿主验证</td></tr><tr><td>极高</td><td>基础设施变更（构建、依赖、路由框架）</td><td>手动测试 + lint + type-check + 三仓全量回归</td></tr></tbody></table></div>
+<h3 id="无法自动化的测试项">无法自动化的测试项</h3>
+<p>以下测试项目前无法自动化（或自动化成本很高），需要手动验证：</p>
+<ul><li>MMF Dev Tools 注入后的页面行为。</li><li>不同权限账号下的页面变化。</li><li>不同语言下的翻译文案正确性。</li><li>不同时区下的时间显示。</li><li>远端组件在 Portal 和 MMF 中的渲染一致性。</li></ul>
+<p>在 MR 描述中明确标注哪些场景未自动化测试——让 reviewer 知道需要重点人工检查什么。</p>
+<h2 id="持续改进-从每次-mr-中积累">持续改进：从每次 MR 中积累</h2>
+<h3 id="建立个人的影响分析模板">建立个人的影响分析模板</h3>
+<p>经过几次跨仓需求后，你会形成自己的影响分析直觉。把常用的检查项整理成模板：</p>
+<figure class="code-card"><div class="code-toolbar"><span>markdown</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="markdown">### 我的影响分析模板
+- [ ] 搜索改动的函数/组件在三个仓库中的引用
+- [ ] 检查 API 类型是否有消费者
+- [ ] 检查 i18n key 是否需要同步
+- [ ] 检查权限码是否需要新增
+- [ ] 确认远端组件的 Props 兼容性
+- [ ] 运行 lint + type-check
+- [ ] 至少验证正常、空态、错误态三种路径</code></pre></figure>
+<h3 id="从-mr-review-的反向反馈学习">从 MR review 的反向反馈学习</h3>
+<p>当 reviewer 指出你漏掉了某项影响时，把它加入你的模板。几次 MR 之后，你的模板会逐渐覆盖所有常见的影响面——这比背任何&quot;最佳实践&quot;都有效。</p>
+<h3 id="影响分析不是一次性的">影响分析不是一次性的</h3>
+<p>随着 FBS 代码库的演进，仓库之间的关系、组件的消费者、共享依赖的版本都可能变化。半年前某个改动的安全范围，今天可能不再安全。关键基础设施变更后，重新审视之前的影响分析假设。</p>
+<h2 id="从模块三结业到独立交付">从模块三结业到独立交付</h2>
+<h3 id="模块三的能力总结">模块三的能力总结</h3>
+<p>学完模块三的 6 章后，你应该获得了以下能力：</p>
+<ol><li><strong>架构理解</strong>：能画出一张从 URL 到页面渲染的三仓加载链路图，标注每一层的关键对象和失败点。</li><li><strong>微前端判断</strong>：能区分 Module Federation、qiankun、MMF 三种机制，知道什么时候用哪种。</li><li><strong>跨框架开发</strong>：能在 React 组件中安全访问宿主 Vuex Store，理解依赖注入的原理和限制。</li><li><strong>质量保障</strong>：能按 diff 范围选择正确的 lint/type-check/test/build 组合。</li><li><strong>系统化排错</strong>：能用四层模型分层定位问题，先排除宿主再排网络最后排应用。</li><li><strong>影响分析</strong>：能从需求出发评估跨仓影响，整理 reviewer 可复核的交接材料。</li></ol>
+<p>这六项能力合在一起，意味着你不再是一个&quot;能在 Vue 中写组件&quot;的前端开发者——你是能独立接手一个 FBS 前端需求、评估影响、完成实现、验证交付的全栈前端工程师。</p>
+<h3 id="从模块三到实际工作的过渡">从模块三到实际工作的过渡</h3>
+<p>模块一到模块三覆盖了从 JavaScript 语法到跨仓架构的完整前端知识链。但知识不等于经验。真正让你从&quot;学会了&quot;到&quot;会做了&quot;的，是在真实仓库中完成 5-10 个实际需求。每做一个需求，回顾本章的影响分析模板，检查自己是否漏掉了影响面。每次 MR 被 reviewer 发现遗漏时，把遗漏项加入你的个人模板。</p>
+<h3 id="模块一至模块三的核心知识链路">模块一至模块三的核心知识链路</h3>
+<figure class="diagram-card"><pre class="mermaid">flowchart TD
+    A[&quot;模块一：语言基础\nJS/TS/Web 标准&quot;] --&gt; B[&quot;模块二：工程实战\n组件/路由/状态/API/权限&quot;]
+    B --&gt; C[&quot;模块三：架构进阶\n生命周期/微前端/跨框架/排错/交接&quot;]
+    C --&gt; D[&quot;独立交付\n接手需求 → 影响分析 → 实现 → 验证 → 交接&quot;]</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<p>这三个模块不是各自独立的课程——它们是一条连贯的学习路径。模块一让你能读懂代码，模块二让你能写对代码，模块三让你能独立交付代码。三者缺一不可。</p>
+<h2 id="从全栈视角看影响分析">从全栈视角看影响分析</h2>
+<h3 id="前后端联动的典型场景">前后端联动的典型场景</h3>
+<p>作为全栈开发者，你需要同时考虑前端和后端的影响面。以下场景需要跨端协调：</p>
+<ol><li><strong>API 契约变更</strong>：后端修改了接口的请求参数或响应字段 → 前端所有消费方需要同步。</li><li><strong>权限模型变更</strong>：后端新增或调整了权限码 → 前端权限检查代码需要更新。</li><li><strong>业务流程变更</strong>：入库流程的某个步骤被移除 → 前端该步骤的页面/组件需要下线。</li></ol>
+<h3 id="前后端交接的沟通要点">前后端交接的沟通要点</h3>
+<p>与后端同事交接时，带上以下信息能让沟通更高效：</p>
+<ol><li>前端目前使用的接口列表（从 <code>src/api/</code> 目录中提取）。</li><li>前端消费的字段清单（从组件中的数据绑定提取）。</li><li>前端期望的响应格式（retcode 约定、分页格式、时间格式）。</li></ol>
+<p>&quot;后端改了接口，前端崩了&quot;通常是沟通问题，不是技术问题。在接口设计阶段就对齐契约，比上线后发现不兼容再修要好得多。</p>
+<h2 id="练习答案与自测">练习答案与自测</h2>
+<h3 id="本章自测题">本章自测题</h3>
+<ol><li>修改了 SC Vue 的 API 函数 <code>getRequestList</code> 的参数类型。影响范围包括哪些？</li><li>远端组件的 Props 新增了一个必填字段。Portal 侧需要做什么？</li><li>一个 MR 的 diff 包含 15 个文件，其中 3 个是构建配置文件的修改。MR 描述中至少应该包含哪些信息？</li><li>跨仓改动的验证至少应该在几个宿主中完成？</li></ol>
+<h3 id="参考答案">参考答案</h3>
+<ol><li>本仓影响：所有调用 <code>getRequestList</code> 的页面需要更新参数。跨仓影响：如果后端接口是同一个，Portal 的对应 API 函数也需要同步。</li><li>Portal 消费该远端组件的代码需要传入新的必填 Props，否则 TypeScript 会报编译错误。</li><li>改动目的、修改的文件和原因、影响分析（本仓/跨仓/破坏性变更）、验证结果（lint/type-check/页面行为）、截图对比。</li><li>Portal 和 MMF 两个宿主都需要验证（如果远端组件被两个宿主消费）。</li></ol>
+<h2 id="回顾与展望">回顾与展望</h2>
+<p>模块三的六章构成了 FBS 前端学习的最高台阶。从理解三种应用的生命周期，到驾驭微前端和跨框架开发，再到系统化排错和规范化交付——你现在具备了独立接手一个完整 FBS 前端需求的能力。下一阶段，你将把视角从前端延伸到后端：Go 语言的语法和标准库、Chassis 框架的 HTTP 开发模型、数据库操作、异步任务和消息系统。前端积累的思维框架——分层排查、影响分析、契约先行——在后端学习中同样适用。区别只是换了语言、换了工具，底层的工程思维一脉相承。</p>
+<p>影响分析不是负担——它是让你在合并之前就发现问题的习惯，而不是在合并之后修 bug 的代价。每一次 MR 都认真做完这五步，你会发现自己踩坑的次数越来越少的。</p>
+<p>总结：影响分析不是让你多写文档——是让你在写完代码之后、提交 MR 之前，停下来想一想：我改的这几行代码，会影响谁？每次 MR 都问自己这个问题，长期下来你会发现自己写的代码越来越安全——不是因为变得畏手畏脚，而是因为你对 FBS 代码库的理解更深入了。 影响分析是习惯，不是负担。</p>
+<h2 id="练习">练习</h2>
+<h3 id="影响分析">影响分析</h3>
+<p>假设需求：为 Portal 的入库列表增加&quot;批量导出 Excel&quot;功能。写出完整的影响分析报告，包括本仓影响、跨仓影响、依赖项和验证计划。</p>
+<h3 id="向后兼容判断">向后兼容判断</h3>
+<p>以下改动哪些是向后兼容的？</p>
+<p>a) 给 API 函数的参数类型新增一个可选字段。 b) 将组件的 Props <code>size: string</code> 改为 <code>size: 'small' | 'medium' | 'large'</code>。 c) 删除了一个已 export 的工具函数。 d) 修改了 request wrapper 的 <code>baseURL</code>。</p>
+<h3 id="填写-mr-描述">填写 MR 描述</h3>
+<p>为你最近一次 FBS 前端改动（或假设一次改动）填写完整的 MR 描述模板。</p>
+<h3 id="综合练习参考答案">综合练习参考答案</h3>
+<p><strong>8.2</strong>：a) 兼容（新增可选字段不影响现有调用）。b) 不兼容（限制了允许的值范围，现有传入超出范围的值会报错）。c) 不兼容（import 方会报模块找不到）。d) 不兼容（所有 API 请求的 URL 都会变化）。</p>
+<h2 id="自检">自检</h2>
+<ol><li>影响分析的三个层次（本仓、跨仓、破坏性变更）分别覆盖什么范围？为什么不能只分析本仓？</li></ol>
+<ol><li>MR 描述中必须包含哪些信息？为什么 reviewer 需要这些信息而不只是看 diff？</li></ol>
+<ol><li>准出检查的选择依据是什么？一个只改了样式的改动和一个新增了路由的改动，各自的检查策略有什么不同？</li></ol>
+<ol><li>跨仓改动的验收矩阵应该覆盖哪些仓库和哪些宿主？为什么 Portal 和 MMF 两个宿主都需要验证？</li></ol>
+<ol><li>从&quot;完成开发&quot;到&quot;完成交接&quot;的差异是什么？交接材料中最容易被遗漏的是哪类信息？</li></ol>
+<h2 id="参考文献">参考文献</h2>
+<ul><li>模块二 FE-W07（前端纵向切片）</li><li>Portal <code>.agents/skills/coding/</code></li><li>SC Vue <code>.agents/skills/coding/</code></li><li>SC React <code>.agents/skills/coding/</code></li></ul><nav class="lesson-nav"><a href="../lessons/fe-a05-observability-systematic-debugging.html">← FE-A05<br><strong>前端观测与系统化排错</strong></a><a href="../lessons/be-l01-go-toolchain-modules-versions.html">BE-L01 →<br><strong>Go 工具链、模块与版本边界</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#这一章解决什么问题"><span class="toc-num">1</span>这一章解决什么问题</a><a class="" href="#影响分析的思维框架"><span class="toc-num">2</span>影响分析的思维框架</a><a class="sub" href="#从需求出发的五问"><span class="toc-num">2.1</span>从需求出发的五问</a><a class="sub" href="#影响分析的三个层次"><span class="toc-num">2.2</span>影响分析的三个层次</a><a class="" href="#仓库地图与影响定位"><span class="toc-num">3</span>仓库地图与影响定位</a><a class="sub" href="#以入库功能为例的影响地图"><span class="toc-num">3.1</span>以入库功能为例的影响地图</a><a class="sub" href="#三种需求类型的典型影响面"><span class="toc-num">3.2</span>三种需求类型的典型影响面</a><a class="" href="#加载仓库规则"><span class="toc-num">4</span>加载仓库规则</a><a class="sub" href="#每个仓库的编码规则"><span class="toc-num">4.1</span>每个仓库的编码规则</a><a class="sub" href="#仓库编码规则的优先级"><span class="toc-num">4.2</span>仓库编码规则的优先级</a><a class="" href="#分析实际-diff"><span class="toc-num">5</span>分析实际 diff</a><a class="sub" href="#生成影响清单"><span class="toc-num">5.1</span>生成影响清单</a><a class="sub" href="#向后兼容性检查清单"><span class="toc-num">5.2</span>向后兼容性检查清单</a><a class="" href="#准出检查与测试矩阵"><span class="toc-num">6</span>准出检查与测试矩阵</a><a class="sub" href="#按改动类型选择检查"><span class="toc-num">6.1</span>按改动类型选择检查</a><a class="sub" href="#跨仓验证矩阵"><span class="toc-num">6.2</span>跨仓验证矩阵</a><a class="" href="#开发交接材料"><span class="toc-num">7</span>开发交接材料</a><a class="sub" href="#mr-描述模板"><span class="toc-num">7.1</span>MR 描述模板</a><a class="sub" href="#给-reviewer-的信息"><span class="toc-num">7.2</span>给 reviewer 的信息</a><a class="" href="#常见错误"><span class="toc-num">8</span>常见错误</a><a class="sub" href="#在-mr-中贴完整-diff-但不说明影响"><span class="toc-num">8.1</span>在 MR 中贴完整 diff 但不说明影响</a><a class="sub" href="#跨仓改动只测了主仓库"><span class="toc-num">8.2</span>跨仓改动只测了主仓库</a><a class="sub" href="#验收只验了正常路径"><span class="toc-num">8.3</span>验收只验了正常路径</a><a class="sub" href="#mr-描述太简略"><span class="toc-num">8.4</span>MR 描述太简略</a><a class="" href="#实际案例分析-跨仓需求的完整影响评估"><span class="toc-num">9</span>实际案例分析：跨仓需求的完整影响评估</a><a class="sub" href="#案例场景"><span class="toc-num">9.1</span>案例场景</a><a class="sub" href="#第一步-确定涉及页面和仓库"><span class="toc-num">9.2</span>第一步：确定涉及页面和仓库</a><a class="sub" href="#第二步-逐仓列出改动清单"><span class="toc-num">9.3</span>第二步：逐仓列出改动清单</a><a class="sub" href="#第三步-评估依赖项"><span class="toc-num">9.4</span>第三步：评估依赖项</a><a class="sub" href="#第四步-准出检查计划"><span class="toc-num">9.5</span>第四步：准出检查计划</a><a class="" href="#团队协作中的开发交接"><span class="toc-num">10</span>团队协作中的开发交接</a><a class="sub" href="#何时需要正式交接"><span class="toc-num">10.1</span>何时需要正式交接</a><a class="sub" href="#交接材料清单"><span class="toc-num">10.2</span>交接材料清单</a><a class="sub" href="#从-完成开发-到-完成交接"><span class="toc-num">10.3</span>从&quot;完成开发&quot;到&quot;完成交接&quot;</a><a class="" href="#测试策略与验证矩阵"><span class="toc-num">11</span>测试策略与验证矩阵</a><a class="sub" href="#按风险等级分配测试工作量"><span class="toc-num">11.1</span>按风险等级分配测试工作量</a><a class="sub" href="#无法自动化的测试项"><span class="toc-num">11.2</span>无法自动化的测试项</a><a class="" href="#持续改进-从每次-mr-中积累"><span class="toc-num">12</span>持续改进：从每次 MR 中积累</a><a class="sub" href="#建立个人的影响分析模板"><span class="toc-num">12.1</span>建立个人的影响分析模板</a><a class="sub" href="#从-mr-review-的反向反馈学习"><span class="toc-num">12.2</span>从 MR review 的反向反馈学习</a><a class="sub" href="#影响分析不是一次性的"><span class="toc-num">12.3</span>影响分析不是一次性的</a><a class="" href="#从模块三结业到独立交付"><span class="toc-num">13</span>从模块三结业到独立交付</a><a class="sub" href="#模块三的能力总结"><span class="toc-num">13.1</span>模块三的能力总结</a><a class="sub" href="#从模块三到实际工作的过渡"><span class="toc-num">13.2</span>从模块三到实际工作的过渡</a><a class="sub" href="#模块一至模块三的核心知识链路"><span class="toc-num">13.3</span>模块一至模块三的核心知识链路</a><a class="" href="#从全栈视角看影响分析"><span class="toc-num">14</span>从全栈视角看影响分析</a><a class="sub" href="#前后端联动的典型场景"><span class="toc-num">14.1</span>前后端联动的典型场景</a><a class="sub" href="#前后端交接的沟通要点"><span class="toc-num">14.2</span>前后端交接的沟通要点</a><a class="" href="#练习答案与自测"><span class="toc-num">15</span>练习答案与自测</a><a class="sub" href="#本章自测题"><span class="toc-num">15.1</span>本章自测题</a><a class="sub" href="#参考答案"><span class="toc-num">15.2</span>参考答案</a><a class="" href="#回顾与展望"><span class="toc-num">16</span>回顾与展望</a><a class="" href="#练习"><span class="toc-num">17</span>练习</a><a class="sub" href="#影响分析"><span class="toc-num">17.1</span>影响分析</a><a class="sub" href="#向后兼容判断"><span class="toc-num">17.2</span>向后兼容判断</a><a class="sub" href="#填写-mr-描述"><span class="toc-num">17.3</span>填写 MR 描述</a><a class="sub" href="#综合练习参考答案"><span class="toc-num">17.4</span>综合练习参考答案</a><a class="" href="#自检"><span class="toc-num">18</span>自检</a><a class="" href="#参考文献"><span class="toc-num">19</span>参考文献</a></aside></div></div></div><footer class="site-footer">FBS 前后端转全栈 Landing · 已发布</footer></div></body></html>

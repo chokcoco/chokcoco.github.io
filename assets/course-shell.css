@@ -17,10 +17,12 @@ a:focus-visible, button:focus-visible, .term:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
 }
-
+.lesson-page-main {
+  width: 1400px;
+}
 .site-shell, .course-shell {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1680px;
   margin: 0 auto;
   padding: 20px 40px 84px;
 }
@@ -508,4 +510,93 @@ h1, h2, h3, h4,
 }
 @media (max-width: 680px) {
   .theme-toggle { font-size: 10px; padding: 4px 10px; }
+}
+
+/* ---- Chapter navigation sidebar ---- */
+.lesson-page-grid {
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  gap: 0;
+  min-width: 0;
+}
+.chapter-nav {
+  position: fixed;
+  z-index: 30;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 270px;
+  overflow-y: auto;
+  padding: 18px 14px;
+  background: color-mix(in srgb, var(--page) 92%, var(--surface-raised));
+  backdrop-filter: blur(16px);
+  transition: width .2s ease, padding .2s ease;
+}
+.course-shell:has(.chapter-nav) { padding-left: 310px; }
+.chapter-nav-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 0 16px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted-strong);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+}
+.chapter-nav-toggle:hover { color: var(--accent); }
+.chapter-nav.is-collapsed { width: 52px; padding-inline: 12px; overflow: hidden; }
+.chapter-nav.is-collapsed .chapter-nav-content { display: none; }
+.chapter-nav.is-collapsed .chapter-nav-toggle { justify-content: center; padding-top: 8px; border-bottom: 0; }
+.chapter-nav.is-collapsed .chapter-nav-toggle-label { display: none; }
+.chapter-nav.is-collapsed .chapter-nav-toggle span[aria-hidden="true"] { transform: rotate(180deg); }
+.course-shell:has(.chapter-nav.is-collapsed) { padding-left: 92px; }
+.chapter-nav-content { padding-top: 2px; }
+.chapter-nav-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.chapter-nav-heading strong { color: var(--ink); font-size: 15px; font-weight: 500; }
+.chapter-nav-heading span { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.chapter-nav-list { display: grid; gap: 2px; }
+.chapter-nav-module { margin: 0 0 16px; }
+.chapter-nav-module h2 { margin: 0 0 5px; color: var(--muted-strong); font-size: 12px; font-weight: 500; line-height: 1.4; font-family: var(--font-sans); }
+.chapter-nav-list a {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 0;
+  color: var(--muted);
+  text-decoration: none;
+}
+.chapter-nav-list a:hover { color: var(--ink); background: var(--surface-raised); }
+.chapter-nav-list a.is-current { color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--surface-raised)); }
+.chapter-nav-list a.is-current .chapter-nav-code { color: var(--accent); }
+.chapter-nav-code { color: var(--accent); font-size: 12px; letter-spacing: .03em; }
+.chapter-nav-title { font-size: 13px; line-height: 1.45; }
+
+@media (max-width: 1240px) {
+  .course-shell:has(.chapter-nav), .course-shell:has(.chapter-nav.is-collapsed) { padding-left: 84px; }
+  .chapter-nav { width: 52px; padding-inline: 12px; overflow: hidden; }
+  .chapter-nav .chapter-nav-content { display: none; }
+  .chapter-nav .chapter-nav-toggle { justify-content: center; padding-top: 8px; border-bottom: 0; }
+  .chapter-nav .chapter-nav-toggle-label { display: none; }
+  .chapter-nav .chapter-nav-toggle span[aria-hidden="true"] { transform: rotate(180deg); }
+  .chapter-nav.is-expanded { width: min(300px, calc(100vw - 24px)); padding-inline: 14px; overflow-y: auto; }
+  .chapter-nav.is-expanded .chapter-nav-content { display: block; }
+  .chapter-nav.is-expanded .chapter-nav-toggle { justify-content: flex-start; padding-top: 0; border-bottom: 1px solid var(--line); }
+  .chapter-nav.is-expanded .chapter-nav-toggle-label { display: inline; }
+  .chapter-nav.is-expanded .chapter-nav-toggle span[aria-hidden="true"] { transform: none; }
+}
+
+@media print {
+  .chapter-nav { display: none; }
 }

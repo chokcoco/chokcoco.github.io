@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="能沿 `context.Context` 传递取消/超时信息，使用 Go 标准库处理 JSON 序列化、HTTP 客户端调用、时间处理和文件操作——为一个调用链补齐 context 与超时，并用测试验证。"><title>context、时间、JSON、HTTP、I/O 与文件 | FBS 前后端转全栈 Landing</title><script src="../assets/theme-switcher.js"></script><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><div class="lesson-page-grid"><aside class="chapter-nav" aria-label="课程章节导航"><button class="chapter-nav-toggle" type="button" aria-expanded="true" aria-controls="chapter-nav-content"><span aria-hidden="true">◀</span><span class="chapter-nav-toggle-label">收起</span></button><div class="chapter-nav-content" id="chapter-nav-content"><div class="chapter-nav-heading"><strong>课程章节</strong><span>第 25 / 40 章</span></div><nav class="chapter-nav-list"><section class="chapter-nav-module"><h2>模块一：前端语言及标准库基础</h2><a href="../lessons/fe-l01-js-data-types-equality.html"><span class="chapter-nav-code">FE-L01</span><span class="chapter-nav-title">JavaScript 数据、类型与相等性：先读懂仓库判断分支</span></a><a href="../lessons/fe-l02-functions-scope-closure-modules.html"><span class="chapter-nav-code">FE-L02</span><span class="chapter-nav-title">函数、作用域、闭包与模块：跟上组件外的调用链</span></a><a href="../lessons/fe-l03-promise-async-eventloop.html"><span class="chapter-nav-code">FE-L03</span><span class="chapter-nav-title">Promise、async/await 与事件循环：读懂请求和页面副作用</span></a><a href="../lessons/fe-l04-js-objects-web-data.html"><span class="chapter-nav-code">FE-L04</span><span class="chapter-nav-title">JavaScript 常用对象与 Web 数据处理</span></a><a href="../lessons/fe-l05-typescript-type-chain.html"><span class="chapter-nav-code">FE-L05</span><span class="chapter-nav-title">TypeScript：从接口数据到组件 Props 的类型链</span></a><a href="../lessons/fe-l06-browser-framework-syntax-bridge.html"><span class="chapter-nav-code">FE-L06</span><span class="chapter-nav-title">浏览器与框架语法桥：DOM、事件、JSX、Vue SFC</span></a></section>
+<section class="chapter-nav-module"><h2>模块二：Web 前端开发</h2><a href="../lessons/fe-w01-start-three-frontend-projects.html"><span class="chapter-nav-code">FE-W01</span><span class="chapter-nav-title">启动三类 FBS 前端工程并建立仓库地图</span></a><a href="../lessons/fe-w02-components-styles-forms-tables.html"><span class="chapter-nav-code">FE-W02</span><span class="chapter-nav-title">组件、样式、表单与表格：按现有组件库做页面</span></a><a href="../lessons/fe-w03-routes-menus-page-entries.html"><span class="chapter-nav-code">FE-W03</span><span class="chapter-nav-title">路由、菜单与页面入口：让页面真正可访问</span></a><a href="../lessons/fe-w04-state-management-redux-vuex-recoil.html"><span class="chapter-nav-code">FE-W04</span><span class="chapter-nav-title">状态管理：Redux/Recoil、Vuex 与宿主状态</span></a><a href="../lessons/fe-w05-api-proxy-errors-contract.html"><span class="chapter-nav-code">FE-W05</span><span class="chapter-nav-title">API、代理、错误与前后端契约</span></a><a href="../lessons/fe-w06-permission-i18n-time-file-pii.html"><span class="chapter-nav-code">FE-W06</span><span class="chapter-nav-title">权限、i18n、时间、文件与 PII：页面功能的准入项</span></a><a href="../lessons/fe-w07-frontend-vertical-slice.html"><span class="chapter-nav-code">FE-W07</span><span class="chapter-nav-title">前端纵向切片：为入库列表增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块三：Web 前端进阶</h2><a href="../lessons/fe-a01-three-app-lifecycles-host-boundaries.html"><span class="chapter-nav-code">FE-A01</span><span class="chapter-nav-title">三种应用生命周期与宿主边界</span></a><a href="../lessons/fe-a02-micro-frontends-remote-components.html"><span class="chapter-nav-code">FE-A02</span><span class="chapter-nav-title">微前端与远端组件：Module Federation、qiankun、MMF</span></a><a href="../lessons/fe-a03-vue-react-coexistence-deps-migration.html"><span class="chapter-nav-code">FE-A03</span><span class="chapter-nav-title">Vue/React 共存、共享依赖与版本迁移</span></a><a href="../lessons/fe-a04-testing-linting-build-artifacts.html"><span class="chapter-nav-code">FE-A04</span><span class="chapter-nav-title">测试、静态检查、构建与产物边界</span></a><a href="../lessons/fe-a05-observability-systematic-debugging.html"><span class="chapter-nav-code">FE-A05</span><span class="chapter-nav-title">前端观测与系统化排错</span></a><a href="../lessons/fe-a06-impact-analysis-dev-handoff.html"><span class="chapter-nav-code">FE-A06</span><span class="chapter-nav-title">前端改动影响分析与开发交接</span></a></section>
+<section class="chapter-nav-module"><h2>模块四：后端语言及标准库基础</h2><a href="../lessons/be-l01-go-toolchain-modules-versions.html"><span class="chapter-nav-code">BE-L01</span><span class="chapter-nav-title">Go 工具链、模块与版本边界</span></a><a href="../lessons/be-l02-values-pointers-structs-tags.html"><span class="chapter-nav-code">BE-L02</span><span class="chapter-nav-title">值、指针、struct、tag 与数据边界</span></a><a href="../lessons/be-l03-methods-interfaces-embedding-di.html"><span class="chapter-nav-code">BE-L03</span><span class="chapter-nav-title">方法、接口、嵌入与依赖倒置</span></a><a href="../lessons/be-l04-slices-maps-sorting-data-transform.html"><span class="chapter-nav-code">BE-L04</span><span class="chapter-nav-title">slice、map、排序与数据转换</span></a><a href="../lessons/be-l05-errors-defer-panic-resources.html"><span class="chapter-nav-code">BE-L05</span><span class="chapter-nav-title">error、defer、panic/recover 与资源生命周期</span></a><a href="../lessons/be-l06-context-time-json-http-io.html" class="is-current" aria-current="page"><span class="chapter-nav-code">BE-L06</span><span class="chapter-nav-title">context、时间、JSON、HTTP、I/O 与文件</span></a><a href="../lessons/be-l07-goroutines-channels-sync-concurrency.html"><span class="chapter-nav-code">BE-L07</span><span class="chapter-nav-title">goroutine、channel、sync 与并发边界</span></a></section>
+<section class="chapter-nav-module"><h2>模块五：Web 后端开发</h2><a href="../lessons/be-w01-start-three-backend-processes.html"><span class="chapter-nav-code">BE-W01</span><span class="chapter-nav-title">启动三类 FBS 后端进程并建立仓库地图</span></a><a href="../lessons/be-w02-chassis-http-route-request-response.html"><span class="chapter-nav-code">BE-W02</span><span class="chapter-nav-title">Chassis HTTP 接口：从路由到请求与响应</span></a><a href="../lessons/be-w03-wire-layered-architecture.html"><span class="chapter-nav-code">BE-W03</span><span class="chapter-nav-title">Wire 与分层：把 handler 接到应用、领域和基础设施</span></a><a href="../lessons/be-w04-mysql-gorm-scorm-repository-transactions.html"><span class="chapter-nav-code">BE-W04</span><span class="chapter-nav-title">MySQL、GORM/Scorm、仓储与事务</span></a><a href="../lessons/be-w05-service-calls-http-grpc-timeouts.html"><span class="chapter-nav-code">BE-W05</span><span class="chapter-nav-title">服务调用、HTTP/gRPC 契约与超时</span></a><a href="../lessons/be-w06-auth-errors-pii-security.html"><span class="chapter-nav-code">BE-W06</span><span class="chapter-nav-title">鉴权、错误码、PII 与接口安全边界</span></a><a href="../lessons/be-w07-backend-vertical-slice.html"><span class="chapter-nav-code">BE-W07</span><span class="chapter-nav-title">后端纵向切片：为入库请求增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块六：Web 后端进阶</h2><a href="../lessons/be-a01-apollo-chassis-config.html"><span class="chapter-nav-code">BE-A01</span><span class="chapter-nav-title">Apollo 与 Chassis 配置：环境差异、热更新和开关</span></a><a href="../lessons/be-a02-redis-codis-cache-consistency.html"><span class="chapter-nav-code">BE-A02</span><span class="chapter-nav-title">Redis/Codis 与缓存一致性</span></a><a href="../lessons/be-a03-saturn-scheduled-async-tasks.html"><span class="chapter-nav-code">BE-A03</span><span class="chapter-nav-title">Saturn 定时任务与异步任务</span></a><a href="../lessons/be-a04-kafka-message-pipeline.html"><span class="chapter-nav-code">BE-A04</span><span class="chapter-nav-title">Kafka 消息链路与事件边界</span></a><a href="../lessons/be-a05-reliability-idempotency-transactions-retry.html"><span class="chapter-nav-code">BE-A05</span><span class="chapter-nav-title">可靠性：幂等、事务、重试、并发与降级组合</span></a><a href="../lessons/be-a06-logging-metrics-diagnostics.html"><span class="chapter-nav-code">BE-A06</span><span class="chapter-nav-title">日志、指标、链路与系统化排错</span></a><a href="../lessons/be-a07-impact-analysis-testing-handoff.html"><span class="chapter-nav-code">BE-A07</span><span class="chapter-nav-title">后端改动影响分析、测试与开发交接</span></a></section></nav></div></aside><div class="lesson-page-main"><header class="topbar"><a class="brand" href="../index.html">FBS 前后端转全栈 Landing</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">BE-L06 · 130–170 分钟</div><h1>context、时间、JSON、HTTP、I/O 与文件</h1><p class="lesson-summary">能沿 `context.Context` 传递取消/超时信息，使用 Go 标准库处理 JSON 序列化、HTTP 客户端调用、时间处理和文件操作——为一个调用链补齐 context 与超时，并用测试验证。</p><a class="source-link" href="../markdown/be-l06-context-time-json-http-io.md">查看 Markdown 版本</a></section><div class="lesson-layout"><main class="lesson-content"><h2 id="这一章解决什么问题">这一章解决什么问题</h2>
+<p>前端同学对 context、JSON、HTTP 和时间处理都有自己的直觉——<code>fetch()</code> + <code>await</code>、<code>JSON.parse()</code>/<code>JSON.stringify()</code>、<code>new Date()</code>、<code>URLSearchParams</code>。Go 的标准库提供了类似的能力，但方式和前端有显著差异：Go 的 HTTP 调用是同步阻塞而非 Promise-based，JSON 处理通过 struct tag 而非运行时检查，时间处理区分秒/毫秒/纳秒且强类型。</p>
+<p>本章以 FBS 后端代码中最常见的操作——handler 接收请求、JSON 解析请求体、调用下游服务、处理时间、返回 JSON 响应——为主线，逐一解释 Go 标准库中的对应工具。学完后，你能独立为一个 handler 补齐完整的 context 传递和超时控制。</p>
+<blockquote><p>本章基于 <code>sbs-fbs-server</code> 的 release 分支（2026-07-20）。</p></blockquote>
+<h2 id="context-请求的生命周期线">context：请求的生命周期线</h2>
+<h3 id="context-做什么">context 做什么</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">func Handler(ctx context.Context, req *Request) (*Response, error) {
+	// ctx 携带：截止时间、取消信号、请求级键值对
+	resp, err := callDownstream(ctx, req)  // 传递 ctx 给下游
+	// 如果 ctx 被取消（超时或调用方取消），callDownstream 应尽快返回
+}</code></pre></figure>
+<p>Go 的 <code>context.Context</code> 是一根贯穿整个请求生命周期的线——它从 HTTP handler 传入，经过 service、repository、HTTP client，一路传递到最深层的调用。任何一层都可以通过 <code>ctx.Done()</code> 检测请求是否已被取消，通过 <code>ctx.Err()</code> 获知取消原因。</p>
+<p><strong>前端类比</strong>：Go 的 context ≈ 前端的 AbortController。<code>ctx.Done()</code> ≈ <code>signal.aborted</code>，<code>ctx.Err()</code> ≈ <code>signal.reason</code>。<code>context.WithTimeout(ctx, 5*time.Second)</code> ≈ <code>AbortSignal.timeout(5000)</code>。区别是 Go 的 context 是显式传递的——每个函数签名都有 <code>ctx context.Context</code>，而前端的 AbortController 通常作为独立对象传递。</p>
+<h3 id="context-的几种创建方式">context 的几种创建方式</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">ctx := context.Background()                      // 根 context——没有超时、没有取消
+ctx, cancel := context.WithTimeout(ctx, 5*time.Second) // 5 秒超时
+defer cancel()                                         // 防止泄漏
+ctx, cancel := context.WithCancel(ctx)                  // 手动取消
+ctx = context.WithValue(ctx, key, value)                // 携带键值对（慎用）</code></pre></figure>
+<p>FBS 的 HTTP handler 从 Chassis 框架接收一个已设置超时的 context——通常 10-30 秒。handler 不需要自己创建 context，只需要把它传给下游。</p>
+<h3 id="context-取消的传播">context 取消的传播</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">func callDownstream(ctx context.Context) error {
+	req, _ := http.NewRequestWithContext(ctx, &quot;GET&quot;, &quot;http://downstream/api&quot;, nil)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err  // 如果 ctx 已取消，err 会包含 context.Canceled
+	}
+	defer resp.Body.Close()
+	// ...
+}</code></pre></figure>
+<p>如果上游的 context 超时或被取消，<code>http.DefaultClient.Do(req)</code> 会立即返回错误——不会继续等待下游响应。这个机制确保一个超时的上游请求不会拖累下游资源。</p>
+<p><strong>前端类比</strong>：Go 的 <code>http.NewRequestWithContext(ctx, ...)</code> ≈ <code>fetch(url, { signal })</code>。Go 的 context 超时 = 前端的 <code>AbortSignal.timeout()</code>。两个生态都在做同样的事——&quot;上游不想要结果了，下游就别做了&quot;。</p>
+<h2 id="json-处理">JSON 处理</h2>
+<h3 id="序列化与反序列化">序列化与反序列化</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">import &quot;encoding/json&quot;
+
+// 序列化
+resp := Response{IrID: 1001, Status: &quot;PENDING&quot;}
+data, err := json.Marshal(resp)    // []byte
+str := string(data)                 // {&quot;ir_id&quot;:1001,&quot;status&quot;:&quot;PENDING&quot;}
+
+// 反序列化
+var req CreateRequest
+err := json.Unmarshal(body, &amp;req)   // 传入指针——Unmarshal 需要修改 req</code></pre></figure>
+<p><code>json.Marshal</code> 通过 struct tag 决定字段名。<code>json.Unmarshal</code> 将 JSON 填充到 struct 中——注意传入的是指针。</p>
+<p><strong>前端类比</strong>：Go 的 <code>json.Marshal</code> ≈ <code>JSON.stringify()</code>，<code>json.Unmarshal</code> ≈ <code>JSON.parse()</code>。区别是 Go 的序列化完全由 struct 定义驱动——tag 决定 JSON 字段名，类型决定值的格式。JavaScript 中你可以随意增删字段，Go 中 struct 定义了什么就是什么。</p>
+<h3 id="空值与-omitempty">空值与 omitempty</h3>
+<p>在 BE-L02 中已经讲过，回顾一下：<code>json:&quot;field,omitempty&quot;</code> 在字段为零值时跳过序列化。<code>*string</code> 的零值是 nil，序列化时完全不出现在 JSON 中；<code>string</code> 的零值是 <code>&quot;&quot;</code>，<code>omitempty</code> 时也被跳过。FBS 的 DTO 中常见 <code>*string json:&quot;xxx,omitempty&quot;</code> 的组合来表达&quot;可选字段&quot;。</p>
+<h3 id="时间格式">时间格式</h3>
+<p>Go 的 <code>time.Time</code> 默认序列化为 RFC 3339 格式（<code>2006-01-02T15:04:05Z07:00</code>）。如果需要自定义格式：</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">type Item struct {
+	CreatedAt time.Time `json:&quot;created_at&quot;`
+}
+
+// 自定义格式需要实现 json.Marshaler 接口
+type CustomTime time.Time
+func (ct CustomTime) MarshalJSON() ([]byte, error) {
+	return json.Marshal(time.Time(ct).Format(&quot;2006-01-02 15:04:05&quot;))
+}</code></pre></figure>
+<p>FBS 的后端通常使用时间戳（秒或毫秒）进行 API 通信——<code>time.Unix(seconds, 0)</code> 或 <code>time.UnixMilli(millis)</code>。前端接收后负责格式化为用户时区。</p>
+<h2 id="http-客户端">HTTP 客户端</h2>
+<h3 id="发送-get-和-post-请求">发送 GET 和 POST 请求</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">// GET
+resp, err := http.Get(&quot;http://example.com/api/data&quot;)
+if err != nil { return err }
+defer resp.Body.Close()
+body, _ := io.ReadAll(resp.Body)
+
+// POST JSON
+data, _ := json.Marshal(reqBody)
+resp, err := http.Post(&quot;http://example.com/api/create&quot;, &quot;application/json&quot;, bytes.NewReader(data))</code></pre></figure>
+<p><strong>前端类比</strong>：Go 的 <code>http.Get(url)</code> ≈ <code>fetch(url)</code>。<code>http.Post(url, &quot;application/json&quot;, body)</code> ≈ <code>fetch(url, { method: 'POST', body: JSON.stringify(data) })</code>。区别是 Go 的 HTTP 调用是同步阻塞的——在 goroutine 中调用不会阻塞其他请求，但当前 goroutine 会等待响应。</p>
+<h3 id="带-context-的请求">带 context 的请求</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">req, _ := http.NewRequestWithContext(ctx, &quot;POST&quot;, url, body)
+req.Header.Set(&quot;Content-Type&quot;, &quot;application/json&quot;)
+req.Header.Set(&quot;Authorization&quot;, &quot;Bearer &quot;+token)
+resp, err := client.Do(req)</code></pre></figure>
+<p>FBS 调用下游服务时使用这种方式——通过 context 传递超时和取消信号，通过 Header 设置鉴权和内容类型。</p>
+<h3 id="超时设置">超时设置</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">client := &amp;http.Client{Timeout: 10 * time.Second}</code></pre></figure>
+<p>FBS 中对下游服务的 HTTP 调用通常设置较短的超时（5-10 秒），加上 context 的超时作为双重保障。</p>
+<h2 id="时间处理">时间处理</h2>
+<h3 id="时间的基本操作">时间的基本操作</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">now := time.Now()                         // 当前本地时间
+nowUTC := time.Now().UTC()                // UTC 时间
+t := time.Unix(1720000000, 0)            // 从 Unix 秒时间戳
+t2 := time.UnixMilli(1720000000000)       // 从 Unix 毫秒时间戳
+t.Format(&quot;2006-01-02 15:04:05&quot;)          // 格式化——使用 Go 独特的参考时间
+
+t.Add(24 * time.Hour)                     // 加一天
+t.Sub(other)                              // 时间差 → time.Duration
+t.Before(other)                           // 比较</code></pre></figure>
+<p><strong>前端类比</strong>：Go 的 <code>time.Now()</code> ≈ <code>new Date()</code>，<code>time.Unix(sec, 0)</code> ≈ <code>new Date(sec * 1000)</code>，<code>t.Format(...)</code> ≈ <code>date.toLocaleString()</code>。Go 的时间格式化使用固定的参考时间 <code>2006-01-02 15:04:05</code>——不是 <code>YYYY-MM-DD</code> 这样的占位符。</p>
+<h3 id="fbs-的时间约定">FBS 的时间约定</h3>
+<p>FBS 后端统一使用 UTC 存储和处理时间。API 响应中的时间通常是秒级 Unix 时间戳（int64）或 ISO 8601 字符串。前端负责按用户时区格式化显示。后端不做时区转换——这是前端的事。</p>
+<h3 id="context-超时">context 超时</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+defer cancel()</code></pre></figure>
+<p>这个模式在 FBS 的 handler 中反复出现——给下游调用设置明确的超时。如果 5 秒内没有响应，context 自动取消，下游调用返回错误。</p>
+<h2 id="文件-i-o">文件 I/O</h2>
+<h3 id="读写文件">读写文件</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">// Go 1.16+（sbs-fbs-server 可用，Tax 仓不可用）
+data, err := os.ReadFile(&quot;config.yaml&quot;)
+
+// Go 1.15 兼容写法（Tax 仓）
+import &quot;io/ioutil&quot;
+data, err := ioutil.ReadFile(&quot;config.yaml&quot;)
+
+// 写入
+err := os.WriteFile(&quot;output.json&quot;, jsonData, 0644)</code></pre></figure>
+<p>Tax 仓库必须使用 <code>ioutil.ReadFile</code>，其他两个仓库可以用 <code>os.ReadFile</code>。在写跨仓库的工具代码时需要注意这个差异。</p>
+<h3 id="流式处理大文件">流式处理大文件</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">f, err := os.Open(&quot;large_file.xlsx&quot;)
+defer f.Close()
+// 逐块读取，不一次加载全部内容
+buf := make([]byte, 4096)
+for {
+	n, err := f.Read(buf)
+	if err == io.EOF { break }
+	// 处理 buf[:n]
+}</code></pre></figure>
+<p>FBS 的文件导出（Excel、PDF）可能涉及大文件处理。使用流式读取避免内存溢出。</p>
+<h2 id="fbs-中的综合示例">FBS 中的综合示例</h2>
+<p>以下是一个完整的 handler 示例，整合 context、JSON、HTTP 和时间处理：</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">func (h *Handler) GetIrDetail(ctx context.Context, req *GetDetailReq) (*GetDetailResp, error) {
+	// 1. 解析请求
+	irID := req.IrID
+
+	// 2. 调用 service（传递 ctx）
+	detail, err := h.svc.GetDetail(ctx, irID)
+	if err != nil {
+		return nil, err  // Chassis 中间件处理错误→HTTP 响应
+	}
+
+	// 3. 组装响应
+	resp := &amp;GetDetailResp{
+		IrID:      detail.ID,
+		Status:    detail.Status,
+		CreatedAt: detail.CreatedAt.Unix(),  // 秒级时间戳
+	}
+	return resp, nil
+}</code></pre></figure>
+<h2 id="常见错误">常见错误</h2>
+<h3 id="忘记-defer-resp-body-close">忘记 defer resp.Body.Close()</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">resp, _ := http.Get(url)
+// 忘记关闭——连接泄漏</code></pre></figure>
+<h3 id="context-未传递">context 未传递</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">func handler(ctx context.Context) {
+	callDB()  // 没传 ctx——数据库查询不受超时控制
+}</code></pre></figure>
+<h3 id="时间戳单位混淆">时间戳单位混淆</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">time.Unix(detail.CreatedAt, 0)   // 假设是秒——如果是毫秒会变成遥远的未来</code></pre></figure>
+<h2 id="context-在-fbs-中的实际传递路径">context 在 FBS 中的实际传递路径</h2>
+<h3 id="从-http-handler-到数据库查询的完整链路">从 HTTP handler 到数据库查询的完整链路</h3>
+<p>在 <code>sbs-fbs-server</code> 中，一个请求的 context 传递链路是：</p>
+<ol><li>Chassis 框架接收 HTTP 请求 → 创建带超时的 context（默认 30 秒）</li><li>Chassis 中间件处理 → context 传递给 handler</li><li>Handler → Service → Repository → 数据库驱动</li></ol>
+<p>每一层都接收并传递 context。如果任何一层创建了新的 context（如 <code>context.WithTimeout</code>），新的 context 继承原 context 的取消信号。当最外层的 HTTP 超时后，所有下游调用——包括正在执行的数据库查询——都会收到取消信号。</p>
+<h3 id="context-超时与数据库连接池">context 超时与数据库连接池</h3>
+<p>FBS 使用连接池管理数据库连接。context 超时后，正在等待连接或正在执行查询的 goroutine 会返回错误。但需要注意的是：context 取消不会中断数据库服务器端正在执行的 SQL——它只是让客户端不再等待结果。如果 SQL 执行了很长时间（例如锁等待），取消 context 后 SQL 仍然在数据库服务器上运行，直到完成或数据库自身的超时触发。</p>
+<h3 id="context-的-withvalue-使用规则">context 的 WithValue 使用规则</h3>
+<p>FBS 代码中偶尔使用 <code>context.WithValue</code> 传递请求级元数据——如 request ID、用户 ID 等。但 Go 社区强烈建议：<strong>不要把业务数据放在 context 中</strong>。context 的 value 只应用于跨层传递的元数据（日志追踪 ID、鉴权信息），不应用于替代函数参数。</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">// 正确：传递追踪信息
+ctx = context.WithValue(ctx, &quot;request_id&quot;, reqID)
+
+// 错误：传递业务数据
+ctx = context.WithValue(ctx, &quot;user&quot;, userObj)  // 应用函数参数替代</code></pre></figure>
+<h3 id="前端-fetch-的超时机制对比">前端 fetch 的超时机制对比</h3>
+<p>前端同学可能注意到：<code>fetch()</code> 本身不支持超时参数——需要 <code>AbortController</code> 配合 <code>setTimeout</code>。Go 的 <code>context.WithTimeout</code> 是语言标准库的一等公民——每个 HTTP 请求、数据库查询、gRPC 调用都原生支持 context 超时。这个差异意味着 Go 的&quot;超时控制&quot;是系统级的——从前到后一条线；前端需要手动在每个 fetch 调用上设置。</p>
+<h2 id="json-和-http-在-fbs-中的完整示例">JSON 和 HTTP 在 FBS 中的完整示例</h2>
+<h3 id="从请求到响应的完整-json-流">从请求到响应的完整 JSON 流</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">func (h *Handler) CreateInbound(ctx context.Context, body []byte) (*Response, error) {
+	// 1. 解析 JSON 请求体
+	var req CreateInboundReq
+	if err := json.Unmarshal(body, &amp;req); err != nil {
+		return nil, fmt.Errorf(&quot;invalid request: %w&quot;, err)
+	}
+
+	// 2. 校验（Chassis 的 binding tag 自动完成，这里手动示例）
+	if req.WarehouseID == &quot;&quot; {
+		return nil, errors.New(&quot;warehouse_id is required&quot;)
+	}
+
+	// 3. 调用 service
+	id, err := h.svc.Create(ctx, &amp;req)
+	if err != nil {
+		return nil, err
+	}
+
+	// 4. 返回 JSON 响应
+	resp := &amp;Response{
+		IrID:      id,
+		CreatedAt: time.Now().UTC().Unix(),
+	}
+	return resp, nil
+}</code></pre></figure>
+<p>FBS 的 handler 不需要手动调用 <code>json.Marshal</code>——Chassis 中间件自动处理。handler 只需要返回 Go struct，中间件负责序列化为 JSON 并写入 HTTP 响应体。</p>
+<h3 id="时间字段的格式约定">时间字段的格式约定</h3>
+<p>FBS 后端统一使用 <strong>秒级 Unix 时间戳（int64）</strong> 作为 API 响应的时间格式。前端接收到 <code>1720000000</code> 后，<code>new Date(1720000000 * 1000)</code> 转为浏览器本地时区显示。后端不做时区转换——这是前后端契约：后端提供 UTC 时间戳，前端负责格式化。</p>
+<p>为什么用秒而不是毫秒？Go 的 <code>time.Now().Unix()</code> 返回秒，<code>time.Now().UnixMilli()</code> 返回毫秒——两个都很简单。FBS 选择秒是为了节省传输字节（10 位数字 vs 13 位），且大多数业务场景秒级精度足够。</p>
+<h2 id="文件处理与内存管理">文件处理与内存管理</h2>
+<h3 id="上传文件的处理">上传文件的处理</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">func (h *Handler) UploadFile(ctx context.Context, file multipart.File, header *multipart.FileHeader) error {
+	defer file.Close()
+
+	// 校验文件大小
+	if header.Size &gt; 10*1024*1024 {  // 10MB 上限
+		return errors.New(&quot;file too large&quot;)
+	}
+
+	// 保存到临时文件
+	dst, err := os.CreateTemp(&quot;&quot;, &quot;upload-*&quot;)
+	if err != nil { return err }
+	defer dst.Close()
+
+	if _, err := io.Copy(dst, file); err != nil { return err }
+	return nil
+}</code></pre></figure>
+<p>FBS 的文件上传和导出通常通过临时文件处理——先写入临时文件，验证正确后再移动到最终位置。<code>io.Copy</code> 是流式复制，不会将整个文件加载到内存。</p>
+<h3 id="excel-导出">Excel 导出</h3>
+<p>FBS 的 Excel 导出功能使用 <code>excelize</code> 或内部封装的 Excel 库。大文件导出时，使用流式写入（<code>StreamWriter</code>）而非一次性构建整个 Excel 对象——避免内存溢出。导出完成后，文件通过 HTTP 响应返回给前端。</p>
+<h2 id="go-标准库的时间陷阱与最佳实践">Go 标准库的时间陷阱与最佳实践</h2>
+<h3 id="time-now-vs-time-now-utc">time.Now vs time.Now().UTC</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">t1 := time.Now()          // 本地时间
+t2 := time.Now().UTC()    // UTC 时间</code></pre></figure>
+<p>在服务器代码中，永远使用 <code>time.Now().UTC()</code>。服务器的时区可能是 UTC、可能是宿主机本地时区——不确定。使用 UTC 消除这种不确定性。本地时间只用于展示层（通常在前端）。</p>
+<h3 id="duration-的运算">Duration 的运算</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">d := 5 * time.Second + 300 * time.Millisecond  // 复合 duration
+time.Since(start)                                // 从 start 到现在的时间
+time.Until(deadline)                             // 从现在到 deadline 的时间
+ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+defer cancel()</code></pre></figure>
+<h3 id="时区的正确处理">时区的正确处理</h3>
+<p>Go 的 <code>time.LoadLocation(&quot;Asia/Shanghai&quot;)</code> 加载时区。FBS 后端不需要这样做——所有时间都是 UTC。如果需要时区转换（如展示仓库当地时间），在前端做，不在后端做。</p>
+<h3 id="时间和-json-的交互">时间和 JSON 的交互</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">type Event struct {
+	At time.Time `json:&quot;at&quot;`  // RFC 3339 格式：2006-01-02T15:04:05Z
+}</code></pre></figure>
+<p>如果后端以 Unix 时间戳传递时间，DTO 中用 int64 而非 time.Time：</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">type Response struct {
+	CreatedAt int64 `json:&quot;created_at&quot;`  // 秒级时间戳
+}</code></pre></figure>
+<h2 id="http-客户端在生产环境的最佳实践">HTTP 客户端在生产环境的最佳实践</h2>
+<h3 id="连接复用">连接复用</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">var client = &amp;http.Client{
+	Timeout: 10 * time.Second,
+	Transport: &amp;http.Transport{
+		MaxIdleConns:        100,
+		IdleConnTimeout:     90 * time.Second,
+		DisableCompression:  false,
+	},
+}</code></pre></figure>
+<p>FBS 中调用外部服务时，复用 HTTP client 实例——不要在每次请求时创建新的 client。<code>http.DefaultClient</code> 是一个全局共享的实例，但最好使用自定义的 client 来控制超时和连接池。</p>
+<h3 id="重试策略">重试策略</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">func callWithRetry(ctx context.Context, url string) ([]byte, error) {
+	for i := 0; i &lt; 3; i++ {
+		resp, err := call(ctx, url)
+		if err == nil { return resp, nil }
+		if !isRetryable(err) { return nil, err }
+		time.Sleep(time.Duration(i) * time.Second)  // 退避
+	}
+	return nil, fmt.Errorf(&quot;max retries exceeded&quot;)
+}</code></pre></figure>
+<p>只在可重试的错误（网络超时、临时服务不可用）上重试。不要在业务错误（如参数校验失败）上重试。</p>
+<h3 id="fbs-中调用敏感数据服务的模式">FBS 中调用敏感数据服务的模式</h3>
+<p>主服务调用敏感数据服务时，使用 gRPC 或 HTTP。HTTP 调用时通过 context 传递超时和鉴权信息。响应中的敏感数据不写日志、不缓存、使用后立即销毁。</p>
+<h2 id="总结与进阶">总结与进阶</h2>
+<p>本章覆盖了 Go 标准库中与前端开发最相关的六个方面：context、JSON、HTTP、时间、文件和 I/O。它们分别对应前端开发中的 Promise 超时、JSON 序列化、fetch API、Date/Intl、File API。理解了这些对应关系后，你在前后端之间切换时不再需要&quot;重新学习&quot;这些概念——只需要翻译语法。</p>
+<p>在后端工程模块中，你将把这些标准库能力与 Chassis 框架结合，构建完整的 HTTP 接口和处理链路。</p>
+<h2 id="练习">练习</h2>
+<h3 id="handler-编写">handler 编写</h3>
+<p>写一个 handler 函数，要求：</p>
+<ul><li>接收 POST JSON 请求（包含 <code>warehouse_id</code> 和 <code>sku_list</code>）</li><li>校验 <code>warehouse_id</code> 不为空</li><li>调用 service 层处理（返回创建的 id 和时间）</li><li>返回 JSON 响应（包含 <code>ir_id</code> 和 <code>created_at</code>）</li><li>context 超时 10 秒</li><li>如果 warehouse_id 为空或 service 返回错误，返回合适的错误</li></ul>
+<h3 id="文件下载与数据处理">文件下载与数据处理</h3>
+<p>写一个函数 <code>DownloadAndProcess(ctx context.Context, url string, outputPath string) error</code>，要求：</p>
+<ul><li>从指定 HTTP URL 下载 JSON 数据（内容为 <code>[]Item</code>，Item 包含 <code>Name</code>、<code>Status</code>、<code>CreatedAt</code> 字段）</li><li>筛选出 <code>Status</code> 为 <code>&quot;ACTIVE&quot;</code> 的条目</li><li>按 <code>CreatedAt</code> 升序排序</li><li>将结果写入 <code>outputPath</code></li><li>context 超时 10 秒</li><li>HTTP 请求失败或 JSON 解析失败时返回带上下文的错误（使用 <code>fmt.Errorf(&quot;...: %w&quot;, err)</code>）</li><li>文件操作使用 defer 确保关闭</li></ul>
+<h3 id="时间处理">时间处理</h3>
+<p>编写一个 API handler，接收 <code>start_date</code> 和 <code>end_date</code>（都是 RFC 3339 格式的字符串，如 <code>&quot;2026-01-01T00:00:00Z&quot;</code>），解析后查询该时间范围内的数据。要求：</p>
+<ul><li>日期范围是 [start, end)（左闭右开）</li><li>如果 end 早于 start，返回参数错误</li><li>如果解析失败，返回带上下文的错误</li></ul>
+<h3 id="参考答案">参考答案</h3>
+<p><strong>handler 编写</strong>：参考「FBS 中的综合示例」一节的结构，整合 <code>json.Unmarshal</code>、参数校验、service 调用、响应组装。关键点：handler 接收 <code>ctx context.Context</code>，传递给 service；service 返回错误时，handler 直接返回 error（由 Chassis 中间件处理）。</p>
+<p><strong>文件下载与数据处理</strong>：整合 <code>http.NewRequestWithContext</code>、<code>json.Unmarshal</code>、筛选、<code>sort.Slice</code>、<code>os.WriteFile</code>。关键点：使用带 context 的 HTTP 请求确保超时生效；筛选和排序在内存中完成（假设数据量不大）；错误包装使用 <code>%w</code> 保留原始错误链。</p>
+<p><strong>时间处理</strong>：使用 <code>time.Parse(time.RFC3339, startDate)</code> 解析日期字符串。左闭右开区间表示 <code>t &gt;= start &amp;&amp; t &lt; end</code>。错误返回使用 <code>fmt.Errorf(&quot;invalid date range: start %s is after end %s&quot;, start, end)</code>。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li><a href="https://pkg.go.dev/context" target="_blank" rel="noreferrer">context package</a></li><li><a href="https://go.dev/blog/context" target="_blank" rel="noreferrer">Go Concurrency Patterns: Context</a></li><li><a href="https://pkg.go.dev/net/http" target="_blank" rel="noreferrer">net/http package</a></li><li><a href="https://pkg.go.dev/encoding/json" target="_blank" rel="noreferrer">encoding/json package</a></li><li><a href="https://pkg.go.dev/time" target="_blank" rel="noreferrer">time package</a></li><li><a href="https://pkg.go.dev/os" target="_blank" rel="noreferrer">os package</a></li></ul><nav class="lesson-nav"><a href="../lessons/be-l05-errors-defer-panic-resources.html">← BE-L05<br><strong>error、defer、panic/recover 与资源生命周期</strong></a><a href="../lessons/be-l07-goroutines-channels-sync-concurrency.html">BE-L07 →<br><strong>goroutine、channel、sync 与并发边界</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#这一章解决什么问题"><span class="toc-num">1</span>这一章解决什么问题</a><a class="" href="#context-请求的生命周期线"><span class="toc-num">2</span>context：请求的生命周期线</a><a class="sub" href="#context-做什么"><span class="toc-num">2.1</span>context 做什么</a><a class="sub" href="#context-的几种创建方式"><span class="toc-num">2.2</span>context 的几种创建方式</a><a class="sub" href="#context-取消的传播"><span class="toc-num">2.3</span>context 取消的传播</a><a class="" href="#json-处理"><span class="toc-num">3</span>JSON 处理</a><a class="sub" href="#序列化与反序列化"><span class="toc-num">3.1</span>序列化与反序列化</a><a class="sub" href="#空值与-omitempty"><span class="toc-num">3.2</span>空值与 omitempty</a><a class="sub" href="#时间格式"><span class="toc-num">3.3</span>时间格式</a><a class="" href="#http-客户端"><span class="toc-num">4</span>HTTP 客户端</a><a class="sub" href="#发送-get-和-post-请求"><span class="toc-num">4.1</span>发送 GET 和 POST 请求</a><a class="sub" href="#带-context-的请求"><span class="toc-num">4.2</span>带 context 的请求</a><a class="sub" href="#超时设置"><span class="toc-num">4.3</span>超时设置</a><a class="" href="#时间处理"><span class="toc-num">5</span>时间处理</a><a class="sub" href="#时间的基本操作"><span class="toc-num">5.1</span>时间的基本操作</a><a class="sub" href="#fbs-的时间约定"><span class="toc-num">5.2</span>FBS 的时间约定</a><a class="sub" href="#context-超时"><span class="toc-num">5.3</span>context 超时</a><a class="" href="#文件-i-o"><span class="toc-num">6</span>文件 I/O</a><a class="sub" href="#读写文件"><span class="toc-num">6.1</span>读写文件</a><a class="sub" href="#流式处理大文件"><span class="toc-num">6.2</span>流式处理大文件</a><a class="" href="#fbs-中的综合示例"><span class="toc-num">7</span>FBS 中的综合示例</a><a class="" href="#常见错误"><span class="toc-num">8</span>常见错误</a><a class="sub" href="#忘记-defer-resp-body-close"><span class="toc-num">8.1</span>忘记 defer resp.Body.Close()</a><a class="sub" href="#context-未传递"><span class="toc-num">8.2</span>context 未传递</a><a class="sub" href="#时间戳单位混淆"><span class="toc-num">8.3</span>时间戳单位混淆</a><a class="" href="#context-在-fbs-中的实际传递路径"><span class="toc-num">9</span>context 在 FBS 中的实际传递路径</a><a class="sub" href="#从-http-handler-到数据库查询的完整链路"><span class="toc-num">9.1</span>从 HTTP handler 到数据库查询的完整链路</a><a class="sub" href="#context-超时与数据库连接池"><span class="toc-num">9.2</span>context 超时与数据库连接池</a><a class="sub" href="#context-的-withvalue-使用规则"><span class="toc-num">9.3</span>context 的 WithValue 使用规则</a><a class="sub" href="#前端-fetch-的超时机制对比"><span class="toc-num">9.4</span>前端 fetch 的超时机制对比</a><a class="" href="#json-和-http-在-fbs-中的完整示例"><span class="toc-num">10</span>JSON 和 HTTP 在 FBS 中的完整示例</a><a class="sub" href="#从请求到响应的完整-json-流"><span class="toc-num">10.1</span>从请求到响应的完整 JSON 流</a><a class="sub" href="#时间字段的格式约定"><span class="toc-num">10.2</span>时间字段的格式约定</a><a class="" href="#文件处理与内存管理"><span class="toc-num">11</span>文件处理与内存管理</a><a class="sub" href="#上传文件的处理"><span class="toc-num">11.1</span>上传文件的处理</a><a class="sub" href="#excel-导出"><span class="toc-num">11.2</span>Excel 导出</a><a class="" href="#go-标准库的时间陷阱与最佳实践"><span class="toc-num">12</span>Go 标准库的时间陷阱与最佳实践</a><a class="sub" href="#time-now-vs-time-now-utc"><span class="toc-num">12.1</span>time.Now vs time.Now().UTC</a><a class="sub" href="#duration-的运算"><span class="toc-num">12.2</span>Duration 的运算</a><a class="sub" href="#时区的正确处理"><span class="toc-num">12.3</span>时区的正确处理</a><a class="sub" href="#时间和-json-的交互"><span class="toc-num">12.4</span>时间和 JSON 的交互</a><a class="" href="#http-客户端在生产环境的最佳实践"><span class="toc-num">13</span>HTTP 客户端在生产环境的最佳实践</a><a class="sub" href="#连接复用"><span class="toc-num">13.1</span>连接复用</a><a class="sub" href="#重试策略"><span class="toc-num">13.2</span>重试策略</a><a class="sub" href="#fbs-中调用敏感数据服务的模式"><span class="toc-num">13.3</span>FBS 中调用敏感数据服务的模式</a><a class="" href="#总结与进阶"><span class="toc-num">14</span>总结与进阶</a><a class="" href="#练习"><span class="toc-num">15</span>练习</a><a class="sub" href="#handler-编写"><span class="toc-num">15.1</span>handler 编写</a><a class="sub" href="#文件下载与数据处理"><span class="toc-num">15.2</span>文件下载与数据处理</a><a class="sub" href="#时间处理"><span class="toc-num">15.3</span>时间处理</a><a class="sub" href="#参考答案"><span class="toc-num">15.4</span>参考答案</a><a class="" href="#参考文献"><span class="toc-num">16</span>参考文献</a></aside></div></div></div><footer class="site-footer">FBS 前后端转全栈 Landing · 已发布</footer></div></body></html>

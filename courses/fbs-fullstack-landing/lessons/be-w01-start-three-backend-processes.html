@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="识别主服务、敏感数据服务和 Tax 服务的职责与进程入口，选择正确 Go 版本、配置和启动命令，并用一条最小构建/测试路径验证进程地图。"><title>启动三类 FBS 后端进程并建立仓库地图 | FBS 前后端转全栈 Landing</title><script src="../assets/theme-switcher.js"></script><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><div class="lesson-page-grid"><aside class="chapter-nav" aria-label="课程章节导航"><button class="chapter-nav-toggle" type="button" aria-expanded="true" aria-controls="chapter-nav-content"><span aria-hidden="true">◀</span><span class="chapter-nav-toggle-label">收起</span></button><div class="chapter-nav-content" id="chapter-nav-content"><div class="chapter-nav-heading"><strong>课程章节</strong><span>第 27 / 40 章</span></div><nav class="chapter-nav-list"><section class="chapter-nav-module"><h2>模块一：前端语言及标准库基础</h2><a href="../lessons/fe-l01-js-data-types-equality.html"><span class="chapter-nav-code">FE-L01</span><span class="chapter-nav-title">JavaScript 数据、类型与相等性：先读懂仓库判断分支</span></a><a href="../lessons/fe-l02-functions-scope-closure-modules.html"><span class="chapter-nav-code">FE-L02</span><span class="chapter-nav-title">函数、作用域、闭包与模块：跟上组件外的调用链</span></a><a href="../lessons/fe-l03-promise-async-eventloop.html"><span class="chapter-nav-code">FE-L03</span><span class="chapter-nav-title">Promise、async/await 与事件循环：读懂请求和页面副作用</span></a><a href="../lessons/fe-l04-js-objects-web-data.html"><span class="chapter-nav-code">FE-L04</span><span class="chapter-nav-title">JavaScript 常用对象与 Web 数据处理</span></a><a href="../lessons/fe-l05-typescript-type-chain.html"><span class="chapter-nav-code">FE-L05</span><span class="chapter-nav-title">TypeScript：从接口数据到组件 Props 的类型链</span></a><a href="../lessons/fe-l06-browser-framework-syntax-bridge.html"><span class="chapter-nav-code">FE-L06</span><span class="chapter-nav-title">浏览器与框架语法桥：DOM、事件、JSX、Vue SFC</span></a></section>
+<section class="chapter-nav-module"><h2>模块二：Web 前端开发</h2><a href="../lessons/fe-w01-start-three-frontend-projects.html"><span class="chapter-nav-code">FE-W01</span><span class="chapter-nav-title">启动三类 FBS 前端工程并建立仓库地图</span></a><a href="../lessons/fe-w02-components-styles-forms-tables.html"><span class="chapter-nav-code">FE-W02</span><span class="chapter-nav-title">组件、样式、表单与表格：按现有组件库做页面</span></a><a href="../lessons/fe-w03-routes-menus-page-entries.html"><span class="chapter-nav-code">FE-W03</span><span class="chapter-nav-title">路由、菜单与页面入口：让页面真正可访问</span></a><a href="../lessons/fe-w04-state-management-redux-vuex-recoil.html"><span class="chapter-nav-code">FE-W04</span><span class="chapter-nav-title">状态管理：Redux/Recoil、Vuex 与宿主状态</span></a><a href="../lessons/fe-w05-api-proxy-errors-contract.html"><span class="chapter-nav-code">FE-W05</span><span class="chapter-nav-title">API、代理、错误与前后端契约</span></a><a href="../lessons/fe-w06-permission-i18n-time-file-pii.html"><span class="chapter-nav-code">FE-W06</span><span class="chapter-nav-title">权限、i18n、时间、文件与 PII：页面功能的准入项</span></a><a href="../lessons/fe-w07-frontend-vertical-slice.html"><span class="chapter-nav-code">FE-W07</span><span class="chapter-nav-title">前端纵向切片：为入库列表增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块三：Web 前端进阶</h2><a href="../lessons/fe-a01-three-app-lifecycles-host-boundaries.html"><span class="chapter-nav-code">FE-A01</span><span class="chapter-nav-title">三种应用生命周期与宿主边界</span></a><a href="../lessons/fe-a02-micro-frontends-remote-components.html"><span class="chapter-nav-code">FE-A02</span><span class="chapter-nav-title">微前端与远端组件：Module Federation、qiankun、MMF</span></a><a href="../lessons/fe-a03-vue-react-coexistence-deps-migration.html"><span class="chapter-nav-code">FE-A03</span><span class="chapter-nav-title">Vue/React 共存、共享依赖与版本迁移</span></a><a href="../lessons/fe-a04-testing-linting-build-artifacts.html"><span class="chapter-nav-code">FE-A04</span><span class="chapter-nav-title">测试、静态检查、构建与产物边界</span></a><a href="../lessons/fe-a05-observability-systematic-debugging.html"><span class="chapter-nav-code">FE-A05</span><span class="chapter-nav-title">前端观测与系统化排错</span></a><a href="../lessons/fe-a06-impact-analysis-dev-handoff.html"><span class="chapter-nav-code">FE-A06</span><span class="chapter-nav-title">前端改动影响分析与开发交接</span></a></section>
+<section class="chapter-nav-module"><h2>模块四：后端语言及标准库基础</h2><a href="../lessons/be-l01-go-toolchain-modules-versions.html"><span class="chapter-nav-code">BE-L01</span><span class="chapter-nav-title">Go 工具链、模块与版本边界</span></a><a href="../lessons/be-l02-values-pointers-structs-tags.html"><span class="chapter-nav-code">BE-L02</span><span class="chapter-nav-title">值、指针、struct、tag 与数据边界</span></a><a href="../lessons/be-l03-methods-interfaces-embedding-di.html"><span class="chapter-nav-code">BE-L03</span><span class="chapter-nav-title">方法、接口、嵌入与依赖倒置</span></a><a href="../lessons/be-l04-slices-maps-sorting-data-transform.html"><span class="chapter-nav-code">BE-L04</span><span class="chapter-nav-title">slice、map、排序与数据转换</span></a><a href="../lessons/be-l05-errors-defer-panic-resources.html"><span class="chapter-nav-code">BE-L05</span><span class="chapter-nav-title">error、defer、panic/recover 与资源生命周期</span></a><a href="../lessons/be-l06-context-time-json-http-io.html"><span class="chapter-nav-code">BE-L06</span><span class="chapter-nav-title">context、时间、JSON、HTTP、I/O 与文件</span></a><a href="../lessons/be-l07-goroutines-channels-sync-concurrency.html"><span class="chapter-nav-code">BE-L07</span><span class="chapter-nav-title">goroutine、channel、sync 与并发边界</span></a></section>
+<section class="chapter-nav-module"><h2>模块五：Web 后端开发</h2><a href="../lessons/be-w01-start-three-backend-processes.html" class="is-current" aria-current="page"><span class="chapter-nav-code">BE-W01</span><span class="chapter-nav-title">启动三类 FBS 后端进程并建立仓库地图</span></a><a href="../lessons/be-w02-chassis-http-route-request-response.html"><span class="chapter-nav-code">BE-W02</span><span class="chapter-nav-title">Chassis HTTP 接口：从路由到请求与响应</span></a><a href="../lessons/be-w03-wire-layered-architecture.html"><span class="chapter-nav-code">BE-W03</span><span class="chapter-nav-title">Wire 与分层：把 handler 接到应用、领域和基础设施</span></a><a href="../lessons/be-w04-mysql-gorm-scorm-repository-transactions.html"><span class="chapter-nav-code">BE-W04</span><span class="chapter-nav-title">MySQL、GORM/Scorm、仓储与事务</span></a><a href="../lessons/be-w05-service-calls-http-grpc-timeouts.html"><span class="chapter-nav-code">BE-W05</span><span class="chapter-nav-title">服务调用、HTTP/gRPC 契约与超时</span></a><a href="../lessons/be-w06-auth-errors-pii-security.html"><span class="chapter-nav-code">BE-W06</span><span class="chapter-nav-title">鉴权、错误码、PII 与接口安全边界</span></a><a href="../lessons/be-w07-backend-vertical-slice.html"><span class="chapter-nav-code">BE-W07</span><span class="chapter-nav-title">后端纵向切片：为入库请求增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块六：Web 后端进阶</h2><a href="../lessons/be-a01-apollo-chassis-config.html"><span class="chapter-nav-code">BE-A01</span><span class="chapter-nav-title">Apollo 与 Chassis 配置：环境差异、热更新和开关</span></a><a href="../lessons/be-a02-redis-codis-cache-consistency.html"><span class="chapter-nav-code">BE-A02</span><span class="chapter-nav-title">Redis/Codis 与缓存一致性</span></a><a href="../lessons/be-a03-saturn-scheduled-async-tasks.html"><span class="chapter-nav-code">BE-A03</span><span class="chapter-nav-title">Saturn 定时任务与异步任务</span></a><a href="../lessons/be-a04-kafka-message-pipeline.html"><span class="chapter-nav-code">BE-A04</span><span class="chapter-nav-title">Kafka 消息链路与事件边界</span></a><a href="../lessons/be-a05-reliability-idempotency-transactions-retry.html"><span class="chapter-nav-code">BE-A05</span><span class="chapter-nav-title">可靠性：幂等、事务、重试、并发与降级组合</span></a><a href="../lessons/be-a06-logging-metrics-diagnostics.html"><span class="chapter-nav-code">BE-A06</span><span class="chapter-nav-title">日志、指标、链路与系统化排错</span></a><a href="../lessons/be-a07-impact-analysis-testing-handoff.html"><span class="chapter-nav-code">BE-A07</span><span class="chapter-nav-title">后端改动影响分析、测试与开发交接</span></a></section></nav></div></aside><div class="lesson-page-main"><header class="topbar"><a class="brand" href="../index.html">FBS 前后端转全栈 Landing</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">BE-W01 · 150–200 分钟</div><h1>启动三类 FBS 后端进程并建立仓库地图</h1><p class="lesson-summary">识别主服务、敏感数据服务和 Tax 服务的职责与进程入口，选择正确 Go 版本、配置和启动命令，并用一条最小构建/测试路径验证进程地图。</p><a class="source-link" href="../markdown/be-w01-start-three-backend-processes.md">查看 Markdown 版本</a></section><div class="lesson-layout"><main class="lesson-content"><h2 id="这一章解决什么问题">这一章解决什么问题</h2>
+<p>前端项目常用一个开发命令启动浏览器应用。FBS 后端的入口更分散：三个仓库一共有七个明确的 <code>main.go</code> 进程，主服务和敏感数据服务各有 API、task 两类进程，Tax 有 API、core、task 三类进程。第一次进入仓库时，先要回答“我正在构建哪个可执行程序”，而不是直接寻找一个统一的启动按钮。</p>
+<p>三个仓库还使用不同的 Go 与 Chassis 版本。它们都包含公司环境中的内部依赖，完整运行通常还需要配置和依赖服务。本章因此把“能编译一个目标包、能运行一组局部测试、能说明未启动的外部依赖”作为最小路径，不假装一条命令能在任意电脑上还原公司环境。</p>
+<h2 id="先认识仓库-进程-框架-配置与构建">先认识仓库、进程、框架、配置与构建</h2>
+<p>这些词在前端也有近似对象，但不能直接画等号。</p>
+<div class="table-wrap"><table><thead><tr><th>概念</th><th>在后端工程中表示什么</th><th>它解决的问题</th><th>前端可借用的类比</th></tr></thead><tbody><tr><td>仓库</td><td>一组共同版本管理的源码、配置和构建文件</td><td>划定代码协作与版本边界</td><td>一个 Git 前端仓库或 monorepo</td></tr><tr><td>进程</td><td>操作系统正在运行的一个可执行程序实例</td><td>承接 HTTP、计算或后台任务</td><td>dev server、SSR server、worker</td></tr><tr><td>框架</td><td>规定启动、路由、中间件等公共流程的代码库</td><td>避免每个业务模块重复搭服务骨架</td><td>Express、NestJS；只作概念类比</td></tr><tr><td>配置</td><td>随环境变化、但不应硬编码进业务逻辑的参数</td><td>让同一份程序适配不同运行环境</td><td><code>.env</code> 与构建配置</td></tr><tr><td>构建</td><td>把源码与依赖检查、编译成目标产物</td><td>提前发现类型和依赖问题</td><td>TypeScript/Webpack 构建</td></tr></tbody></table></div>
+<p>一个仓库可以生成多个可执行程序；一个可执行程序上线后又可能运行多个实例。<code>cmd/api_server/main.go</code> 是源码入口，不是“某台服务器”；<code>go build ./cmd/api_server</code> 生成的是二进制文件，也不等于服务已经连接好数据库并可接受真实请求。</p>
+<h3 id="chassis-是什么-为什么现在就要知道">Chassis 是什么，为什么现在就要知道</h3>
+<p>Chassis 是三个仓库当前使用的 Go 服务框架。它承接进程初始化、HTTP/gRPC schema 注册、中间件、配置和公司基础设施接入。业务模块在框架规定的入口注册 route 与 handler。下一章会逐层读一条 Chassis HTTP 请求，本章只需要知道：<code>main.go</code> 启动的不是一段孤立业务函数，而是由 Chassis 组织起来的一整个服务进程。</p>
+<p>社区里常见的同类选择有标准库 <code>net/http</code>、Gin、Echo、Go kit 等。标准库依赖少、控制直接，但团队需要自行组合参数绑定、错误包装、监控和服务治理；Gin/Echo 提供较轻的 HTTP 开发体验，却仍需接入公司的配置、鉴权与监控；Chassis 对内部基础设施集成更深，代价是 API 与版本行为必须以当前仓库源码为准，不能直接套公开框架教程。本课程不会把现有服务迁移到另一套框架。</p>
+<h3 id="api-core-与-task-为什么拆成不同进程">API、core 与 task 为什么拆成不同进程</h3>
+<p>API 进程接收同步请求并返回响应；task 进程处理定时或异步工作；Tax 的 core 进程承接该仓库当前定义的核心服务能力。拆进程后可以分别构建、配置和观察，但进程之间的调用会引入网络、超时与兼容问题。不能仅凭名称推断部署规模、机器位置或资源模型，实际运行形态要以环境配置和平台事实为准。</p>
+<p><strong>Situation</strong>：一个前端开发者第一次面对三个仓库和七个进程入口，不确定先构建哪个目标、使用哪个 Go 版本，也分不清编译与启动证据。</p>
+<p><strong>Task</strong>：选择主服务作为切入点，完成一条最小启动路径（编译+测试），并为另外两个仓库绘制准确的进程地图和版本矩阵。</p>
+<p><strong>Action</strong>：比较三个仓库的 go.mod → 追踪 cmd/ 目录下的各个 main.go → 理解每个进程的职责 → 运行 go build 和 go test → 记录版本、端口、启动方式。</p>
+<p><strong>Result</strong>：你得到一张可核对的进程地图：能找到入口文件，知道该用哪条编译和测试命令，也能区分“源码可构建”与“完整环境可运行”。</p>
+<blockquote><p>本章基于三个后端仓库的 release 分支（2026-07-20）。Go 版本以各仓库 go.mod 中的声明为准。</p></blockquote>
+<h2 id="三个仓库的职责全景">三个仓库的职责全景</h2>
+<h3 id="为什么需要三个仓库">为什么需要三个仓库</h3>
+<p>三个后端仓库按当前代码职责划分了主业务、敏感数据和 Tax 边界。课程只依据仓库中的入口、模块和调用关系解释这些边界，不推断组织或发布原因：</p>
+<div class="table-wrap"><table><thead><tr><th>仓库</th><th>核心职责</th><th>为什么独立</th></tr></thead><tbody><tr><td><code>sbs-fbs-server</code></td><td>入库、商品、库存、店铺管理等核心业务</td><td>主业务逻辑，改动频繁、团队主要维护</td></tr><tr><td><code>fbs-sensitive-data-server</code></td><td>卖家敏感信息（姓名、电话、证件）</td><td>PII 数据安全合规，独立部署、独立审计、独立权限</td></tr><tr><td><code>fbs-tax-server</code></td><td>税务计算、发票生成、计费结算</td><td>财务相关业务，维护周期长、合规要求高、发布节奏慢</td></tr></tbody></table></div>
+<p><strong>前端类比</strong>：三个仓库 ≈ 前端的三个微前端应用或 npm monorepo 中的 packages。拆分的原因不是技术限制，而是组织结构（不同团队）、安全合规（敏感数据隔离）、发布节奏（财务慢、业务快）。你可以把 <code>sbs-fbs-server</code> 理解为前端的&quot;主应用&quot;，<code>fbs-sensitive-data-server</code> 是&quot;安全隔离的 PII 模块&quot;，<code>fbs-tax-server</code> 是&quot;稳定少变的财务模块&quot;。</p>
+<h3 id="每个仓库的进程矩阵">每个仓库的进程矩阵</h3>
+<div class="table-wrap"><table><thead><tr><th>仓库</th><th>进程</th><th>main.go 位置</th><th>职责</th><th>部署数量</th></tr></thead><tbody><tr><td><code>sbs-fbs-server</code></td><td>api_server</td><td><code>cmd/api_server/main.go</code></td><td>面向同步调用的主 API 入口</td><td>由运行环境决定</td></tr><tr><td><code>sbs-fbs-server</code></td><td>fbs_task</td><td><code>cmd/fbs_task/main.go</code></td><td>定时、异步与消息类任务入口</td><td>由运行环境决定</td></tr><tr><td><code>fbs-sensitive-data-server</code></td><td>api_server</td><td><code>cmd/api_server/main.go</code></td><td>敏感数据服务 API 入口</td><td>由运行环境决定</td></tr><tr><td><code>fbs-sensitive-data-server</code></td><td>task</td><td><code>cmd/task/main.go</code></td><td>敏感数据相关任务入口</td><td>由运行环境决定</td></tr><tr><td><code>fbs-tax-server</code></td><td>tax_api</td><td><code>cmd/tax_api/main.go</code></td><td>Tax API 入口</td><td>由运行环境决定</td></tr><tr><td><code>fbs-tax-server</code></td><td>tax_core</td><td><code>cmd/tax_core/main.go</code></td><td>Tax core 入口</td><td>由运行环境决定</td></tr><tr><td><code>fbs-tax-server</code></td><td>tax_task</td><td><code>cmd/tax_task/main.go</code></td><td>Tax 任务入口</td><td>由运行环境决定</td></tr></tbody></table></div>
+<p><strong>前端类比</strong>：多进程架构接近 monorepo 中的多个 app。<code>cmd/api_server</code> 是同步服务的源码入口；<code>cmd/fbs_task</code> 接近独立 worker，承接任务与消费入口。类比只用于定位，不表示前后端运行模型相同。</p>
+<h3 id="进程之间的关系">进程之间的关系</h3>
+<figure class="diagram-card"><pre class="mermaid">flowchart TD
+    A[&quot;Portal / Seller Center&quot;] --&gt;|HTTP| B[&quot;sbs-fbs-server api_server&quot;]
+    A --&gt;|HTTP| C[&quot;fbs-sensitive-data-server api_server&quot;]
+    A --&gt;|HTTP| D[&quot;fbs-tax-server tax_api&quot;]
+    B --&gt;|gRPC/HTTP| C
+    B --&gt;|gRPC/HTTP| D
+    B --&gt;|Kafka| E[&quot;sbs-fbs-server fbs_task&quot;]
+    D --&gt;|Kafka| F[&quot;fbs-tax-server tax_task&quot;]</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<p>本课程以主服务 API 作为 ASN 同步请求主线。主服务代码中存在敏感数据与 Tax 的 client 边界，task 入口中存在定时、异步和消息处理代码。某个具体需求实际经过哪些服务，必须从 route、client 与任务注册逐条确认，不能把全景图当成每次请求的固定时序。</p>
+<p><strong>前端类比</strong>：这个架构 ≈ 前端的主应用（主服务 API）+ 独立的微服务（敏感数据 / Tax）+ 后台 Worker（task 进程）。前端同学可以把它想象成 Vercel/Netlify 的部署模型：API Routes 处理请求、Background Functions 处理异步任务、第三方 API 处理专项能力。</p>
+<h2 id="主服务-sbs-fbs-server">主服务：sbs-fbs-server</h2>
+<h3 id="进程入口">进程入口</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">// cmd/api_server/main.go（简化）
+func main() {
+	// 1. 初始化 Chassis 框架（注册 HTTP 路由、gRPC 服务）
+	// 2. 初始化 Wire 依赖注入（创建 handler、service、repository）
+	// 3. 启动 HTTP 服务器
+}</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">// cmd/fbs_task/main.go（简化）
+func main() {
+	// 1. 初始化 Chassis + Saturn 任务框架
+	// 2. 注册定时任务和消息消费者
+	// 3. 启动任务调度器
+}</code></pre></figure>
+<h3 id="目录结构回顾">目录结构回顾</h3>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">sbs-fbs-server/
+├── cmd/                  # 进程入口
+│   ├── api_server/       # HTTP/gRPC API 服务
+│   └── fbs_task/         # 定时任务 + 消息消费
+├── app/                  # 旧模块（逐步迁移到 apps/）
+├── apps/                 # 新模块（inbound、rts、product 等）
+├── middleware/            # HTTP 中间件
+├── sbs_agent/            # 基础设施适配层
+├── errcode/              # 错误码定义
+├── libs/                 # 内部工具库
+├── conf/                 # Chassis 配置文件
+└── go.mod                # Go 1.20</code></pre></figure>
+<p><strong>前端类比</strong>：<code>cmd/</code> 接近多个应用入口，<code>apps/</code> 按业务域组织模块，<code>middleware/</code> 接近服务端的请求拦截链，<code>sbs_agent/</code> 封装数据库、缓存和任务等设施。React route guard 只能帮助理解“入口前检查”，不能替代服务端中间件的安全语义。</p>
+<h3 id="编译和测试">编译和测试</h3>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">cd sbs-fbs-server
+
+# 编译 API 服务
+go build -o bin/api_server ./cmd/api_server
+
+# 编译任务服务
+go build -o bin/fbs_task ./cmd/fbs_task
+
+# 运行所有测试
+go test ./... -count=1
+
+# 只测试某个模块
+go test ./apps/inbound/... -v
+
+# 带 race detector 的测试
+go test -race ./...</code></pre></figure>
+<p><strong>前端类比</strong>：<code>go build -o bin/api_server ./cmd/api_server</code> 与前端 build 都会检查源码与依赖，但 Go 产出本机可执行程序，前端通常产出浏览器资源。<code>go test ./...</code> 与 Jest/Vitest 都是测试入口，包选择和运行环境不同。</p>
+<h3 id="star-案例-启动主服务-api">Star 案例：启动主服务 API</h3>
+<p><strong>Situation</strong>：你需要验证主服务的代码能否正常编译和运行测试，以便开始开发一个入库功能。</p>
+<p><strong>Task</strong>：编译主服务的两个进程，运行核心模块的测试，记录版本和依赖信息。</p>
+<p><strong>Action</strong>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">cd sbs-fbs-server
+go version  # go1.20.x
+go build -o bin/api_server ./cmd/api_server
+go build -o bin/fbs_task ./cmd/fbs_task
+go test ./apps/inbound/... -v -count=1
+go test ./middleware/... -v -count=1</code></pre></figure>
+<p><strong>Result</strong>：若命令退出码为 0，两个二进制文件会生成在 <code>bin/</code>，目标测试形成改动前基线。课程生成环境没有执行公司内网依赖下的真实构建，学员需保存自己的命令、退出码和阻塞信息，不能复制一段“全部通过”的结论。</p>
+<h2 id="敏感数据服务-fbs-sensitive-data-server">敏感数据服务：fbs-sensitive-data-server</h2>
+<h3 id="职责边界">职责边界</h3>
+<p>敏感数据服务的 module path 与主服务相同（<code>git.garena.com/shopee/bg-logistics/b2c/sbs-fbs-server</code>），但仓库与进程入口是分开的。课程只把相同 module path 当作当前工具链和 IDE 排错事实，不猜测形成原因，也不据此推断数据库或部署拓扑。</p>
+<p>它集中承接联系人、地址等敏感数据相关能力，并通过自己的 API、鉴权和数据访问层控制边界。主服务需要相关信息时应沿现有 client 调用，不直接复制敏感数据存储逻辑。具体接口返回完整值、掩码值还是最小视图，要逐接口查代码与权限，不能用“敏感服务会自动脱敏”概括全部行为。</p>
+<p><strong>前端类比</strong>：前端 <code>piiRequest</code> 与后端敏感数据 client 都是在边界访问敏感能力。它们的协议、鉴权和返回字段并不对称，必须分别沿 wrapper/client 与服务端 route 核验。</p>
+<h3 id="编译和测试-敏感数据服务">编译和测试（敏感数据服务）</h3>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">cd fbs-sensitive-data-server
+go build -o bin/api_server ./cmd/api_server
+go build -o bin/task ./cmd/task
+go test ./... -count=1</code></pre></figure>
+<h3 id="star-案例-从主服务追踪-pii-调用">Star 案例：从主服务追踪 PII 调用</h3>
+<p><strong>Situation</strong>：主服务的 handler 需要展示卖家联系人姓名。这个字段来自敏感数据服务。</p>
+<p><strong>Task</strong>：理解主服务如何调用敏感数据服务，以及敏感数据服务如何确保数据安全。</p>
+<p><strong>Action</strong>：</p>
+<ol><li>在主服务的 <code>thirdpart/</code> 或 <code>agent/</code> 目录中找到调用敏感数据服务的 gRPC client。</li><li>追踪 client 的创建过程，确认连接、context 与鉴权信息由哪一层提供。</li><li>在敏感数据服务的 <code>apps/client/access/http/sc/</code> 中找到对应的 handler。</li><li>检查 handler、application 与 mapper 实际返回哪些字段，以及鉴权发生在哪一层。</li></ol>
+<p><strong>Result</strong>：你能够画出一条经过代码核对的敏感数据调用链，并明确哪些字段和鉴权行为仍需在受控环境验证。</p>
+<h2 id="tax-服务-fbs-tax-server">Tax 服务：fbs-tax-server</h2>
+<h3 id="职责和特殊性">职责和特殊性</h3>
+<p>Tax 服务承接税务、发票与计费相关能力。仓库提供 <code>tax_api</code>、<code>tax_core</code>、<code>tax_task</code> 三个入口；为什么某段逻辑属于哪一个进程，要看调用与注册代码，不能从“core”名称继续推导 CPU 模型或部署策略。</p>
+<p>Tax 的 <code>go.mod</code> 声明 Go 1.15。为该仓库编写声称可用的代码时，不使用泛型和更高版本才加入的标准库 API，并按仓库当前构建线验证。新版本 Go 工具链可能具备向后兼容能力，但“能被新工具链编译”不代表可以抬高项目的语言基线。</p>
+<h3 id="编译和测试-tax-服务">编译和测试（Tax 服务）</h3>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">cd fbs-tax-server
+go build -o bin/tax_api ./cmd/tax_api
+go build -o bin/tax_core ./cmd/tax_core
+go build -o bin/tax_task ./cmd/tax_task
+go test ./... -count=1</code></pre></figure>
+<h3 id="star-案例-为什么-tax-服务独立">Star 案例：为什么 Tax 服务独立</h3>
+<p><strong>Situation</strong>：ASN 需求评审中出现 Tax 字段，开发者需要判断是否真的修改 Tax，并注意其 Go 1.15 基线。</p>
+<p><strong>Task</strong>：理解 Tax 服务独立的原因。</p>
+<p><strong>Action</strong>：查看 Tax 的进程入口、领域目录、协议和当前依赖，确认它与主服务之间通过明确边界协作。再记录 Go 1.15 对新代码语法与标准库选择的限制。仓库为什么形成、多久发布一次、升级为何尚未发生，如果没有正式资料就不写成结论。</p>
+<p><strong>Result</strong>：你能根据职责与代码调用判断一个 ASN 需求是否涉及 Tax，并能在不涉及时给出“不修改 Tax”的证据。</p>
+<h2 id="配置文件与环境">配置文件与环境</h2>
+<h3 id="chassis-配置">Chassis 配置</h3>
+<p>三个仓库都使用 Chassis 框架，配置文件在 <code>conf/</code> 目录下：</p>
+<figure class="code-card"><div class="code-toolbar"><span>yaml</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="yaml"># 从主服务 conf/chassis.yaml 缩减，只保留本章要识别的结构。
+sbs_fbs_server:
+  initial:
+    config:
+      apolloDisabled: false
+      appId: sbs-fbs-server
+      namespaceList: sbs_fbs_server
+  application:
+    name: ${APPLICATION_NAME||FBSServer}
+    environment: ${ENV||test}
+  service:
+    rest:
+      listenAddress: &quot;${POD_IP||0.0.0.0}:${PORT||8080}&quot;</code></pre></figure>
+<p>配置值的实际来源要沿当前 Chassis 配置和环境约定核验。DSN、口令和密钥不能写进课程或提交到仓库；本章只记录键名、读取位置与缺失时的可观察错误。</p>
+<p><strong>前端类比</strong>：Chassis 配置 ≈ 前端的 <code>.env</code> + webpack config。<code>conf/chassis.yaml</code> ≈ <code>.env.local</code>（本地配置），Apollo ≈ 远程配置中心（类似前端的 LaunchDarkly 或 Firebase Remote Config）。</p>
+<h3 id="makefile-是仓库命令索引-不是统一标准">Makefile 是仓库命令索引，不是统一标准</h3>
+<p>主服务 Makefile 当前包含 <code>gen_wire</code>、<code>build_prepare</code>、<code>run_api_server</code>、<code>run_task_server</code> 与若干构建 target；Tax Makefile 另有 <code>test</code>、<code>lint</code>、<code>wire_*</code>、<code>build</code> 等 target。三个仓库没有一套完全相同的 <code>make build/test/run/lint</code> 接口。</p>
+<p>本地操作前先阅读目标 target。某些 target 会安装工具、访问内网、启动代理或读取环境配置，不应因为名称像 <code>run</code> 就直接执行。只需要验证编译时，优先使用明确的 <code>go build ./cmd/...</code>；需要生成 Wire 时再按仓库现有脚本和版本执行。</p>
+<p><strong>前端类比</strong>：Makefile 与 <code>package.json</code> scripts 都给复杂命令命名，但 target 名称没有跨仓统一语义，最终仍要读脚本内容。</p>
+<h2 id="版本矩阵与环境要求">版本矩阵与环境要求</h2>
+<div class="table-wrap"><table><thead><tr><th>项目</th><th>sbs-fbs-server</th><th>fbs-sensitive-data-server</th><th>fbs-tax-server</th></tr></thead><tbody><tr><td>Go 版本</td><td>1.20</td><td>1.20</td><td>1.15</td></tr><tr><td>Chassis</td><td>v0.4.3-r.13</td><td>v0.4.3-r.13</td><td>v0.4.3-r.22</td></tr><tr><td>GORM/Scorm</td><td>internal gorm v0.0.7、scorm v0.2.3-r.4、scormv2 v0.0.2-r.3、GORM 1.23.8</td><td>scormv2 v0.0.2-r.3；旧 scorm/GORM 为间接依赖</td><td>scormv2 v0.0.2-r.5、GORM 1.23.8</td></tr><tr><td>Redis client</td><td>go-redis v0.0.1-r.4</td><td>go-redis v0.0.1-a2</td><td>go-redis v0.0.1-r.9</td></tr><tr><td>Saturn adapter</td><td>chassis-saturn-server v1.0.8-r.17</td><td>chassis-saturn-server v1.0.8-r.9</td><td>chassis-saturn-server v1.0.8-r.18</td></tr></tbody></table></div>
+<p><code>r.13</code>、<code>r.22</code> 等修订号属于当前内部依赖版本标识，不能用公开教程的相近版本替代当前源码行为。</p>
+<h2 id="从启动一个进程到理解整个架构">从启动一个进程到理解整个架构</h2>
+<h3 id="推荐的学习路径">推荐的学习路径</h3>
+<p>最低要求是在 <code>sbs-fbs-server</code> 中构建并测试一条局部路径。随后按以下顺序扩大范围：</p>
+<ol><li>先在主服务中完成一次完整的功能开发（handler → service → repository → 测试）。</li><li>在授权环境用受控请求核对一个跨服务协议；没有账号时只提交 client/route 链路和 fixture。</li><li>阅读 Tax 的入口与对外协议，判断当前 ASN 需求是否与它有关。</li></ol>
+<h3 id="学习检查清单">学习检查清单</h3>
+<ul><li>[ ] 能画出三个仓库的进程图</li><li>[ ] 能在主服务中完成编译和测试</li><li>[ ] 能说明 Tax 当前声明 Go 1.15，并据此限制示例语法</li><li>[ ] 能在本地用 curl 调用主服务的健康检查接口</li><li>[ ] 能从仓库、进程和 client 边界说明敏感服务为何是独立修改范围</li></ul>
+<h2 id="常见错误">常见错误</h2>
+<h3 id="用错-go-版本">用错 Go 版本</h3>
+<p>Tax 的 <code>go.mod</code> 声明 1.15。较新工具链是否可用于当前构建要按仓库约定验证；无论使用哪版工具链，提交的源码都不能悄悄采用高于项目基线的语法和标准库 API。</p>
+<h3 id="混淆三个仓库的-import-路径">混淆三个仓库的 import 路径</h3>
+<p>敏感数据服务与主服务 module path 相同。IDE 索引或跨仓跳转异常时，先检查当前 workspace、module root 和打开的仓库，不把同名 import 当作另一个工作树的代码。</p>
+<h3 id="在生产环境中手动启动进程">在生产环境中手动启动进程</h3>
+<p>本章只验证本地构建、测试和授权环境中的启动证据，不教授生产部署或发布操作。不要在生产环境手动执行课程命令。</p>
+<h2 id="练习">练习</h2>
+<h3 id="进程地图绘制">进程地图绘制</h3>
+<p>画出三个仓库的全部进程及其通信关系。标注每个进程的 main.go 位置和职责。</p>
+<h3 id="版本兼容判断">版本兼容判断</h3>
+<p>以下代码使用了 <code>go 1.21</code> 的 <code>slices.Contains</code> 函数。它能在哪个仓库的代码中使用？（答案：都不能。主服务和敏感数据服务是 1.20，Tax 是 1.15。这个函数需要 Go 1.21+。）</p>
+<h3 id="编译和测试实战">编译和测试实战</h3>
+<p>在 <code>sbs-fbs-server</code> 中运行 <code>go build ./cmd/api_server</code> 和 <code>go test ./apps/inbound/... -v</code>。记录输出和耗时。</p>
+<h2 id="把构建-启动和联调分成三种证据">把构建、启动和联调分成三种证据</h2>
+<p><code>go build</code> 只证明目标包及其编译期依赖可以生成产物。<code>go test</code> 证明被执行的测试在当前环境通过。进程真正启动还要经过配置加载、端口监听与依赖初始化；接口可用则继续需要路由、身份、数据库或下游服务。三种结论不能互相替代。</p>
+<div class="table-wrap"><table><thead><tr><th>证据</th><th>可以下什么结论</th><th>不能下什么结论</th></tr></thead><tbody><tr><td>目标进程构建退出码为 0</td><td>当前源码与编译依赖相容</td><td>配置正确、接口可访问</td></tr><tr><td>局部测试通过</td><td>对应测试覆盖的行为通过</td><td>全仓、真实数据库和下游均正常</td></tr><tr><td>进程日志显示监听成功</td><td>框架已走到监听阶段</td><td>每条业务 route 和权限都正确</td></tr><tr><td>授权环境中的请求记录</td><td>该请求在该环境形成响应</td><td>其他身份、错误路径和 task 均正常</td></tr></tbody></table></div>
+<p>如果构建被内部模块下载阻塞，记录 Go 版本、命令、退出码和第一条有意义的错误，再判断是代码错误还是环境依赖。不要把本机缺少凭据改写成“仓库无法编译”，也不要为让命令通过而把敏感配置写进课程。</p>
+<p>Makefile 与前端 <code>package.json</code> scripts 都是命令入口，但文件中实际 target 才是事实。先运行 <code>make help</code> 或阅读 Makefile，再决定使用 <code>make build</code>、<code>go build</code> 还是仓库定义的其他目标。Go 模块通常使用共享下载缓存；首次构建仍可能访问内部模块代理，因此“无需安装依赖”不等于“离线必然可构建”。</p>
+<h2 id="独立练习-交付一张可复核进程地图">独立练习：交付一张可复核进程地图</h2>
+<p>选择主服务 API 作为最小路径：</p>
+<ol><li>从 <code>go.mod</code> 记录语言版本，并说明本机工具链是否匹配；</li><li>从 <code>cmd/api_server/main.go</code> 沿初始化调用找到 Chassis 与应用装配入口；</li><li>运行目标构建和一组 inbound 局部测试，保存命令、退出码和未验证项；</li><li>为另外两仓只读检查 <code>go.mod</code>、<code>cmd/</code> 与 Makefile，不要求连接真实依赖；</li><li>画出七个进程，箭头只保留能由当前代码或配置证明的调用；</li><li>给每个进程写出“面向同步请求、核心服务或任务”的入口类型；</li><li>标出完整运行仍需要的配置、内网依赖和授权环境。</li></ol>
+<p>通过标准：没有把仓库、进程、实例混为一谈；没有把 build 成功写成接口启动成功；Tax 示例保持 Go 1.15 基线；敏感服务相同 module path 被记录为工具链边界；图中没有凭空添加数据库、部署数量或调用方向。</p>
+<h2 id="章末自检与下一步">章末自检与下一步</h2>
+<ul><li>三个仓库共有几个明确进程入口？分别是什么？</li><li><code>go.mod</code> 的 Go 版本、当前安装的工具链版本与代码可用语法是什么关系？</li><li>Chassis 解决哪类公共问题？标准库、Gin/Echo 与它的主要取舍是什么？</li><li>为什么 <code>go build</code>、进程监听成功和接口联调成功是三种证据？</li><li>敏感数据服务与主服务 module path 相同会怎样影响 IDE 和依赖排查？</li><li>一个 ASN 列表需求为什么通常先从主服务 API 开始，又怎样证明暂不修改 Tax？</li></ul>
+<p>下一章从主服务 API 的一条真实 Network 记录进入 Chassis route。届时会把 route、middleware、DTO、handler 与统一响应逐个解释，并验证请求究竟在哪一层失败。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li><a href="https://go.dev/doc/modules/gomod-ref" target="_blank" rel="noreferrer">Go Modules Reference</a></li><li><a href="https://go.dev/doc/go1.15" target="_blank" rel="noreferrer">Go 1.15 Release Notes</a></li><li><a href="https://go.dev/doc/go1.20" target="_blank" rel="noreferrer">Go 1.20 Release Notes</a></li></ul><nav class="lesson-nav"><a href="../lessons/be-l07-goroutines-channels-sync-concurrency.html">← BE-L07<br><strong>goroutine、channel、sync 与并发边界</strong></a><a href="../lessons/be-w02-chassis-http-route-request-response.html">BE-W02 →<br><strong>Chassis HTTP 接口：从路由到请求与响应</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#这一章解决什么问题"><span class="toc-num">1</span>这一章解决什么问题</a><a class="" href="#先认识仓库-进程-框架-配置与构建"><span class="toc-num">2</span>先认识仓库、进程、框架、配置与构建</a><a class="sub" href="#chassis-是什么-为什么现在就要知道"><span class="toc-num">2.1</span>Chassis 是什么，为什么现在就要知道</a><a class="sub" href="#api-core-与-task-为什么拆成不同进程"><span class="toc-num">2.2</span>API、core 与 task 为什么拆成不同进程</a><a class="" href="#三个仓库的职责全景"><span class="toc-num">3</span>三个仓库的职责全景</a><a class="sub" href="#为什么需要三个仓库"><span class="toc-num">3.1</span>为什么需要三个仓库</a><a class="sub" href="#每个仓库的进程矩阵"><span class="toc-num">3.2</span>每个仓库的进程矩阵</a><a class="sub" href="#进程之间的关系"><span class="toc-num">3.3</span>进程之间的关系</a><a class="" href="#主服务-sbs-fbs-server"><span class="toc-num">4</span>主服务：sbs-fbs-server</a><a class="sub" href="#进程入口"><span class="toc-num">4.1</span>进程入口</a><a class="sub" href="#目录结构回顾"><span class="toc-num">4.2</span>目录结构回顾</a><a class="sub" href="#编译和测试"><span class="toc-num">4.3</span>编译和测试</a><a class="sub" href="#star-案例-启动主服务-api"><span class="toc-num">4.4</span>Star 案例：启动主服务 API</a><a class="" href="#敏感数据服务-fbs-sensitive-data-server"><span class="toc-num">5</span>敏感数据服务：fbs-sensitive-data-server</a><a class="sub" href="#职责边界"><span class="toc-num">5.1</span>职责边界</a><a class="sub" href="#编译和测试-敏感数据服务"><span class="toc-num">5.2</span>编译和测试（敏感数据服务）</a><a class="sub" href="#star-案例-从主服务追踪-pii-调用"><span class="toc-num">5.3</span>Star 案例：从主服务追踪 PII 调用</a><a class="" href="#tax-服务-fbs-tax-server"><span class="toc-num">6</span>Tax 服务：fbs-tax-server</a><a class="sub" href="#职责和特殊性"><span class="toc-num">6.1</span>职责和特殊性</a><a class="sub" href="#编译和测试-tax-服务"><span class="toc-num">6.2</span>编译和测试（Tax 服务）</a><a class="sub" href="#star-案例-为什么-tax-服务独立"><span class="toc-num">6.3</span>Star 案例：为什么 Tax 服务独立</a><a class="" href="#配置文件与环境"><span class="toc-num">7</span>配置文件与环境</a><a class="sub" href="#chassis-配置"><span class="toc-num">7.1</span>Chassis 配置</a><a class="sub" href="#makefile-是仓库命令索引-不是统一标准"><span class="toc-num">7.2</span>Makefile 是仓库命令索引，不是统一标准</a><a class="" href="#版本矩阵与环境要求"><span class="toc-num">8</span>版本矩阵与环境要求</a><a class="" href="#从启动一个进程到理解整个架构"><span class="toc-num">9</span>从启动一个进程到理解整个架构</a><a class="sub" href="#推荐的学习路径"><span class="toc-num">9.1</span>推荐的学习路径</a><a class="sub" href="#学习检查清单"><span class="toc-num">9.2</span>学习检查清单</a><a class="" href="#常见错误"><span class="toc-num">10</span>常见错误</a><a class="sub" href="#用错-go-版本"><span class="toc-num">10.1</span>用错 Go 版本</a><a class="sub" href="#混淆三个仓库的-import-路径"><span class="toc-num">10.2</span>混淆三个仓库的 import 路径</a><a class="sub" href="#在生产环境中手动启动进程"><span class="toc-num">10.3</span>在生产环境中手动启动进程</a><a class="" href="#练习"><span class="toc-num">11</span>练习</a><a class="sub" href="#进程地图绘制"><span class="toc-num">11.1</span>进程地图绘制</a><a class="sub" href="#版本兼容判断"><span class="toc-num">11.2</span>版本兼容判断</a><a class="sub" href="#编译和测试实战"><span class="toc-num">11.3</span>编译和测试实战</a><a class="" href="#把构建-启动和联调分成三种证据"><span class="toc-num">12</span>把构建、启动和联调分成三种证据</a><a class="" href="#独立练习-交付一张可复核进程地图"><span class="toc-num">13</span>独立练习：交付一张可复核进程地图</a><a class="" href="#章末自检与下一步"><span class="toc-num">14</span>章末自检与下一步</a><a class="" href="#参考文献"><span class="toc-num">15</span>参考文献</a></aside></div></div></div><footer class="site-footer">FBS 前后端转全栈 Landing · 已发布</footer></div></body></html>

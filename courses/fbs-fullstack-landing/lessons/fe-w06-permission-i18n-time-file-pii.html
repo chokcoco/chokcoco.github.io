@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="能在写 FBS 页面时同步处理权限检查、多语言翻译、时区转换、文件上传下载和 PII 敏感信息边界——以&quot;新增字段 + 导出&quot;需求为主线，逐项加载仓库规则，用缺权限/不同时区/错误文件做反例验证。"><title>权限、i18n、时间、文件与 PII：页面功能的准入项 | FBS 前后端转全栈 Landing</title><script src="../assets/theme-switcher.js"></script><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><div class="lesson-page-grid"><aside class="chapter-nav" aria-label="课程章节导航"><button class="chapter-nav-toggle" type="button" aria-expanded="true" aria-controls="chapter-nav-content"><span aria-hidden="true">◀</span><span class="chapter-nav-toggle-label">收起</span></button><div class="chapter-nav-content" id="chapter-nav-content"><div class="chapter-nav-heading"><strong>课程章节</strong><span>第 12 / 40 章</span></div><nav class="chapter-nav-list"><section class="chapter-nav-module"><h2>模块一：前端语言及标准库基础</h2><a href="../lessons/fe-l01-js-data-types-equality.html"><span class="chapter-nav-code">FE-L01</span><span class="chapter-nav-title">JavaScript 数据、类型与相等性：先读懂仓库判断分支</span></a><a href="../lessons/fe-l02-functions-scope-closure-modules.html"><span class="chapter-nav-code">FE-L02</span><span class="chapter-nav-title">函数、作用域、闭包与模块：跟上组件外的调用链</span></a><a href="../lessons/fe-l03-promise-async-eventloop.html"><span class="chapter-nav-code">FE-L03</span><span class="chapter-nav-title">Promise、async/await 与事件循环：读懂请求和页面副作用</span></a><a href="../lessons/fe-l04-js-objects-web-data.html"><span class="chapter-nav-code">FE-L04</span><span class="chapter-nav-title">JavaScript 常用对象与 Web 数据处理</span></a><a href="../lessons/fe-l05-typescript-type-chain.html"><span class="chapter-nav-code">FE-L05</span><span class="chapter-nav-title">TypeScript：从接口数据到组件 Props 的类型链</span></a><a href="../lessons/fe-l06-browser-framework-syntax-bridge.html"><span class="chapter-nav-code">FE-L06</span><span class="chapter-nav-title">浏览器与框架语法桥：DOM、事件、JSX、Vue SFC</span></a></section>
+<section class="chapter-nav-module"><h2>模块二：Web 前端开发</h2><a href="../lessons/fe-w01-start-three-frontend-projects.html"><span class="chapter-nav-code">FE-W01</span><span class="chapter-nav-title">启动三类 FBS 前端工程并建立仓库地图</span></a><a href="../lessons/fe-w02-components-styles-forms-tables.html"><span class="chapter-nav-code">FE-W02</span><span class="chapter-nav-title">组件、样式、表单与表格：按现有组件库做页面</span></a><a href="../lessons/fe-w03-routes-menus-page-entries.html"><span class="chapter-nav-code">FE-W03</span><span class="chapter-nav-title">路由、菜单与页面入口：让页面真正可访问</span></a><a href="../lessons/fe-w04-state-management-redux-vuex-recoil.html"><span class="chapter-nav-code">FE-W04</span><span class="chapter-nav-title">状态管理：Redux/Recoil、Vuex 与宿主状态</span></a><a href="../lessons/fe-w05-api-proxy-errors-contract.html"><span class="chapter-nav-code">FE-W05</span><span class="chapter-nav-title">API、代理、错误与前后端契约</span></a><a href="../lessons/fe-w06-permission-i18n-time-file-pii.html" class="is-current" aria-current="page"><span class="chapter-nav-code">FE-W06</span><span class="chapter-nav-title">权限、i18n、时间、文件与 PII：页面功能的准入项</span></a><a href="../lessons/fe-w07-frontend-vertical-slice.html"><span class="chapter-nav-code">FE-W07</span><span class="chapter-nav-title">前端纵向切片：为入库列表增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块三：Web 前端进阶</h2><a href="../lessons/fe-a01-three-app-lifecycles-host-boundaries.html"><span class="chapter-nav-code">FE-A01</span><span class="chapter-nav-title">三种应用生命周期与宿主边界</span></a><a href="../lessons/fe-a02-micro-frontends-remote-components.html"><span class="chapter-nav-code">FE-A02</span><span class="chapter-nav-title">微前端与远端组件：Module Federation、qiankun、MMF</span></a><a href="../lessons/fe-a03-vue-react-coexistence-deps-migration.html"><span class="chapter-nav-code">FE-A03</span><span class="chapter-nav-title">Vue/React 共存、共享依赖与版本迁移</span></a><a href="../lessons/fe-a04-testing-linting-build-artifacts.html"><span class="chapter-nav-code">FE-A04</span><span class="chapter-nav-title">测试、静态检查、构建与产物边界</span></a><a href="../lessons/fe-a05-observability-systematic-debugging.html"><span class="chapter-nav-code">FE-A05</span><span class="chapter-nav-title">前端观测与系统化排错</span></a><a href="../lessons/fe-a06-impact-analysis-dev-handoff.html"><span class="chapter-nav-code">FE-A06</span><span class="chapter-nav-title">前端改动影响分析与开发交接</span></a></section>
+<section class="chapter-nav-module"><h2>模块四：后端语言及标准库基础</h2><a href="../lessons/be-l01-go-toolchain-modules-versions.html"><span class="chapter-nav-code">BE-L01</span><span class="chapter-nav-title">Go 工具链、模块与版本边界</span></a><a href="../lessons/be-l02-values-pointers-structs-tags.html"><span class="chapter-nav-code">BE-L02</span><span class="chapter-nav-title">值、指针、struct、tag 与数据边界</span></a><a href="../lessons/be-l03-methods-interfaces-embedding-di.html"><span class="chapter-nav-code">BE-L03</span><span class="chapter-nav-title">方法、接口、嵌入与依赖倒置</span></a><a href="../lessons/be-l04-slices-maps-sorting-data-transform.html"><span class="chapter-nav-code">BE-L04</span><span class="chapter-nav-title">slice、map、排序与数据转换</span></a><a href="../lessons/be-l05-errors-defer-panic-resources.html"><span class="chapter-nav-code">BE-L05</span><span class="chapter-nav-title">error、defer、panic/recover 与资源生命周期</span></a><a href="../lessons/be-l06-context-time-json-http-io.html"><span class="chapter-nav-code">BE-L06</span><span class="chapter-nav-title">context、时间、JSON、HTTP、I/O 与文件</span></a><a href="../lessons/be-l07-goroutines-channels-sync-concurrency.html"><span class="chapter-nav-code">BE-L07</span><span class="chapter-nav-title">goroutine、channel、sync 与并发边界</span></a></section>
+<section class="chapter-nav-module"><h2>模块五：Web 后端开发</h2><a href="../lessons/be-w01-start-three-backend-processes.html"><span class="chapter-nav-code">BE-W01</span><span class="chapter-nav-title">启动三类 FBS 后端进程并建立仓库地图</span></a><a href="../lessons/be-w02-chassis-http-route-request-response.html"><span class="chapter-nav-code">BE-W02</span><span class="chapter-nav-title">Chassis HTTP 接口：从路由到请求与响应</span></a><a href="../lessons/be-w03-wire-layered-architecture.html"><span class="chapter-nav-code">BE-W03</span><span class="chapter-nav-title">Wire 与分层：把 handler 接到应用、领域和基础设施</span></a><a href="../lessons/be-w04-mysql-gorm-scorm-repository-transactions.html"><span class="chapter-nav-code">BE-W04</span><span class="chapter-nav-title">MySQL、GORM/Scorm、仓储与事务</span></a><a href="../lessons/be-w05-service-calls-http-grpc-timeouts.html"><span class="chapter-nav-code">BE-W05</span><span class="chapter-nav-title">服务调用、HTTP/gRPC 契约与超时</span></a><a href="../lessons/be-w06-auth-errors-pii-security.html"><span class="chapter-nav-code">BE-W06</span><span class="chapter-nav-title">鉴权、错误码、PII 与接口安全边界</span></a><a href="../lessons/be-w07-backend-vertical-slice.html"><span class="chapter-nav-code">BE-W07</span><span class="chapter-nav-title">后端纵向切片：为入库请求增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块六：Web 后端进阶</h2><a href="../lessons/be-a01-apollo-chassis-config.html"><span class="chapter-nav-code">BE-A01</span><span class="chapter-nav-title">Apollo 与 Chassis 配置：环境差异、热更新和开关</span></a><a href="../lessons/be-a02-redis-codis-cache-consistency.html"><span class="chapter-nav-code">BE-A02</span><span class="chapter-nav-title">Redis/Codis 与缓存一致性</span></a><a href="../lessons/be-a03-saturn-scheduled-async-tasks.html"><span class="chapter-nav-code">BE-A03</span><span class="chapter-nav-title">Saturn 定时任务与异步任务</span></a><a href="../lessons/be-a04-kafka-message-pipeline.html"><span class="chapter-nav-code">BE-A04</span><span class="chapter-nav-title">Kafka 消息链路与事件边界</span></a><a href="../lessons/be-a05-reliability-idempotency-transactions-retry.html"><span class="chapter-nav-code">BE-A05</span><span class="chapter-nav-title">可靠性：幂等、事务、重试、并发与降级组合</span></a><a href="../lessons/be-a06-logging-metrics-diagnostics.html"><span class="chapter-nav-code">BE-A06</span><span class="chapter-nav-title">日志、指标、链路与系统化排错</span></a><a href="../lessons/be-a07-impact-analysis-testing-handoff.html"><span class="chapter-nav-code">BE-A07</span><span class="chapter-nav-title">后端改动影响分析、测试与开发交接</span></a></section></nav></div></aside><div class="lesson-page-main"><header class="topbar"><a class="brand" href="../index.html">FBS 前后端转全栈 Landing</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">FE-W06 · 120–160 分钟</div><h1>权限、i18n、时间、文件与 PII：页面功能的准入项</h1><p class="lesson-summary">能在写 FBS 页面时同步处理权限检查、多语言翻译、时区转换、文件上传下载和 PII 敏感信息边界——以&quot;新增字段 + 导出&quot;需求为主线，逐项加载仓库规则，用缺权限/不同时区/错误文件做反例验证。</p><a class="source-link" href="../markdown/fe-w06-permission-i18n-time-file-pii.md">查看 Markdown 版本</a></section><div class="lesson-layout"><main class="lesson-content"><h2 id="这一章解决什么问题">这一章解决什么问题</h2>
+<p>后端同学写前端页面时，往往聚焦在&quot;把数据正确显示出来&quot;。但在 FBS 的前端仓库中，一个功能完整上线还需要通过五道准入检查：这个用户能看到这个页面/按钮吗？页面上的文字在不同语言下正确吗？时间是用 UTC 还是本地时区？导出文件是 Excel 还是 PDF，文件名怎么定？涉及 PII 的数据经过了敏感服务吗？</p>
+<p>这些检查不是&quot;最后加一下就行&quot;——它们分布在路由、请求、组件、Store 的不同层面。本章用一个统一的需求主线&quot;在入库列表增加一个联系人字段 + 导出功能&quot;串联这五道检查，每道检查都给出仓库中现有的实现位置和代码样例。</p>
+<p>学完本章后，你不会背完所有权限码和 i18n key，但你会在写任何新功能时自动问自己这五个问题，并且知道去哪里找答案。</p>
+<blockquote><p>本章基于三个前端仓库的 release 分支（2026-07-20）。权限码、i18n key、时区约定和 PII 规则以仓库当前代码为准。</p></blockquote>
+<h2 id="权限-路由级和操作级两层控制">权限：路由级和操作级两层控制</h2>
+<h3 id="路由级权限-authcodes">路由级权限（authCodes）</h3>
+<p>在 SC Vue 和 SC React 中，路由级权限由 <code>meta.authCodes</code> 控制：</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">// SC Vue src/router/index.ts
+meta: {
+  authCodes: ['access_to_sbs', 'access_to_sbs_service_by_shopee'],
+}</code></pre></figure>
+<p><code>authCodes</code> 由 Seller Center 宿主在用户进入模块前校验。如果用户不满足任一个 authCode，整个 FBS 模块不可见。这不是 FBS 自己能控制的——它是宿主层面的准入。</p>
+<h3 id="操作级权限-permissions">操作级权限（permissions）</h3>
+<p>进入模块后，具体页面和操作按钮由操作权限控制。Portal 和 SC 仓库使用类似模式：</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">// Portal: 路由定义中的权限
+meta: { permissions: ['VIEW_INBOUND_REQUEST'] }
+
+// Portal: 页面中的按钮级权限
+{hasPermission('PROCESS_INBOUND_REQUEST') &amp;&amp; (
+  &lt;Button&gt;创建入库单&lt;/Button&gt;
+)}
+
+// SC Vue: 操作权限检查
+const canModify = computed(() =&gt; {
+  return hasPermission('INBOUND_MODIFY');
+});</code></pre></figure>
+<p>Portal 的权限码定义在 <code>src/constants/permissions.ts</code> 中，是一个数字到权限名的映射：</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">export const PERMISSIONS = {
+  VIEW_INBOUND_REQUEST: 1111,
+  PROCESS_INBOUND_REQUEST: 1112,
+  // ...
+};</code></pre></figure>
+<p>SC Vue 和 SC React 的权限检查依赖宿主提供的权限列表。<code>hasPermission</code> 函数在 <code>fbs-frontend/src/business/utils/permission.ts</code> 中定义（FE-L01 已讲过），核心逻辑是从 Redux Store 中读取 <code>permission_code_list</code>，然后 <code>includes</code> 判断。</p>
+<h3 id="新增功能时的权限步骤">新增功能时的权限步骤</h3>
+<p>当你需要新增一个受权限控制的功能时：</p>
+<ol><li>确认权限码是否已在 <code>PERMISSIONS</code> 常量或权限管理平台中定义。如果没有，先在权限管理平台注册，再添加到代码中。</li><li>在路由定义中配置 <code>permissions</code>（控制页面准入）或 <code>authCodes</code>（控制模块准入）。</li><li>在页面中需要权限控制的操作按钮处加上 <code>hasPermission</code> 判断。</li><li>测试无权限用户的体验：页面是否显示无权限提示（而不是白屏或报错），受限按钮是否正确隐藏。</li></ol>
+<h2 id="i18n-transify-i18next-与翻译-key">i18n：Transify、i18next 与翻译 key</h2>
+<h3 id="翻译函数的正确调用方式">翻译函数的正确调用方式</h3>
+<p>FBS 三个前端仓库使用 Transify 作为翻译管理平台。页面中所有用户可见的文案都必须通过 <code>$t()</code> 包裹：</p>
+<figure class="code-card"><div class="code-toolbar"><span>vue</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="vue">&lt;!-- Vue --&gt;
+&lt;h1&gt;{{ $t('inboundProblemId') }}: {{ id }}&lt;/h1&gt;
+&lt;EdsTag&gt;{{ $t('commonUrgent') }}&lt;/EdsTag&gt;</code></pre></figure>
+<figure class="code-card"><div class="code-toolbar"><span>tsx</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="tsx">// React (Portal)
+&lt;h1&gt;{$t('Inbound Request List')}&lt;/h1&gt;</code></pre></figure>
+<p><code>$t</code> 接收一个翻译 key，返回当前语言对应的翻译文案。翻译 key 由 Transify 平台管理，前端通过 <code>yarn i18n:pull</code> 从远程拉取到本地 <code>src/lang/</code> 目录下的 JSON 文件。</p>
+<h3 id="翻译-key-的命名惯例">翻译 key 的命名惯例</h3>
+<p>FBS 的翻译 key 没有强制的层级命名规则，但常见的模式是：</p>
+<div class="table-wrap"><table><thead><tr><th>类型</th><th>示例 key</th><th>含义</th></tr></thead><tbody><tr><td>通用文案</td><td><code>commonUrgent</code>、<code>commonModify</code>、<code>commonError</code></td><td>跨页面复用的按钮/提示文案</td></tr><tr><td>页面特化</td><td><code>inboundProblemId</code>、<code>ibtDefaultTreatment</code></td><td>只在特定页面使用的文案</td></tr><tr><td>状态值</td><td>状态 key 直接对应后端返回的枚举值</td><td>状态枚举的翻译</td></tr></tbody></table></div>
+<h3 id="新增文案的流程">新增文案的流程</h3>
+<ol><li>在 Transify 平台创建新的翻译 key，填写各语言（中文、英文、泰文等）的翻译。</li><li>在本地仓库执行 <code>yarn i18n:pull</code> 拉取最新翻译文件。</li><li>在代码中使用 <code>$t('yourNewKey')</code>。</li></ol>
+<p>不要在代码中硬编码文案，也不要通过拼接字符串来&quot;省 key&quot;：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 错误：硬编码中文
+&lt;Button&gt;创建入库单&lt;/Button&gt;
+
+// 错误：拼接——不同语言的语序可能不同
+const msg = $t('create') + ' ' + $t('inbound') + ' ' + $t('request');
+
+// 正确：使用完整的翻译 key
+&lt;Button&gt;{$t('createInboundRequest')}&lt;/Button&gt;</code></pre></figure>
+<h3 id="portal-的-t-封装">Portal 的 $t 封装</h3>
+<p>Portal 在 <code>src/business/utils/i18n.ts</code> 中封装了 <code>$t</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">export const $t: IntlT = generateTransifyCommon({
+  project: 'fbs',
+  t: (key, options) =&gt; {
+    handleTranslateReport(key);
+    return i18n.t(key, options);
+  },
+  isShowKey: false,
+});</code></pre></figure>
+<p><code>isShowKey: false</code> 表示如果找不到翻译，不显示原始 key（而是显示空字符串或其他降级方案）。<code>handleTranslateReport</code> 用于翻译覆盖率上报——如果某个 key 缺失翻译，Transify 平台会收到报告。</p>
+<p>SC React 中远端组件使用 <code>$gtForRemoteComponent</code>，它使用单花括号插值 <code>{var}</code> 而非双花括号 <code>{{var}}</code>——这是远端组件的宿主兼容约束，不要混用。</p>
+<h2 id="时间-秒-毫秒-utc-本地时区与格式化">时间：秒/毫秒、UTC/本地时区与格式化</h2>
+<h3 id="fbs-的时间契约">FBS 的时间契约</h3>
+<p>FBS 后端（Go）返回的时间戳通常是<strong>秒级 Unix 时间戳</strong>。前端接收到后需要 <code>* 1000</code> 转为毫秒才能传给 <code>new Date()</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 后端返回：mtime: 1720000000（秒）
+const date = new Date(item.mtime * 1000);</code></pre></figure>
+<p>不同接口可能有不同的时间格式（秒级时间戳、毫秒级时间戳、ISO 8601 字符串）。读 API 文档或响应样例时先确认时间格式，不要假设所有接口都返回相同的格式。</p>
+<h3 id="时区边界">时区边界</h3>
+<p>FBS 是跨国业务，卖家可能分布在巴西（UTC-3）、新加坡（UTC+8）、泰国（UTC+7）等不同时区。前端的时间处理规则：</p>
+<ul><li><strong>存储和传输</strong>：统一使用 UTC。API 的请求和响应中的时间戳/ISO 字符串都应该是 UTC。</li><li><strong>展示</strong>：按用户所在时区格式化。使用 <code>toLocaleDateString</code> 或 <code>Intl.DateTimeFormat</code>。</li><li><strong>日期选择器</strong>：选择的日期通常按当天 00:00 本地时间处理，需要转成 UTC 时间戳发给后端。</li></ul>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 展示：按用户时区格式化
+const displayDate = new Date(timestamp * 1000).toLocaleDateString('zh-CN');
+// 输出：2026/7/20
+
+// 发给后端：日期选择器选中的日期转 UTC 时间戳
+const selectedDate = new Date('2026-07-20'); // 本地时间 00:00
+const utcTimestamp = Math.floor(selectedDate.getTime() / 1000);</code></pre></figure>
+<p>关键边界：<code>new Date('2026-07-20')</code> 在不同时区的浏览器中行为不同。在 UTC+8 的浏览器中它是 <code>2026-07-20 00:00:00 +0800</code>，在 UTC-3 中是 <code>2026-07-20 00:00:00 -0300</code>。如果你需要精确的 UTC 午夜，使用 <code>new Date('2026-07-20T00:00:00Z')</code>。</p>
+<h3 id="fbs-仓库中的时间工具">FBS 仓库中的时间工具</h3>
+<p>三个仓库各自封装了时间处理工具函数。写新功能时，优先搜索仓库中已有的时间格式化函数而不是手写 <code>new Date().getXxx()</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash"># 在仓库中搜索时间相关工具函数
+rg &quot;formatTime|formatDate|toLocale&quot; --include='*.ts' --include='*.js'</code></pre></figure>
+<h2 id="文件-下载-上传与-blob-处理">文件：下载、上传与 Blob 处理</h2>
+<h3 id="文件下载-区分普通请求和-blob-请求">文件下载：区分普通请求和 Blob 请求</h3>
+<p>FBS 的文件导出（Excel、PDF）使用专门的 Blob 请求实例。以 SC Vue 为例：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 普通请求——返回 JSON，自动解包
+export const exportForExcel = (data) =&gt; request({
+  url: '/inbound/request/export/excel',
+  method: 'POST',
+  data,
+});
+
+// Blob 请求——返回二进制，不解包
+export const exportSyncPdf = (data) =&gt; blobRequest({
+  url: '/inbound/request/export/pdf',
+  method: 'POST',
+  data,
+});</code></pre></figure>
+<p><code>blobRequest</code> 是 <code>app.request.clone({ responseType: 'blob' })</code>，配置了 <code>responseType: 'blob'</code> 告诉 Axios 不要将响应解析为 JSON。收到 Blob 后，需要通过临时 URL 触发浏览器下载：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const blob = await exportSyncPdf({ ir_id: id });
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `inbound_${id}.pdf`;
+a.click();
+URL.revokeObjectURL(url);</code></pre></figure>
+<h3 id="文件上传">文件上传</h3>
+<p>FBS 的上传功能通常使用 FormData + POST：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const formData = new FormData();
+formData.append('file', file);
+formData.append('ir_id', id);
+
+await request({
+  url: '/inbound/request/upload',
+  method: 'POST',
+  data: formData,
+  headers: { 'Content-Type': 'multipart/form-data' },
+});</code></pre></figure>
+<p>上传前通常需要前端校验文件类型和大小：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_TYPES = ['.xlsx', '.xls', '.csv'];
+
+if (file.size &gt; MAX_SIZE) {
+  EdsToastInstance.error($t('fileTooLarge'));
+  return;
+}
+if (!ALLOWED_TYPES.some(ext =&gt; file.name.endsWith(ext))) {
+  EdsToastInstance.error($t('fileTypeNotAllowed'));
+  return;
+}</code></pre></figure>
+<h3 id="导出文件命名">导出文件命名</h3>
+<p>文件名通常包含业务标识、时间戳和文件类型：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 命名模式
+const fileName = `Inbound_Request_${ir_id}_${Date.now()}.pdf`;</code></pre></figure>
+<p><code>Date.now()</code> 用于生成唯一文件名，避免浏览器缓存问题。</p>
+<h2 id="pii-敏感信息的处理边界">PII：敏感信息的处理边界</h2>
+<h3 id="pii-请求使用独立的-request-实例">PII 请求使用独立的 request 实例</h3>
+<p>FBS 中涉及敏感信息（姓名、电话、邮箱、证件号等）的请求，必须使用 <code>piiRequest</code> 而非普通的 <code>request</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// SC Vue src/utils/request.js
+export const piiRequest = app.request.clone({
+  baseURL: '/api/fbs/pii/sc',  // 指向敏感数据服务
+  unpackData: false,
+});</code></pre></figure>
+<p>PII 请求指向 <code>/api/fbs/pii/sc</code> 而非普通业务请求的 <code>/api/fbs/sc</code>。后端 <code>fbs-sensitive-data-server</code> 专门处理敏感数据，提供独立的鉴权、审计和脱敏能力。</p>
+<h3 id="pii-的展示边界">PII 的展示边界</h3>
+<p>即使通过 PII 接口获取了敏感数据，前端展示时仍然要遵循最小展示原则：</p>
+<ul><li>姓名：可能需要部分脱敏（如&quot;张**&quot;）。</li><li>电话：通常需要脱敏（如&quot;138****1234&quot;）。</li><li>证件号：绝不在页面上完整展示，仅展示部分或完全隐藏。</li><li>邮箱：视业务需求决定是否脱敏。</li></ul>
+<p>脱敏通常在服务端完成（<code>fbs-sensitive-data-server</code> 的响应中已经脱敏），但前端不能假设服务端一定会脱敏——展示前应做二次检查。FBS 仓库中有对应的脱敏工具函数，在展示 PII 数据时优先使用。</p>
+<h3 id="pii-数据的日志与存储">PII 数据的日志与存储</h3>
+<p>PII 数据绝不能出现在以下位置：</p>
+<ul><li><code>console.log()</code> 或任何前端日志。</li><li>浏览器 localStorage/sessionStorage。</li><li>URL 查询参数（除非已脱敏）。</li><li>错误上报的 payload 中。</li></ul>
+<p>如果必须在前端临时持有 PII 数据（如编辑表单），使用后应立即清理。不要将 PII 数据存入 Redux/Vuex Store 的持久化部分。</p>
+<h3 id="pii-的权限检查">PII 的权限检查</h3>
+<p>访问 PII 数据通常需要更高的权限级别。在 FBS Portal 中，查看卖家详情的 PII 字段需要 <code>CLIENT_DETAIL_ALL</code> 权限码；SC 仓库中 PII 相关操作需要宿主层面的额外授权。</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// Portal: 只有特定权限才能看完整信息
+{hasPermission('CLIENT_DETAIL_ALL') ? (
+  &lt;FullDetail data={piiData} /&gt;
+) : (
+  &lt;MaskedDetail data={piiData} /&gt;
+)}</code></pre></figure>
+<h2 id="综合任务-新增字段-导出">综合任务：新增字段 + 导出</h2>
+<p>将以上五道检查串联为一个实际任务。假设需求是：在入库列表中新增&quot;紧急联系人&quot;字段和导出 Excel 功能。</p>
+<h3 id="需求拆解">需求拆解</h3>
+<div class="table-wrap"><table><thead><tr><th>关注点</th><th>需要做什么</th><th>仓库位置</th></tr></thead><tbody><tr><td>权限</td><td>确认是否需要新权限码</td><td><code>constants/permissions.ts</code></td></tr><tr><td>i18n</td><td>新增翻译 key：<code>inboundUrgentContact</code>、<code>exportInboundList</code></td><td>Transify 平台 → <code>yarn i18n:pull</code></td></tr><tr><td>时间</td><td>确认导出文件名中的时间格式</td><td>现有导出函数参考</td></tr><tr><td>文件</td><td>新增 Excel 导出 API（blobRequest）</td><td><code>src/api/inbound.js</code></td></tr><tr><td>PII</td><td>判断&quot;紧急联系人&quot;是否属于 PII，如果是走 piiRequest</td><td><code>src/utils/request.js</code></td></tr></tbody></table></div>
+<h3 id="实现检查清单">实现检查清单</h3>
+<ol><li><strong>权限</strong>：如果导出功能需要特定权限，在操作按钮上添加 <code>hasPermission</code> 判断。</li><li><strong>i18n</strong>：列表列头和导出按钮文案使用 <code>$t('inboundUrgentContact')</code>。</li><li><strong>时间</strong>：导出文件名包含 <code>YYYYMMDD</code> 格式的当前日期。</li><li><strong>文件</strong>：使用 <code>blobRequest</code> 发送导出请求，接收 Blob 后触发浏览器下载。</li><li><strong>PII</strong>：如果&quot;紧急联系人&quot;是 PII，展示时脱敏；导出时确认权限和审计。</li></ol>
+<h3 id="反例验证">反例验证</h3>
+<div class="table-wrap"><table><thead><tr><th>反例</th><th>预期行为</th></tr></thead><tbody><tr><td>无导出权限用户访问页面</td><td>导出按钮隐藏</td></tr><tr><td>英文语言下的页面</td><td>列头显示&quot;Urgent Contact&quot;</td></tr><tr><td>巴西时区用户导出</td><td>文件名中的日期是巴西当地时间</td></tr><tr><td>导出请求网络错误</td><td>Toast 提示 + 不下载破损文件</td></tr><tr><td>PII 数据出现在 console.log</td><td>ESLint/代码审查应拦截</td></tr></tbody></table></div>
+<h2 id="常见错误">常见错误</h2>
+<h3 id="硬编码文案">硬编码文案</h3>
+<figure class="code-card"><div class="code-toolbar"><span>vue</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="vue">&lt;!-- 错误 --&gt;
+&lt;Button&gt;Create Inbound Request&lt;/Button&gt;
+&lt;!-- 正确 --&gt;
+&lt;Button&gt;{{ $t('createInboundRequest') }}&lt;/Button&gt;</code></pre></figure>
+<h3 id="时间戳未区分秒-毫秒">时间戳未区分秒/毫秒</h3>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 错误：后端返回秒级时间戳，前端直接当毫秒用
+new Date(item.mtime);  // 日期是 1970 年！
+
+// 正确：
+new Date(item.mtime * 1000);</code></pre></figure>
+<h3 id="pii-走普通请求">PII 走普通请求</h3>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 错误：敏感数据走普通 request
+const data = await request({ url: '/some/pii/endpoint' });
+// 正确：
+const data = await piiRequest({ url: '/some/pii/endpoint' });</code></pre></figure>
+<h3 id="导出文件名含特殊字符">导出文件名含特殊字符</h3>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 可能在某些浏览器/OS 中失败
+const fileName = `入库单_${irId}_${name}.pdf`;
+// 更安全：使用 ASCII 字符
+const fileName = `Inbound_${irId}_${Date.now()}.pdf`;</code></pre></figure>
+<h2 id="练习">练习</h2>
+<h3 id="i18n-缺失排查">i18n 缺失排查</h3>
+<p>在 SC Vue 仓库中，找一个未在 Transify 注册但页面中直接写了中文的地方（提示：搜索非 <code>$t()</code> 包裹的中文字符）。评估它是否需要改为 <code>$t()</code>。</p>
+<h3 id="时间处理审查">时间处理审查</h3>
+<p>在 <code>fbs-sc-vue/src/views/inbound/</code> 目录下搜索 <code>new Date(</code> 或 <code>mtime</code> 的使用。检查所有时间处理是否正确处理了秒/毫秒转换。</p>
+<h3 id="pii-数据流追踪">PII 数据流追踪</h3>
+<p>在 SC Vue 仓库中追踪 <code>piiRequest</code> 的一个用例。从页面调用开始，经过 API 函数、request wrapper、到后端路由。标注在每一层中 PII 数据是否被正确保护。</p>
+<h3 id="参考答案">参考答案</h3>
+<p><strong>8.3</strong>：<code>piiRequest</code> 的 <code>baseURL: '/api/fbs/pii/sc'</code> 将请求路由到 <code>fbs-sensitive-data-server</code> 而非主服务。请求 header 中注入的 <code>lang-id</code>、<code>fbs-sc-source</code> 等信息同样由 wrapper 注入。后端敏感服务返回的数据已经脱敏，前端不应做额外的日志输出。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat" target="_blank" rel="noreferrer">MDN Intl.DateTimeFormat</a> — 时区感知的日期格式化</li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Blob" target="_blank" rel="noreferrer">MDN Blob</a> — 二进制数据对象</li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL" target="_blank" rel="noreferrer">MDN URL.createObjectURL</a> — Blob 下载</li><li><a href="https://github.com/axios/axios/tree/v0.18.0" target="_blank" rel="noreferrer">Axios v0.18 Response Type</a> — Portal 的 Blob 请求配置</li><li><a href="https://www.rfc-editor.org/rfc/rfc9110" target="_blank" rel="noreferrer">RFC 9110 HTTP Semantics</a> — HTTP 请求/响应语义</li></ul><nav class="lesson-nav"><a href="../lessons/fe-w05-api-proxy-errors-contract.html">← FE-W05<br><strong>API、代理、错误与前后端契约</strong></a><a href="../lessons/fe-w07-frontend-vertical-slice.html">FE-W07 →<br><strong>前端纵向切片：为入库列表增加一个受控能力</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#这一章解决什么问题"><span class="toc-num">1</span>这一章解决什么问题</a><a class="" href="#权限-路由级和操作级两层控制"><span class="toc-num">2</span>权限：路由级和操作级两层控制</a><a class="sub" href="#路由级权限-authcodes"><span class="toc-num">2.1</span>路由级权限（authCodes）</a><a class="sub" href="#操作级权限-permissions"><span class="toc-num">2.2</span>操作级权限（permissions）</a><a class="sub" href="#新增功能时的权限步骤"><span class="toc-num">2.3</span>新增功能时的权限步骤</a><a class="" href="#i18n-transify-i18next-与翻译-key"><span class="toc-num">3</span>i18n：Transify、i18next 与翻译 key</a><a class="sub" href="#翻译函数的正确调用方式"><span class="toc-num">3.1</span>翻译函数的正确调用方式</a><a class="sub" href="#翻译-key-的命名惯例"><span class="toc-num">3.2</span>翻译 key 的命名惯例</a><a class="sub" href="#新增文案的流程"><span class="toc-num">3.3</span>新增文案的流程</a><a class="sub" href="#portal-的-t-封装"><span class="toc-num">3.4</span>Portal 的 $t 封装</a><a class="" href="#时间-秒-毫秒-utc-本地时区与格式化"><span class="toc-num">4</span>时间：秒/毫秒、UTC/本地时区与格式化</a><a class="sub" href="#fbs-的时间契约"><span class="toc-num">4.1</span>FBS 的时间契约</a><a class="sub" href="#时区边界"><span class="toc-num">4.2</span>时区边界</a><a class="sub" href="#fbs-仓库中的时间工具"><span class="toc-num">4.3</span>FBS 仓库中的时间工具</a><a class="" href="#文件-下载-上传与-blob-处理"><span class="toc-num">5</span>文件：下载、上传与 Blob 处理</a><a class="sub" href="#文件下载-区分普通请求和-blob-请求"><span class="toc-num">5.1</span>文件下载：区分普通请求和 Blob 请求</a><a class="sub" href="#文件上传"><span class="toc-num">5.2</span>文件上传</a><a class="sub" href="#导出文件命名"><span class="toc-num">5.3</span>导出文件命名</a><a class="" href="#pii-敏感信息的处理边界"><span class="toc-num">6</span>PII：敏感信息的处理边界</a><a class="sub" href="#pii-请求使用独立的-request-实例"><span class="toc-num">6.1</span>PII 请求使用独立的 request 实例</a><a class="sub" href="#pii-的展示边界"><span class="toc-num">6.2</span>PII 的展示边界</a><a class="sub" href="#pii-数据的日志与存储"><span class="toc-num">6.3</span>PII 数据的日志与存储</a><a class="sub" href="#pii-的权限检查"><span class="toc-num">6.4</span>PII 的权限检查</a><a class="" href="#综合任务-新增字段-导出"><span class="toc-num">7</span>综合任务：新增字段 + 导出</a><a class="sub" href="#需求拆解"><span class="toc-num">7.1</span>需求拆解</a><a class="sub" href="#实现检查清单"><span class="toc-num">7.2</span>实现检查清单</a><a class="sub" href="#反例验证"><span class="toc-num">7.3</span>反例验证</a><a class="" href="#常见错误"><span class="toc-num">8</span>常见错误</a><a class="sub" href="#硬编码文案"><span class="toc-num">8.1</span>硬编码文案</a><a class="sub" href="#时间戳未区分秒-毫秒"><span class="toc-num">8.2</span>时间戳未区分秒/毫秒</a><a class="sub" href="#pii-走普通请求"><span class="toc-num">8.3</span>PII 走普通请求</a><a class="sub" href="#导出文件名含特殊字符"><span class="toc-num">8.4</span>导出文件名含特殊字符</a><a class="" href="#练习"><span class="toc-num">9</span>练习</a><a class="sub" href="#i18n-缺失排查"><span class="toc-num">9.1</span>i18n 缺失排查</a><a class="sub" href="#时间处理审查"><span class="toc-num">9.2</span>时间处理审查</a><a class="sub" href="#pii-数据流追踪"><span class="toc-num">9.3</span>PII 数据流追踪</a><a class="sub" href="#参考答案"><span class="toc-num">9.4</span>参考答案</a><a class="" href="#参考文献"><span class="toc-num">10</span>参考文献</a></aside></div></div></div><footer class="site-footer">FBS 前后端转全栈 Landing · 已发布</footer></div></body></html>
