@@ -1,8 +1,0 @@
-@import url("../../../assets/course-theme.css");
-:root { --course-mark: "FBS"; }
-
-body { overflow-x: hidden; }
-.lesson-header h1 { font-size: clamp(2.4rem, 4.6vw, 4rem); max-width: 20ch; }
-.lesson-layout, .lesson-content { min-width: 0; }
-.diagram-card { max-width: 100%; overflow-x: auto; }
-.lesson-content :not(pre) > code { overflow-wrap: anywhere; word-break: break-word; }
