@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="对“展示联系人”需求做数据分类，沿 SC 身份、中间件与敏感服务追踪信任边界，并用无权限、非法参数和日志扫描验证最小返回。"><title>鉴权、错误码、PII 与接口安全边界 | FBS 前后端转全栈 Landing</title><script src="../assets/theme-switcher.js"></script><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><div class="lesson-page-grid"><aside class="chapter-nav" aria-label="课程章节导航"><button class="chapter-nav-toggle" type="button" aria-expanded="true" aria-controls="chapter-nav-content"><span aria-hidden="true">◀</span><span class="chapter-nav-toggle-label">收起</span></button><div class="chapter-nav-content" id="chapter-nav-content"><div class="chapter-nav-heading"><strong>课程章节</strong><span>第 32 / 40 章</span></div><nav class="chapter-nav-list"><section class="chapter-nav-module"><h2>模块一：前端语言及标准库基础</h2><a href="../lessons/fe-l01-js-data-types-equality.html"><span class="chapter-nav-code">FE-L01</span><span class="chapter-nav-title">JavaScript 数据、类型与相等性：先读懂仓库判断分支</span></a><a href="../lessons/fe-l02-functions-scope-closure-modules.html"><span class="chapter-nav-code">FE-L02</span><span class="chapter-nav-title">函数、作用域、闭包与模块：跟上组件外的调用链</span></a><a href="../lessons/fe-l03-promise-async-eventloop.html"><span class="chapter-nav-code">FE-L03</span><span class="chapter-nav-title">Promise、async/await 与事件循环：读懂请求和页面副作用</span></a><a href="../lessons/fe-l04-js-objects-web-data.html"><span class="chapter-nav-code">FE-L04</span><span class="chapter-nav-title">JavaScript 常用对象与 Web 数据处理</span></a><a href="../lessons/fe-l05-typescript-type-chain.html"><span class="chapter-nav-code">FE-L05</span><span class="chapter-nav-title">TypeScript：从接口数据到组件 Props 的类型链</span></a><a href="../lessons/fe-l06-browser-framework-syntax-bridge.html"><span class="chapter-nav-code">FE-L06</span><span class="chapter-nav-title">浏览器与框架语法桥：DOM、事件、JSX、Vue SFC</span></a></section>
+<section class="chapter-nav-module"><h2>模块二：Web 前端开发</h2><a href="../lessons/fe-w01-start-three-frontend-projects.html"><span class="chapter-nav-code">FE-W01</span><span class="chapter-nav-title">启动三类 FBS 前端工程并建立仓库地图</span></a><a href="../lessons/fe-w02-components-styles-forms-tables.html"><span class="chapter-nav-code">FE-W02</span><span class="chapter-nav-title">组件、样式、表单与表格：按现有组件库做页面</span></a><a href="../lessons/fe-w03-routes-menus-page-entries.html"><span class="chapter-nav-code">FE-W03</span><span class="chapter-nav-title">路由、菜单与页面入口：让页面真正可访问</span></a><a href="../lessons/fe-w04-state-management-redux-vuex-recoil.html"><span class="chapter-nav-code">FE-W04</span><span class="chapter-nav-title">状态管理：Redux/Recoil、Vuex 与宿主状态</span></a><a href="../lessons/fe-w05-api-proxy-errors-contract.html"><span class="chapter-nav-code">FE-W05</span><span class="chapter-nav-title">API、代理、错误与前后端契约</span></a><a href="../lessons/fe-w06-permission-i18n-time-file-pii.html"><span class="chapter-nav-code">FE-W06</span><span class="chapter-nav-title">权限、i18n、时间、文件与 PII：页面功能的准入项</span></a><a href="../lessons/fe-w07-frontend-vertical-slice.html"><span class="chapter-nav-code">FE-W07</span><span class="chapter-nav-title">前端纵向切片：为入库列表增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块三：Web 前端进阶</h2><a href="../lessons/fe-a01-three-app-lifecycles-host-boundaries.html"><span class="chapter-nav-code">FE-A01</span><span class="chapter-nav-title">三种应用生命周期与宿主边界</span></a><a href="../lessons/fe-a02-micro-frontends-remote-components.html"><span class="chapter-nav-code">FE-A02</span><span class="chapter-nav-title">微前端与远端组件：Module Federation、qiankun、MMF</span></a><a href="../lessons/fe-a03-vue-react-coexistence-deps-migration.html"><span class="chapter-nav-code">FE-A03</span><span class="chapter-nav-title">Vue/React 共存、共享依赖与版本迁移</span></a><a href="../lessons/fe-a04-testing-linting-build-artifacts.html"><span class="chapter-nav-code">FE-A04</span><span class="chapter-nav-title">测试、静态检查、构建与产物边界</span></a><a href="../lessons/fe-a05-observability-systematic-debugging.html"><span class="chapter-nav-code">FE-A05</span><span class="chapter-nav-title">前端观测与系统化排错</span></a><a href="../lessons/fe-a06-impact-analysis-dev-handoff.html"><span class="chapter-nav-code">FE-A06</span><span class="chapter-nav-title">前端改动影响分析与开发交接</span></a></section>
+<section class="chapter-nav-module"><h2>模块四：后端语言及标准库基础</h2><a href="../lessons/be-l01-go-toolchain-modules-versions.html"><span class="chapter-nav-code">BE-L01</span><span class="chapter-nav-title">Go 工具链、模块与版本边界</span></a><a href="../lessons/be-l02-values-pointers-structs-tags.html"><span class="chapter-nav-code">BE-L02</span><span class="chapter-nav-title">值、指针、struct、tag 与数据边界</span></a><a href="../lessons/be-l03-methods-interfaces-embedding-di.html"><span class="chapter-nav-code">BE-L03</span><span class="chapter-nav-title">方法、接口、嵌入与依赖倒置</span></a><a href="../lessons/be-l04-slices-maps-sorting-data-transform.html"><span class="chapter-nav-code">BE-L04</span><span class="chapter-nav-title">slice、map、排序与数据转换</span></a><a href="../lessons/be-l05-errors-defer-panic-resources.html"><span class="chapter-nav-code">BE-L05</span><span class="chapter-nav-title">error、defer、panic/recover 与资源生命周期</span></a><a href="../lessons/be-l06-context-time-json-http-io.html"><span class="chapter-nav-code">BE-L06</span><span class="chapter-nav-title">context、时间、JSON、HTTP、I/O 与文件</span></a><a href="../lessons/be-l07-goroutines-channels-sync-concurrency.html"><span class="chapter-nav-code">BE-L07</span><span class="chapter-nav-title">goroutine、channel、sync 与并发边界</span></a></section>
+<section class="chapter-nav-module"><h2>模块五：Web 后端开发</h2><a href="../lessons/be-w01-start-three-backend-processes.html"><span class="chapter-nav-code">BE-W01</span><span class="chapter-nav-title">启动三类 FBS 后端进程并建立仓库地图</span></a><a href="../lessons/be-w02-chassis-http-route-request-response.html"><span class="chapter-nav-code">BE-W02</span><span class="chapter-nav-title">Chassis HTTP 接口：从路由到请求与响应</span></a><a href="../lessons/be-w03-wire-layered-architecture.html"><span class="chapter-nav-code">BE-W03</span><span class="chapter-nav-title">Wire 与分层：把 handler 接到应用、领域和基础设施</span></a><a href="../lessons/be-w04-mysql-gorm-scorm-repository-transactions.html"><span class="chapter-nav-code">BE-W04</span><span class="chapter-nav-title">MySQL、GORM/Scorm、仓储与事务</span></a><a href="../lessons/be-w05-service-calls-http-grpc-timeouts.html"><span class="chapter-nav-code">BE-W05</span><span class="chapter-nav-title">服务调用、HTTP/gRPC 契约与超时</span></a><a href="../lessons/be-w06-auth-errors-pii-security.html" class="is-current" aria-current="page"><span class="chapter-nav-code">BE-W06</span><span class="chapter-nav-title">鉴权、错误码、PII 与接口安全边界</span></a><a href="../lessons/be-w07-backend-vertical-slice.html"><span class="chapter-nav-code">BE-W07</span><span class="chapter-nav-title">后端纵向切片：为入库请求增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块六：Web 后端进阶</h2><a href="../lessons/be-a01-apollo-chassis-config.html"><span class="chapter-nav-code">BE-A01</span><span class="chapter-nav-title">Apollo 与 Chassis 配置：环境差异、热更新和开关</span></a><a href="../lessons/be-a02-redis-codis-cache-consistency.html"><span class="chapter-nav-code">BE-A02</span><span class="chapter-nav-title">Redis/Codis 与缓存一致性</span></a><a href="../lessons/be-a03-saturn-scheduled-async-tasks.html"><span class="chapter-nav-code">BE-A03</span><span class="chapter-nav-title">Saturn 定时任务与异步任务</span></a><a href="../lessons/be-a04-kafka-message-pipeline.html"><span class="chapter-nav-code">BE-A04</span><span class="chapter-nav-title">Kafka 消息链路与事件边界</span></a><a href="../lessons/be-a05-reliability-idempotency-transactions-retry.html"><span class="chapter-nav-code">BE-A05</span><span class="chapter-nav-title">可靠性：幂等、事务、重试、并发与降级组合</span></a><a href="../lessons/be-a06-logging-metrics-diagnostics.html"><span class="chapter-nav-code">BE-A06</span><span class="chapter-nav-title">日志、指标、链路与系统化排错</span></a><a href="../lessons/be-a07-impact-analysis-testing-handoff.html"><span class="chapter-nav-code">BE-A07</span><span class="chapter-nav-title">后端改动影响分析、测试与开发交接</span></a></section></nav></div></aside><div class="lesson-page-main"><header class="topbar"><a class="brand" href="../index.html">FBS 前后端转全栈 Landing</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">BE-W06 · 180–240 分钟</div><h1>鉴权、错误码、PII 与接口安全边界</h1><p class="lesson-summary">对“展示联系人”需求做数据分类，沿 SC 身份、中间件与敏感服务追踪信任边界，并用无权限、非法参数和日志扫描验证最小返回。</p><a class="source-link" href="../markdown/be-w06-auth-errors-pii-security.md">查看 Markdown 版本</a></section><div class="lesson-layout"><main class="lesson-content"><h2 id="需求看起来只是多一个字段">需求看起来只是多一个字段</h2>
+<p>ASN 页面希望展示联系人信息。若把它当成普通 DTO 字段，开发者可能直接从下游取回姓名、电话和地址，写日志排错，再塞进列表响应。功能会很快“完成”，安全边界也同时被绕开。</p>
+<p>本章先问四个问题：请求者是谁；请求者能否操作当前 seller/shop/region；数据是否属于 PII；调用方真正需要返回多少。答案分别落在身份认证、授权、敏感服务边界与响应最小化。它们不能由一个 <code>if user != nil</code> 代替。</p>
+<p>主服务的中间件目录包含 Seller Center auth、FBS session auth、OpenAPI auth、CSRF、权限检查与统一 controller wrapper。敏感服务有 session/remote auth interceptor 和 SC HTTP 接口。Tax 另有 JWT、限流、恢复与响应 middleware。三仓概念相通，handler 名称和上下文结构并不相同。</p>
+<h2 id="先认识认证-授权-pii-错误码与安全边界">先认识认证、授权、PII、错误码与安全边界</h2>
+<p>认证（authentication）验证调用方是谁或持有什么可信凭据。授权（authorization）判断这个身份能否执行某个动作。数据范围继续限制它能访问哪些 seller、shop、region、记录与字段。三者缺一不可。</p>
+<p>PII 是可以直接或间接识别个人的信息。姓名、电话和详细地址是常见例子，但实际分类以团队规范和字段用途为准。安全边界是数据或信任跨层、跨进程时必须重新检查的地方，例如浏览器进入主服务、主服务调用敏感服务、完整对象映射成响应。</p>
+<p>错误码是给机器稳定判断的契约标识，错误消息服务于受控的人类提示，内部 cause 则用于工程诊断。把三者混在一个字符串里，会同时破坏调用方兼容和信息保护。middleware/interceptor 是执行这些横切控制的常见位置，但业务资源归属仍需 application/domain 判断。</p>
+<h3 id="常见身份与权限方案的取舍">常见身份与权限方案的取舍</h3>
+<div class="table-wrap"><table><thead><tr><th>方案</th><th>适合解决什么</th><th>优点</th><th>不能替代什么</th></tr></thead><tbody><tr><td>Session/Cookie</td><td>浏览器登录态</td><td>注销和服务端控制直观</td><td>资源归属、CSRF、服务间身份</td></tr><tr><td>JWT/签名 token</td><td>无状态身份声明、API 调用</td><td>可携带声明，跨服务验证方便</td><td>token 吊销策略、数据范围、最小返回</td></tr><tr><td>API key/服务凭据</td><td>标识服务或集成方</td><td>接入简单</td><td>终端用户授权、细粒度资源权限</td></tr><tr><td>RBAC</td><td>角色到动作权限</td><td>规则易集中管理</td><td>seller/shop/region 级数据范围</td></tr><tr><td>ABAC/策略判断</td><td>根据属性与上下文授权</td><td>表达细粒度条件</td><td>凭据真实性和安全数据处理</td></tr></tbody></table></div>
+<p>当前仓库已经有 SC session、OpenAPI、远程鉴权、JWT 与不同 middleware 链。优势是各入口可沿现有控制接入；代价是不能把一套入口的 principal/context 假设复制给另一套入口。本章不新建统一身份平台，只训练读懂边界并写出负例证据。</p>
+<h2 id="认证-授权与数据范围是三次判断">认证、授权与数据范围是三次判断</h2>
+<p>认证回答“凭据对应谁”。授权回答“这个身份能做哪个动作”。数据范围回答“即使能做此动作，能访问哪些 seller、region、记录和字段”。</p>
+<figure class="diagram-card"><pre class="mermaid">flowchart LR
+  A[&quot;请求与凭据&quot;] --&gt; B{&quot;认证通过?&quot;}
+  B -- 否 --&gt; X[&quot;稳定的未认证错误&quot;]
+  B -- 是 --&gt; C{&quot;动作权限通过?&quot;}
+  C -- 否 --&gt; Y[&quot;稳定的无权限错误&quot;]
+  C -- 是 --&gt; D{&quot;数据范围匹配?&quot;}
+  D -- 否 --&gt; Y
+  D -- 是 --&gt; E[&quot;参数与资源校验&quot;]
+  E --&gt; F[&quot;调用敏感服务/业务服务&quot;]
+  F --&gt; G[&quot;最小字段转换&quot;]
+  G --&gt; H[&quot;脱敏日志 + 统一响应&quot;]</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<p>“已登录”不等于能读任意 shop。URL/body 中的 seller ID 也不能因来自前端就可信。主服务 wrapper 中可见 region 操作与 API permission 检查；SC auth 还会从请求和会话建立身份。业务层仍要检查资源归属，尤其是按 ID 查询单条记录时。</p>
+<p>前端权限控制只负责体验，例如隐藏按钮。攻击者可以直接发 HTTP 请求，所以后端必须独立鉴权。这个规则与前端课程的权限章衔接：菜单不可见不是 API 安全证据。</p>
+<h3 id="批量接口会放大数据范围错误">批量接口会放大数据范围错误</h3>
+<p>批量 ASN 查询不能只检查“用户有查看权限”，再按请求中的 ID list 查询。可信 seller/shop/region 应与 ID list 一起进入 repository 条件。先查出全部记录再在 Go 内存中过滤，意味着未授权数据已经越过数据库边界，也可能进入日志或 metrics。</p>
+<p>批量输入还需要数量上限、去重和明确的部分失败策略。100 个 ID 中一个越权，是整体拒绝、只返回允许项，还是逐项状态，必须由契约决定。测试应准备两个 shop 的合成数据，断言查询条件包含可信范围，并确认另一组数据没有进入结果和日志。</p>
+<h2 id="中间件链的顺序会改变结果">中间件链的顺序会改变结果</h2>
+<p>认证应在业务 handler 前建立可信 context。CSRF 保护针对会改变状态的方法，主服务当前保护 POST、PUT、PATCH、DELETE，并读取 <code>X-CSRFToken</code> 与 session。限流可能在高成本业务之前拒绝。recovery 负责把 panic 转为受控失败，不负责把鉴权错误当成功响应。</p>
+<p>顺序不应靠课程臆测，必须从 route/schema 注册和 wrapper 读取。新增 endpoint 时复制相邻 route 的 handler chain，再逐项说明每个中间件服务的威胁。漏一个名称可能让接口绕开 session；多加错误的 auth 又可能让合法调用方全部 401。</p>
+<div class="table-wrap"><table><thead><tr><th>控制</th><th>保护对象</th><th>不能替代</th></tr></thead><tbody><tr><td>authentication</td><td>伪造/缺失身份</td><td>resource ownership</td></tr><tr><td>authorization</td><td>未获准动作</td><td>参数校验、PII 最小化</td></tr><tr><td>CSRF</td><td>已登录浏览器被诱导发状态变更</td><td>XSS、防重放、业务幂等</td></tr><tr><td>rate limit</td><td>资源耗尽与滥用频率</td><td>权限和输入大小上限</td></tr><tr><td>validation</td><td>非法格式与范围</td><td>数据归属和业务状态机</td></tr><tr><td>recovery</td><td>未处理 panic 的进程影响</td><td>正确错误处理</td></tr></tbody></table></div>
+<h3 id="多种入口不能共享同一身份假设">多种入口不能共享同一身份假设</h3>
+<p>Portal、SC、OpenAPI 和内部 gRPC 的身份来源不同。SC session 中的 seller/shop 语义不能直接套到 OpenAPI；OpenAPI 的 JWT 或签名也不等于浏览器会话。application 被多个入口复用时，应接收归一化的可信 principal 与 scope，而不是在 domain 内读取某个 HTTP header。</p>
+<p>服务间认证也不等于终端用户授权。主服务调用敏感服务时，敏感服务需要确认调用服务身份；是否还传递用户、店铺与用途上下文，要看当前协议。服务凭据不能成为读取任意 PII 的通行证。</p>
+<h3 id="写接口还要区分-csrf-幂等与重放">写接口还要区分 CSRF、幂等与重放</h3>
+<p>CSRF 保护持有浏览器 session 的状态变更请求，防止第三方页面诱导发送；它不保证请求只执行一次。双击、网络重试或合法请求重放仍需业务幂等和状态检查。敏感查询也不应把 PII 放在 URL query，因为浏览器历史、代理和 access log 都可能记录 URL。</p>
+<h2 id="pii-分类从字段和用途开始">PII 分类从字段和用途开始</h2>
+<p>姓名、电话、详细地址、证件、银行信息通常需要更严格处理；是否属于 PII 还要遵循团队数据分类规范。本课不列真实数据。练习使用合成值，并把字段按用途分为：页面必要展示；仅服务端处理；仅审计系统可见；完全不应进入当前链路。</p>
+<p>“存在敏感服务”不是普通服务自由读取的许可证。敏感服务把存储与访问控制集中到更窄边界，调用方仍需证明用途、身份与最小字段。列表页若只需显示掩码电话后四位，就不应先取完整地址再在前端截断。</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">错误路径：PII 服务 → 返回完整对象 → 主服务日志完整对象 → 前端取一个字段
+受控路径：主服务提交身份/资源语义 → PII 服务鉴权并返回最小视图 → 主服务只映射允许字段</code></pre></figure>
+<p>敏感服务生成的 protobuf 文件中能看到 contact/address 等字段，这只能证明协议存在，不能证明每个调用方都有权使用全部字段。</p>
+<h3 id="按数据生命周期检查-而不是只看-response">按数据生命周期检查，而不是只看 response</h3>
+<p>一项联系人数据会经历收集、传输、处理、存储、缓存、日志/监控与删除或过期。当前接口可能只负责其中几段，但安全评审要标出每次复制：HTTP body 到 DTO、DTO 到 client request、远端 response 到 domain、domain 到 response、错误与日志。每多一次完整对象复制，就多一个可能泄露或超范围复用的位置。</p>
+<p>字段 allowlist 比“先复制完整对象再删字段”更可靠。前者默认拒绝未来新增字段，后者可能在 protobuf/struct 增加字段后自动把它带入日志或响应。mapper 测试因此应构造一个包含额外敏感字段的远端对象，并证明输出仍只有允许字段。</p>
+<p>缓存也不能绕过授权。若最小联系人视图将来被缓存，key 必须包含足以区分数据范围的维度，缓存值仍遵循最小化与过期策略；这些设计属于模块六的缓存章节。本章先把“是否发生缓存、谁能读取”列为边界问题，不自行加入 Redis。</p>
+<h2 id="错误码是接口契约的一部分">错误码是接口契约的一部分</h2>
+<p>主服务 <code>errcode</code> 把错误登记为稳定 code、消息、类型与来源，controller wrapper 转成前端熟悉的 envelope。错误需要同时服务机器判断与人类定位。稳定 retcode 用于调用方分支；日志中的 cause 用于工程诊断。不能把数据库 error、JWT 内容或远端 PII 直接当响应 info。</p>
+<p>新增错误前先搜索是否已有同语义 code。重复注册“no permission”会让前端不知道处理哪一个。参数错误、未认证、无权限、资源不存在、依赖失败和系统错误不能全映射成一个通用失败，否则监控与用户反馈都失去分类。</p>
+<p>另一方面，错误差异不能泄露资源是否存在。未授权调用者查询一个 ASN ID 时，如果“存在但无权限”与“不存在”返回可区分细节，可能形成枚举通道。具体策略应按接口现有约定与安全审查决定。</p>
+<h3 id="错误信息的安全回归矩阵">错误信息的安全回归矩阵</h3>
+<div class="table-wrap"><table><thead><tr><th>场景</th><th>调用方看到什么</th><th>日志/监控保留什么</th><th>禁止行为</th></tr></thead><tbody><tr><td>无凭据或失效</td><td>稳定未认证错误</td><td>route、request ID、失效分类</td><td>回显 token 或签名细节</td></tr><tr><td>无动作权限</td><td>稳定权限错误</td><td>principal 类型、action、scope 摘要</td><td>返回资源内容</td></tr><tr><td>跨数据范围</td><td>按防枚举策略处理</td><td>脱敏资源键、权限分类</td><td>暴露存在性细节</td></tr><tr><td>参数非法</td><td>稳定参数错误</td><td>字段名与规则</td><td>返回 parser/SQL 原文</td></tr><tr><td>PII 下游失败</td><td>依赖错误或允许的降级</td><td>dependency、operation、retcode</td><td>记录完整响应</td></tr></tbody></table></div>
+<p>错误码测试要与日志捕获测试配合。只看数字发现不了 info 泄露；只扫禁词也证明不了授权正确。</p>
+<h3 id="错误转换的四层">错误转换的四层</h3>
+<p>infra 保留数据库/下游 cause；domain/application 转成业务语义；handler/wrapper 映射稳定 retcode；日志记录脱敏上下文。每层只做自己的转换。handler 不应通过字符串匹配 SQL error 决定权限。</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">// 教学缩减示例。
+contact, err := piiClient.GetMinimalContact(ctx, resource)
+if err != nil {
+	if errors.Is(err, ErrRemoteUnauthenticated) {
+		return Response{}, ErrDependencyAuth
+	}
+	return Response{}, fmt.Errorf(&quot;load contact view: %w&quot;, err)
+}
+return toSafeResponse(contact), nil</code></pre></figure>
+<h2 id="参数校验要在昂贵调用前完成">参数校验要在昂贵调用前完成</h2>
+<p>格式、长度、枚举、分页上限在协议入口尽早拒绝。资源归属和业务状态可能需要 application/domain 查询后判断。不要把所有校验挤进 struct tag，也不要等到 SQL 报错。</p>
+<p>联系人需求的输入矩阵至少包括：缺少 ASN ID；ID 格式非法；合法但不存在；存在但不属于当前 shop；有查看 ASN 权限但无查看联系人权限；全部通过。每组都应有确定的 retcode/HTTP 语义与“敏感 client 是否被调用”断言。前四组若不需要 PII，应断言 client 没有调用。</p>
+<h2 id="日志-能关联问题-但不能复制数据">日志：能关联问题，但不能复制数据</h2>
+<p>安全日志保留 request ID、操作名、受控资源标识、结果 code、耗时与依赖名称。禁止记录 Authorization、cookie、CSRF token、完整请求/响应、联系人、地址或未脱敏凭据。资源 ID 是否敏感也要按规范判断；必要时 hash 或截断。</p>
+<p>字符串 <code>%+v</code> 打印整个 req/resp 是高频风险。第三方 client 的现存日志不能自动成为新代码可复制的范本；课程生成也不展示其中可能包含的数据。code review 应搜索结构体打印、header dump、protobuf JSON 与 panic stack 附带的对象。</p>
+<div class="table-wrap"><table><thead><tr><th>目的</th><th>可记录示例</th><th>不应记录</th></tr></thead><tbody><tr><td>关联调用</td><td>request ID、operation</td><td>token、cookie</td></tr><tr><td>判断范围</td><td>region、脱敏资源键</td><td>完整地址、电话</td></tr><tr><td>判断结果</td><td>retcode、错误分类</td><td>完整 remote response</td></tr><tr><td>性能</td><td>duration、dependency name</td><td>带 PII 的 URL query</td></tr></tbody></table></div>
+<p>错误日志也不能成为数据出口。返回给用户的信息收窄了，但日志若保留原文，风险仍在。</p>
+<h3 id="凭据与配置也属于披露边界">凭据与配置也属于披露边界</h3>
+<p>token、secret、private key 和数据库口令不进入代码、课程示例或测试 fixture。配置只引用键名与加载边界，实际值通过安全渠道取得。排错记录保存“header 是否存在、凭据类型、过期分类和 request ID”，不要求复制 header/cookie。截图也可能包含凭据，交付前要做视觉检查。</p>
+<h2 id="受控接口改动-返回最小联系人视图">受控接口改动：返回最小联系人视图</h2>
+<p>定义合成契约：列表默认不返回联系人；只有显式请求 detail 且权限通过时，返回 <code>display_name</code> 与 <code>masked_phone</code>；完整电话和地址不进入响应。旧调用方未传开关时行为不变。</p>
+<p>第一步在 DTO 使用可选字段保留未传语义。第二步在 application 做 resource ownership 与 action permission 检查。第三步调用敏感服务的最小 client 接口。第四步在 adapter/mapper 只选择允许字段。第五步统一错误映射。第六步做披露扫描。</p>
+<p>不要把 mask 只留给前端。Network、浏览器插件和前端日志都能看到原始响应。最小化应在离数据源尽可能近且能执行业务授权的服务端边界完成。</p>
+<h3 id="三类强制失败验证">三类强制失败验证</h3>
+<p>无权限：使用合成身份，断言稳定权限错误、PII client 未调用、日志无敏感字段。非法参数：断言在入口或 application 早期拒绝，无数据库/PII 访问。日志检查：成功与远端失败各跑一次，扫描 token、phone、address、完整 DTO 等模式。</p>
+<p>再补两个边界：旧调用方未传新字段；敏感服务返回字段缺失。前者验证兼容，后者验证 mapper 不 panic 且采用安全默认。</p>
+<h3 id="安全测试按边界分层">安全测试按边界分层</h3>
+<p>中间件单测验证缺 header、无效 session、CSRF mismatch 和 handler 是否被阻止。handler 测试验证 principal/context 传给 application。application 测试验证 action 与 ownership，失败时 PII client 未调用。adapter 测试验证最小字段 mapper 与远端 auth error。端到端测试再确认 route chain 真实注册。</p>
+<p>安全测试尤其关注“某动作没有发生”：repository/client 没被调用，response 没带字段，logger 没收到完整对象。每层模拟全系统会让测试脆弱；只做端到端 happy path 又无法定位失败。</p>
+<h2 id="威胁检查-从数据流而不是术语清单出发">威胁检查：从数据流而不是术语清单出发</h2>
+<div class="table-wrap"><table><thead><tr><th>数据流节点</th><th>主要威胁</th><th>证据/控制</th></tr></thead><tbody><tr><td>浏览器到主服务</td><td>伪造 ID、CSRF、越权</td><td>auth chain、CSRF、permission test</td></tr><tr><td>主服务 resource lookup</td><td>跨 shop/region 访问</td><td>ownership 条件、negative test</td></tr><tr><td>主服务到敏感服务</td><td>伪造调用方、过量字段</td><td>remote auth、最小 request/response</td></tr><tr><td>response mapping</td><td>完整对象透传</td><td>allowlist mapper、contract test</td></tr><tr><td>logging/metrics</td><td>PII 或凭据泄漏</td><td>structured fields、披露扫描</td></tr><tr><td>error handling</td><td>资源枚举、内部细节泄漏</td><td>stable error map、unauthorized test</td></tr></tbody></table></div>
+<p>这张表不是一次性合规勾选。接口字段、调用方或日志变化后需要回归对应节点。</p>
+<h2 id="tax-为什么只能做边界对照">Tax 为什么只能做边界对照</h2>
+<p>Tax middleware 中有 JWT、限流、日志、recovery 与 gRPC interceptor，但联系人 ASN 需求不经过 Tax。为了“覆盖三个仓库”把 Tax 接入主案例会制造错误架构。正确用法是比较：Tax 的 controller 如何取得可信 context、错误如何转成 SSC 语义、第三方 client 怎样处理敏感发票数据。然后回到本需求说明为什么不改 Tax。</p>
+<p>这也是全栈影响分析能力：知道某服务有安全能力，不等于每个需求都要修改它。</p>
+<h2 id="常见安全误判怎样修正">常见安全误判怎样修正</h2>
+<p>“接口在内网”不能替代应用身份与数据范围；“数据已经 mask”也不能允许无限批量枚举。网络位置和掩码是控制的一部分，不是授权结论。</p>
+<p>“返回 404 就不会泄露资源”只处理响应文案。授权失败和不存在若在耗时、大小、日志或下游调用上差异明显，仍可能泄露线索。课程不要求自行实现常量时间响应，但要按现有安全策略检查可观察差异。</p>
+<p>“只在 debug 日志打印”也不安全。故障时可能开启 debug，数据在进入日志调用参数时已经暴露。logger 应从源头选择 allowlist 字段。测试使用合成电话也不能证明完整 payload 打印是安全模式。</p>
+<h2 id="star-案例-接口权限正确-日志仍泄露电话">STAR 案例：接口权限正确，日志仍泄露电话</h2>
+<h3 id="situation">Situation</h3>
+<p>联系人接口只对有权限用户返回掩码电话，功能测试和越权测试都通过。一次远端错误时，client 用 <code>%+v</code> 记录了完整响应，日志出现原始电话。</p>
+<h3 id="task">Task</h3>
+<p>堵住日志出口，同时保留排错所需的请求关联、远端错误分类和耗时。</p>
+<h3 id="action">Action</h3>
+<p>沿失败路径找到结构体打印，列出实际需要的字段。改成结构化日志，只记录 request ID、operation、远端 retcode 与 duration；错误 cause 保留分类，不附 response body。增加成功/失败日志捕获测试，并对课程与生成 HTML 执行敏感关键词和凭据模式扫描。检查相邻 retry 日志，避免第二处再次打印。</p>
+<h3 id="result">Result</h3>
+<p>权限与接口响应行为不变，日志仍可按 request ID 定位依赖失败，扫描不再命中联系人数据。</p>
+<h3 id="reflection">Reflection</h3>
+<p>安全边界覆盖数据的整个生命周期。入口鉴权通过、响应脱敏都不能补偿日志复制原始对象。</p>
+<h2 id="安全评审口述题">安全评审口述题</h2>
+<p>给出一个新 OpenAPI：调用方凭 JWT 传 seller ID，查询联系人。学员需指出 JWT 认证后仍要验证 seller scope；联系人应由敏感服务最小返回；请求参数不应记录；错误不应泄露 seller 是否存在；批量查询需要上限和逐项策略。每个判断至少映射到一个代码层和一个负例测试；若接口包含写操作，还要补 CSRF 适用性、幂等与重放判断。</p>
+<h2 id="独立练习-联系人字段安全评审">独立练习：联系人字段安全评审</h2>
+<p>提交以下材料：</p>
+<ol><li>字段分类与使用目的；</li><li>SC 请求从 auth 到 resource ownership 的链路；</li><li>主服务到敏感服务的最小契约；</li><li>权限、参数、远端错误到稳定 retcode 的映射；</li><li>无权限、非法参数、旧调用方、空响应测试；</li><li>允许日志字段清单与披露扫描结果；</li><li>说明为什么 Tax 不在本次修改范围。</li></ol>
+<p>通过标准：前端隐藏按钮不作为授权证据；非法/越权请求不会调用敏感 client；响应采用字段 allowlist；日志不含真实或合成的完整 PII；错误不会泄露资源细节；旧调用方行为不变。</p>
+<p>交付包还应包含 principal/scope 模型、route middleware 顺序、字段分类、最小 response schema、错误矩阵、负例测试、client 未调用断言、日志捕获与凭据/PII 披露扫描。真实环境证据无法安全保存时，只记录检查结论与执行者，不复制原始数据。</p>
+<h2 id="章末自检">章末自检</h2>
+<ul><li>能否区分认证、动作授权和数据范围？</li><li>能否说明 CSRF、限流和参数校验各自不能替代什么？</li><li>能否从 PII 用途推出最小返回字段？</li><li>能否解释为什么错误响应与日志需要不同信息密度？</li><li>能否设计断言“无权限时 client 未被调用”的测试？</li><li>能否判断一个不经过 Tax 的 ASN 需求为何不应修改 Tax？</li></ul>
+<p>下一章把 HTTP、Wire、repository、client 与安全边界合成一个后端纵向切片。课程不会真的写入共享环境；学员以受控 diff、单测、接口样例和兼容清单作为完成证据。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li><a href="https://datatracker.ietf.org/doc/html/rfc9110" target="_blank" rel="noreferrer">RFC 9110: HTTP Semantics</a></li><li><a href="https://grpc.io/docs/languages/go/" target="_blank" rel="noreferrer">gRPC Go documentation</a></li></ul><nav class="lesson-nav"><a href="../lessons/be-w05-service-calls-http-grpc-timeouts.html">← BE-W05<br><strong>服务调用、HTTP/gRPC 契约与超时</strong></a><a href="../lessons/be-w07-backend-vertical-slice.html">BE-W07 →<br><strong>后端纵向切片：为入库请求增加一个受控能力</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#需求看起来只是多一个字段"><span class="toc-num">1</span>需求看起来只是多一个字段</a><a class="" href="#先认识认证-授权-pii-错误码与安全边界"><span class="toc-num">2</span>先认识认证、授权、PII、错误码与安全边界</a><a class="sub" href="#常见身份与权限方案的取舍"><span class="toc-num">2.1</span>常见身份与权限方案的取舍</a><a class="" href="#认证-授权与数据范围是三次判断"><span class="toc-num">3</span>认证、授权与数据范围是三次判断</a><a class="sub" href="#批量接口会放大数据范围错误"><span class="toc-num">3.1</span>批量接口会放大数据范围错误</a><a class="" href="#中间件链的顺序会改变结果"><span class="toc-num">4</span>中间件链的顺序会改变结果</a><a class="sub" href="#多种入口不能共享同一身份假设"><span class="toc-num">4.1</span>多种入口不能共享同一身份假设</a><a class="sub" href="#写接口还要区分-csrf-幂等与重放"><span class="toc-num">4.2</span>写接口还要区分 CSRF、幂等与重放</a><a class="" href="#pii-分类从字段和用途开始"><span class="toc-num">5</span>PII 分类从字段和用途开始</a><a class="sub" href="#按数据生命周期检查-而不是只看-response"><span class="toc-num">5.1</span>按数据生命周期检查，而不是只看 response</a><a class="" href="#错误码是接口契约的一部分"><span class="toc-num">6</span>错误码是接口契约的一部分</a><a class="sub" href="#错误信息的安全回归矩阵"><span class="toc-num">6.1</span>错误信息的安全回归矩阵</a><a class="sub" href="#错误转换的四层"><span class="toc-num">6.2</span>错误转换的四层</a><a class="" href="#参数校验要在昂贵调用前完成"><span class="toc-num">7</span>参数校验要在昂贵调用前完成</a><a class="" href="#日志-能关联问题-但不能复制数据"><span class="toc-num">8</span>日志：能关联问题，但不能复制数据</a><a class="sub" href="#凭据与配置也属于披露边界"><span class="toc-num">8.1</span>凭据与配置也属于披露边界</a><a class="" href="#受控接口改动-返回最小联系人视图"><span class="toc-num">9</span>受控接口改动：返回最小联系人视图</a><a class="sub" href="#三类强制失败验证"><span class="toc-num">9.1</span>三类强制失败验证</a><a class="sub" href="#安全测试按边界分层"><span class="toc-num">9.2</span>安全测试按边界分层</a><a class="" href="#威胁检查-从数据流而不是术语清单出发"><span class="toc-num">10</span>威胁检查：从数据流而不是术语清单出发</a><a class="" href="#tax-为什么只能做边界对照"><span class="toc-num">11</span>Tax 为什么只能做边界对照</a><a class="" href="#常见安全误判怎样修正"><span class="toc-num">12</span>常见安全误判怎样修正</a><a class="" href="#star-案例-接口权限正确-日志仍泄露电话"><span class="toc-num">13</span>STAR 案例：接口权限正确，日志仍泄露电话</a><a class="sub" href="#situation"><span class="toc-num">13.1</span>Situation</a><a class="sub" href="#task"><span class="toc-num">13.2</span>Task</a><a class="sub" href="#action"><span class="toc-num">13.3</span>Action</a><a class="sub" href="#result"><span class="toc-num">13.4</span>Result</a><a class="sub" href="#reflection"><span class="toc-num">13.5</span>Reflection</a><a class="" href="#安全评审口述题"><span class="toc-num">14</span>安全评审口述题</a><a class="" href="#独立练习-联系人字段安全评审"><span class="toc-num">15</span>独立练习：联系人字段安全评审</a><a class="" href="#章末自检"><span class="toc-num">16</span>章末自检</a><a class="" href="#参考文献"><span class="toc-num">17</span>参考文献</a></aside></div></div></div><footer class="site-footer">FBS 前后端转全栈 Landing · 已发布</footer></div></body></html>

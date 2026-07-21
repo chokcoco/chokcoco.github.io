@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="从“消息队列在后端架构中解决什么问题”开始，讲清 Kafka 的核心概念、社区同类方案、FBS 仓库中的真实 producer/consumer 链路，以及消息兼容、重复、失败处理的设计方法。"><title>Kafka 消息链路与事件边界 | FBS 前后端转全栈 Landing</title><script src="../assets/theme-switcher.js"></script><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><div class="lesson-page-grid"><aside class="chapter-nav" aria-label="课程章节导航"><button class="chapter-nav-toggle" type="button" aria-expanded="true" aria-controls="chapter-nav-content"><span aria-hidden="true">◀</span><span class="chapter-nav-toggle-label">收起</span></button><div class="chapter-nav-content" id="chapter-nav-content"><div class="chapter-nav-heading"><strong>课程章节</strong><span>第 37 / 40 章</span></div><nav class="chapter-nav-list"><section class="chapter-nav-module"><h2>模块一：前端语言及标准库基础</h2><a href="../lessons/fe-l01-js-data-types-equality.html"><span class="chapter-nav-code">FE-L01</span><span class="chapter-nav-title">JavaScript 数据、类型与相等性：先读懂仓库判断分支</span></a><a href="../lessons/fe-l02-functions-scope-closure-modules.html"><span class="chapter-nav-code">FE-L02</span><span class="chapter-nav-title">函数、作用域、闭包与模块：跟上组件外的调用链</span></a><a href="../lessons/fe-l03-promise-async-eventloop.html"><span class="chapter-nav-code">FE-L03</span><span class="chapter-nav-title">Promise、async/await 与事件循环：读懂请求和页面副作用</span></a><a href="../lessons/fe-l04-js-objects-web-data.html"><span class="chapter-nav-code">FE-L04</span><span class="chapter-nav-title">JavaScript 常用对象与 Web 数据处理</span></a><a href="../lessons/fe-l05-typescript-type-chain.html"><span class="chapter-nav-code">FE-L05</span><span class="chapter-nav-title">TypeScript：从接口数据到组件 Props 的类型链</span></a><a href="../lessons/fe-l06-browser-framework-syntax-bridge.html"><span class="chapter-nav-code">FE-L06</span><span class="chapter-nav-title">浏览器与框架语法桥：DOM、事件、JSX、Vue SFC</span></a></section>
+<section class="chapter-nav-module"><h2>模块二：Web 前端开发</h2><a href="../lessons/fe-w01-start-three-frontend-projects.html"><span class="chapter-nav-code">FE-W01</span><span class="chapter-nav-title">启动三类 FBS 前端工程并建立仓库地图</span></a><a href="../lessons/fe-w02-components-styles-forms-tables.html"><span class="chapter-nav-code">FE-W02</span><span class="chapter-nav-title">组件、样式、表单与表格：按现有组件库做页面</span></a><a href="../lessons/fe-w03-routes-menus-page-entries.html"><span class="chapter-nav-code">FE-W03</span><span class="chapter-nav-title">路由、菜单与页面入口：让页面真正可访问</span></a><a href="../lessons/fe-w04-state-management-redux-vuex-recoil.html"><span class="chapter-nav-code">FE-W04</span><span class="chapter-nav-title">状态管理：Redux/Recoil、Vuex 与宿主状态</span></a><a href="../lessons/fe-w05-api-proxy-errors-contract.html"><span class="chapter-nav-code">FE-W05</span><span class="chapter-nav-title">API、代理、错误与前后端契约</span></a><a href="../lessons/fe-w06-permission-i18n-time-file-pii.html"><span class="chapter-nav-code">FE-W06</span><span class="chapter-nav-title">权限、i18n、时间、文件与 PII：页面功能的准入项</span></a><a href="../lessons/fe-w07-frontend-vertical-slice.html"><span class="chapter-nav-code">FE-W07</span><span class="chapter-nav-title">前端纵向切片：为入库列表增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块三：Web 前端进阶</h2><a href="../lessons/fe-a01-three-app-lifecycles-host-boundaries.html"><span class="chapter-nav-code">FE-A01</span><span class="chapter-nav-title">三种应用生命周期与宿主边界</span></a><a href="../lessons/fe-a02-micro-frontends-remote-components.html"><span class="chapter-nav-code">FE-A02</span><span class="chapter-nav-title">微前端与远端组件：Module Federation、qiankun、MMF</span></a><a href="../lessons/fe-a03-vue-react-coexistence-deps-migration.html"><span class="chapter-nav-code">FE-A03</span><span class="chapter-nav-title">Vue/React 共存、共享依赖与版本迁移</span></a><a href="../lessons/fe-a04-testing-linting-build-artifacts.html"><span class="chapter-nav-code">FE-A04</span><span class="chapter-nav-title">测试、静态检查、构建与产物边界</span></a><a href="../lessons/fe-a05-observability-systematic-debugging.html"><span class="chapter-nav-code">FE-A05</span><span class="chapter-nav-title">前端观测与系统化排错</span></a><a href="../lessons/fe-a06-impact-analysis-dev-handoff.html"><span class="chapter-nav-code">FE-A06</span><span class="chapter-nav-title">前端改动影响分析与开发交接</span></a></section>
+<section class="chapter-nav-module"><h2>模块四：后端语言及标准库基础</h2><a href="../lessons/be-l01-go-toolchain-modules-versions.html"><span class="chapter-nav-code">BE-L01</span><span class="chapter-nav-title">Go 工具链、模块与版本边界</span></a><a href="../lessons/be-l02-values-pointers-structs-tags.html"><span class="chapter-nav-code">BE-L02</span><span class="chapter-nav-title">值、指针、struct、tag 与数据边界</span></a><a href="../lessons/be-l03-methods-interfaces-embedding-di.html"><span class="chapter-nav-code">BE-L03</span><span class="chapter-nav-title">方法、接口、嵌入与依赖倒置</span></a><a href="../lessons/be-l04-slices-maps-sorting-data-transform.html"><span class="chapter-nav-code">BE-L04</span><span class="chapter-nav-title">slice、map、排序与数据转换</span></a><a href="../lessons/be-l05-errors-defer-panic-resources.html"><span class="chapter-nav-code">BE-L05</span><span class="chapter-nav-title">error、defer、panic/recover 与资源生命周期</span></a><a href="../lessons/be-l06-context-time-json-http-io.html"><span class="chapter-nav-code">BE-L06</span><span class="chapter-nav-title">context、时间、JSON、HTTP、I/O 与文件</span></a><a href="../lessons/be-l07-goroutines-channels-sync-concurrency.html"><span class="chapter-nav-code">BE-L07</span><span class="chapter-nav-title">goroutine、channel、sync 与并发边界</span></a></section>
+<section class="chapter-nav-module"><h2>模块五：Web 后端开发</h2><a href="../lessons/be-w01-start-three-backend-processes.html"><span class="chapter-nav-code">BE-W01</span><span class="chapter-nav-title">启动三类 FBS 后端进程并建立仓库地图</span></a><a href="../lessons/be-w02-chassis-http-route-request-response.html"><span class="chapter-nav-code">BE-W02</span><span class="chapter-nav-title">Chassis HTTP 接口：从路由到请求与响应</span></a><a href="../lessons/be-w03-wire-layered-architecture.html"><span class="chapter-nav-code">BE-W03</span><span class="chapter-nav-title">Wire 与分层：把 handler 接到应用、领域和基础设施</span></a><a href="../lessons/be-w04-mysql-gorm-scorm-repository-transactions.html"><span class="chapter-nav-code">BE-W04</span><span class="chapter-nav-title">MySQL、GORM/Scorm、仓储与事务</span></a><a href="../lessons/be-w05-service-calls-http-grpc-timeouts.html"><span class="chapter-nav-code">BE-W05</span><span class="chapter-nav-title">服务调用、HTTP/gRPC 契约与超时</span></a><a href="../lessons/be-w06-auth-errors-pii-security.html"><span class="chapter-nav-code">BE-W06</span><span class="chapter-nav-title">鉴权、错误码、PII 与接口安全边界</span></a><a href="../lessons/be-w07-backend-vertical-slice.html"><span class="chapter-nav-code">BE-W07</span><span class="chapter-nav-title">后端纵向切片：为入库请求增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块六：Web 后端进阶</h2><a href="../lessons/be-a01-apollo-chassis-config.html"><span class="chapter-nav-code">BE-A01</span><span class="chapter-nav-title">Apollo 与 Chassis 配置：环境差异、热更新和开关</span></a><a href="../lessons/be-a02-redis-codis-cache-consistency.html"><span class="chapter-nav-code">BE-A02</span><span class="chapter-nav-title">Redis/Codis 与缓存一致性</span></a><a href="../lessons/be-a03-saturn-scheduled-async-tasks.html"><span class="chapter-nav-code">BE-A03</span><span class="chapter-nav-title">Saturn 定时任务与异步任务</span></a><a href="../lessons/be-a04-kafka-message-pipeline.html" class="is-current" aria-current="page"><span class="chapter-nav-code">BE-A04</span><span class="chapter-nav-title">Kafka 消息链路与事件边界</span></a><a href="../lessons/be-a05-reliability-idempotency-transactions-retry.html"><span class="chapter-nav-code">BE-A05</span><span class="chapter-nav-title">可靠性：幂等、事务、重试、并发与降级组合</span></a><a href="../lessons/be-a06-logging-metrics-diagnostics.html"><span class="chapter-nav-code">BE-A06</span><span class="chapter-nav-title">日志、指标、链路与系统化排错</span></a><a href="../lessons/be-a07-impact-analysis-testing-handoff.html"><span class="chapter-nav-code">BE-A07</span><span class="chapter-nav-title">后端改动影响分析、测试与开发交接</span></a></section></nav></div></aside><div class="lesson-page-main"><header class="topbar"><a class="brand" href="../index.html">FBS 前后端转全栈 Landing</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">BE-A04 · 140–200 分钟</div><h1>Kafka 消息链路与事件边界</h1><p class="lesson-summary">从“消息队列在后端架构中解决什么问题”开始，讲清 Kafka 的核心概念、社区同类方案、FBS 仓库中的真实 producer/consumer 链路，以及消息兼容、重复、失败处理的设计方法。</p><a class="source-link" href="../markdown/be-a04-kafka-message-pipeline.md">查看 Markdown 版本</a></section><div class="lesson-layout"><main class="lesson-content"><h2 id="消息队列解决什么问题">消息队列解决什么问题</h2>
+<p>HTTP API 是请求-响应模式：A 发请求给 B，B 处理完返回结果。这种模式要求 A 和 B 同时在线，A 知道 B 的存在，A 关心 B 的处理结果。在 FBS 系统中，还有很多场景不需要这一整套约束。</p>
+<p>店铺渠道信息变更了，对账模块需要知道，但不要求变更操作者在页面上等着对账完成。入库 ASN 创建后，仓库管理系统和 BI 报表系统各自需要消费这份信息，但创建 ASN 的接口不应该直接耦合仓库系统和 BI。发票生成完成后，账单系统需要据此更新——但账单系统可能在发票生成时恰好维护中，不能强制要求它实时在线。</p>
+<p><strong>消息队列</strong>（message queue）在这些场景中充当了异步解耦层。上游（producer，生产者）把消息写入队列后继续自己的工作，不等待下游（consumer，消费者）处理完毕。下游按自己的节奏从队列中消费消息。RabbitMQ、Amazon SQS、Google Pub/Sub、NSQ 都是社区常用的消息队列，各有侧重。</p>
+<p><strong>Kafka</strong> 的定位不是传统消息队列，而是一个分布式流平台（distributed streaming platform）。它由 LinkedIn 在 2011 年开源，后来捐给 Apache 基金会。和 RabbitMQ 的主要区别在于：Kafka 把消息持久化在磁盘并按时间顺序保留（默认数天甚至数周），支持多个 consumer group 独立消费同一份数据，天然适合大数据量、高吞吐、多消费者、需要回放（replay）的场景。在 FBS 架构中，Kafka 既承担了服务间的异步通信，也部分承担了数据同步和事件溯源的角色。</p>
+<p>对比 Saturn 的差异值得在这个阶段再强调一次：Kafka 的出发点是“某件事发生了，关心这件事的人自己消费”，它的核心是事件通知和领域事件分发。Saturn 的出发点是“我要做一件事”，它的核心是任务调度和可靠执行。在 FBS 仓库中，同一个业务流程可能先通过 Kafka 发布事件，消费方收到事件后根据需要提交 Saturn 异步任务——两者配合使用，不是因为功能重叠，而是因为它们服务于不同层次的可靠性需求。</p>
+<blockquote><p>本章基于三个后端仓库的 release 分支（2026-07-20）。Kafka 的版本、producer/consumer 注册方式和消息序列化格式以 <code>sbs-fbs-server</code> 和 <code>fbs-tax-server</code> 的当前代码为准。具体平台（集群、topic、分区数、保留策略）不在课程范围。</p></blockquote>
+<h2 id="kafka-的核心概念">Kafka 的核心概念</h2>
+<p>在开始读 FBS 仓库的 consumer 代码之前，先建立起 Kafka 的几个基础模型。这些概念在前端开发中几乎没有对应的概念，建议逐条消化而不是一次读完。</p>
+<p><strong>消息（message）</strong>：一段键值对数据，包含 key（用于分区路由）、value（业务数据，通常是 JSON 或 protobuf 序列化后的字节串）、headers（键值对元数据，如 trace_id、retry_count）和 timestamp。</p>
+<p><strong>Topic（主题）</strong>：消息的分类名，比如 <code>fbs.shop.channel.change</code>。producer 往 topic 写，consumer 从 topic 读。一个 topic 可以有多个 consumer group 独立消费，不会互相影响。</p>
+<p><strong>Partition（分区）</strong>：一个 topic 被分成多个 partition，分布在不同 broker 上。partition 内部消息严格有序，但 partition 之间的消息无序。拥有相同 key 的消息一定路由到同一个 partition，这是“同一个实体的消息保证有序”的唯一方式。</p>
+<p><strong>Consumer Group（消费者组）</strong>：同一组内的 consumer 共同消费一个 topic，每个 partition 只被组内一个 consumer 消费。这保证了同一消息不会在组内重复处理，同时允许通过增加 consumer 实例水平扩展消费能力。</p>
+<p><strong>Offset（偏移量）</strong>：每条消息在 partition 内的唯一序号。consumer 处理完消息后提交（commit）当前 offset，下次启动时从这个 offset 继续消费。提交时机决定了“at-most-once”、“at-least-once”还是“exactly-once”语义。</p>
+<p><strong>序列化与 Schema 演进</strong>：producer 把 Go struct 序列化成字节串写入 Kafka，consumer 按相同 schema 反序列化。如果 producer 增加了字段但 consumer 还没更新，consumer 应当能跳过不认识的新字段而不报错。这就是消息的向后兼容（backward compatibility）和向前兼容（forward compatibility），通常由 protobuf 或 Apache Avro 等序列化方案的 schema 检查来保证。</p>
+<h2 id="fbs-仓库中的-kafka-链路">FBS 仓库中的 Kafka 链路</h2>
+<h3 id="主服务的-consumer-注册">主服务的 consumer 注册</h3>
+<p>主服务 <code>fbs_task</code> 进程中注册了多个 Kafka consumer。典型的注册路径是：<code>initNewTask()</code> → 各模块的 consumer 注册函数 → Chassis Kafka consumer handler。consumer 的实现文件分布在 <code>apps/*/access/consumer/</code> 目录下：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">apps/seller/shop/access/consumer/sync_shop_channel_consumer.go
+apps/seller/shop/access/consumer/sync_shop_channel_for_whs_consumer.go
+apps/seller/client/port/input/consumer/mass_update_client_handler.go
+apps/seller/client/port/input/consumer/account_user_handler.go
+apps/seller/client/port/input/consumer/client_request_event_handler.go
+...</code></pre></figure>
+<p>每个 consumer handler 通常包含三个部分：定义消息结构体（payload）、实现消费处理函数、错误和重试逻辑。以 <code>sync_shop_channel_consumer</code> 这个典型的 consumer 为例：</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">// apps/seller/shop/access/consumer/define.go（简化）
+type ShopChannelChangeEvent struct {
+    ShopID    int64  `json:&quot;shop_id&quot;`
+    ChannelID int64  `json:&quot;channel_id&quot;`
+    Action    string `json:&quot;action&quot;`   // &quot;add&quot;, &quot;remove&quot;, &quot;update&quot;
+    Timestamp int64  `json:&quot;timestamp&quot;`
+}
+
+// sync_shop_channel_consumer.go（简化）
+func HandleShopChannelChange(ctx context.Context, msg []byte) error {
+    var event ShopChannelChangeEvent
+    if err := json.Unmarshal(msg, &amp;event); err != nil {
+        return fmt.Errorf(&quot;unmarshal event: %w&quot;, err)
+    }
+    // 根据 Action 执行对应的业务逻辑
+    switch event.Action {
+    case &quot;add&quot;:
+        return service.AddShopChannel(ctx, event.ShopID, event.ChannelID)
+    case &quot;remove&quot;:
+        return service.RemoveShopChannel(ctx, event.ShopID, event.ChannelID)
+    case &quot;update&quot;:
+        return service.UpdateShopChannel(ctx, event.ShopID, event.ChannelID)
+    default:
+        return fmt.Errorf(&quot;unknown action: %s&quot;, event.Action)
+    }
+}</code></pre></figure>
+<p>从这段真实代码中能归纳出几个知识点：</p>
+<ol><li>consumer 接收的是 <code>[]byte</code>，自己负责反序列化。序列化格式（JSON 还是 protobuf）由消息的契约决定，不是由 consumer 框架决定的。</li><li>handler 不直接操作数据库，而是委托给 service 层。这意味着 consumer、HTTP handler 和 Saturn handler 可以共享同一套 application/domain 层。</li><li>错误返回后，框架会根据配置决定是否重试、重试几次、是否需要写入 DLQ（Dead Letter Queue，死信队列）。</li></ol>
+<h3 id="tax-服务的-producer-模式">Tax 服务的 producer 模式</h3>
+<p>Tax 仓库在 <code>internal/common/kafka/</code> 下组织 Kafka 相关代码，其中 produder 的职责是“在业务事件发生时发送消息”：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">internal/common/kafka/producer/biling.go      // 账单相关消息
+internal/common/kafka/brazil_invoice.go         // 巴西发票消息
+internal/common/kafka/brazil_cancel_invoice.go  // 发票取消消息
+internal/common/kafka/order_status.go           // 订单状态消息
+internal/common/kafka/consumer/billing.go       // 账单消费</code></pre></figure>
+<p>这些文件说明 Tax 服务在 Kafka 中同时扮演 producer 和 consumer：它既向外发送发票生成完成的事件（让账单系统消费），也消费外部发来的订单状态变更事件（触发自身税务计算）。</p>
+<p>一个关键设计点：<code>initialize/base/init_kafka.go</code> 是 Tax 服务中 Kafka 初始化的集中入口。producer 的配置（topic、broker 地址、序列化方式）在启动时初始化一次，业务代码通过注入的 Kafka client 发送消息。</p>
+<p><strong>Situation</strong>：当店铺绑定的渠道发生变化时，对账系统和库存系统需要感知到这个变化并做出相应调整，但店铺管理接口不应该直接耦合这两个系统。</p>
+<p><strong>Task</strong>：追踪主服务中 <code>sync_shop_channel_consumer</code> 从消息消费到业务处理的完整链路，理解消息的生产者、消费者和消息生命周期。</p>
+<p><strong>Action</strong>：</p>
+<ol><li>找到产生 <code>ShopChannelChangeEvent</code> 的 producer 代码（可能在店铺管理的 service 或 repository 层）。</li><li>找到消费该事件的 consumer handler 代码，画出从消息到达 → 反序列化 → 业务处理的完整流程图。</li><li>识别 consumer 如何处理重复消息：有没有基于 shop_id + channel_id + timestamp 的幂等机制？</li><li>在测试环境复现一次消息消费失败 → 重试 → 最终成功的完整流程，记录日志和监控输出。</li></ol>
+<p><strong>Result</strong>：你能从 producer 代码追到 consumer handler，理解一条 Kafka 消息从发到收的完整链路，并能判断当前代码对消息重复、失败和兼容性的保护能力。</p>
+<h2 id="消息设计的常见决策">消息设计的常见决策</h2>
+<h3 id="消息体是具体数据还是数据-id">消息体是具体数据还是数据 ID</h3>
+<p>两种模式在 FBS 仓库中都有出现。</p>
+<p><strong>携带完整数据</strong>：消息体中包含处理所需的全部字段。优点是 consumer 不需要额外查询，处理更快；缺点是一旦上游数据模型变更，消息结构也必须跟着变。适合实时性要求高、consumer 并发大、上游数据变化不频繁的场景。</p>
+<p><strong>只携带数据 ID</strong>：消息体中只包含实体 ID 和时间戳。consumer 收到消息后根据 ID 重新查询最新数据。优点是消息 payload 稳定、consumer 始终拿到最新数据；缺点是多一次查询、数据在“发出消息”和“消费消息”之间可能已经再次变化。适合数据频繁更新、consumer 需要最准确状态的场景。</p>
+<p>主服务的 <code>sync_shop_channel_consumer</code> 走的是“携带完整数据”的模式：消息中包含了 <code>ShopID</code>、<code>ChannelID</code>、<code>Action</code> 和 <code>Timestamp</code>。Consumer 收到后直接用这些字段执行操作，不需要查库。</p>
+<h3 id="消息兼容性">消息兼容性</h3>
+<p>消息的字段会随着需求变化而增加或修改。一个 producer 多了一个 <code>Region</code> 字段，旧的 consumer 能否正确处理这个消息？</p>
+<p><strong>向后兼容（backward compatibility）</strong>：新 consumer 能消费旧 producer 的消息。新增字段在反序列化时赋零值即可。</p>
+<p><strong>向前兼容（forward compatibility）</strong>：旧 consumer 能消费新 producer 的消息。用 JSON 做序列化时，旧 consumer 的 <code>json.Unmarshal</code> 会自动忽略不认识的新字段，天然支持向前兼容。但 protobuf 等 schemaful 格式需要显式声明向后兼容（字段号只能增加不能修改）。</p>
+<p>FBS 仓库中大部分 consumer 使用 JSON 序列化，向前兼容性是内置的。但这不是永久免费的午餐：当新字段承载业务语义且 consumer 需要感知（比如 <code>Action</code> 从三种变成四种）时，consumer 必须同步更新。</p>
+<h3 id="消息重复与乱序">消息重复与乱序</h3>
+<p>Kafka 保证 partition 内部消息有序，但不保证跨 partition 有序，也不保证消息不重复。consumer 的处理逻辑必须能应对以下情况：</p>
+<p><strong>消息重复</strong>：网络波动时 producer 可能重发，consumer 重启时可能从已处理过的 offset 重新消费。应对方式是幂等处理（与 Saturn 相同的原则）：基于业务唯一键判断是否已处理。</p>
+<p><strong>消息乱序</strong>：同一个实体的不同状态变更可能落入不同 partition，导致 consumer 读到“先更新，后创建”的乱序消息。应对方式是 consumer 按实体 ID 缓存最后处理的 timestamp，丢弃早于该 timestamp 的消息；或者按实体 ID 路由到同一个 partition（Kafka message key 决定 partition）。</p>
+<h2 id="消息的可靠性层次">消息的可靠性层次</h2>
+<p>Kafka 不提供“exactly-once”（恰好一次）的消息投递保证，只提供“at-least-once”（至少一次）。这意味着 consumer 在最理想的情况下也能收到重复消息。真正实现业务级别的 exactly-once 需要 consumer 端配合：幂等处理 + 事务性提交 offset。</p>
+<p>在 FBS 仓库中，consumer 的常见做法是“处理成功则提交 offset，失败则不提交并依赖重试”。这种方式保证 at-least-once（消息不会被漏掉），但不保证 exactly-once（同一消息可能被处理多次）。每个 consumer handler 的设计者都必须意识到这个语义，并在 handler 内部实现业务幂等。</p>
+<p><strong>DLQ（Dead Letter Queue，死信队列）</strong> 是消息重试全部失败后的最后去处。主服务中的 consumer 在达到最大重试次数后会走 DLQ 路径。进入 DLQ 的消息不会自动重新处理，需要人工或定时任务检查 DLQ 中的消息，判断是数据问题（修数据后重新入队）、代码问题（修 bug 后重新部署）还是配置问题（纠正 topic 路由）。</p>
+<p><strong>消息丢失的可能环节</strong>：</p>
+<ol><li>producer 端：<code>producer.Send()</code> 返回成功不代表消息已持久化到所有 replica。Kafka broker 在 acks=1（只等 leader 确认）时，leader 挂了且新 leader 没有这条消息，就丢了。</li><li>broker 端：Kafka broker 根据 retention policy（保留策略）自动删除过期消息。如果 consumer 因为故障停在某个 offset 超过保留时间，恢复后那段数据已经不存在了。</li><li>consumer 端：consumer 处理消息成功后、提交 offset 之前进程崩溃。重启后从旧 offset 重新消费，产生重复处理——这不是丢失，是重复。</li></ol>
+<p>对于 FBS 课程而言，你不需要配置 Kafka broker 的参数。你需要知道：你的 consumer handler 随时可能收到重复消息，所以必须幂等；你的 producer 代码 <code>Send()</code> 成功后消息不保证一定能被消费（broker 故障、retention 清理都可能影响），所以关键业务应该在 producer 侧保存一份消息发送记录用于对账。</p>
+<h2 id="事务后发消息的风险">事务后发消息的风险</h2>
+<p>一个常见的写路径：</p>
+<ol><li>数据库事务中更新 ASN 状态为“已入库”</li><li>事务提交成功后，producer 向 Kafka 发送 <code>ASN_STATUS_CHANGED</code> 消息</li></ol>
+<p>第二步失败（producer 超时、网络不可达）会导致：数据库已经更新了 ASN 状态，但下游 consumer 不知道这件事。下游系统将永远缺少这条状态变更通知。</p>
+<p>这是一个分布式系统中经典的“dual-write”问题：数据库和消息是两个独立的存储，无法在一个本地事务中同时写入。处理方式有以下几种：</p>
+<p><strong>方案一：outbox 模式</strong>。不直接发 Kafka，而是在同一个数据库事务中往一张 <code>outbox</code> 表插入消息记录。然后由一个独立的 scan 线程轮询 outbox 表，把未发送的消息投递到 Kafka，投递成功后才删除或标记为已发送。核心思想是把“发消息”这个操作变成数据库事务的一部分，用数据库事务保证不丢。</p>
+<p><strong>方案二：CDC（Change Data Capture，变更数据捕获）</strong>。不让业务代码直接写 Kafka，而是通过 Debezium 等工具捕捉 MySQL binlog，把 INSERT/UPDATE 自动转换成 Kafka 消息。彻底避免了 dual-write，但要求运维有 CDC 基础设施。</p>
+<p><strong>方案三：妥协方案——发消息失败时记录异常并告警</strong>。在 FBS 仓库中，部分代码在事务提交后直接发 Kafka，失败时写错误日志并记录到监控系统。运营或开发定期检查积压的失败消息，手工补偿。这个方案的可靠性远不如 outbox，但对非核心、允许短暂不一致的场景够用。</p>
+<p>FBS 仓库当前没有统一的 outbox 或 CDC 实现。你在自己的代码中选择哪条路径，取决于业务对一致性的要求。课程的建议是：涉及资金、库存、订单状态等不可逆操作的，优先与团队讨论 outbox 或 CDC；对于纯通知类的事件，抓好失败监控和告警就够。</p>
+<h2 id="消息可观测性">消息可观测性</h2>
+<p>一个 Kafka consumer 如果静默地停止消费了，你可能在几小时后才发现下游数据全部过期。所以在开发和运维 consumer 时，至少要确保三件事：</p>
+<p><strong>消费延迟（consumer lag）监控</strong>。consumer lag 是当前最新消息 offset 和 consumer 已提交 offset 之间的差值。lag 持续增长说明 consumer 处理速度跟不上生产速度或者 consumer 停了。主服务的 task 进程通过 Prometheus 暴露了 consumer lag 指标，你在 Grafana 上能看到。</p>
+<p><strong>错误率监控</strong>。consumer handler 的 error 返回次数、反序列化失败次数、重试次数。假设你突然看到某个 topic 的 consumer error 率从 0.1% 飙升到 50%，大概率是 producer 的消息格式变了但 consumer 没升级。</p>
+<p><strong>消费记录日志</strong>。每个 consumer handler 处理消息时应在日志中输出消息的唯一标识（如 trace_id、message_id）和处理结果。当需要排查“为什么这条数据下游没更新”时，消费者日志是比猜测更可靠的证据。</p>
+<p>FBS 主服务的 <code>middleware/</code> 和 <code>libs/monitor/</code> 中已有 consumer 延迟上报的实现，但具体指标名称和上报方式以当前环境配置为准。课程不虚构具体的 Grafana 看板截图，只说明你要找什么、怎么看。</p>
+<h2 id="测试-kafka-consumer">测试 Kafka consumer</h2>
+<p>consumer 的单元测试与 HTTP handler 不同：HTTP handler 可以用 <code>net/http/httptest</code> 模拟请求，consumer 没有这种标准库。</p>
+<p>FBS 仓库中 consumer 测试的常见方法：</p>
+<p><strong>直接测试 handler 函数</strong>。consumer handler 最终是一个接收 <code>[]byte</code> 返回 <code>error</code> 的函数。把你的 handler 提取成纯函数后，可以传入合法 JSON、非法 JSON、空字节、超大 payload 等输入，验证返回结果。这样测试不依赖 Kafka 运行环境。</p>
+<p><strong>Mock 依赖的 service 和 repository</strong>。consumer 调用了 service 层和 repository 层，测试时将这些依赖注入 fake/mock，验证 consumer 在不同 service 返回结果时的行为——service 返回 error 时应重试还是放弃，service panic 时 consumer 如何处理。</p>
+<p><strong>集成测试（如需验证整个链路）</strong>。在 test 环境中启动一个真实的 Kafka consumer，往 topic 写入测试消息，等待 consumer 处理完成后检查数据库状态、下游调用记录和日志输出。这门课不要求你在课程环境中运行这一步。</p>
+<p>主服务 <code>apps/seller/shop/access/consumer/sync_shop_channel_consumer_test.go</code> 提供了真实的 consumer 测试范例。这些测试没有启动 Kafka broker，而是直接调用 handler 函数并 mock 依赖。</p>
+<h2 id="消息契约的设计评审清单">消息契约的设计评审清单</h2>
+<p>在发布一条新的 Kafka 消息之前，用以下问题检查消息设计：</p>
+<ul><li>topic 命名是否遵循团队约定的命名规范（如 <code>{domain}.{entity}.{event}</code>）？</li><li>消息体的字段是否足够让 consumer 独立处理？还是 consumer 必须额外查询其他数据源？</li><li>消息的 key 是否保证了需要有序消费的实体落到同一个 partition？</li><li>序列化格式（JSON / protobuf）是否与现有 consumer 兼容？</li><li>消息中有没有不应扩散的敏感信息（PII、token、内部路径）？</li><li>消息的新增字段是否可选的，旧 consumer 忽略后是否有默认行为？</li><li>有没有设计消息的 schema version 字段，便于未来 consumer 按版本区分处理？</li><li>如果一条消息被 DLQ 了，是否需要人工处理流程？谁负责？</li></ul>
+<h2 id="练习">练习</h2>
+<h3 id="练习一-为-asn-状态变更设计消息">练习一：为 ASN 状态变更设计消息</h3>
+<p>ASN 状态从“待收货”变为“已入库”时，需要通知对账系统和 BI 报表系统。</p>
+<ol><li>设计消息 topic 名称和消息体结构（至少包含 ASN ID、状态变更前后值、操作时间）。</li><li>选择消息体模式：携带完整数据还是只携带 ID？写出选择理由。</li><li>如果下游消费了对账但还没来得及消费，ASN 状态又被回退到“待收货”，写出消息消费的时序和可能出现的问题。</li><li>设计消息的向后兼容策略：后续增加 <code>final_location</code> 字段时，旧 consumer 如何不受影响？</li></ol>
+<h3 id="练习二-追踪一个真实的-fbs-consumer">练习二：追踪一个真实的 FBS consumer</h3>
+<p>选择主服务 <code>apps/seller/client/port/input/consumer/</code> 下的任意一个 consumer handler：</p>
+<ol><li>找出它对应的 Kafka topic。</li><li>画出从 Kafka 消息到达 → 反序列化 → handler 入口 → application/domain 层 → response 的流程图。</li><li>判断该 consumer 如何处理消息解析失败、业务处理失败和重试。</li><li>找出该 consumer 是否可能处理重复消息，以及重复消息的业务影响。</li></ol>
+<h3 id="练习三-kafka-与-saturn-的协作">练习三：Kafka 与 Saturn 的协作</h3>
+<p>ASN 创建后，需要触发生成发票的 Saturn 异步任务。但发票生成依赖订单状态，订单状态通过 Kafka 消息传递。</p>
+<ol><li>画出完整数据流：ASN 创建 → Kafka 消息 → consumer 消费 → 提交 Saturn 异步任务 → handler 执行 → 结果写入。</li><li>在每一步标注“如果这一步失败，下一步会怎样”。</li><li>如果 Saturn 异步任务提交成功但 3 次重试全部失败，这算“已处理的 Kafka 消息”还是“未处理的”？offset 已经提交了吗？写出你的理解和处理方案。</li></ol>
+<h3 id="练习四-kafka-consumer-故障诊断">练习四：Kafka consumer 故障诊断</h3>
+<p>以下是来自团队的故障报告：</p>
+<blockquote><p>事件：店铺渠道同步延迟了 40 分钟。 现象：<code>sync_shop_channel_consumer</code> 的 lag 从上午 10:00 开始持续增长，10:40 恢复正常。 当时没有服务发布、没有配置变更、没有流量尖峰。</p></blockquote>
+<ol><li>列出可能导致 consumer lag 突增的原因（至少 5 种）。</li><li>为每种原因设计验证方法（查什么日志、看什么指标、用什么命令）。</li><li>如果确认原因是“消费者在 10:00-10:40 期间每次反序列化一个特殊 shop_id 的消息时 panic 并被 recover 捕获，每次 panic 导致 consumer 暂停处理 30 秒后重试”，说明 consumer 的重试策略设计有什么问题，并写出改进方案。</li><li>如果确认原因是“上游在 10:00 发布了一次大批量同步任务，短时间内向 Kafka 写入了 50 万条消息”，说明 consumer 水平扩展有什么限制（partition 数量固定时最多能扩展多少个 consumer 实例？）。</li></ol>
+<p>Kafka 在 FBS 架构中承担了一个不容易被替代的角色：它既是异步通信通道，又是数据管道。你可以从 topic 中回溯几天前的消息，这对问题排查和数据修复来说是巨大的优势。但这也意味着 consumer 代码要不断地处理“过去”的消息——schema 兼容、数据修复、状态补偿在 Kafka 系统中是持续的工作，不是一次性搞定的。</p>
+<p>另一个值得注意的细节：主服务的 <code>fbs_task</code> 进程同时运行 Saturn 任务和 Kafka consumer。它在同一个进程中承载了消息消费和任务执行两套调度，但它们共享了同一个 Chassis 初始化、同一个 config、同一个数据库连接池和同一个监控体系。这意味着 fbs_task 进程是主服务中逻辑最复杂的进程入口，排查 task 进程故障时要分清是 Saturn 任务的问题还是 Kafka consumer 的问题，以及两者之间是否存在资源竞争。</p>
+<h2 id="自检">自检</h2>
+<ol><li>Kafka 和 HTTP API 在通信模式上的本质区别是什么？什么场景适合 Kafka，什么场景适合同步 HTTP 调用？</li><li>Kafka 的 topic、partition、consumer group、offset 分别解决什么问题？消息在 partition 内有序和跨 partition 无序意味着什么？</li><li>“消息携带完整数据”和“消息只携带数据 ID”两种模式分别适合什么场景？FBS 仓库中哪个 consumer 用的是哪一种？</li><li>消息重复和乱序是 Kafka 消费中必须应对的两个问题。分别写出它们的成因和应对方式。</li><li>Kafka 和 Saturn 什么时候配合使用？什么时候只用一个就够了？</li></ol>
+<h2 id="参考文献">参考文献</h2>
+<ul><li><code>sbs-fbs-server/apps/seller/shop/access/consumer/</code>：店铺渠道同步的 consumer 实现</li><li><code>sbs-fbs-server/apps/seller/client/port/input/consumer/</code>：客户相关事件 consumer 实现</li><li><code>fbs-tax-server/internal/common/kafka/</code>：Tax 服务的 producer 和 consumer 模块</li><li><code>fbs-tax-server/initialize/base/init_kafka.go</code>：Tax 服务 Kafka 初始化入口</li></ul><nav class="lesson-nav"><a href="../lessons/be-a03-saturn-scheduled-async-tasks.html">← BE-A03<br><strong>Saturn 定时任务与异步任务</strong></a><a href="../lessons/be-a05-reliability-idempotency-transactions-retry.html">BE-A05 →<br><strong>可靠性：幂等、事务、重试、并发与降级组合</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#消息队列解决什么问题"><span class="toc-num">1</span>消息队列解决什么问题</a><a class="" href="#kafka-的核心概念"><span class="toc-num">2</span>Kafka 的核心概念</a><a class="" href="#fbs-仓库中的-kafka-链路"><span class="toc-num">3</span>FBS 仓库中的 Kafka 链路</a><a class="sub" href="#主服务的-consumer-注册"><span class="toc-num">3.1</span>主服务的 consumer 注册</a><a class="sub" href="#tax-服务的-producer-模式"><span class="toc-num">3.2</span>Tax 服务的 producer 模式</a><a class="" href="#消息设计的常见决策"><span class="toc-num">4</span>消息设计的常见决策</a><a class="sub" href="#消息体是具体数据还是数据-id"><span class="toc-num">4.1</span>消息体是具体数据还是数据 ID</a><a class="sub" href="#消息兼容性"><span class="toc-num">4.2</span>消息兼容性</a><a class="sub" href="#消息重复与乱序"><span class="toc-num">4.3</span>消息重复与乱序</a><a class="" href="#消息的可靠性层次"><span class="toc-num">5</span>消息的可靠性层次</a><a class="" href="#事务后发消息的风险"><span class="toc-num">6</span>事务后发消息的风险</a><a class="" href="#消息可观测性"><span class="toc-num">7</span>消息可观测性</a><a class="" href="#测试-kafka-consumer"><span class="toc-num">8</span>测试 Kafka consumer</a><a class="" href="#消息契约的设计评审清单"><span class="toc-num">9</span>消息契约的设计评审清单</a><a class="" href="#练习"><span class="toc-num">10</span>练习</a><a class="sub" href="#练习一-为-asn-状态变更设计消息"><span class="toc-num">10.1</span>练习一：为 ASN 状态变更设计消息</a><a class="sub" href="#练习二-追踪一个真实的-fbs-consumer"><span class="toc-num">10.2</span>练习二：追踪一个真实的 FBS consumer</a><a class="sub" href="#练习三-kafka-与-saturn-的协作"><span class="toc-num">10.3</span>练习三：Kafka 与 Saturn 的协作</a><a class="sub" href="#练习四-kafka-consumer-故障诊断"><span class="toc-num">10.4</span>练习四：Kafka consumer 故障诊断</a><a class="" href="#自检"><span class="toc-num">11</span>自检</a><a class="" href="#参考文献"><span class="toc-num">12</span>参考文献</a></aside></div></div></div><footer class="site-footer">FBS 前后端转全栈 Landing · 已发布</footer></div></body></html>

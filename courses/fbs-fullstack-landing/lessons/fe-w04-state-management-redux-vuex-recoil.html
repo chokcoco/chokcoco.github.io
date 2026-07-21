@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="能追踪&quot;当前 seller/shop&quot;从初始化到页面的完整数据流，读懂 Redux/Thunk、Vuex module、Recoil atom 和 Redux Toolkit 的读法与不可变更新规则——画出一个状态的来源、写入、派生与消费链。"><title>状态管理：Redux/Recoil、Vuex 与宿主状态 | FBS 前后端转全栈 Landing</title><script src="../assets/theme-switcher.js"></script><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><div class="lesson-page-grid"><aside class="chapter-nav" aria-label="课程章节导航"><button class="chapter-nav-toggle" type="button" aria-expanded="true" aria-controls="chapter-nav-content"><span aria-hidden="true">◀</span><span class="chapter-nav-toggle-label">收起</span></button><div class="chapter-nav-content" id="chapter-nav-content"><div class="chapter-nav-heading"><strong>课程章节</strong><span>第 10 / 40 章</span></div><nav class="chapter-nav-list"><section class="chapter-nav-module"><h2>模块一：前端语言及标准库基础</h2><a href="../lessons/fe-l01-js-data-types-equality.html"><span class="chapter-nav-code">FE-L01</span><span class="chapter-nav-title">JavaScript 数据、类型与相等性：先读懂仓库判断分支</span></a><a href="../lessons/fe-l02-functions-scope-closure-modules.html"><span class="chapter-nav-code">FE-L02</span><span class="chapter-nav-title">函数、作用域、闭包与模块：跟上组件外的调用链</span></a><a href="../lessons/fe-l03-promise-async-eventloop.html"><span class="chapter-nav-code">FE-L03</span><span class="chapter-nav-title">Promise、async/await 与事件循环：读懂请求和页面副作用</span></a><a href="../lessons/fe-l04-js-objects-web-data.html"><span class="chapter-nav-code">FE-L04</span><span class="chapter-nav-title">JavaScript 常用对象与 Web 数据处理</span></a><a href="../lessons/fe-l05-typescript-type-chain.html"><span class="chapter-nav-code">FE-L05</span><span class="chapter-nav-title">TypeScript：从接口数据到组件 Props 的类型链</span></a><a href="../lessons/fe-l06-browser-framework-syntax-bridge.html"><span class="chapter-nav-code">FE-L06</span><span class="chapter-nav-title">浏览器与框架语法桥：DOM、事件、JSX、Vue SFC</span></a></section>
+<section class="chapter-nav-module"><h2>模块二：Web 前端开发</h2><a href="../lessons/fe-w01-start-three-frontend-projects.html"><span class="chapter-nav-code">FE-W01</span><span class="chapter-nav-title">启动三类 FBS 前端工程并建立仓库地图</span></a><a href="../lessons/fe-w02-components-styles-forms-tables.html"><span class="chapter-nav-code">FE-W02</span><span class="chapter-nav-title">组件、样式、表单与表格：按现有组件库做页面</span></a><a href="../lessons/fe-w03-routes-menus-page-entries.html"><span class="chapter-nav-code">FE-W03</span><span class="chapter-nav-title">路由、菜单与页面入口：让页面真正可访问</span></a><a href="../lessons/fe-w04-state-management-redux-vuex-recoil.html" class="is-current" aria-current="page"><span class="chapter-nav-code">FE-W04</span><span class="chapter-nav-title">状态管理：Redux/Recoil、Vuex 与宿主状态</span></a><a href="../lessons/fe-w05-api-proxy-errors-contract.html"><span class="chapter-nav-code">FE-W05</span><span class="chapter-nav-title">API、代理、错误与前后端契约</span></a><a href="../lessons/fe-w06-permission-i18n-time-file-pii.html"><span class="chapter-nav-code">FE-W06</span><span class="chapter-nav-title">权限、i18n、时间、文件与 PII：页面功能的准入项</span></a><a href="../lessons/fe-w07-frontend-vertical-slice.html"><span class="chapter-nav-code">FE-W07</span><span class="chapter-nav-title">前端纵向切片：为入库列表增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块三：Web 前端进阶</h2><a href="../lessons/fe-a01-three-app-lifecycles-host-boundaries.html"><span class="chapter-nav-code">FE-A01</span><span class="chapter-nav-title">三种应用生命周期与宿主边界</span></a><a href="../lessons/fe-a02-micro-frontends-remote-components.html"><span class="chapter-nav-code">FE-A02</span><span class="chapter-nav-title">微前端与远端组件：Module Federation、qiankun、MMF</span></a><a href="../lessons/fe-a03-vue-react-coexistence-deps-migration.html"><span class="chapter-nav-code">FE-A03</span><span class="chapter-nav-title">Vue/React 共存、共享依赖与版本迁移</span></a><a href="../lessons/fe-a04-testing-linting-build-artifacts.html"><span class="chapter-nav-code">FE-A04</span><span class="chapter-nav-title">测试、静态检查、构建与产物边界</span></a><a href="../lessons/fe-a05-observability-systematic-debugging.html"><span class="chapter-nav-code">FE-A05</span><span class="chapter-nav-title">前端观测与系统化排错</span></a><a href="../lessons/fe-a06-impact-analysis-dev-handoff.html"><span class="chapter-nav-code">FE-A06</span><span class="chapter-nav-title">前端改动影响分析与开发交接</span></a></section>
+<section class="chapter-nav-module"><h2>模块四：后端语言及标准库基础</h2><a href="../lessons/be-l01-go-toolchain-modules-versions.html"><span class="chapter-nav-code">BE-L01</span><span class="chapter-nav-title">Go 工具链、模块与版本边界</span></a><a href="../lessons/be-l02-values-pointers-structs-tags.html"><span class="chapter-nav-code">BE-L02</span><span class="chapter-nav-title">值、指针、struct、tag 与数据边界</span></a><a href="../lessons/be-l03-methods-interfaces-embedding-di.html"><span class="chapter-nav-code">BE-L03</span><span class="chapter-nav-title">方法、接口、嵌入与依赖倒置</span></a><a href="../lessons/be-l04-slices-maps-sorting-data-transform.html"><span class="chapter-nav-code">BE-L04</span><span class="chapter-nav-title">slice、map、排序与数据转换</span></a><a href="../lessons/be-l05-errors-defer-panic-resources.html"><span class="chapter-nav-code">BE-L05</span><span class="chapter-nav-title">error、defer、panic/recover 与资源生命周期</span></a><a href="../lessons/be-l06-context-time-json-http-io.html"><span class="chapter-nav-code">BE-L06</span><span class="chapter-nav-title">context、时间、JSON、HTTP、I/O 与文件</span></a><a href="../lessons/be-l07-goroutines-channels-sync-concurrency.html"><span class="chapter-nav-code">BE-L07</span><span class="chapter-nav-title">goroutine、channel、sync 与并发边界</span></a></section>
+<section class="chapter-nav-module"><h2>模块五：Web 后端开发</h2><a href="../lessons/be-w01-start-three-backend-processes.html"><span class="chapter-nav-code">BE-W01</span><span class="chapter-nav-title">启动三类 FBS 后端进程并建立仓库地图</span></a><a href="../lessons/be-w02-chassis-http-route-request-response.html"><span class="chapter-nav-code">BE-W02</span><span class="chapter-nav-title">Chassis HTTP 接口：从路由到请求与响应</span></a><a href="../lessons/be-w03-wire-layered-architecture.html"><span class="chapter-nav-code">BE-W03</span><span class="chapter-nav-title">Wire 与分层：把 handler 接到应用、领域和基础设施</span></a><a href="../lessons/be-w04-mysql-gorm-scorm-repository-transactions.html"><span class="chapter-nav-code">BE-W04</span><span class="chapter-nav-title">MySQL、GORM/Scorm、仓储与事务</span></a><a href="../lessons/be-w05-service-calls-http-grpc-timeouts.html"><span class="chapter-nav-code">BE-W05</span><span class="chapter-nav-title">服务调用、HTTP/gRPC 契约与超时</span></a><a href="../lessons/be-w06-auth-errors-pii-security.html"><span class="chapter-nav-code">BE-W06</span><span class="chapter-nav-title">鉴权、错误码、PII 与接口安全边界</span></a><a href="../lessons/be-w07-backend-vertical-slice.html"><span class="chapter-nav-code">BE-W07</span><span class="chapter-nav-title">后端纵向切片：为入库请求增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块六：Web 后端进阶</h2><a href="../lessons/be-a01-apollo-chassis-config.html"><span class="chapter-nav-code">BE-A01</span><span class="chapter-nav-title">Apollo 与 Chassis 配置：环境差异、热更新和开关</span></a><a href="../lessons/be-a02-redis-codis-cache-consistency.html"><span class="chapter-nav-code">BE-A02</span><span class="chapter-nav-title">Redis/Codis 与缓存一致性</span></a><a href="../lessons/be-a03-saturn-scheduled-async-tasks.html"><span class="chapter-nav-code">BE-A03</span><span class="chapter-nav-title">Saturn 定时任务与异步任务</span></a><a href="../lessons/be-a04-kafka-message-pipeline.html"><span class="chapter-nav-code">BE-A04</span><span class="chapter-nav-title">Kafka 消息链路与事件边界</span></a><a href="../lessons/be-a05-reliability-idempotency-transactions-retry.html"><span class="chapter-nav-code">BE-A05</span><span class="chapter-nav-title">可靠性：幂等、事务、重试、并发与降级组合</span></a><a href="../lessons/be-a06-logging-metrics-diagnostics.html"><span class="chapter-nav-code">BE-A06</span><span class="chapter-nav-title">日志、指标、链路与系统化排错</span></a><a href="../lessons/be-a07-impact-analysis-testing-handoff.html"><span class="chapter-nav-code">BE-A07</span><span class="chapter-nav-title">后端改动影响分析、测试与开发交接</span></a></section></nav></div></aside><div class="lesson-page-main"><header class="topbar"><a class="brand" href="../index.html">FBS 前后端转全栈 Landing</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">FE-W04 · 110–150 分钟</div><h1>状态管理：Redux/Recoil、Vuex 与宿主状态</h1><p class="lesson-summary">能追踪&quot;当前 seller/shop&quot;从初始化到页面的完整数据流，读懂 Redux/Thunk、Vuex module、Recoil atom 和 Redux Toolkit 的读法与不可变更新规则——画出一个状态的来源、写入、派生与消费链。</p><a class="source-link" href="../markdown/fe-w04-state-management-redux-vuex-recoil.md">查看 Markdown 版本</a></section><div class="lesson-layout"><main class="lesson-content"><h2 id="这一章解决什么问题">这一章解决什么问题</h2>
+<p>后端同学看前端状态管理代码时，最常见的误判是：把 Store 当作一个&quot;全局变量池&quot;——需要什么就从里面取，想改就直接改。但在 FBS 前端中，状态有严格的生命周期和所有权：组件自己管理的、本仓 Store 管理的、宿主提供的、远端组件共享的——每一层都有不同的读写规则。</p>
+<p>更复杂的是，三个 FBS 前端仓库使用了完全不同的状态管理方案：Portal 同时用 Redux（带 Thunk 中间件）和 Recoil，SC Vue 用 Vuex（由 Seller Center 宿主注入），SC React 用 Redux Toolkit 但依赖宿主 Vuex 提供基础信息。这不是&quot;选型混乱&quot;，而是不同时期的技术决策和宿主约束共同作用的结果。</p>
+<p>本章的目标不是让你成为 Redux 或 Vuex 专家，而是帮你建立一套状态追踪能力：看到一个页面上的数据（如当前 seller 的 shop ID），你能从页面一路追溯到 Store 中的定义、初始化 action、写入点、派生逻辑和消费方。</p>
+<blockquote><p>本章基于三个前端仓库的 release 分支（2026-07-20）。</p></blockquote>
+<h2 id="先建立状态分层的概念">先建立状态分层的概念</h2>
+<p>在 FBS 的任一前端页面中，一个&quot;当前 shop 信息&quot;可能来自以下四层之一：</p>
+<div class="table-wrap"><table><thead><tr><th>层级</th><th>示例</th><th>特点</th></tr></thead><tbody><tr><td>组件局部状态</td><td><code>data() { return { form: {} } }</code> 或 <code>useState</code></td><td>只有当前组件可见，组件销毁即消失</td></tr><tr><td>本仓 Store</td><td>Redux store、Vuex module、RTK slice</td><td>跨页面共享，浏览器刷新后可能丢失</td></tr><tr><td>宿主 Store</td><td>Seller Center 提供的全局状态</td><td>跨模块共享，由宿主管理生命周期</td></tr><tr><td>远端组件状态</td><td>通过 Props/Context 从远端组件传入</td><td>跨仓共享，但契约严格限制</td></tr></tbody></table></div>
+<p>一个实用的判断规则：如果数据只在一个组件中使用，用局部状态；如果在多个页面中需要（如用户信息、当前 shop），放 Store；如果其他 MMF 模块或宿主也需要，放宿主 Store。FBS 的&quot;当前 seller/shop&quot;就是最典型的跨页面、跨模块共享数据，所以它在宿主 Store 中管理。</p>
+<h2 id="sc-vue-vuex-模块化的宿主注入模式">SC Vue：Vuex 模块化的宿主注入模式</h2>
+<h3 id="fbs-store-的注册">FBS Store 的注册</h3>
+<p>SC Vue 中的 Store 不是在本仓创建的，而是注册到 Seller Center 宿主提供的 Vuex Store 中：</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">// src/store/index.ts
+import { app } from 'framework';
+import FBS_STORE from './modules/index';
+
+export const fbsStoreName = 'FBS_STORE';
+app.registerVue3StoreModule(fbsStoreName, FBS_STORE);</code></pre></figure>
+<p><code>app.registerVue3StoreModule</code> 是 MMF 框架提供的能力，它将 FBS 的 Vuex 模块挂载到宿主 Vuex Store 的 <code>FBS_STORE</code> 命名空间下。此后，任何代码（包括宿主的其他模块）都可以通过 <code>app.vue3VuexStore.getters['FBS_STORE/Shop/currentShop']</code> 访问 FBS 的状态。</p>
+<h3 id="模块结构">模块结构</h3>
+<p><code>src/store/modules/</code> 下有四个子模块：</p>
+<div class="table-wrap"><table><thead><tr><th>模块</th><th>路径</th><th>管理的数据</th></tr></thead><tbody><tr><td><code>Seller</code></td><td><code>modules/seller/index.ts</code></td><td>卖家信息、入驻状态、一键注册配置</td></tr><tr><td><code>Shop</code></td><td><code>modules/shop/index.ts</code></td><td>当前选中的店铺、店铺列表、店铺标签</td></tr><tr><td><code>System</code></td><td><code>modules/system/index.ts</code></td><td>系统升级状态、全局开关</td></tr><tr><td><code>Temporal</code></td><td><code>modules/temporal/index.ts</code></td><td>临时数据缓存</td></tr></tbody></table></div>
+<h3 id="读法-从页面追到-store">读法：从页面追到 Store</h3>
+<p>在 IBT 详情页中，<code>dataLoading</code> 是从组件 <code>data()</code> 中读取的局部状态，而 <code>basicInfo.urgentStatus</code> 可能来自 Store。追踪过程：</p>
+<ol><li>页面模板中使用 <code>basicInfo</code> → 在 <code>&lt;script&gt;</code> 中找它的来源。</li><li>如果来自 <code>mapState</code> 或 <code>this.$store.state.FBS_STORE.xxx</code> → 找到对应 module 的 state 定义。</li><li>如果来自 computed 属性 → 看它是从 state 派生的还是从 API 响应赋值的。</li></ol>
+<h3 id="写操作-dispatch-和-commit">写操作：<code>dispatch</code> 和 <code>commit</code></h3>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 触发异步 action
+await app.vue3VuexStore.dispatch('FBS_STORE/INIT_FBS_STORE');
+// 同步修改 state
+app.vue3VuexStore.commit('FBS_STORE/SET_SHOP_INFO', shopInfo);</code></pre></figure>
+<ul><li><code>dispatch</code> 用于触发 action（可以包含异步操作），action 内部通过 <code>commit</code> 修改 state。</li><li><code>commit</code> 用于直接提交 mutation（必须是同步操作），mutation 是唯一能改变 state 的途径。</li></ul>
+<p>FBS 仓库中，路由守卫的 <code>beforeEnter</code> 里 <code>dispatch('FBS_STORE/INIT_FBS_STORE')</code> 是 Store 初始化的入口——它内部会并发请求卖家信息和店铺信息，然后将结果 commit 到对应 module 的 state 中。</p>
+<h3 id="命名空间规则">命名空间规则</h3>
+<p>Vuex module 通过 <code>namespaced: true</code> 启用命名空间。访问时必须带完整路径：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 正确
+app.vue3VuexStore.getters['FBS_STORE/Shop/currentShop']
+// 错误
+app.vue3VuexStore.getters.currentShop  // 找不到</code></pre></figure>
+<h2 id="portal-redux-thunk-recoil">Portal：Redux + Thunk + Recoil</h2>
+<h3 id="redux-基础结构">Redux 基础结构</h3>
+<p>Portal 的 Redux Store 创建于 <code>src/store/index.ts</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">import { createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
+
+export const store = createStore(reducer, applyMiddleware(thunk));</code></pre></figure>
+<p>Redux 的三个核心概念对应 FBS Portal 的实际角色：</p>
+<div class="table-wrap"><table><thead><tr><th>概念</th><th>定义</th><th>FBS Portal 中的位置</th></tr></thead><tbody><tr><td><strong>State</strong></td><td>单一数据源，一个大的对象树</td><td><code>store.getState()</code> 返回的整个 state</td></tr><tr><td><strong>Action</strong></td><td>描述&quot;发生了什么&quot;的普通对象</td><td><code>src/store/actions/</code> 下的 action creator</td></tr><tr><td><strong>Reducer</strong></td><td>根据 action 计算新 state 的纯函数</td><td><code>src/store/reducers/</code> 下的 reducer 文件</td></tr></tbody></table></div>
+<h3 id="thunk-让-action-可以异步">Thunk：让 action 可以异步</h3>
+<p>Redux 原生的 action 是同步的——dispatch 一个 action 对象，reducer 立即处理。但在 FBS Portal 中，大量操作需要先发 API 请求再更新 state。Thunk 中间件让 action creator 可以返回一个函数而不是对象：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 同步 action creator
+const setUser = (user) =&gt; ({ type: 'SET_USER', payload: user });
+
+// 异步 action creator（Thunk）
+const fetchUser = () =&gt; async (dispatch, getState) =&gt; {
+  dispatch({ type: 'FETCH_USER_START' });
+  try {
+    const user = await api.getUser();
+    dispatch({ type: 'FETCH_USER_SUCCESS', payload: user });
+  } catch (error) {
+    dispatch({ type: 'FETCH_USER_ERROR', payload: error });
+  }
+};</code></pre></figure>
+<p>FBS Portal 中，几乎所有的 API 调用都通过 Thunk 包装。页面上 <code>dispatch(fetchInboundList(params))</code> 会触发请求 → 更新 loading 状态 → 请求完成后更新列表数据。</p>
+<h3 id="recoil-portal-的原子化状态">Recoil：Portal 的原子化状态</h3>
+<p>Portal 同时使用了 Recoil 管理部分状态。Recoil 的核心是 <strong>atom</strong>（状态单元）和 <strong>selector</strong>（派生状态）：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// atom：定义一个状态单元
+const currentUserAtom = atom({
+  key: 'currentUser',
+  default: null,
+});
+
+// selector：从 atom 派生数据
+const permissionListSelector = selector({
+  key: 'permissionList',
+  get: ({ get }) =&gt; {
+    const user = get(currentUserAtom);
+    return user?.permission_code_list ?? [];
+  },
+});</code></pre></figure>
+<p>在 Portal 中，<code>src/recoil/</code> 目录下定义了 Recoil atom 和 selector。与 Redux 的区别：Recoil 的状态单元更细粒度，且自带派生能力（selector），不需要像 Redux 那样通过 <code>mapStateToProps</code> 或 <code>useSelector</code> 手动订阅整个 state 树。</p>
+<p>Portal 中 Redux 和 Recoil 并存是历史原因。简单判断：Redux 管理业务数据（入库列表、商品列表），Recoil 管理全局上下文（当前用户、权限列表）。</p>
+<h3 id="portal-页面读取-store-的方式">Portal 页面读取 Store 的方式</h3>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// React-Redux hooks
+import { useSelector, useDispatch } from 'react-redux';
+
+function InboundList() {
+  const list = useSelector(state =&gt; state.inbound.list);
+  const loading = useSelector(state =&gt; state.inbound.loading);
+  const dispatch = useDispatch();
+
+  useEffect(() =&gt; {
+    dispatch(fetchInboundList(params));
+  }, [params]);
+
+  // 读取 Recoil 状态
+  const permissions = useRecoilValue(permissionListSelector);
+}</code></pre></figure>
+<h2 id="sc-react-redux-toolkit-宿主-vuex">SC React：Redux Toolkit + 宿主 Vuex</h2>
+<h3 id="双-store-并存">双 Store 并存</h3>
+<p>SC React 面临一个特殊挑战：作为 MMF 模块，它需要与宿主的 Vuex Store 交互（获取 seller 信息、shop 信息等基础数据），但模块内部的业务状态使用 Redux Toolkit 管理。</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">// 从宿主 Vuex 读取当前 shop
+const currentShop = app?.vue3VuexStore?.getters?.['FBS_STORE/Shop/currentShop'];
+
+// 从模块自己的 Redux Store 读取业务状态
+import { useSelector } from 'react-redux';
+const inboundList = useSelector(state =&gt; state.inbound.list);</code></pre></figure>
+<h3 id="redux-toolkit-slice-模式">Redux Toolkit：slice 模式</h3>
+<p>SC React 使用 Redux Toolkit 的 <code>createSlice</code> 替代传统 Redux 的分散 action/reducer 文件：</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">// store/modules/shop.ts
+import { createSlice } from '@reduxjs/toolkit';
+
+const shopSlice = createSlice({
+  name: 'shop',
+  initialState: { currentSelectedShop: null, fbsStatus: 0 },
+  reducers: {
+    setCurrentShop(state, action) {
+      state.currentSelectedShop = action.payload;
+    },
+    setFbsStatus(state, action) {
+      state.fbsStatus = action.payload;
+    },
+  },
+});
+
+export const { setCurrentShop, setFbsStatus } = shopSlice.actions;
+export default shopSlice.reducer;</code></pre></figure>
+<p>Redux Toolkit 的 <code>createSlice</code> 自动生成 action creator 和 reducer，并内置 Immer——你可以在 reducer 中&quot;直接修改&quot;state（实际上 Immer 在背后做了不可变更新）。这对习惯 Redux 传统写法的人可能有些反直觉：<code>state.currentSelectedShop = action.payload</code> 看起来像直接修改，但它是安全且正确的。</p>
+<h3 id="selector-从-state-中提取数据">Selector：从 state 中提取数据</h3>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">// 基础 selector
+const selectCurrentShop = (state) =&gt; state.shop.currentSelectedShop;
+
+// 带派生逻辑的 selector
+const selectFbsTag = (state) =&gt; state.shop.fbsTag !== 0;</code></pre></figure>
+<p>Selector 是纯函数，可以组合。复杂项目中使用 <code>createSelector</code>（reselect）创建带缓存的 selector，避免不必要的重新计算。</p>
+<h2 id="状态流转-一次完整的追踪练习">状态流转：一次完整的追踪练习</h2>
+<p>以&quot;当前 shop 的仓库区域 <code>fbsWhsRegion</code>&quot;为例，追踪它在 SC Vue 仓库中的完整生命周期：</p>
+<ol><li><strong>初始化</strong>：路由守卫 <code>beforeEnter</code> → <code>dispatch('FBS_STORE/INIT_FBS_STORE')</code> → action 中并发请求 seller 和 shop 信息 → <code>commit('SET_SHOP_INFO', data)</code>。</li><li><strong>存储</strong>：<code>state.FBS_STORE.Shop.currentShop.fbsWhsRegion</code>。</li><li><strong>消费</strong>：request interceptor 中通过 <code>getCurrentShop().fbsWhsRegion.toUpperCase()</code> 注入到请求 header 的 <code>fbs-whs-region</code> 中。</li><li><strong>派生</strong>：如果 CBSC 条件下，<code>fbsWhsRegion</code> 影响请求来源标记 <code>req-source: 'CNSC'</code>。</li></ol>
+<figure class="diagram-card"><pre class="mermaid">flowchart LR
+    A[&quot;路由守卫 beforeEnter&quot;] --&gt; B[&quot;dispatch INIT_FBS_STORE&quot;]
+    B --&gt; C[&quot;并发请求\nseller + shop API&quot;]
+    C --&gt; D[&quot;commit SET_SHOP_INFO&quot;]
+    D --&gt; E[&quot;Vuex state:\nShop/currentShop&quot;]
+    E --&gt; F[&quot;getCurrentShop()&quot;]
+    F --&gt; G[&quot;request interceptor\nheader: fbs-whs-region&quot;]</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<p>如果你需要新增一个跨页面的状态（如&quot;用户选择的默认仓库&quot;），你需要决定它放哪一层。判断标准：如果只有本仓页面需要，放入本仓 Store 的对应 module；如果其他 MMF 模块也需要，考虑放入宿主 Store（需要协调宿主侧改动）；如果只有一个组件需要，用局部状态。</p>
+<h2 id="不可变更新-react-和-redux-的共同约束">不可变更新：React 和 Redux 的共同约束</h2>
+<p>React 和 Redux 都依赖引用比较来判断是否需要重新渲染。修改状态时必须创建新对象/新数组：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 错误：直接修改
+state.list.push(newItem);
+
+// 正确：创建新引用
+return { ...state, list: [...state.list, newItem] };
+
+// Redux Toolkit 中 Immer 让你可以&quot;直接修改&quot;（实际做了不可变代理）
+state.list.push(newItem); // createSlice reducer 中合法</code></pre></figure>
+<p>Vue 3 使用 Proxy 实现响应式，所以 Vuex/组件 data 中可以直接赋值。但跨框架传递数据时（如 SC React 从宿主 Vuex 读取），仍需注意不可变性的约束。</p>
+<h2 id="常见错误">常见错误</h2>
+<h3 id="在-action-外直接修改-state">在 action 外直接修改 state</h3>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 错误：绕过 mutation 直接修改
+this.$store.state.FBS_STORE.Shop.currentShop = newShop;
+
+// 正确：通过 commit
+this.$store.commit('FBS_STORE/SET_SHOP_INFO', newShop);</code></pre></figure>
+<h3 id="忘记-redux-reducer-是纯函数">忘记 Redux reducer 是纯函数</h3>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 错误：reducer 中有副作用（API 调用、随机数）
+function inboundReducer(state, action) {
+  const data = await fetchData();  // 不允许！
+  return { ...state, data };
+}
+
+// 正确：副作用放在 Thunk 中</code></pre></figure>
+<h3 id="从宿主-vuex-读取时未处理可选链">从宿主 Vuex 读取时未处理可选链</h3>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 可能抛出 TypeError
+const shopId = state.shop.currentSelectedShop.fbsShopId;
+
+// 正确
+const shopId = state.shop.currentSelectedShop?.fbsShopId;</code></pre></figure>
+<h3 id="把大量不需要跨页面的数据放入-store">把大量不需要跨页面的数据放入 Store</h3>
+<p>组件的表单临时数据、搜索关键词、展开/折叠状态通常不需要入 Store。Store 中只放真正需要跨页面共享的状态。</p>
+<h2 id="练习">练习</h2>
+<h3 id="追踪练习">追踪练习</h3>
+<p>在 SC Vue 仓库中追踪 <code>fbsTag</code> 的完整生命周期：它在哪个 API 中获取、存入哪个 module、在哪些文件中被读取和使用。</p>
+<h3 id="新增状态">新增状态</h3>
+<p>在 SC Vue 的 System module 中新增一个 <code>maintenanceMode</code> 状态（布尔值，默认 <code>false</code>）。在路由守卫 <code>beforeEnter</code> 中检查这个状态，如果为 <code>true</code>，重定向到一个维护提示页。</p>
+<h3 id="派生状态">派生状态</h3>
+<p>Portal 仓库中，<code>permissions.includes(permission)</code> 被多次使用。创建一个 selector，封装这个判断逻辑，使调用方只需 <code>const hasPermission = useSelector(selectHasPermission(code))</code>。</p>
+<h3 id="参考答案">参考答案</h3>
+<p><strong>8.2</strong> 关键步骤：<code>modules/system/index.ts</code> 的 state 中新增 <code>maintenanceMode: false</code>；mutation 中新增 <code>SET_MAINTENANCE_MODE</code>；<code>beforeEnter</code> 中读取 <code>getters['FBS_STORE/System/maintenanceMode']</code>；维护提示页可以是简单的 <code>MaintenanceNotice.vue</code>。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li><a href="https://redux.js.org/tutorials/essentials/part-1-overview-concepts" target="_blank" rel="noreferrer">Redux Essentials Tutorial</a> — store/action/reducer 概念</li><li><a href="https://redux-toolkit.js.org/tutorials/overview" target="_blank" rel="noreferrer">Redux Toolkit Tutorials</a> — createSlice 和 createAsyncThunk</li><li><a href="https://vuex.vuejs.org/" target="_blank" rel="noreferrer">Vuex 4 Documentation</a> — state/getter/mutation/action/module</li><li><a href="https://recoiljs.org/docs/introduction/getting-started/" target="_blank" rel="noreferrer">Recoil Documentation</a> — atom/selector 概念</li><li><a href="https://react.dev/learn/managing-state" target="_blank" rel="noreferrer">React Learn — Managing State</a> — React 状态管理概述</li></ul><nav class="lesson-nav"><a href="../lessons/fe-w03-routes-menus-page-entries.html">← FE-W03<br><strong>路由、菜单与页面入口：让页面真正可访问</strong></a><a href="../lessons/fe-w05-api-proxy-errors-contract.html">FE-W05 →<br><strong>API、代理、错误与前后端契约</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#这一章解决什么问题"><span class="toc-num">1</span>这一章解决什么问题</a><a class="" href="#先建立状态分层的概念"><span class="toc-num">2</span>先建立状态分层的概念</a><a class="" href="#sc-vue-vuex-模块化的宿主注入模式"><span class="toc-num">3</span>SC Vue：Vuex 模块化的宿主注入模式</a><a class="sub" href="#fbs-store-的注册"><span class="toc-num">3.1</span>FBS Store 的注册</a><a class="sub" href="#模块结构"><span class="toc-num">3.2</span>模块结构</a><a class="sub" href="#读法-从页面追到-store"><span class="toc-num">3.3</span>读法：从页面追到 Store</a><a class="sub" href="#写操作-dispatch-和-commit"><span class="toc-num">3.4</span>写操作：dispatch 和 commit</a><a class="sub" href="#命名空间规则"><span class="toc-num">3.5</span>命名空间规则</a><a class="" href="#portal-redux-thunk-recoil"><span class="toc-num">4</span>Portal：Redux + Thunk + Recoil</a><a class="sub" href="#redux-基础结构"><span class="toc-num">4.1</span>Redux 基础结构</a><a class="sub" href="#thunk-让-action-可以异步"><span class="toc-num">4.2</span>Thunk：让 action 可以异步</a><a class="sub" href="#recoil-portal-的原子化状态"><span class="toc-num">4.3</span>Recoil：Portal 的原子化状态</a><a class="sub" href="#portal-页面读取-store-的方式"><span class="toc-num">4.4</span>Portal 页面读取 Store 的方式</a><a class="" href="#sc-react-redux-toolkit-宿主-vuex"><span class="toc-num">5</span>SC React：Redux Toolkit + 宿主 Vuex</a><a class="sub" href="#双-store-并存"><span class="toc-num">5.1</span>双 Store 并存</a><a class="sub" href="#redux-toolkit-slice-模式"><span class="toc-num">5.2</span>Redux Toolkit：slice 模式</a><a class="sub" href="#selector-从-state-中提取数据"><span class="toc-num">5.3</span>Selector：从 state 中提取数据</a><a class="" href="#状态流转-一次完整的追踪练习"><span class="toc-num">6</span>状态流转：一次完整的追踪练习</a><a class="" href="#不可变更新-react-和-redux-的共同约束"><span class="toc-num">7</span>不可变更新：React 和 Redux 的共同约束</a><a class="" href="#常见错误"><span class="toc-num">8</span>常见错误</a><a class="sub" href="#在-action-外直接修改-state"><span class="toc-num">8.1</span>在 action 外直接修改 state</a><a class="sub" href="#忘记-redux-reducer-是纯函数"><span class="toc-num">8.2</span>忘记 Redux reducer 是纯函数</a><a class="sub" href="#从宿主-vuex-读取时未处理可选链"><span class="toc-num">8.3</span>从宿主 Vuex 读取时未处理可选链</a><a class="sub" href="#把大量不需要跨页面的数据放入-store"><span class="toc-num">8.4</span>把大量不需要跨页面的数据放入 Store</a><a class="" href="#练习"><span class="toc-num">9</span>练习</a><a class="sub" href="#追踪练习"><span class="toc-num">9.1</span>追踪练习</a><a class="sub" href="#新增状态"><span class="toc-num">9.2</span>新增状态</a><a class="sub" href="#派生状态"><span class="toc-num">9.3</span>派生状态</a><a class="sub" href="#参考答案"><span class="toc-num">9.4</span>参考答案</a><a class="" href="#参考文献"><span class="toc-num">10</span>参考文献</a></aside></div></div></div><footer class="site-footer">FBS 前后端转全栈 Landing · 已发布</footer></div></body></html>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="能读懂 FBS 三个后端仓库的 `go.mod`、理解 Go 的模块/包组织方式、掌握编译和测试的最小命令，并知道 Go 1.15 与 1.20 版本差异对课程示例的限制。"><title>Go 工具链、模块与版本边界 | FBS 前后端转全栈 Landing</title><script src="../assets/theme-switcher.js"></script><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><div class="lesson-page-grid"><aside class="chapter-nav" aria-label="课程章节导航"><button class="chapter-nav-toggle" type="button" aria-expanded="true" aria-controls="chapter-nav-content"><span aria-hidden="true">◀</span><span class="chapter-nav-toggle-label">收起</span></button><div class="chapter-nav-content" id="chapter-nav-content"><div class="chapter-nav-heading"><strong>课程章节</strong><span>第 20 / 40 章</span></div><nav class="chapter-nav-list"><section class="chapter-nav-module"><h2>模块一：前端语言及标准库基础</h2><a href="../lessons/fe-l01-js-data-types-equality.html"><span class="chapter-nav-code">FE-L01</span><span class="chapter-nav-title">JavaScript 数据、类型与相等性：先读懂仓库判断分支</span></a><a href="../lessons/fe-l02-functions-scope-closure-modules.html"><span class="chapter-nav-code">FE-L02</span><span class="chapter-nav-title">函数、作用域、闭包与模块：跟上组件外的调用链</span></a><a href="../lessons/fe-l03-promise-async-eventloop.html"><span class="chapter-nav-code">FE-L03</span><span class="chapter-nav-title">Promise、async/await 与事件循环：读懂请求和页面副作用</span></a><a href="../lessons/fe-l04-js-objects-web-data.html"><span class="chapter-nav-code">FE-L04</span><span class="chapter-nav-title">JavaScript 常用对象与 Web 数据处理</span></a><a href="../lessons/fe-l05-typescript-type-chain.html"><span class="chapter-nav-code">FE-L05</span><span class="chapter-nav-title">TypeScript：从接口数据到组件 Props 的类型链</span></a><a href="../lessons/fe-l06-browser-framework-syntax-bridge.html"><span class="chapter-nav-code">FE-L06</span><span class="chapter-nav-title">浏览器与框架语法桥：DOM、事件、JSX、Vue SFC</span></a></section>
+<section class="chapter-nav-module"><h2>模块二：Web 前端开发</h2><a href="../lessons/fe-w01-start-three-frontend-projects.html"><span class="chapter-nav-code">FE-W01</span><span class="chapter-nav-title">启动三类 FBS 前端工程并建立仓库地图</span></a><a href="../lessons/fe-w02-components-styles-forms-tables.html"><span class="chapter-nav-code">FE-W02</span><span class="chapter-nav-title">组件、样式、表单与表格：按现有组件库做页面</span></a><a href="../lessons/fe-w03-routes-menus-page-entries.html"><span class="chapter-nav-code">FE-W03</span><span class="chapter-nav-title">路由、菜单与页面入口：让页面真正可访问</span></a><a href="../lessons/fe-w04-state-management-redux-vuex-recoil.html"><span class="chapter-nav-code">FE-W04</span><span class="chapter-nav-title">状态管理：Redux/Recoil、Vuex 与宿主状态</span></a><a href="../lessons/fe-w05-api-proxy-errors-contract.html"><span class="chapter-nav-code">FE-W05</span><span class="chapter-nav-title">API、代理、错误与前后端契约</span></a><a href="../lessons/fe-w06-permission-i18n-time-file-pii.html"><span class="chapter-nav-code">FE-W06</span><span class="chapter-nav-title">权限、i18n、时间、文件与 PII：页面功能的准入项</span></a><a href="../lessons/fe-w07-frontend-vertical-slice.html"><span class="chapter-nav-code">FE-W07</span><span class="chapter-nav-title">前端纵向切片：为入库列表增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块三：Web 前端进阶</h2><a href="../lessons/fe-a01-three-app-lifecycles-host-boundaries.html"><span class="chapter-nav-code">FE-A01</span><span class="chapter-nav-title">三种应用生命周期与宿主边界</span></a><a href="../lessons/fe-a02-micro-frontends-remote-components.html"><span class="chapter-nav-code">FE-A02</span><span class="chapter-nav-title">微前端与远端组件：Module Federation、qiankun、MMF</span></a><a href="../lessons/fe-a03-vue-react-coexistence-deps-migration.html"><span class="chapter-nav-code">FE-A03</span><span class="chapter-nav-title">Vue/React 共存、共享依赖与版本迁移</span></a><a href="../lessons/fe-a04-testing-linting-build-artifacts.html"><span class="chapter-nav-code">FE-A04</span><span class="chapter-nav-title">测试、静态检查、构建与产物边界</span></a><a href="../lessons/fe-a05-observability-systematic-debugging.html"><span class="chapter-nav-code">FE-A05</span><span class="chapter-nav-title">前端观测与系统化排错</span></a><a href="../lessons/fe-a06-impact-analysis-dev-handoff.html"><span class="chapter-nav-code">FE-A06</span><span class="chapter-nav-title">前端改动影响分析与开发交接</span></a></section>
+<section class="chapter-nav-module"><h2>模块四：后端语言及标准库基础</h2><a href="../lessons/be-l01-go-toolchain-modules-versions.html" class="is-current" aria-current="page"><span class="chapter-nav-code">BE-L01</span><span class="chapter-nav-title">Go 工具链、模块与版本边界</span></a><a href="../lessons/be-l02-values-pointers-structs-tags.html"><span class="chapter-nav-code">BE-L02</span><span class="chapter-nav-title">值、指针、struct、tag 与数据边界</span></a><a href="../lessons/be-l03-methods-interfaces-embedding-di.html"><span class="chapter-nav-code">BE-L03</span><span class="chapter-nav-title">方法、接口、嵌入与依赖倒置</span></a><a href="../lessons/be-l04-slices-maps-sorting-data-transform.html"><span class="chapter-nav-code">BE-L04</span><span class="chapter-nav-title">slice、map、排序与数据转换</span></a><a href="../lessons/be-l05-errors-defer-panic-resources.html"><span class="chapter-nav-code">BE-L05</span><span class="chapter-nav-title">error、defer、panic/recover 与资源生命周期</span></a><a href="../lessons/be-l06-context-time-json-http-io.html"><span class="chapter-nav-code">BE-L06</span><span class="chapter-nav-title">context、时间、JSON、HTTP、I/O 与文件</span></a><a href="../lessons/be-l07-goroutines-channels-sync-concurrency.html"><span class="chapter-nav-code">BE-L07</span><span class="chapter-nav-title">goroutine、channel、sync 与并发边界</span></a></section>
+<section class="chapter-nav-module"><h2>模块五：Web 后端开发</h2><a href="../lessons/be-w01-start-three-backend-processes.html"><span class="chapter-nav-code">BE-W01</span><span class="chapter-nav-title">启动三类 FBS 后端进程并建立仓库地图</span></a><a href="../lessons/be-w02-chassis-http-route-request-response.html"><span class="chapter-nav-code">BE-W02</span><span class="chapter-nav-title">Chassis HTTP 接口：从路由到请求与响应</span></a><a href="../lessons/be-w03-wire-layered-architecture.html"><span class="chapter-nav-code">BE-W03</span><span class="chapter-nav-title">Wire 与分层：把 handler 接到应用、领域和基础设施</span></a><a href="../lessons/be-w04-mysql-gorm-scorm-repository-transactions.html"><span class="chapter-nav-code">BE-W04</span><span class="chapter-nav-title">MySQL、GORM/Scorm、仓储与事务</span></a><a href="../lessons/be-w05-service-calls-http-grpc-timeouts.html"><span class="chapter-nav-code">BE-W05</span><span class="chapter-nav-title">服务调用、HTTP/gRPC 契约与超时</span></a><a href="../lessons/be-w06-auth-errors-pii-security.html"><span class="chapter-nav-code">BE-W06</span><span class="chapter-nav-title">鉴权、错误码、PII 与接口安全边界</span></a><a href="../lessons/be-w07-backend-vertical-slice.html"><span class="chapter-nav-code">BE-W07</span><span class="chapter-nav-title">后端纵向切片：为入库请求增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块六：Web 后端进阶</h2><a href="../lessons/be-a01-apollo-chassis-config.html"><span class="chapter-nav-code">BE-A01</span><span class="chapter-nav-title">Apollo 与 Chassis 配置：环境差异、热更新和开关</span></a><a href="../lessons/be-a02-redis-codis-cache-consistency.html"><span class="chapter-nav-code">BE-A02</span><span class="chapter-nav-title">Redis/Codis 与缓存一致性</span></a><a href="../lessons/be-a03-saturn-scheduled-async-tasks.html"><span class="chapter-nav-code">BE-A03</span><span class="chapter-nav-title">Saturn 定时任务与异步任务</span></a><a href="../lessons/be-a04-kafka-message-pipeline.html"><span class="chapter-nav-code">BE-A04</span><span class="chapter-nav-title">Kafka 消息链路与事件边界</span></a><a href="../lessons/be-a05-reliability-idempotency-transactions-retry.html"><span class="chapter-nav-code">BE-A05</span><span class="chapter-nav-title">可靠性：幂等、事务、重试、并发与降级组合</span></a><a href="../lessons/be-a06-logging-metrics-diagnostics.html"><span class="chapter-nav-code">BE-A06</span><span class="chapter-nav-title">日志、指标、链路与系统化排错</span></a><a href="../lessons/be-a07-impact-analysis-testing-handoff.html"><span class="chapter-nav-code">BE-A07</span><span class="chapter-nav-title">后端改动影响分析、测试与开发交接</span></a></section></nav></div></aside><div class="lesson-page-main"><header class="topbar"><a class="brand" href="../index.html">FBS 前后端转全栈 Landing</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">BE-L01 · 120–160 分钟</div><h1>Go 工具链、模块与版本边界</h1><p class="lesson-summary">能读懂 FBS 三个后端仓库的 `go.mod`、理解 Go 的模块/包组织方式、掌握编译和测试的最小命令，并知道 Go 1.15 与 1.20 版本差异对课程示例的限制。</p><a class="source-link" href="../markdown/be-l01-go-toolchain-modules-versions.md">查看 Markdown 版本</a></section><div class="lesson-layout"><main class="lesson-content"><h2 id="这一章解决什么问题">这一章解决什么问题</h2>
+<p>前端同学第一次打开 FBS 后端仓库时，第一个困惑往往不是 Go 语法本身，而是工程组织方式。<code>go.mod</code> 文件做什么用？<code>git.garena.com/shopee/...</code> 这样的 import 路径是什么意思？为什么三个后端仓库使用了不同的 Go 版本？为什么有些文件叫 <code>xxx_test.go</code>？为什么有些文件开头带 <code>// +build</code> 注释？</p>
+<p>这些问题的答案和 JavaScript 的 <code>package.json</code>、<code>node_modules</code>、<code>import</code> 路径有对应关系——但又不完全一样。本章帮你建立 Go 工程的心智模型，用前端工程的类比来解释 Go 的模块系统、编译过程和测试命令。学完后，你能看懂任何一个 FBS 后端仓库的 <code>go.mod</code>，知道怎样在各个仓库间判断代码的版本兼容性，以及为什么 Tax 仓库还在用 Go 1.15 而另外两个仓库已经升级到 Go 1.20。</p>
+<blockquote><p>本章基于三个后端仓库的 release 分支（2026-07-20）。</p></blockquote>
+<h2 id="go-模块-前端的-package-json-但更严格">Go 模块：前端的 <code>package.json</code> 但更严格</h2>
+<h3 id="go-mod-是声明文件但不执行">go.mod 是声明文件但不执行</h3>
+<p>在 JavaScript/TypeScript 项目中，<code>package.json</code> 既声明依赖，又通过 <code>scripts</code> 字段定义可执行命令。Go 的 <code>go.mod</code> 只做两件事：声明当前模块的<strong>路径</strong>（module path）和<strong>依赖约束</strong>（require）。它没有 scripts，没有 devDependencies 与 dependencies 的区分。</p>
+<p>以 <code>sbs-fbs-server</code> 的 <code>go.mod</code> 为例：</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">module git.garena.com/shopee/bg-logistics/b2c/sbs-fbs-server
+
+go 1.20
+
+require (
+	git.garena.com/shopee/bg-logistics/go/chassis v0.4.3-r.13
+	git.garena.com/shopee/bg-logistics/go/gorm v0.0.7
+	git.garena.com/shopee/bg-logistics/go/scorm v0.2.3-r.4
+	// ...更多依赖
+)</code></pre></figure>
+<ul><li><strong><code>module</code> 行</strong>：声明这个仓库的&quot;名字&quot;。当你从别的仓库 import 这个仓库的代码时，用的就是这个路径。类比前端的 npm 包名，但 Go 的 module path 是完整路径而非短名。</li><li><strong><code>go 1.20</code></strong>：声明这个模块编写时使用的 Go 版本。编译器根据这个版本决定启用哪些语言特性。Go 1.20 的代码可以 import Go 1.15 的模块，但反过来不行——低版本编译器不认识高版本语法。</li><li><strong><code>require</code> 块</strong>：声明依赖的模块和版本。和 <code>package.json</code> 的 dependencies 非常类似，版本号格式为 <code>v主版本.次版本.补丁版本-r.内部修订号</code>。</li></ul>
+<p><strong>前端类比</strong>：<code>go.mod</code> ≈ <code>package.json</code>（但更精简）。Go 没有 <code>package-lock.json</code> 或 <code>yarn.lock</code> 的等价物——<code>go.sum</code> 文件记录了依赖的哈希校验和，用于安全性验证，而不是锁定版本。</p>
+<h3 id="import-路径就是-module-path-子目录">import 路径就是 module path + 子目录</h3>
+<p>在 JavaScript 中，<code>import</code> 可以使用相对路径（<code>'./utils'</code>）、别名路径（<code>'@/utils'</code>）或包名（<code>'lodash'</code>）。Go 的 import 只有一种形式：<strong>以 module path 或标准库名为前缀的完整路径</strong>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">import (
+	&quot;git.garena.com/shopee/bg-logistics/b2c/sbs-fbs-server/apps/inbound&quot;   // 本仓库的子包
+	&quot;git.garena.com/shopee/bg-logistics/go/chassis&quot;                         // 外部依赖
+	&quot;context&quot;                                                               // 标准库
+	&quot;fmt&quot;                                                                   // 标准库
+)</code></pre></figure>
+<ul><li><code>&quot;context&quot;</code> 和 <code>&quot;fmt&quot;</code> 是 Go 标准库的包——不用声明在 go.mod 中，编译器自动识别。</li><li><code>&quot;git.garena.com/shopee/...&quot;</code> 开头的路径都是内部依赖。路径的前缀和 go.mod 中 require 的模块名对应。</li><li>import 路径不是 URL——虽然看起来像。它是模块的命名空间。Go 编译器通过内部代理（GOPROXY）或公司内部 Git 服务器解析这些路径并下载代码。</li></ul>
+<p><strong>前端类比</strong>：Go 的 import path ≈ npm 的 <code>&quot;lodash/fp&quot;</code>——包名（<code>lodash</code>）+ 子路径（<code>/fp</code>）。区别是 Go 没有&quot;路径别名&quot;机制（没有 <code>@/</code>）；每次 import 必须写完整路径。不过 FBS 的后端仓库中可以通过 <code>go.mod</code> 的 <code>replace</code> 指令做路径重定向。</p>
+<h3 id="包的组织-目录即包边界">包的组织：目录即包边界</h3>
+<p>在 JavaScript 项目中，一个目录下可以有多个文件，通过 <code>export</code>/<code>import</code> 按文件自由引用。Go 中一个目录下的所有 <code>.go</code> 文件（除 <code>_test.go</code>）属于同一个包，共享同一个命名空间。包名通常和目录名一致，但不强制：</p>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">apps/inbound/
+├── inbound.go          // package inbound
+├── handle.go           // package inbound
+├── wire_set.go         // package inbound
+└── handle_test.go      // package inbound_test（或 package inbound）</code></pre></figure>
+<p>一个目录下所有非测试文件的 <code>package</code> 声明必须一致。你可以 import 一个包，但不能 import 包内的单个文件。所以 Go 代码中的 import 粒度是<strong>包</strong>，文件的拆分纯粹是为了可读性。</p>
+<p><strong>前端类比</strong>：Go 的包 ≈ JavaScript 中一个目录下的 <code>index.js</code> 加上所有通过它 re-export 的模块。区别是 Go 强制一个目录只属于一个包，且包内所有导出都是全局可见的（不需要在每个文件里 import 同包的其他文件）。</p>
+<h2 id="go-多版本并存的现实-1-15-与-1-20">Go 多版本并存的现实：1.15 与 1.20</h2>
+<h3 id="fbs-三个后端仓库的版本">FBS 三个后端仓库的版本</h3>
+<div class="table-wrap"><table><thead><tr><th>仓库</th><th>Go 版本</th><th>Chassis 版本</th><th>主要影响</th></tr></thead><tbody><tr><td><code>sbs-fbs-server</code></td><td>1.20</td><td>v0.4.3-r.13</td><td>主服务和敏感服务的 Go 基线</td></tr><tr><td><code>fbs-sensitive-data-server</code></td><td>1.20</td><td>v0.4.3-r.13</td><td>与主服务同基线</td></tr><tr><td><code>fbs-tax-server</code></td><td>1.15</td><td>v0.4.3-r.22</td><td>税务服务的旧版本基线</td></tr></tbody></table></div>
+<p>Tax 仓库使用 Go 1.15，这意味着它不能使用 Go 1.18 引入的泛型、Go 1.13 的数字字面量改进、Go 1.20 的多项性能优化。这不是&quot;懒得升级&quot;——税务服务的稳定性要求很高，升级 Go 版本需要大量的回归测试和合规审查。在 FBS 的日常开发中，写 Tax 相关代码时必须记住这个版本限制。</p>
+<p><strong>前端类比</strong>：这就像 FBS 前端中 Portal 还在用 Node 16 而 SC 仓库已升级到 Node 20。你不能在 Portal 代码里用 Node 18+ 的 API（如原生 <code>fetch</code>），同理不能在 Tax 代码里用 Go 1.18+ 的泛型。两个生态的&quot;技术债&quot;来自同一个原因——稳定优先。</p>
+<h3 id="go-1-15-不能用的关键特性">Go 1.15 不能用的关键特性</h3>
+<div class="table-wrap"><table><thead><tr><th>特性</th><th>Go 版本要求</th><th>在 FBS Tax 仓库中</th></tr></thead><tbody><tr><td>泛型（<code>func F[T any](x T)</code>）</td><td>1.18+</td><td><strong>不能用</strong></td></tr><tr><td><code>any</code> 关键字（<code>interface{}</code> 的别名）</td><td>1.18+</td><td><strong>不能用</strong>，继续用 <code>interface{}</code></td></tr><tr><td><code>os.ReadFile</code>（简化文件读取）</td><td>1.16+</td><td><strong>不能用</strong>，继续用 <code>ioutil.ReadFile</code></td></tr><tr><td>内嵌 <code>embed</code>（打包静态资源）</td><td>1.16+</td><td><strong>不能用</strong></td></tr><tr><td>切片转数组指针</td><td>1.17+</td><td><strong>不能用</strong></td></tr></tbody></table></div>
+<p>我们的课程示例以 Go 1.20 为主，方便展示现代 Go 的最佳实践。但对于 Tax 仓相关的练习，会标注哪些写法在 Tax 中不兼容。</p>
+<h3 id="版本选择对课程的意义">版本选择对课程的意义</h3>
+<p>FBS 三个后端仓库的 Go 版本不一致，决定了本章后续所有代码示例必须兼容 Go 1.20，并在必要时标注 Tax 的差异。课程不会因为 Tax 用旧版本就把所有示例写成 Go 1.15 风格——那样会丢失现代 Go 的最佳实践。但涉及 Tax 的章节会明确说明差异。</p>
+<p><strong>前端类比</strong>：这门课程不会因为 Portal 用 TypeScript 4.4 就放弃讲 4.7 的改进——但会标注哪些写法在 Portal 中不能用。生产环境的多样性是现实约束，课程的职责是帮你认清这些约束，而不是为了&quot;统一起见&quot;把所有内容降到最低公共版本。</p>
+<h2 id="仓库结构与入口点">仓库结构与入口点</h2>
+<h3 id="three-后端仓库的结构概览">three 后端仓库的结构概览</h3>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">sbs-fbs-server/
+├── cmd/                  # 程序入口（main 包）
+│   ├── api_server/       # HTTP/gRPC API 服务
+│   └── fbs_task/         # 定时任务和异步任务服务
+├── app/                  # 旧模块目录
+├── apps/                 # 新模块目录
+├── middleware/           # HTTP 中间件
+├── sbs_agent/            # 基础设施适配层（DB、Redis、Saturn 等）
+├── errcode/              # 错误码定义
+├── go.mod                # 模块声明
+└── Makefile              # 编译和运行命令</code></pre></figure>
+<p><code>cmd/</code> 下的每个子目录对应一个独立的可执行程序。<code>cmd/api_server/main.go</code> 是 API 服务的入口，<code>cmd/fbs_task/main.go</code> 是任务服务的入口。它们可以共用 <code>apps/</code> 下的业务代码，但编译成两个独立的二进制文件。</p>
+<p><strong>前端类比</strong>：<code>cmd/</code> ≈ monorepo 中的 <code>packages/app-a</code> 和 <code>packages/app-b</code>。它们共享 <code>apps/</code>（domains）中的业务逻辑，但各自有各自的 <code>index.js</code>（main.go）。Go 的 main package 是唯一可以编译成可执行文件的包——其他所有包都只能产生库文件，不能被&quot;运行&quot;。</p>
+<h3 id="makefile-后端的-scripts">Makefile：后端的 scripts</h3>
+<p>Go 没有 <code>npm scripts</code> 的概念。FBS 后端仓库使用 <code>Makefile</code> 来定义常用命令。与 <code>package.json</code> 的 scripts 不同，Makefile 更底层——它直接在 shell 中执行命令：</p>
+<figure class="code-card"><div class="code-toolbar"><span>makefile</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="makefile"># 简化示例
+.PHONY: build test run
+
+build:
+	go build -o bin/api_server ./cmd/api_server
+
+test:
+	go test ./... -count=1
+
+run:
+	go run ./cmd/api_server</code></pre></figure>
+<ul><li><code>make build</code> 编译出二进制文件。</li><li><code>make test</code> 运行全项目的测试。</li><li><code>make run</code> 编译并运行。</li></ul>
+<p><strong>前端类比</strong>：<code>Makefile</code> ≈ <code>&quot;scripts&quot;</code> in <code>package.json</code>。<code>make build</code> 相当于 <code>yarn build</code>，<code>make test</code> 相当于 <code>yarn test</code>。区别是 Go 的编译是&quot;真编译&quot;——产出的是平台相关的二进制文件，而不是前端那样的 JS bundle。</p>
+<h2 id="从零开始-编译和运行一个最小-go-程序">从零开始：编译和运行一个最小 Go 程序</h2>
+<h3 id="hello-world-与编译过程">Hello World 与编译过程</h3>
+<p>创建一个最小 Go 文件 <code>main.go</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">package main
+
+import &quot;fmt&quot;
+
+func main() {
+	fmt.Println(&quot;hello fbs&quot;)
+}</code></pre></figure>
+<p>运行它有两种方式：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash"># 方式一：编译并立即运行（不保留二进制文件）
+go run main.go
+# 输出：hello fbs
+
+# 方式二：编译出二进制文件再运行
+go build -o hello main.go
+./hello
+# 输出：hello fbs</code></pre></figure>
+<p><code>go run</code> 相当于前端的 <code>node main.js</code>或 <code>ts-node main.ts</code>——编译并执行，不保留编译产物。<code>go build</code> 相当于 <code>webpack build</code> 或 <code>tsc</code>——产生可部署的产物。区别是 Go 编译出的产物是原生的二进制文件，不依赖 Node.js 运行时。</p>
+<p><strong>前端类比</strong>：<code>go run</code> ≈ <code>node index.js</code>（解释执行），<code>go build</code> ≈ <code>npx webpack --mode production</code>（产生可部署产物）。Go 的二进制文件可以直接在目标服务器上运行，不需要安装 Go 运行时——这和后端 Node.js 应用需要在服务器上安装 Node 完全不同。</p>
+<h3 id="编译是跨平台的">编译是跨平台的</h3>
+<p>Go 编译支持交叉编译——在 macOS 上可以编译出 Linux 的二进制文件：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">GOOS=linux GOARCH=amd64 go build -o hello-linux main.go</code></pre></figure>
+<p>这在 CI/CD 中非常实用：开发者在 macOS 上写代码和测试，CI 服务器编译 Linux 二进制部署。前端同学熟悉的&quot;本地开发是 macOS，服务器是 Linux，但 Node.js 抹平了差异&quot;的经验，在 Go 中体现为&quot;交叉编译&quot;能力。</p>
+<h3 id="go-test-的基础用法">go test 的基础用法</h3>
+<p>Go 的测试文件和源码在同一目录下，以 <code>_test.go</code> 结尾。创建一个简单测试 <code>main_test.go</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">package main
+
+import &quot;testing&quot;
+
+func TestHello(t *testing.T) {
+	got := &quot;hello fbs&quot;
+	want := &quot;hello fbs&quot;
+	if got != want {
+		t.Errorf(&quot;got %q, want %q&quot;, got, want)
+	}
+}</code></pre></figure>
+<p>运行测试：</p>
+<figure class="code-card"><div class="code-toolbar"><span>bash</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="bash">go test        # 当前目录
+go test ./...  # 当前目录及所有子目录
+go test -v     # 显示详细输出
+go test -run TestHello  # 只运行匹配名称的测试</code></pre></figure>
+<p><strong>前端类比</strong>：<code>go test</code> ≈ <code>yarn test</code> 或 <code>npm test</code>。<code>_test.go</code> ≈ <code>.test.ts</code> 或 <code>.spec.ts</code>。<code>t.Errorf()</code> ≈ <code>expect(x).toBe(y)</code>。Go 的测试框架非常简洁——没有 describe/it/beforeEach 等 DSL，只有 <code>testing.T</code> 提供的基本断言。FBS 后端代码中如果使用了 test suite，那是自定义的扩展，不是标准库的一部分。</p>
+<h3 id="go-没有-nodemodules">Go 没有 node_modules</h3>
+<p>前端项目的 <code>node_modules</code> 通常有几个 GB，每个项目一份。Go 使用全局模块缓存——<code>$GOPATH/pkg/mod/</code>——所有项目共享一份下载的依赖。你不需要在每个项目里 <code>npm install</code>，Go 在编译时自动从缓存（或网络）取用依赖。</p>
+<p><strong>前端类比</strong>：Go 的依赖管理 ≈ 全局的 <code>pnpm store</code>，所有项目共享同一份缓存。<code>go mod tidy</code> ≈ <code>npm prune</code>——清理不再使用的依赖。</p>
+<h2 id="内网依赖与私有模块">内网依赖与私有模块</h2>
+<h3 id="fbs-使用的私有-go-模块">FBS 使用的私有 Go 模块</h3>
+<p>FBS 后端仓库依赖大量公司内部的 Go 模块，所有路径以 <code>git.garena.com/shopee/bg-logistics/</code> 开头。这些模块托管在公司内部的 Git 服务器上，不对外公开。你的本地 Go 环境需要配置正确的 GOPROXY（指向内部 Go 模块代理）或 <code>.gitconfig</code>（允许通过 SSH 访问内部仓库）。</p>
+<p>如果你在本地 <code>go build</code> 时报错 <code>cannot find module providing package</code>，通常是因为 Go 无法解析内部模块路径——确认网络和 GOPROXY/GOPRIVATE 配置。</p>
+<h3 id="replace-指令">replace 指令</h3>
+<p><code>go.mod</code> 中的 <code>replace</code> 指令允许将依赖重定向到本地路径或其他版本：</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">replace git.garena.com/shopee/bg-logistics/go/chassis =&gt; ../chassis</code></pre></figure>
+<p>这在本地调试共享库时非常有用。你不需要发布新版本才能测试改动——直接用本地路径替换。在 FBS 的开发中，如果你同时改了 chassis 和 sbs-fbs-server，可以用 replace 指向本地的 chassis。</p>
+<p><strong>前端类比</strong>：Go 的 <code>replace</code> ≈ npm 的 <code>&quot;file:../local-pkg&quot;</code> 或 Yarn 的 <code>yarn link</code>。都是让本地依赖覆盖远程版本，方便联调。</p>
+<h3 id="生成代码-go-generate">生成代码：<code>//go:generate</code></h3>
+<p>FBS 后端仓库中大量使用代码生成——Wire 的依赖注入代码、protobuf 的 gRPC 桩代码、错误码的字符串映射等。这些生成代码通常通过 <code>//go:generate</code> 注释声明：</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">//go:generate wire
+//go:generate protoc --go_out=. --go-grpc_out=. proto/*.proto</code></pre></figure>
+<p>运行 <code>go generate ./...</code> 会扫描所有包含 <code>//go:generate</code> 注释的文件并执行对应命令。生成代码不应该手动修改——它会在每次 <code>go generate</code> 时被覆盖。</p>
+<p><strong>前端类比</strong>：<code>//go:generate</code> + <code>go generate</code> ≈ <code>&quot;prebuild&quot;</code> 或 <code>&quot;codegen&quot;</code> scripts in <code>package.json</code>。Protobuf 代码生成 ≈ GraphQL Codegen。Wire 代码生成在功能上类似于 Angular 或 NestJS 的依赖注入代码生成。</p>
+<h2 id="版本兼容性判断">版本兼容性判断</h2>
+<h3 id="一段代码能否用在-tax-仓库中的判断流程">一段代码能否用在 Tax 仓库中的判断流程</h3>
+<p>以后你看到一段 Go 代码，需要判断它能否在 Tax 仓库中使用时：</p>
+<ol><li>打开 Tax 的 <code>go.mod</code>，看 <code>go</code> 指令——它决定可用的语言特性。</li><li>确认代码中使用的语法是否是 1.15 支持的（无泛型、无 <code>any</code>、无 <code>os.ReadFile</code> 等）。</li><li>确认代码中 import 的包在 Tax 的 <code>go.mod</code> 中是否有对应依赖（版本可能不同）。</li><li>如果代码使用了 <code>go.mod</code> 中未声明的依赖，需要 <code>go get</code> 添加。但如果这个新依赖的内部版本与 Tax 已有的其他依赖冲突（同一个模块的不同版本），可能无法直接添加。</li></ol>
+<p><strong>前端类比</strong>：判断一段 TypeScript 代码能否在 Portal（TypeScript 4.4）中运行，等同于判断一段 Go 代码能否在 Tax（Go 1.15）中运行。两边的限制都是&quot;语言版本限定了可用语法&quot;。</p>
+<h2 id="常见错误">常见错误</h2>
+<h3 id="package-xxx-is-not-in-goroot"><code>package xxx is not in GOROOT</code></h3>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">package git.garena.com/.../chassis is not in GOROOT</code></pre></figure>
+<p>翻译：Go 找不到这个包。可能原因：</p>
+<ul><li>模块未下载到缓存（运行 <code>go mod download</code> 或直接 <code>go build</code>，Go 会自动下载）。</li><li>GOPROXY 配置不正确（检查 <code>go env GOPROXY</code>）。</li><li>内网依赖需要特定认证（确认 Git 可以 clone 对应的内部仓库）。</li></ul>
+<h3 id="用错了-go-版本">用错了 Go 版本</h3>
+<figure class="code-card"><div class="code-toolbar"><span>text</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="text">go: go.mod file indicates go 1.20, but maximum version supported by tidy is 1.15</code></pre></figure>
+<p>你的系统 Go 版本太低。Tax 仓库需要 Go 1.15，主服务仓库需要 Go 1.20。确认 <code>go version</code> 输出匹配当前仓库的要求。</p>
+<h3 id="试图-import-单个文件">试图 import 单个文件</h3>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">import &quot;git.garena.com/.../apps/inbound/handle.go&quot;  // 错误！</code></pre></figure>
+<p>Go 不能 import 文件——只能 import 包。正确的写法是 import 目录对应的包路径。</p>
+<h3 id="生成代码被手动修改">生成代码被手动修改</h3>
+<p>FBS 仓库中的 <code>wire_gen.go</code>、protobuf 生成的 <code>.pb.go</code> 文件如果被手动修改，下次 <code>go generate</code> 时会覆盖掉修改。发现问题时先确认代码是手写的还是生成的——检查文件头部是否有 <code>// Code generated by... DO NOT EDIT.</code> 注释。</p>
+<h2 id="练习">练习</h2>
+<h3 id="依赖分析">依赖分析</h3>
+<p>下面的 Go 代码使用了 <code>os.ReadFile</code>。这段代码能在 <code>fbs-tax-server</code> 中编译吗？如果不能，应该怎么改？</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">package main
+
+import &quot;os&quot;
+
+func main() {
+	data, err := os.ReadFile(&quot;config.yaml&quot;)
+	if err != nil {
+		panic(err)
+	}
+	println(string(data))
+}</code></pre></figure>
+<h3 id="版本判断">版本判断</h3>
+<p>以下代码段中哪些不能在 Tax 仓库中使用？</p>
+<p>a) <code>var x interface{} = &quot;hello&quot;</code> b) <code>var x any = &quot;hello&quot;</code> c) <code>func Max[T Ordered](a, b T) T { if a &gt; b { return a }; return b }</code> d) <code>import &quot;context&quot;</code> e) <code>import &quot;git.garena.com/shopee/bg-logistics/go/scormv2&quot;</code></p>
+<h3 id="模块路径练习">模块路径练习</h3>
+<p>以下是 <code>sbs-fbs-server</code> 代码中的一行 import。请说明它的每个组成部分分别对应 go.mod 中的什么信息：</p>
+<figure class="code-card"><div class="code-toolbar"><span>go</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="go">import &quot;git.garena.com/shopee/bg-logistics/go/chassis&quot;</code></pre></figure>
+<h3 id="参考答案">参考答案</h3>
+<p><strong>8.1</strong>：不能。<code>os.ReadFile</code> 是 Go 1.16 加入的，Tax 仓库使用的 Go 1.15 不支持。应改为 <code>ioutil.ReadFile</code>。</p>
+<p><strong>8.2</strong>：b）<code>any</code> 是 Go 1.18 语法糖，c）泛型是 Go 1.18 特性。a、d、e 在 Go 1.15 中都可以使用（前提是 scormv2 的版本与 Tax 的 go.mod 兼容）。</p>
+<p><strong>8.3</strong>：<code>git.garena.com/shopee/bg-logistics/go/chassis</code> 对应 go.mod 中 <code>require</code> 块的 <code>git.garena.com/shopee/bg-logistics/go/chassis v0.4.3-r.13</code>。前缀 <code>git.garena.com/shopee/bg-logistics/go/</code> 是该内部模块的组织命名空间，<code>chassis</code> 是具体模块名。</p>
+<h2 id="从-npm-到-go-一个前端开发者的工具链对照表">从 npm 到 Go：一个前端开发者的工具链对照表</h2>
+<p>为了让前端同学更快地上手 Go 开发环境，下面是一张工具链对照表：</p>
+<div class="table-wrap"><table><thead><tr><th>前端概念</th><th>Go 对应</th><th>说明</th></tr></thead><tbody><tr><td><code>package.json</code></td><td><code>go.mod</code></td><td>声明模块名和依赖</td></tr><tr><td><code>node_modules/</code></td><td><code>$GOPATH/pkg/mod/</code></td><td>依赖存储位置（Go 全局共享）</td></tr><tr><td><code>npm install</code></td><td><code>go mod download</code></td><td>下载依赖到缓存</td></tr><tr><td><code>npm run build</code></td><td><code>go build</code></td><td>编译项目</td></tr><tr><td><code>npm test</code></td><td><code>go test</code></td><td>运行测试</td></tr><tr><td><code>npm run dev</code></td><td><code>go run</code></td><td>编译并运行（开发模式）</td></tr><tr><td><code>npx tsc --noEmit</code></td><td><code>go vet</code> 或 IDE</td><td>静态检查（Go 编译器自带）</td></tr><tr><td><code>ESLint</code></td><td><code>gofmt</code> + <code>go vet</code></td><td>格式化和静态分析</td></tr><tr><td><code>.eslintrc</code></td><td>无需配置文件</td><td>Go 的格式化和大部分检查是强制性的</td></tr><tr><td><code>&quot;scripts&quot;</code></td><td><code>Makefile</code></td><td>可执行命令的定义文件</td></tr><tr><td>TypeScript <code>any</code></td><td><code>interface{}</code></td><td>任意类型（Go 1.18+ 有 <code>any</code> 别名）</td></tr><tr><td><code>&quot;exports&quot;</code> 字段</td><td>公开名首字母大写</td><td>Go 通过命名规则控制可见性</td></tr><tr><td><code>&quot;private&quot;: true</code></td><td>module path 不以公开仓库命名</td><td>Go 没有显式的 private 标记</td></tr><tr><td><code>import x from 'y'</code></td><td><code>import &quot;y&quot;</code></td><td>导入一个包</td></tr><tr><td><code>import { x } from 'y'</code></td><td><code>import &quot;y&quot;</code> 并通过 <code>y.X</code> 使用</td><td>Go 没有具名导入</td></tr></tbody></table></div>
+<p>核心差异总结：</p>
+<ol><li><strong>Go 没有包管理器命令</strong>：npm/yarn/pnpm 是独立的 CLI 工具。Go 的工具链（<code>go build</code>、<code>go test</code>、<code>go mod</code>）全部打包在 <code>go</code> 这个二进制文件中。</li><li><strong>Go 的编译是强制性的</strong>：你没法&quot;保存代码就直接在浏览器里看效果&quot;——必须先编译（或 <code>go run</code> 编译+运行）。但这个编译非常快——Go 1.20 的编译速度通常以秒计，不会像前端大型项目的 Webpack 编译那样等几分钟。</li><li><strong>Go 没有热更新</strong>：前端开发中有 HMR（Hot Module Replacement），Go 没有等价物。修改代码后必须重新编译和重启服务。不过 FBS 后端使用了内部框架，部分场景下可能有热重载能力——具体取决于 Chassis 配置。</li><li><strong>Go 的类型系统是不可商量的</strong>：TypeScript 允许 <code>any</code> 绕过类型检查，<code>// @ts-ignore</code> 可以跳过某一行。Go 没有等价物——类型错误就是编译错误，必须修。这对从 JavaScript 转过来的前端同学来说可能需要适应，但它也意味着很多前端常见的运行时类型错误在 Go 中根本不会发生。</li></ol>
+<h2 id="小结">小结</h2>
+<p>本章建立了 Go 工程的心智模型：<code>go.mod</code> 声明依赖，import 路径对应模块路径+子目录，<code>go build</code> 编译出原生二进制，<code>go test</code> 运行测试。你学会了识别三个 FBS 后端仓库的 Go 版本差异（1.15 vs 1.20），以及这个版本差异对代码可移植性的限制。接下来，你将深入 Go 的类型系统——从 struct、指针和 tag 开始。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li><a href="https://go.dev/ref/spec" target="_blank" rel="noreferrer">The Go Programming Language Specification</a></li><li><a href="https://go.dev/doc/effective_go" target="_blank" rel="noreferrer">Effective Go</a></li><li><a href="https://go.dev/doc/modules/gomod-ref" target="_blank" rel="noreferrer">Go Modules Reference</a></li><li><a href="https://go.dev/doc/go1.15" target="_blank" rel="noreferrer">Go 1.15 Release Notes</a></li><li><a href="https://go.dev/doc/go1.20" target="_blank" rel="noreferrer">Go 1.20 Release Notes</a></li></ul><nav class="lesson-nav"><a href="../lessons/fe-a06-impact-analysis-dev-handoff.html">← FE-A06<br><strong>前端改动影响分析与开发交接</strong></a><a href="../lessons/be-l02-values-pointers-structs-tags.html">BE-L02 →<br><strong>值、指针、struct、tag 与数据边界</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#这一章解决什么问题"><span class="toc-num">1</span>这一章解决什么问题</a><a class="" href="#go-模块-前端的-package-json-但更严格"><span class="toc-num">2</span>Go 模块：前端的 package.json 但更严格</a><a class="sub" href="#go-mod-是声明文件但不执行"><span class="toc-num">2.1</span>go.mod 是声明文件但不执行</a><a class="sub" href="#import-路径就是-module-path-子目录"><span class="toc-num">2.2</span>import 路径就是 module path + 子目录</a><a class="sub" href="#包的组织-目录即包边界"><span class="toc-num">2.3</span>包的组织：目录即包边界</a><a class="" href="#go-多版本并存的现实-1-15-与-1-20"><span class="toc-num">3</span>Go 多版本并存的现实：1.15 与 1.20</a><a class="sub" href="#fbs-三个后端仓库的版本"><span class="toc-num">3.1</span>FBS 三个后端仓库的版本</a><a class="sub" href="#go-1-15-不能用的关键特性"><span class="toc-num">3.2</span>Go 1.15 不能用的关键特性</a><a class="sub" href="#版本选择对课程的意义"><span class="toc-num">3.3</span>版本选择对课程的意义</a><a class="" href="#仓库结构与入口点"><span class="toc-num">4</span>仓库结构与入口点</a><a class="sub" href="#three-后端仓库的结构概览"><span class="toc-num">4.1</span>three 后端仓库的结构概览</a><a class="sub" href="#makefile-后端的-scripts"><span class="toc-num">4.2</span>Makefile：后端的 scripts</a><a class="" href="#从零开始-编译和运行一个最小-go-程序"><span class="toc-num">5</span>从零开始：编译和运行一个最小 Go 程序</a><a class="sub" href="#hello-world-与编译过程"><span class="toc-num">5.1</span>Hello World 与编译过程</a><a class="sub" href="#编译是跨平台的"><span class="toc-num">5.2</span>编译是跨平台的</a><a class="sub" href="#go-test-的基础用法"><span class="toc-num">5.3</span>go test 的基础用法</a><a class="sub" href="#go-没有-nodemodules"><span class="toc-num">5.4</span>Go 没有 nodemodules</a><a class="" href="#内网依赖与私有模块"><span class="toc-num">6</span>内网依赖与私有模块</a><a class="sub" href="#fbs-使用的私有-go-模块"><span class="toc-num">6.1</span>FBS 使用的私有 Go 模块</a><a class="sub" href="#replace-指令"><span class="toc-num">6.2</span>replace 指令</a><a class="sub" href="#生成代码-go-generate"><span class="toc-num">6.3</span>生成代码：//go:generate</a><a class="" href="#版本兼容性判断"><span class="toc-num">7</span>版本兼容性判断</a><a class="sub" href="#一段代码能否用在-tax-仓库中的判断流程"><span class="toc-num">7.1</span>一段代码能否用在 Tax 仓库中的判断流程</a><a class="" href="#常见错误"><span class="toc-num">8</span>常见错误</a><a class="sub" href="#package-xxx-is-not-in-goroot"><span class="toc-num">8.1</span>package xxx is not in GOROOT</a><a class="sub" href="#用错了-go-版本"><span class="toc-num">8.2</span>用错了 Go 版本</a><a class="sub" href="#试图-import-单个文件"><span class="toc-num">8.3</span>试图 import 单个文件</a><a class="sub" href="#生成代码被手动修改"><span class="toc-num">8.4</span>生成代码被手动修改</a><a class="" href="#练习"><span class="toc-num">9</span>练习</a><a class="sub" href="#依赖分析"><span class="toc-num">9.1</span>依赖分析</a><a class="sub" href="#版本判断"><span class="toc-num">9.2</span>版本判断</a><a class="sub" href="#模块路径练习"><span class="toc-num">9.3</span>模块路径练习</a><a class="sub" href="#参考答案"><span class="toc-num">9.4</span>参考答案</a><a class="" href="#从-npm-到-go-一个前端开发者的工具链对照表"><span class="toc-num">10</span>从 npm 到 Go：一个前端开发者的工具链对照表</a><a class="" href="#小结"><span class="toc-num">11</span>小结</a><a class="" href="#参考文献"><span class="toc-num">12</span>参考文献</a></aside></div></div></div><footer class="site-footer">FBS 前后端转全栈 Landing · 已发布</footer></div></body></html>

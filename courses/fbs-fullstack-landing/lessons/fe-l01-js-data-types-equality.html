@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="从 FBS 前端的真实条件分支入手，理解 JavaScript 的数据类型、引用、空值、隐式转换与相等性规则，能够独立解释并修改仓库中的权限判断、路由守卫和状态筛选逻辑。"><title>JavaScript 数据、类型与相等性：先读懂仓库判断分支 | FBS 前后端转全栈 Landing</title><script src="../assets/theme-switcher.js"></script><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><div class="lesson-page-grid"><aside class="chapter-nav" aria-label="课程章节导航"><button class="chapter-nav-toggle" type="button" aria-expanded="true" aria-controls="chapter-nav-content"><span aria-hidden="true">◀</span><span class="chapter-nav-toggle-label">收起</span></button><div class="chapter-nav-content" id="chapter-nav-content"><div class="chapter-nav-heading"><strong>课程章节</strong><span>第 1 / 40 章</span></div><nav class="chapter-nav-list"><section class="chapter-nav-module"><h2>模块一：前端语言及标准库基础</h2><a href="../lessons/fe-l01-js-data-types-equality.html" class="is-current" aria-current="page"><span class="chapter-nav-code">FE-L01</span><span class="chapter-nav-title">JavaScript 数据、类型与相等性：先读懂仓库判断分支</span></a><a href="../lessons/fe-l02-functions-scope-closure-modules.html"><span class="chapter-nav-code">FE-L02</span><span class="chapter-nav-title">函数、作用域、闭包与模块：跟上组件外的调用链</span></a><a href="../lessons/fe-l03-promise-async-eventloop.html"><span class="chapter-nav-code">FE-L03</span><span class="chapter-nav-title">Promise、async/await 与事件循环：读懂请求和页面副作用</span></a><a href="../lessons/fe-l04-js-objects-web-data.html"><span class="chapter-nav-code">FE-L04</span><span class="chapter-nav-title">JavaScript 常用对象与 Web 数据处理</span></a><a href="../lessons/fe-l05-typescript-type-chain.html"><span class="chapter-nav-code">FE-L05</span><span class="chapter-nav-title">TypeScript：从接口数据到组件 Props 的类型链</span></a><a href="../lessons/fe-l06-browser-framework-syntax-bridge.html"><span class="chapter-nav-code">FE-L06</span><span class="chapter-nav-title">浏览器与框架语法桥：DOM、事件、JSX、Vue SFC</span></a></section>
+<section class="chapter-nav-module"><h2>模块二：Web 前端开发</h2><a href="../lessons/fe-w01-start-three-frontend-projects.html"><span class="chapter-nav-code">FE-W01</span><span class="chapter-nav-title">启动三类 FBS 前端工程并建立仓库地图</span></a><a href="../lessons/fe-w02-components-styles-forms-tables.html"><span class="chapter-nav-code">FE-W02</span><span class="chapter-nav-title">组件、样式、表单与表格：按现有组件库做页面</span></a><a href="../lessons/fe-w03-routes-menus-page-entries.html"><span class="chapter-nav-code">FE-W03</span><span class="chapter-nav-title">路由、菜单与页面入口：让页面真正可访问</span></a><a href="../lessons/fe-w04-state-management-redux-vuex-recoil.html"><span class="chapter-nav-code">FE-W04</span><span class="chapter-nav-title">状态管理：Redux/Recoil、Vuex 与宿主状态</span></a><a href="../lessons/fe-w05-api-proxy-errors-contract.html"><span class="chapter-nav-code">FE-W05</span><span class="chapter-nav-title">API、代理、错误与前后端契约</span></a><a href="../lessons/fe-w06-permission-i18n-time-file-pii.html"><span class="chapter-nav-code">FE-W06</span><span class="chapter-nav-title">权限、i18n、时间、文件与 PII：页面功能的准入项</span></a><a href="../lessons/fe-w07-frontend-vertical-slice.html"><span class="chapter-nav-code">FE-W07</span><span class="chapter-nav-title">前端纵向切片：为入库列表增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块三：Web 前端进阶</h2><a href="../lessons/fe-a01-three-app-lifecycles-host-boundaries.html"><span class="chapter-nav-code">FE-A01</span><span class="chapter-nav-title">三种应用生命周期与宿主边界</span></a><a href="../lessons/fe-a02-micro-frontends-remote-components.html"><span class="chapter-nav-code">FE-A02</span><span class="chapter-nav-title">微前端与远端组件：Module Federation、qiankun、MMF</span></a><a href="../lessons/fe-a03-vue-react-coexistence-deps-migration.html"><span class="chapter-nav-code">FE-A03</span><span class="chapter-nav-title">Vue/React 共存、共享依赖与版本迁移</span></a><a href="../lessons/fe-a04-testing-linting-build-artifacts.html"><span class="chapter-nav-code">FE-A04</span><span class="chapter-nav-title">测试、静态检查、构建与产物边界</span></a><a href="../lessons/fe-a05-observability-systematic-debugging.html"><span class="chapter-nav-code">FE-A05</span><span class="chapter-nav-title">前端观测与系统化排错</span></a><a href="../lessons/fe-a06-impact-analysis-dev-handoff.html"><span class="chapter-nav-code">FE-A06</span><span class="chapter-nav-title">前端改动影响分析与开发交接</span></a></section>
+<section class="chapter-nav-module"><h2>模块四：后端语言及标准库基础</h2><a href="../lessons/be-l01-go-toolchain-modules-versions.html"><span class="chapter-nav-code">BE-L01</span><span class="chapter-nav-title">Go 工具链、模块与版本边界</span></a><a href="../lessons/be-l02-values-pointers-structs-tags.html"><span class="chapter-nav-code">BE-L02</span><span class="chapter-nav-title">值、指针、struct、tag 与数据边界</span></a><a href="../lessons/be-l03-methods-interfaces-embedding-di.html"><span class="chapter-nav-code">BE-L03</span><span class="chapter-nav-title">方法、接口、嵌入与依赖倒置</span></a><a href="../lessons/be-l04-slices-maps-sorting-data-transform.html"><span class="chapter-nav-code">BE-L04</span><span class="chapter-nav-title">slice、map、排序与数据转换</span></a><a href="../lessons/be-l05-errors-defer-panic-resources.html"><span class="chapter-nav-code">BE-L05</span><span class="chapter-nav-title">error、defer、panic/recover 与资源生命周期</span></a><a href="../lessons/be-l06-context-time-json-http-io.html"><span class="chapter-nav-code">BE-L06</span><span class="chapter-nav-title">context、时间、JSON、HTTP、I/O 与文件</span></a><a href="../lessons/be-l07-goroutines-channels-sync-concurrency.html"><span class="chapter-nav-code">BE-L07</span><span class="chapter-nav-title">goroutine、channel、sync 与并发边界</span></a></section>
+<section class="chapter-nav-module"><h2>模块五：Web 后端开发</h2><a href="../lessons/be-w01-start-three-backend-processes.html"><span class="chapter-nav-code">BE-W01</span><span class="chapter-nav-title">启动三类 FBS 后端进程并建立仓库地图</span></a><a href="../lessons/be-w02-chassis-http-route-request-response.html"><span class="chapter-nav-code">BE-W02</span><span class="chapter-nav-title">Chassis HTTP 接口：从路由到请求与响应</span></a><a href="../lessons/be-w03-wire-layered-architecture.html"><span class="chapter-nav-code">BE-W03</span><span class="chapter-nav-title">Wire 与分层：把 handler 接到应用、领域和基础设施</span></a><a href="../lessons/be-w04-mysql-gorm-scorm-repository-transactions.html"><span class="chapter-nav-code">BE-W04</span><span class="chapter-nav-title">MySQL、GORM/Scorm、仓储与事务</span></a><a href="../lessons/be-w05-service-calls-http-grpc-timeouts.html"><span class="chapter-nav-code">BE-W05</span><span class="chapter-nav-title">服务调用、HTTP/gRPC 契约与超时</span></a><a href="../lessons/be-w06-auth-errors-pii-security.html"><span class="chapter-nav-code">BE-W06</span><span class="chapter-nav-title">鉴权、错误码、PII 与接口安全边界</span></a><a href="../lessons/be-w07-backend-vertical-slice.html"><span class="chapter-nav-code">BE-W07</span><span class="chapter-nav-title">后端纵向切片：为入库请求增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块六：Web 后端进阶</h2><a href="../lessons/be-a01-apollo-chassis-config.html"><span class="chapter-nav-code">BE-A01</span><span class="chapter-nav-title">Apollo 与 Chassis 配置：环境差异、热更新和开关</span></a><a href="../lessons/be-a02-redis-codis-cache-consistency.html"><span class="chapter-nav-code">BE-A02</span><span class="chapter-nav-title">Redis/Codis 与缓存一致性</span></a><a href="../lessons/be-a03-saturn-scheduled-async-tasks.html"><span class="chapter-nav-code">BE-A03</span><span class="chapter-nav-title">Saturn 定时任务与异步任务</span></a><a href="../lessons/be-a04-kafka-message-pipeline.html"><span class="chapter-nav-code">BE-A04</span><span class="chapter-nav-title">Kafka 消息链路与事件边界</span></a><a href="../lessons/be-a05-reliability-idempotency-transactions-retry.html"><span class="chapter-nav-code">BE-A05</span><span class="chapter-nav-title">可靠性：幂等、事务、重试、并发与降级组合</span></a><a href="../lessons/be-a06-logging-metrics-diagnostics.html"><span class="chapter-nav-code">BE-A06</span><span class="chapter-nav-title">日志、指标、链路与系统化排错</span></a><a href="../lessons/be-a07-impact-analysis-testing-handoff.html"><span class="chapter-nav-code">BE-A07</span><span class="chapter-nav-title">后端改动影响分析、测试与开发交接</span></a></section></nav></div></aside><div class="lesson-page-main"><header class="topbar"><a class="brand" href="../index.html">FBS 前后端转全栈 Landing</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">FE-L01 · 90–130 分钟</div><h1>JavaScript 数据、类型与相等性：先读懂仓库判断分支</h1><p class="lesson-summary">从 FBS 前端的真实条件分支入手，理解 JavaScript 的数据类型、引用、空值、隐式转换与相等性规则，能够独立解释并修改仓库中的权限判断、路由守卫和状态筛选逻辑。</p><a class="source-link" href="../markdown/fe-l01-js-data-types-equality.md">查看 Markdown 版本</a></section><div class="lesson-layout"><main class="lesson-content"><h2 id="这一章解决什么问题">这一章解决什么问题</h2>
+<p>打开 FBS 任一前端仓库，你会看到大量条件判断：路由守卫里的 <code>to.route.name === 'fbsNoPermissions'</code>，权限检查中的 <code>permission.some(item =&gt; permissions.includes(item))</code>，错误处理中的 <code>if (data?.retcode !== 0)</code>。每一行都依赖 JavaScript 特有的类型规则和相等性行为。</p>
+<p>后端同学转前端时，最常见的两类问题都与这些规则有关。第一，把 JavaScript 当成&quot;去掉类型的 Java/C#&quot;，忽略了隐式转换、<code>undefined</code> vs <code>null</code>、引用相等这些微妙但频繁出现的规则；第二，知道语法但读不懂代码为什么这样写，比如为什么用 <code>===</code> 而不是 <code>==</code>，为什么 <code>?.</code> 和 <code>??</code> 几乎出现在每一个页面组件里。</p>
+<p>本章从 FBS 三个前端仓库的真实片段出发，先建立类型系统，再解释相等性规则，最后回到仓库阅读和修改条件分支。目标不是让你背完 ECMAScript 规范——而是让你在看到 <code>if (data?.retcode !== 0)</code> 时，能拆解出：<code>data</code> 可能是什么、<code>?.</code> 在什么情况下返回 <code>undefined</code>、<code>!==</code> 与 <code>!=</code> 的区别、<code>0</code> 在这里代表什么语义。</p>
+<p>学完后你能做到三件事：解释四个真实判断片段的类型和结果；修复一个故意引入的空值边界问题；在看任何 FBS 页面代码时，不用猜一个表达式的结果会是什么。</p>
+<blockquote><p>本章示例来自 <code>fbs-sc-vue</code>、<code>fbs-frontend</code> 和 <code>fbs-sc-react</code> 三个仓库的 release 分支（2026-07-20）。代码行为可能随仓库演进；做实际需求时应重新打开当前工作树核验。</p></blockquote>
+<h2 id="变量与基本类型-从权限判断片段出发">变量与基本类型：从权限判断片段出发</h2>
+<p>先看 <code>fbs-frontend/src/business/utils/permission.ts</code> 里的权限判断：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">export function hasPermission(permission) {
+  const permissions = get(store.getState(), 'context.currentUser.permission_code_list', []);
+  if (Array.isArray(permission)) {
+    return permission.some(item =&gt; permissions.includes(item));
+  }
+  return permissions.includes(permission);
+}</code></pre></figure>
+<p>这段代码看起来简单，但后端同学要想明白每一层，至少需要理解：<code>const</code> 声明、数组、<code>Array.isArray</code> 返回值、<code>some</code> 和 <code>includes</code> 的布尔语义、以及函数没有写返回类型这件事本身的含义。我们逐层拆开。</p>
+<h3 id="const-与-let-变量声明不携带运行时类型"><code>const</code> 与 <code>let</code>：变量声明不携带运行时类型</h3>
+<p>JavaScript 用 <code>const</code> 和 <code>let</code> 声明变量。核心规则只有两条：<code>const</code> 声明的变量不能重新赋值；<code>let</code> 可以。两者都不限制修改变量指向的对象内部。</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const list = [];      // 不能再写 list = somethingElse
+list.push('item');    // 但可以修改数组内容
+
+let count = 0;
+count = 1;            // let 允许重新赋值</code></pre></figure>
+<p>在 FBS 代码中你几乎看不到 <code>var</code>。<code>var</code> 有函数作用域和变量提升等历史行为，三个 FBS 前端仓库通过 ESLint 或团队约定已经统一使用 <code>const</code>/<code>let</code>。作为惯例：默认用 <code>const</code>，只有确实需要重新赋值时改用 <code>let</code>。</p>
+<p><code>const</code> 不意味着&quot;不可变&quot;。<code>const permissions = []; permissions.push('code')</code> 完全合法。它限制的是变量名与值的绑定关系，而不是值本身。这个区别在后面讲到对象和数组时还会反复出现。</p>
+<h3 id="基本类型-值本身直接存储">基本类型：值本身直接存储</h3>
+<p>JavaScript 有七种基本类型：<code>number</code>、<code>string</code>、<code>boolean</code>、<code>null</code>、<code>undefined</code>、<code>symbol</code>、<code>bigint</code>。后面两种在 FBS 前端仓库中极少出现，本章聚焦前五种。</p>
+<p>基本类型变量直接保存值本身。赋值给另一个变量时，值被复制：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">let first = 10;
+let second = first;
+second = 20;
+console.log(first);   // 10，不受 second 修改影响</code></pre></figure>
+<p><code>number</code> 是 IEEE 754 双精度浮点数。没有 int/float/double 的区分。<code>1</code> 和 <code>1.0</code> 是同一个值。</p>
+<p><code>string</code> 可以用单引号、双引号或反引号（模板字面量）。FBS 仓库中，JSX 属性习惯用双引号，普通字符串三种都有出现，模板字面量用于拼接变量：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const path = `/portal/fbs/${module}`;  // 模板字面量嵌入变量</code></pre></figure>
+<p><code>boolean</code> 只有 <code>true</code> 和 <code>false</code>。注意 <code>'false'</code>（字符串）的布尔值是 <code>true</code>——这是一个高频陷阱，后面在 truthy/falsy 部分会详细讲。</p>
+<h3 id="typeof-运行时类型检查"><code>typeof</code>：运行时类型检查</h3>
+<p><code>typeof</code> 操作符返回类型的字符串表示。它有一些&quot;反直觉&quot;的结果，但记住核心几条就够用：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">typeof 42;           // 'number'
+typeof 'hello';      // 'string'
+typeof true;         // 'boolean'
+typeof undefined;    // 'undefined'
+typeof null;         // 'object' ← 历史遗留，记住即可
+typeof [];           // 'object'
+typeof {};           // 'object'
+typeof (() =&gt; {});   // 'function'</code></pre></figure>
+<p><code>typeof null === 'object'</code> 是 JavaScript 最早版本的一个 bug，因为兼容性原因一直保留至今。判断 <code>null</code> 不能依赖 <code>typeof</code>，应该用 <code>value === null</code>。</p>
+<p>对于数组，更可靠的方式是 <code>Array.isArray(value)</code>，正如上面权限代码中使用的那样。</p>
+<h2 id="对象-数组与引用-值被复制-引用也是">对象、数组与引用：值被复制，引用也是</h2>
+<h3 id="对象是引用类型">对象是引用类型</h3>
+<p>JavaScript 中，对象（包括普通对象 <code>{}</code>、数组 <code>[]</code>、函数、日期、正则等）都是引用类型。变量保存的是指向对象的<strong>引用值</strong>，而不是对象本身。</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const obj1 = { name: 'FBS' };
+const obj2 = obj1;
+obj2.name = 'Portal';
+console.log(obj1.name);   // 'Portal' —— 两个变量指向同一个对象</code></pre></figure>
+<p>赋值的规则没有变——<code>obj2 = obj1</code> 复制的仍然是值，只是这个值是引用值。结果就是两个变量指向同一个对象。这和 Java 中引用类型的行为类似，但 JavaScript 没有基本类型包装类的自动装箱/拆箱，对象字面量就是直接的对象值。</p>
+<h3 id="数组也是对象">数组也是对象</h3>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const list = ['a', 'b'];
+const alias = list;
+alias.push('c');
+console.log(list);    // ['a', 'b', 'c']
+console.log(list.length); // 3</code></pre></figure>
+<p>数组在 JavaScript 中是一种特殊的对象。<code>typeof []</code> 返回 <code>'object'</code>，<code>Array.isArray</code> 专门用来区分数组和普通对象。数组有 <code>length</code> 属性、支持索引访问、有一组自己的方法（<code>push</code>、<code>filter</code>、<code>map</code>、<code>includes</code> 等），但这些都是在对象基础上的扩展。</p>
+<h3 id="不可变更新-为什么-react-要用展开运算符">不可变更新：为什么 React 要用展开运算符</h3>
+<p>三个 FBS 前端仓库都大量使用不可变更新模式。当你看到这样的代码：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const nextState = { ...prevState, key: newValue };
+const nextList = [...prevList, newItem];</code></pre></figure>
+<p>它的作用是创建一个新对象或新数组，而不是修改原来的。React 依赖引用变化来判断是否需要重新渲染；Vue 3 虽然使用 Proxy 代理实现响应式，但展开运算符仍然是创建浅拷贝的标准方式。</p>
+<p>注意是<strong>浅</strong>拷贝：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const obj = { nested: { value: 1 } };
+const copy = { ...obj };
+copy.nested.value = 2;
+console.log(obj.nested.value); // 2 —— 嵌套对象没有被复制</code></pre></figure>
+<p>不可变更新的完整模式会在后续工程章节展开。这一章你只需要知道：<code>...</code> 创建的是浅拷贝，修改嵌套属性时仍然会影响原对象。</p>
+<h2 id="空值-null-undefined-与它们带来的防御性编程">空值：<code>null</code>、<code>undefined</code> 与它们带来的防御性编程</h2>
+<h3 id="两种空值的语义差异">两种空值的语义差异</h3>
+<p>JavaScript 有两种&quot;空&quot;值，它们的语义不同，但经常被混用：</p>
+<ul><li><code>undefined</code> 表示&quot;不存在&quot;或&quot;未赋值&quot;。变量声明但未初始化时是 <code>undefined</code>，对象访问不存在的属性时返回 <code>undefined</code>，函数没有 <code>return</code> 语句时返回 <code>undefined</code>。</li><li><code>null</code> 表示&quot;有意为空&quot;或&quot;没有对象&quot;。它通常由开发者显式赋值，表示一个变量目前不指向任何对象。</li></ul>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">let x;
+console.log(x);              // undefined —— 声明但未赋值
+
+const obj = {};
+console.log(obj.nonexist);  // undefined —— 属性不存在
+
+function noReturn() {}
+console.log(noReturn());    // undefined —— 没有返回值
+
+const manual = null;        // null —— 显式设置为空</code></pre></figure>
+<p>在 FBS 代码中，两者通常不严格区分。API 返回数据中缺失的字段可能是 <code>null</code> 也可能是 <code>undefined</code>。重要的是统一使用安全的访问方式。</p>
+<h3 id="可选链-不要在有-null-undefined-的地方深入访问">可选链 <code>?.</code>：不要在有 <code>null</code>/<code>undefined</code> 的地方深入访问</h3>
+<p><code>?.</code> 是 FBS 前端代码中出现频率最高的操作符之一。它会在左值为 <code>null</code> 或 <code>undefined</code> 时短路并返回 <code>undefined</code>，而不是抛出 <code>TypeError</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const shopId = data?.shopInfo?.fbsShopId;
+// 等价于：
+// let temp = data === null || data === undefined ? undefined : data.shopInfo;
+// temp = temp === null || temp === undefined ? undefined : temp.fbsShopId;</code></pre></figure>
+<p>在之前看到的权限代码中，<code>permission.some(...)</code> 之所以能安全执行，是因为前面有 <code>Array.isArray(permission)</code> 的守卫。如果那段代码没有守卫而直接写 <code>permission?.some(item =&gt; ...)</code>，就能在 <code>permission</code> 为 <code>null</code>/<code>undefined</code> 时安全返回 <code>undefined</code> 而不是崩溃。</p>
+<p>但 <code>?.</code> 返回 <code>undefined</code> 这件事本身值得注意。<code>undefined</code> 出现在条件判断中会被当作 <code>false</code>（见下一节 truthy/falsy），所以 <code>if (data?.retcode !== 0)</code> 中如果 <code>data</code> 是 <code>null</code>，表达式变成 <code>undefined !== 0</code>，结果是 <code>true</code>，会触发错误分支——这可能就是期望的行为（数据都没回来当然应该当作失败）。</p>
+<h3 id="空值合并-只在-null-undefined-时提供默认值">空值合并 <code>??</code>：只在 <code>null</code>/<code>undefined</code> 时提供默认值</h3>
+<p><code>??</code> 也称为 nullish coalescing。它和 <code>||</code> 的关键区别是：<code>??</code> 只在左值为 <code>null</code> 或 <code>undefined</code> 时取右值；<code>||</code> 在所有 falsy 值（<code>0</code>、<code>''</code>、<code>false</code>、<code>null</code>、<code>undefined</code>、<code>NaN</code>）上都取右值。</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const count = 0 || 10;       // 10 —— 0 是 falsy
+const count2 = 0 ?? 10;      // 0 —— 0 不是 null/undefined
+
+const name = '' || 'default';    // 'default'
+const name2 = '' ?? 'default';   // ''</code></pre></figure>
+<p>在 FBS 的分页和计数逻辑中，<code>??</code> 的正确使用很重要。如果一段代码写了 <code>pageSize || 20</code> 而有效的 <code>pageSize</code> 确实可能为 <code>0</code>，这个写法就会出错，必须改为 <code>pageSize ?? 20</code>。</p>
+<h2 id="truthy-与-falsy-布尔上下文中的隐式转换">Truthy 与 Falsy：布尔上下文中的隐式转换</h2>
+<h3 id="哪些值是-falsy">哪些值是 falsy</h3>
+<p>当 JavaScript 期望一个布尔值（如在 <code>if</code>、<code>while</code>、<code>&amp;&amp;</code>、<code>||</code>、<code>!</code> 中），非布尔值会被隐式转换为布尔。以下八个值是 falsy，其他所有值都是 truthy：</p>
+<div class="table-wrap"><table><thead><tr><th>Falsy 值</th><th>常见场景</th></tr></thead><tbody><tr><td><code>false</code></td><td>布尔假</td></tr><tr><td><code>0</code>、<code>-0</code>、<code>0n</code></td><td>数值零</td></tr><tr><td><code>''</code>、<code>&quot;&quot;</code>、<code> </code><code> </code></td><td>空字符串</td></tr><tr><td><code>null</code></td><td>显式空</td></tr><tr><td><code>undefined</code></td><td>未定义</td></tr><tr><td><code>NaN</code></td><td>非数值</td></tr></tbody></table></div>
+<h3 id="在-fbs-页面判断中识别转换">在 FBS 页面判断中识别转换</h3>
+<p>回到 FBS 的路由守卫片段 <code>fbs-sc-vue/src/router/index.ts</code>：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">if (data.shopInfo.fbsTag) {
+  // 卖家标签存在，进入正常流程
+  if (!isCBSC &amp;&amp; region === 'br' &amp;&amp; data.shopInfo.lockByTax &amp;&amp; to.route.name !== 'fbsTaxError') {
+    return { path: '/portal/fbs/taxError' };
+  }
+}</code></pre></figure>
+<p><code>data.shopInfo.fbsTag</code> 本身是一个值。如果 <code>fbsTag</code> 不存在（<code>undefined</code>），条件分支的 <code>if (undefined)</code> 等同于 <code>if (false)</code>，不会进入。如果 <code>fbsTag</code> 是 <code>0</code> 或空字符串，也不会进入——但后端同学需要确认这个字段的实际类型：它是布尔值还是数字标签？如果是数字标签且可能为 <code>0</code>，那么 <code>0</code> 是 falsy 会导致逻辑错误，需要用更精确的判断如 <code>fbsTag !== undefined</code>。</p>
+<p>再看权限判断中的 <code>Array.isArray(permission)</code>：如果 <code>permission</code> 是 <code>null</code> 或 <code>undefined</code>，<code>Array.isArray</code> 返回 <code>false</code>，条件分支不进入，函数走到最后的 <code>permissions.includes(permission)</code>——这行可能会因为 <code>permission</code> 为 <code>null</code>/<code>undefined</code> 而返回 <code>false</code>（<code>includes</code> 用 <code>SameValueZero</code> 比较，<code>null</code> 和 <code>undefined</code> 与普通值永不相等），不会崩溃。</p>
+<h3 id="显式转换-不要依赖隐式规则">显式转换：不要依赖隐式规则</h3>
+<p>虽然 JavaScript 允许隐式转换，FBS 代码中优先使用显式方式：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 推荐：显式判断
+if (list &amp;&amp; list.length &gt; 0) { }
+if (value !== null &amp;&amp; value !== undefined) { }
+
+// 避免：依赖隐式转换（虽然能跑，但意图不明确）
+if (list.length) { }    // 0 是 falsy，意图是“非空列表”
+if (!value) { }         // 太宽泛，0 和 '' 也会命中</code></pre></figure>
+<h2 id="相等性-与-object-is">相等性：<code>==</code>、<code>===</code> 与 <code>Object.is</code></h2>
+<h3 id="是默认选择"><code>===</code> 是默认选择</h3>
+<p><code>===</code>（严格相等）不进行类型转换。类型不同直接返回 <code>false</code>；类型相同再比较值或引用。</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">1 === 1;         // true
+'1' === 1;       // false —— 类型不同
+null === null;   // true
+undefined === undefined; // true
+null === undefined;      // false
+[] === [];       // false —— 两个不同的数组对象</code></pre></figure>
+<p>在 FBS 三个前端仓库中，ESLint 配置禁止 <code>==</code>、强制使用 <code>===</code>。仓库中所有条件判断都用 <code>===</code> 和 <code>!==</code>。</p>
+<h3 id="对象和数组的比较是比较引用">对象和数组的比较是比较引用</h3>
+<p>这一点和 Java 的 <code>==</code> 行为一致：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const a = [1, 2];
+const b = [1, 2];
+a === b;           // false —— 不同引用
+
+const c = a;
+a === c;           // true —— 同一引用</code></pre></figure>
+<p>想要比较数组&quot;内容是否相同&quot;，通常需要逐个元素比较，或使用 <code>lodash.isEqual</code>。FBS 代码中如需要深度相等比较，会使用 lodash 的工具函数，不会直接用 <code>===</code> 比较两个数组或对象。</p>
+<h3 id="的隐式转换规则-知道它会-努力让两边相同类型-即可"><code>==</code> 的隐式转换规则（知道它会&quot;努力让两边相同类型&quot;即可）</h3>
+<p>你不需要背下 <code>==</code> 的全部转换规则。要知道的是：<code>null == undefined</code> 返回 <code>true</code>（这是 <code>==</code> 唯一被偶尔使用的场景）；其他情况一律使用 <code>===</code>。FBS 仓库的 ESLint 已经禁止 <code>==</code>，如果某处代码仍然使用了它，要么是故意的（需要团队 review），要么是历史遗留。</p>
+<h3 id="nan-的特殊性"><code>NaN</code> 的特殊性</h3>
+<p><code>NaN</code> 是唯一一个不等于自身的值：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">NaN === NaN;       // false
+Number.isNaN(NaN); // true —— 正确的 NaN 判断方式</code></pre></figure>
+<p>在 FBS 的数值处理和表单校验中，如果后端接口可能返回非数值，前端通常会用 <code>isNaN</code> 或 <code>Number.isNaN</code> 做防御：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">if (Number.isNaN(parsedValue)) {
+  // 处理非数值输入
+}</code></pre></figure>
+<h2 id="在仓库中阅读条件判断-逐行拆解四个真实片段">在仓库中阅读条件判断：逐行拆解四个真实片段</h2>
+<h3 id="片段一-权限检查">片段一：权限检查</h3>
+<p>来源：<code>fbs-frontend/src/business/utils/permission.ts</code></p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">export function hasPermission(permission) {
+  const permissions = get(store.getState(), 'context.currentUser.permission_code_list', []);
+  if (Array.isArray(permission)) {
+    return permission.some(item =&gt; permissions.includes(item));
+  }
+  return permissions.includes(permission);
+}</code></pre></figure>
+<p>拆解：</p>
+<ul><li><code>const permissions</code> —— 从 Redux Store 中取出用户的权限码列表，<code>get</code>（lodash 的 <code>get</code>）的安全之处在于第三个参数 <code>[]</code>：如果路径中任何一层不存在，返回空数组而不是 <code>undefined</code>。</li><li><code>Array.isArray(permission)</code> —— 判断传入参数是单个权限码（字符串）还是多个权限码（数组）。这里不能依赖 truthy/falsy，因为字符串也可能是空字符串。</li><li><code>permission.some(item =&gt; permissions.includes(item))</code> —— 数组版本的逻辑：只要传入的任一权限码在用户权限列表中存在，就返回 <code>true</code>。<code>some</code> 找到一个匹配项就短路返回 <code>true</code>；全不匹配返回 <code>false</code>。</li><li><code>permissions.includes(permission)</code> —— 单权限码版本的逻辑：检查这个具体的权限码是否在用户列表中。</li></ul>
+<p>如果 <code>permission</code> 是 <code>null</code> 或 <code>undefined</code>，第一行 <code>Array.isArray</code> 返回 <code>false</code>，进入第二条路。<code>includes</code> 对 <code>null</code>/<code>undefined</code> 与权限码列表的比较不会匹配（权限码是字符串），所以返回 <code>false</code>。不会崩溃，但也不会有权限。</p>
+<h3 id="片段二-路由守卫中的条件链">片段二：路由守卫中的条件链</h3>
+<p>来源：<code>fbs-sc-vue/src/router/index.ts</code></p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">if (data.shopInfo.fbsTag) {
+  if (!isCBSC &amp;&amp; region === 'br' &amp;&amp; data.shopInfo.lockByTax &amp;&amp; to.route.name !== 'fbsTaxError') {
+    return { path: '/portal/fbs/taxError' };
+  }
+}</code></pre></figure>
+<p>拆解：</p>
+<ul><li><code>data.shopInfo.fbsTag</code> —— 隐式布尔转换。<code>undefined</code> 时为 <code>false</code>，不会进入。但如果 <code>fbsTag</code> 是数字 <code>0</code>，也会导致不进入——但根据上下文，<code>fbsTag</code> 在这里应为布尔值或非零数值，表示&quot;卖家已打标&quot;。</li><li><code>!isCBSC &amp;&amp; region === 'br' &amp;&amp; ...</code> —— 三个条件用 <code>&amp;&amp;</code> 串联。<code>&amp;&amp;</code> 是短路求值：只要左边为 <code>false</code>，右边不会执行。这里在 CBSC 条件下整个表达式不会进入锁税逻辑。</li><li><code>to.route.name !== 'fbsTaxError'</code> —— 如果当前已经在税务错误页，不重复跳转（避免死循环）。<code>!==</code> 是严格不等，没有类型转换。</li></ul>
+<h3 id="片段三-api-响应错误判断">片段三：API 响应错误判断</h3>
+<p>来源：<code>fbs-sc-vue/src/utils/request.js</code></p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">if (notBlob &amp;&amp; data?.retcode !== 0 &amp;&amp; !config.__hiddenErrorMessage) {
+  commonHandleAPIError(data);
+}</code></pre></figure>
+<p>拆解：</p>
+<ul><li><code>data?.retcode</code> —— 可选链。如果 <code>data</code> 为 <code>null</code> 或 <code>undefined</code>，整个表达式求值为 <code>undefined</code>。</li><li><code>data?.retcode !== 0</code> —— 注意这里：如果 <code>data</code> 是 <code>null</code>/<code>undefined</code>，<code>undefined !== 0</code> 是 <code>true</code>。这意味着数据完全缺失时也会触发错误处理——这通常是期望的行为。</li><li><code>!config.__hiddenErrorMessage</code> —— 逻辑非。某些场景下（比如静默预加载数据）前端不希望弹出 toast，会传入 <code>hiddenErrorMessage: false</code>。</li></ul>
+<p>假设 <code>data</code> 正常返回，<code>retcode</code> 为 <code>0</code> 表示业务成功。不为 <code>0</code> 就进入错误处理。这段逻辑的前提是 HTTP 状态码层面已经成功（200），只是业务返回码表示失败——这正是 <code>unpackData: false</code> 配置的设计意图。如果 HTTP 层就已经失败（如 500），会被 response interceptor 的 <code>error</code> 回调捕获，不会走到这里。</p>
+<h3 id="片段四-路由守卫中判断-vpi-管理权限">片段四：路由守卫中判断 VPI 管理权限</h3>
+<p>来源：<code>fbs-sc-vue/src/router/index.ts</code></p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">if (vpiRouteNames.includes(to.route.name) &amp;&amp; !data?.shopInfo?.allowVpiManagement) {
+  return { path: '/portal/fbs/product/approved' };
+}</code></pre></figure>
+<p>拆解：</p>
+<ul><li><code>vpiRouteNames.includes(to.route.name)</code> —— <code>vpiRouteNames</code> 是预定义的数组：<code>['fbsVirtualBundlesList', 'fbsVirtualBundlesCreate', 'fbsVirtualBundlesEdit']</code>。<code>includes</code> 检查当前路由是否属于这三个 VPI 管理页面。</li><li><code>!data?.shopInfo?.allowVpiManagement</code> —— 双重可选链。如果 <code>data</code> 或 <code>shopInfo</code> 为 <code>null</code>/<code>undefined</code>，表达式结果为 <code>undefined</code>，<code>!undefined</code> 为 <code>true</code>，意味着&quot;没有权限信息就当作没权限&quot;，重定向到商品列表页。这是一种安全的默认拒绝策略。</li></ul>
+<h2 id="常见错误与修正">常见错误与修正</h2>
+<h3 id="把-0-或空字符串当作-没有值">把 <code>0</code> 或空字符串当作&quot;没有值&quot;</h3>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 错误：0 是合法的库存数，但 0 || default 会忽略它
+const stock = response.stock || 999;
+// 正确：
+const stock = response.stock ?? 999;</code></pre></figure>
+<h3 id="忘记-只短路-null-undefined">忘记 <code>?.</code> 只短路 <code>null</code>/<code>undefined</code></h3>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// data 是空字符串 '' 时，data?.length 返回 0 而不是 undefined
+// 如果后续依赖 undefined 来判断&quot;数据不存在&quot;，就会出错
+const length = data?.length; // ''?.length = 0！</code></pre></figure>
+<h3 id="比较数组和对象"><code>===</code> 比较数组和对象</h3>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">const permissions = ['a', 'b'];
+permissions === ['a', 'b']; // false —— 不同引用
+// 应使用：
+permissions[0] === 'a' &amp;&amp; permissions[1] === 'b'; // 或 .every()</code></pre></figure>
+<h3 id="typeof-null-object"><code>typeof null === 'object'</code></h3>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 错误：这个判断无法区分 null 和普通对象
+if (typeof value === 'object') { /* ... */ }
+// 正确：
+if (value !== null &amp;&amp; typeof value === 'object') { /* ... */ }</code></pre></figure>
+<h2 id="练习">练习</h2>
+<h3 id="预测输出">预测输出</h3>
+<p>不运行代码，写出每一行的输出并解释原因。</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">// 练习 A：基本类型与引用
+const a = { count: 1 };
+const b = a;
+b.count = 2;
+const c = 1;
+let d = c;
+d = 3;
+console.log(a.count);  // ?
+console.log(c);        // ?
+
+// 练习 B：空值与相等性
+const x = undefined;
+const y = null;
+console.log(x == y);   // ?
+console.log(x === y);  // ?
+console.log(x ?? 'fallback');   // ?
+console.log(y ?? 'fallback');   // ?
+
+// 练习 C：可选链与 truthy
+const data = { shopInfo: { fbsTag: 0 } };
+console.log(data?.shopInfo?.fbsTag !== undefined);  // ?
+if (data?.shopInfo?.fbsTag) {
+  console.log('进入分支');
+} else {
+  console.log('不进入');  // ?
+}</code></pre></figure>
+<h3 id="修复空值边界">修复空值边界</h3>
+<p>以下代码来自一个假想的 FBS 商品列表筛选组件。找出所有可能因空值而崩溃或行为不符合预期的地方，并修复：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">function getFilteredProducts(products, filter) {
+  const result = [];
+  for (let i = 0; i &lt; products.length; i++) {
+    const product = products[i];
+    if (filter.status === product.status) {
+      if (product.name.includes(filter.keyword)) {
+        result.push(product);
+      }
+    }
+  }
+  return result;
+}</code></pre></figure>
+<p>修复提示：<code>products</code> 可能为 <code>null</code>，<code>filter</code> 可能为 <code>null</code>，<code>filter.status</code> 可能为 <code>undefined</code>，<code>filter.keyword</code> 可能为空字符串，<code>product.name</code> 可能为 <code>null</code>。</p>
+<h3 id="判断仓库片段">判断仓库片段</h3>
+<p>打开你本地 <code>fbs-sc-vue</code> 仓库，找到 <code>src/views/inbound/IBT/detail/index.vue</code> 中 <code>v-if</code> 或 <code>v-show</code> 指令。选一个包含 <code>?.</code>、<code>!==</code> 或 <code>&amp;&amp;</code> 的判断表达式，解释：</p>
+<ul><li>这个表达式在什么条件下渲染对应元素</li><li>如果数据的每一层都为 <code>null</code>，最终行为是什么</li><li>如果修改一个条件（如把 <code>!==</code> 改成 <code>!=</code>），行为会有什么变化</li></ul>
+<h3 id="参考答案">参考答案</h3>
+<p><strong>8.1 A</strong>: <code>a.count</code> 输出 <code>2</code>（<code>a</code> 和 <code>b</code> 指向同一个对象）。<code>c</code> 输出 <code>1</code>（基本类型赋值是复制，<code>d</code> 的修改不影响 <code>c</code>）。</p>
+<p><strong>8.1 B</strong>: <code>x == y</code> 为 <code>true</code>（宽松相等中 <code>null == undefined</code>）。<code>x === y</code> 为 <code>false</code>（严格相等中类型不同）。<code>x ?? 'fallback'</code> 为 <code>'fallback'</code>（<code>undefined</code> 触发 <code>??</code>）。<code>y ?? 'fallback'</code> 也为 <code>'fallback'</code>（<code>null</code> 同样触发 <code>??</code>）。</p>
+<p><strong>8.1 C</strong>: <code>data?.shopInfo?.fbsTag !== undefined</code> 为 <code>true</code>（<code>fbsTag</code> 是 <code>0</code>，不等于 <code>undefined</code>）。<code>if (data?.shopInfo?.fbsTag)</code> 中 <code>0</code> 是 falsy，不进入分支，输出 <code>'不进入'</code>。这正是前面提到的：数字型标签为 <code>0</code> 时不能用 truthy 判断，需要用 <code>!== undefined</code> 或明确的值比较。</p>
+<h2 id="参考文献">参考文献</h2>
+<ul><li><a href="https://tc39.es/ecma262/#sec-ecmascript-data-types-and-values" target="_blank" rel="noreferrer">ECMAScript Language Specification — Types</a> — JavaScript 类型系统的规范定义</li><li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types" target="_blank" rel="noreferrer">MDN JavaScript Guide — Grammar and types</a> — 变量声明、类型与字面量</li><li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness" target="_blank" rel="noreferrer">MDN Equality comparisons and sameness</a> — <code>==</code>、<code>===</code> 与 <code>Object.is</code> 的完整对比</li><li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining" target="_blank" rel="noreferrer">MDN Optional chaining</a> — <code>?.</code> 操作符</li><li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing" target="_blank" rel="noreferrer">MDN Nullish coalescing operator</a> — <code>??</code> 操作符</li><li><a href="https://developer.mozilla.org/en-US/docs/Glossary/Truthy" target="_blank" rel="noreferrer">MDN Truthy</a> — truthy 与 falsy 的完整列表</li></ul><nav class="lesson-nav"><span></span><a href="../lessons/fe-l02-functions-scope-closure-modules.html">FE-L02 →<br><strong>函数、作用域、闭包与模块：跟上组件外的调用链</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#这一章解决什么问题"><span class="toc-num">1</span>这一章解决什么问题</a><a class="" href="#变量与基本类型-从权限判断片段出发"><span class="toc-num">2</span>变量与基本类型：从权限判断片段出发</a><a class="sub" href="#const-与-let-变量声明不携带运行时类型"><span class="toc-num">2.1</span>const 与 let：变量声明不携带运行时类型</a><a class="sub" href="#基本类型-值本身直接存储"><span class="toc-num">2.2</span>基本类型：值本身直接存储</a><a class="sub" href="#typeof-运行时类型检查"><span class="toc-num">2.3</span>typeof：运行时类型检查</a><a class="" href="#对象-数组与引用-值被复制-引用也是"><span class="toc-num">3</span>对象、数组与引用：值被复制，引用也是</a><a class="sub" href="#对象是引用类型"><span class="toc-num">3.1</span>对象是引用类型</a><a class="sub" href="#数组也是对象"><span class="toc-num">3.2</span>数组也是对象</a><a class="sub" href="#不可变更新-为什么-react-要用展开运算符"><span class="toc-num">3.3</span>不可变更新：为什么 React 要用展开运算符</a><a class="" href="#空值-null-undefined-与它们带来的防御性编程"><span class="toc-num">4</span>空值：null、undefined 与它们带来的防御性编程</a><a class="sub" href="#两种空值的语义差异"><span class="toc-num">4.1</span>两种空值的语义差异</a><a class="sub" href="#可选链-不要在有-null-undefined-的地方深入访问"><span class="toc-num">4.2</span>可选链 ?.：不要在有 null/undefined 的地方深入访问</a><a class="sub" href="#空值合并-只在-null-undefined-时提供默认值"><span class="toc-num">4.3</span>空值合并 ??：只在 null/undefined 时提供默认值</a><a class="" href="#truthy-与-falsy-布尔上下文中的隐式转换"><span class="toc-num">5</span>Truthy 与 Falsy：布尔上下文中的隐式转换</a><a class="sub" href="#哪些值是-falsy"><span class="toc-num">5.1</span>哪些值是 falsy</a><a class="sub" href="#在-fbs-页面判断中识别转换"><span class="toc-num">5.2</span>在 FBS 页面判断中识别转换</a><a class="sub" href="#显式转换-不要依赖隐式规则"><span class="toc-num">5.3</span>显式转换：不要依赖隐式规则</a><a class="" href="#相等性-与-object-is"><span class="toc-num">6</span>相等性：==、=== 与 Object.is</a><a class="sub" href="#是默认选择"><span class="toc-num">6.1</span>=== 是默认选择</a><a class="sub" href="#对象和数组的比较是比较引用"><span class="toc-num">6.2</span>对象和数组的比较是比较引用</a><a class="sub" href="#的隐式转换规则-知道它会-努力让两边相同类型-即可"><span class="toc-num">6.3</span>== 的隐式转换规则（知道它会&quot;努力让两边相同类型&quot;即可）</a><a class="sub" href="#nan-的特殊性"><span class="toc-num">6.4</span>NaN 的特殊性</a><a class="" href="#在仓库中阅读条件判断-逐行拆解四个真实片段"><span class="toc-num">7</span>在仓库中阅读条件判断：逐行拆解四个真实片段</a><a class="sub" href="#片段一-权限检查"><span class="toc-num">7.1</span>片段一：权限检查</a><a class="sub" href="#片段二-路由守卫中的条件链"><span class="toc-num">7.2</span>片段二：路由守卫中的条件链</a><a class="sub" href="#片段三-api-响应错误判断"><span class="toc-num">7.3</span>片段三：API 响应错误判断</a><a class="sub" href="#片段四-路由守卫中判断-vpi-管理权限"><span class="toc-num">7.4</span>片段四：路由守卫中判断 VPI 管理权限</a><a class="" href="#常见错误与修正"><span class="toc-num">8</span>常见错误与修正</a><a class="sub" href="#把-0-或空字符串当作-没有值"><span class="toc-num">8.1</span>把 0 或空字符串当作&quot;没有值&quot;</a><a class="sub" href="#忘记-只短路-null-undefined"><span class="toc-num">8.2</span>忘记 ?. 只短路 null/undefined</a><a class="sub" href="#比较数组和对象"><span class="toc-num">8.3</span>=== 比较数组和对象</a><a class="sub" href="#typeof-null-object"><span class="toc-num">8.4</span>typeof null === 'object'</a><a class="" href="#练习"><span class="toc-num">9</span>练习</a><a class="sub" href="#预测输出"><span class="toc-num">9.1</span>预测输出</a><a class="sub" href="#修复空值边界"><span class="toc-num">9.2</span>修复空值边界</a><a class="sub" href="#判断仓库片段"><span class="toc-num">9.3</span>判断仓库片段</a><a class="sub" href="#参考答案"><span class="toc-num">9.4</span>参考答案</a><a class="" href="#参考文献"><span class="toc-num">10</span>参考文献</a></aside></div></div></div><footer class="site-footer">FBS 前后端转全栈 Landing · 已发布</footer></div></body></html>

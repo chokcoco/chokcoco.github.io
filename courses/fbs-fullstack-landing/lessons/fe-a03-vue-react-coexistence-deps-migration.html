@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="能处理 FBS 中 React 16/18、Vue 3 三种框架在同一页面中共存的情况——理解宿主 Vuex 注入、axios external 共享、全局依赖注入机制，能够定位依赖缺失故障并提出兼容改法。"><title>Vue/React 共存、共享依赖与版本迁移 | FBS 前后端转全栈 Landing</title><script src="../assets/theme-switcher.js"></script><link rel="stylesheet" href="../assets/course.css"><script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script><script defer src="../assets/course.js"></script></head>
+<body><div class="course-shell"><div class="lesson-page-grid"><aside class="chapter-nav" aria-label="课程章节导航"><button class="chapter-nav-toggle" type="button" aria-expanded="true" aria-controls="chapter-nav-content"><span aria-hidden="true">◀</span><span class="chapter-nav-toggle-label">收起</span></button><div class="chapter-nav-content" id="chapter-nav-content"><div class="chapter-nav-heading"><strong>课程章节</strong><span>第 16 / 40 章</span></div><nav class="chapter-nav-list"><section class="chapter-nav-module"><h2>模块一：前端语言及标准库基础</h2><a href="../lessons/fe-l01-js-data-types-equality.html"><span class="chapter-nav-code">FE-L01</span><span class="chapter-nav-title">JavaScript 数据、类型与相等性：先读懂仓库判断分支</span></a><a href="../lessons/fe-l02-functions-scope-closure-modules.html"><span class="chapter-nav-code">FE-L02</span><span class="chapter-nav-title">函数、作用域、闭包与模块：跟上组件外的调用链</span></a><a href="../lessons/fe-l03-promise-async-eventloop.html"><span class="chapter-nav-code">FE-L03</span><span class="chapter-nav-title">Promise、async/await 与事件循环：读懂请求和页面副作用</span></a><a href="../lessons/fe-l04-js-objects-web-data.html"><span class="chapter-nav-code">FE-L04</span><span class="chapter-nav-title">JavaScript 常用对象与 Web 数据处理</span></a><a href="../lessons/fe-l05-typescript-type-chain.html"><span class="chapter-nav-code">FE-L05</span><span class="chapter-nav-title">TypeScript：从接口数据到组件 Props 的类型链</span></a><a href="../lessons/fe-l06-browser-framework-syntax-bridge.html"><span class="chapter-nav-code">FE-L06</span><span class="chapter-nav-title">浏览器与框架语法桥：DOM、事件、JSX、Vue SFC</span></a></section>
+<section class="chapter-nav-module"><h2>模块二：Web 前端开发</h2><a href="../lessons/fe-w01-start-three-frontend-projects.html"><span class="chapter-nav-code">FE-W01</span><span class="chapter-nav-title">启动三类 FBS 前端工程并建立仓库地图</span></a><a href="../lessons/fe-w02-components-styles-forms-tables.html"><span class="chapter-nav-code">FE-W02</span><span class="chapter-nav-title">组件、样式、表单与表格：按现有组件库做页面</span></a><a href="../lessons/fe-w03-routes-menus-page-entries.html"><span class="chapter-nav-code">FE-W03</span><span class="chapter-nav-title">路由、菜单与页面入口：让页面真正可访问</span></a><a href="../lessons/fe-w04-state-management-redux-vuex-recoil.html"><span class="chapter-nav-code">FE-W04</span><span class="chapter-nav-title">状态管理：Redux/Recoil、Vuex 与宿主状态</span></a><a href="../lessons/fe-w05-api-proxy-errors-contract.html"><span class="chapter-nav-code">FE-W05</span><span class="chapter-nav-title">API、代理、错误与前后端契约</span></a><a href="../lessons/fe-w06-permission-i18n-time-file-pii.html"><span class="chapter-nav-code">FE-W06</span><span class="chapter-nav-title">权限、i18n、时间、文件与 PII：页面功能的准入项</span></a><a href="../lessons/fe-w07-frontend-vertical-slice.html"><span class="chapter-nav-code">FE-W07</span><span class="chapter-nav-title">前端纵向切片：为入库列表增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块三：Web 前端进阶</h2><a href="../lessons/fe-a01-three-app-lifecycles-host-boundaries.html"><span class="chapter-nav-code">FE-A01</span><span class="chapter-nav-title">三种应用生命周期与宿主边界</span></a><a href="../lessons/fe-a02-micro-frontends-remote-components.html"><span class="chapter-nav-code">FE-A02</span><span class="chapter-nav-title">微前端与远端组件：Module Federation、qiankun、MMF</span></a><a href="../lessons/fe-a03-vue-react-coexistence-deps-migration.html" class="is-current" aria-current="page"><span class="chapter-nav-code">FE-A03</span><span class="chapter-nav-title">Vue/React 共存、共享依赖与版本迁移</span></a><a href="../lessons/fe-a04-testing-linting-build-artifacts.html"><span class="chapter-nav-code">FE-A04</span><span class="chapter-nav-title">测试、静态检查、构建与产物边界</span></a><a href="../lessons/fe-a05-observability-systematic-debugging.html"><span class="chapter-nav-code">FE-A05</span><span class="chapter-nav-title">前端观测与系统化排错</span></a><a href="../lessons/fe-a06-impact-analysis-dev-handoff.html"><span class="chapter-nav-code">FE-A06</span><span class="chapter-nav-title">前端改动影响分析与开发交接</span></a></section>
+<section class="chapter-nav-module"><h2>模块四：后端语言及标准库基础</h2><a href="../lessons/be-l01-go-toolchain-modules-versions.html"><span class="chapter-nav-code">BE-L01</span><span class="chapter-nav-title">Go 工具链、模块与版本边界</span></a><a href="../lessons/be-l02-values-pointers-structs-tags.html"><span class="chapter-nav-code">BE-L02</span><span class="chapter-nav-title">值、指针、struct、tag 与数据边界</span></a><a href="../lessons/be-l03-methods-interfaces-embedding-di.html"><span class="chapter-nav-code">BE-L03</span><span class="chapter-nav-title">方法、接口、嵌入与依赖倒置</span></a><a href="../lessons/be-l04-slices-maps-sorting-data-transform.html"><span class="chapter-nav-code">BE-L04</span><span class="chapter-nav-title">slice、map、排序与数据转换</span></a><a href="../lessons/be-l05-errors-defer-panic-resources.html"><span class="chapter-nav-code">BE-L05</span><span class="chapter-nav-title">error、defer、panic/recover 与资源生命周期</span></a><a href="../lessons/be-l06-context-time-json-http-io.html"><span class="chapter-nav-code">BE-L06</span><span class="chapter-nav-title">context、时间、JSON、HTTP、I/O 与文件</span></a><a href="../lessons/be-l07-goroutines-channels-sync-concurrency.html"><span class="chapter-nav-code">BE-L07</span><span class="chapter-nav-title">goroutine、channel、sync 与并发边界</span></a></section>
+<section class="chapter-nav-module"><h2>模块五：Web 后端开发</h2><a href="../lessons/be-w01-start-three-backend-processes.html"><span class="chapter-nav-code">BE-W01</span><span class="chapter-nav-title">启动三类 FBS 后端进程并建立仓库地图</span></a><a href="../lessons/be-w02-chassis-http-route-request-response.html"><span class="chapter-nav-code">BE-W02</span><span class="chapter-nav-title">Chassis HTTP 接口：从路由到请求与响应</span></a><a href="../lessons/be-w03-wire-layered-architecture.html"><span class="chapter-nav-code">BE-W03</span><span class="chapter-nav-title">Wire 与分层：把 handler 接到应用、领域和基础设施</span></a><a href="../lessons/be-w04-mysql-gorm-scorm-repository-transactions.html"><span class="chapter-nav-code">BE-W04</span><span class="chapter-nav-title">MySQL、GORM/Scorm、仓储与事务</span></a><a href="../lessons/be-w05-service-calls-http-grpc-timeouts.html"><span class="chapter-nav-code">BE-W05</span><span class="chapter-nav-title">服务调用、HTTP/gRPC 契约与超时</span></a><a href="../lessons/be-w06-auth-errors-pii-security.html"><span class="chapter-nav-code">BE-W06</span><span class="chapter-nav-title">鉴权、错误码、PII 与接口安全边界</span></a><a href="../lessons/be-w07-backend-vertical-slice.html"><span class="chapter-nav-code">BE-W07</span><span class="chapter-nav-title">后端纵向切片：为入库请求增加一个受控能力</span></a></section>
+<section class="chapter-nav-module"><h2>模块六：Web 后端进阶</h2><a href="../lessons/be-a01-apollo-chassis-config.html"><span class="chapter-nav-code">BE-A01</span><span class="chapter-nav-title">Apollo 与 Chassis 配置：环境差异、热更新和开关</span></a><a href="../lessons/be-a02-redis-codis-cache-consistency.html"><span class="chapter-nav-code">BE-A02</span><span class="chapter-nav-title">Redis/Codis 与缓存一致性</span></a><a href="../lessons/be-a03-saturn-scheduled-async-tasks.html"><span class="chapter-nav-code">BE-A03</span><span class="chapter-nav-title">Saturn 定时任务与异步任务</span></a><a href="../lessons/be-a04-kafka-message-pipeline.html"><span class="chapter-nav-code">BE-A04</span><span class="chapter-nav-title">Kafka 消息链路与事件边界</span></a><a href="../lessons/be-a05-reliability-idempotency-transactions-retry.html"><span class="chapter-nav-code">BE-A05</span><span class="chapter-nav-title">可靠性：幂等、事务、重试、并发与降级组合</span></a><a href="../lessons/be-a06-logging-metrics-diagnostics.html"><span class="chapter-nav-code">BE-A06</span><span class="chapter-nav-title">日志、指标、链路与系统化排错</span></a><a href="../lessons/be-a07-impact-analysis-testing-handoff.html"><span class="chapter-nav-code">BE-A07</span><span class="chapter-nav-title">后端改动影响分析、测试与开发交接</span></a></section></nav></div></aside><div class="lesson-page-main"><header class="topbar"><a class="brand" href="../index.html">FBS 前后端转全栈 Landing</a><nav><a href="../index.html">课程目录</a><a href="../reference/glossary.html">术语表</a><a href="../../../index.html">全部课程</a></nav></header><section class="lesson-header"><div class="eyebrow">FE-A03 · 120–160 分钟</div><h1>Vue/React 共存、共享依赖与版本迁移</h1><p class="lesson-summary">能处理 FBS 中 React 16/18、Vue 3 三种框架在同一页面中共存的情况——理解宿主 Vuex 注入、axios external 共享、全局依赖注入机制，能够定位依赖缺失故障并提出兼容改法。</p><a class="source-link" href="../markdown/fe-a03-vue-react-coexistence-deps-migration.md">查看 Markdown 版本</a></section><div class="lesson-layout"><main class="lesson-content"><h2 id="这一章解决什么问题">这一章解决什么问题</h2>
+<p>大多数前端项目只有一个框架——React 或 Vue，选一个用到老。但 FBS 的三个前端仓库打破了这条规则：Portal 运行 React 16，SC Vue 运行 Vue 3，SC React 运行 React 18——更关键的是，SC React 作为一个 React 应用，需要从宿主的 Vuex Store 读取卖家信息和店铺数据。React 和 Vue 不是&quot;选一个&quot;的关系，它们在同一页面中共存。</p>
+<p>这种跨框架共存带来了三类问题：一是 React 组件如何读取 Vuex Store（答案：不是通过&quot;桥接库&quot;，而是直接访问宿主的 getter）；二是多个框架的共享依赖（如 axios）如何避免重复打包（答案：通过 webpack external 声明&quot;运行时由宿主提供&quot;）；三是全局依赖（翻译函数、请求实例、监控上报）如何注入到不同框架的组件中。</p>
+<p>本章从三个真实场景出发：React 组件读取 Vuex Store、SC React 的 <code>DepsProvider</code> 依赖注入机制、以及依赖共享与版本迁移策略。学会这些后，你不会再对&quot;为什么这个 React 组件里能访问 <code>app.vue3VuexStore</code>&quot;感到困惑，也不会在改了共享依赖后导致另一个框架爆炸。</p>
+<blockquote><p>本章基于三个前端仓库的 release 分支（2026-07-20）。</p></blockquote>
+<h2 id="跨框架共存的现实">跨框架共存的现实</h2>
+<h3 id="fbs-中三种框架的共存地图">FBS 中三种框架的共存地图</h3>
+<p>在当前 FBS 代码中，以下场景涉及跨框架交互：</p>
+<div class="table-wrap"><table><thead><tr><th>场景</th><th>消费者框架</th><th>提供者框架</th><th>交互方式</th></tr></thead><tbody><tr><td>SC React 读取卖家/店铺信息</td><td>React 18</td><td>Vue 3（宿主 Vuex）</td><td><code>app.vue3VuexStore.getters</code></td></tr><tr><td>SC React 使用宿主请求实例</td><td>React 18</td><td>Vue 3（宿主 <code>app.request</code>）</td><td><code>app.request.clone()</code></td></tr><tr><td>SC React 使用宿主翻译</td><td>React 18</td><td>Vue 3（宿主 <code>app.i18n</code>）</td><td><code>$gt</code> 函数通过 DepsProvider 注入</td></tr><tr><td>远端组件被 Portal 消费</td><td>React 18</td><td>React 16（Portal）</td><td>Module Federation + createRemoteComponent</td></tr><tr><td>Portal 微应用（qiankun）</td><td>各种框架</td><td>React 16（Portal）</td><td>qiankun 沙箱隔离</td></tr></tbody></table></div>
+<h3 id="跨框架不是-桥接-是-共享宿主基础设施">跨框架不是&quot;桥接&quot;——是&quot;共享宿主基础设施&quot;</h3>
+<p>理解 FBS 跨框架的关键洞察：这些框架不是通过某个&quot;桥接库&quot;互相调用的。它们共享的是<strong>同一个宿主基础设施</strong>——<code>app</code> 对象。<code>app.vue3VuexStore</code> 本质上就是一个 JavaScript 对象，React 组件访问它不需要通过 Vue——直接读取 <code>getters</code> 属性即可。</p>
+<p>这解释了为什么你在 SC React 中看到这样的代码：</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">const currentShop = app?.vue3VuexStore?.getters?.['FBS_STORE/Shop/currentShop'];</code></pre></figure>
+<p>这不是 React 调用了 Vue 的某个 API。这是普通的 JavaScript 对象属性访问——<code>getters</code> 是一个对象，<code>'FBS_STORE/Shop/currentShop'</code> 是它的一个 key。Vuex 的响应式系统（<code>getters</code> 是计算属性的代理）对 React 是透明的——React 拿到的是计算后的值。</p>
+<h2 id="sc-react-读取宿主的-vuex-store">SC React 读取宿主的 Vuex Store</h2>
+<h3 id="直接访问-getters">直接访问 getters</h3>
+<p>在 SC React 中，获取当前店铺信息的标准写法：</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">import { app } from 'framework';
+
+// 在组件或工具函数中
+const shop = app?.vue3VuexStore?.getters?.['FBS_STORE/Shop/currentShop'] || {
+  fbsWhsRegion: '',
+  fbsShopId: '',
+};</code></pre></figure>
+<p>注意几个细节：</p>
+<ul><li><strong>可选链</strong>：<code>app?.vue3VuexStore?.getters</code>——这三层的每一层都可能为 <code>undefined</code>。<code>app</code> 在模块加载早期可能还未完全初始化。</li><li><strong>命名空间路径</strong>：<code>'FBS_STORE/Shop/currentShop'</code> 是完整的命名空间路径。不能省略 <code>FBS_STORE/</code> 前缀。</li><li><strong>默认值</strong>：<code>|| { fbsWhsRegion: '', fbsShopId: '' }</code> 确保即使 getter 返回 <code>undefined</code>，后续代码也不会崩溃。</li></ul>
+<h3 id="为什么不用-react-vuex-bridge">为什么不用 react-vuex-bridge</h3>
+<p>你可能会问：为什么不用一个现成的 React-Vuex 桥接库？答案是：不需要。FBS 代码中读取 Vuex Store 的场景很有限——主要是初始化时读取一次基础信息（shop、seller、region）。这种低频、少字段的访问模式，直接读对象属性比引入一个桥接库更简单、更可控。引入桥接库会带来额外的依赖维护成本、版本兼容问题和学习曲线——而对于 FBS 的实际使用场景来说收益极小。</p>
+<h3 id="访问宿主-vuex-的边界">访问宿主 Vuex 的边界</h3>
+<p>不所有数据都应该从宿主 Vuex 读取。判断标准：</p>
+<div class="table-wrap"><table><thead><tr><th>数据类型</th><th>存储位置</th><th>理由</th></tr></thead><tbody><tr><td>跨模块基础信息（shop、seller）</td><td>宿主 Vuex</td><td>多个 MMF 模块共享</td></tr><tr><td>SC React 模块业务数据</td><td>自建 Redux Toolkit Store</td><td>只有本模块使用</td></tr><tr><td>组件临时状态（表单、筛选）</td><td>组件局部 state</td><td>不需要持久化</td></tr></tbody></table></div>
+<p>如果 SC React 中需要频繁访问某个 Vuex 数据，考虑在模块初始化时从 Vuex 读取一次，存入本模块的 Redux Store，而不是每次使用都跨越框架边界读取。这样减少了与宿主的耦合，也方便单元测试时 mock。</p>
+<h2 id="共享依赖的-webpack-external-机制">共享依赖的 webpack external 机制</h2>
+<h3 id="为什么要-external">为什么要 external</h3>
+<p>FBS 前端多个框架共享一些基础库——axios、lodash、moment 等。如果每个模块都把 axios 打包进自己的 bundle，会有三个问题：</p>
+<ol><li><strong>体积膨胀</strong>：页面加载三个 axios 副本，浪费带宽和解析时间。</li><li><strong>版本冲突</strong>：不同模块的 axios 版本可能不一致，拦截器行为可能互相干扰。</li><li><strong>实例隔离</strong>：每个模块创建自己的 axios 实例，但共享宿主 Cookie 和 CSRF token 的能力需要通过宿主的 <code>app.request</code> 获得。</li></ol>
+<p>webpack external 的解决方案：在构建时声明&quot;这个库不要打包，运行时由外部提供&quot;。</p>
+<h3 id="mmf-模块中的-external-实践">MMF 模块中的 external 实践</h3>
+<p>SC 两个仓库在 <code>mmc.config.js</code> 中配置了 external。例如：</p>
+<figure class="code-card"><div class="code-toolbar"><span>javascript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="javascript">module.exports = {
+  externals: {
+    'axios': 'axios',       // 不打包 axios
+    'react': 'React',       // 不打包 React
+    'react-dom': 'ReactDOM',
+  },
+};</code></pre></figure>
+<p>运行时，这些库由宿主（Seller Center Portal）提供。宿主在页面中已经加载了这些库的 <code>&lt;script&gt;</code> 标签，模块代码运行时直接从 <code>window.axios</code> 等全局变量获取。</p>
+<h3 id="external-失效的排查">external 失效的排查</h3>
+<p>常见症状：模块构建成功，但浏览器中报 <code>axios is not defined</code> 或 <code>React is not defined</code>。</p>
+<p>排查步骤：</p>
+<ol><li>确认宿主的 HTML 中是否加载了对应的库的 <code>&lt;script&gt;</code> 标签。</li><li>确认 external 配置中的全局变量名是否与宿主提供的变量名一致（区分大小写）。</li><li>如果本地 dev server 独立启动（没有宿主），需要手动在 HTML 模板中添加这些依赖的 <code>&lt;script&gt;</code>。</li></ol>
+<h2 id="全局依赖注入-depsprovider-与-initglobaldepsformmf">全局依赖注入：DepsProvider 与 initGlobalDepsForMMF</h2>
+<h3 id="依赖注入的动机">依赖注入的动机</h3>
+<p>SC React 的组件依赖一些全局能力：翻译函数 <code>$gt</code>、请求实例 <code>request</code>、路由实例 <code>router</code>、监控上报 <code>reporter</code>。这些不是 React 组件自己创建的对象——它们来自宿主。如何把这些宿主提供的对象传递给组件树的每个节点？</p>
+<p>直接 <code>import { app } from 'framework'</code> 在每个组件中是可行的（SC Vue 就是这么做的），但 SC React 选择了一条不同的路——React Context。原因：</p>
+<ul><li><strong>可测试性</strong>：通过 Context 注入的依赖在测试中可以轻松替换为 mock，而直接 import <code>app</code> 需要在模块级别做 mock。</li><li><strong>显式依赖</strong>：组件通过 <code>useContext(DepsContext)</code> 声明自己需要哪些全局能力，而不是隐式依赖全局变量。</li><li><strong>类型安全</strong>：DepsContext 的值可以定义完整的 TypeScript 类型。</li></ul>
+<h3 id="initglobaldepsformmf-的执行时机">initGlobalDepsForMMF 的执行时机</h3>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">// global-deps-register.ts（简化）
+export function initGlobalDepsForMMF() {
+  globalDeps = {
+    $gt: app.i18n.t,          // 翻译函数
+    request: app.request.clone({ baseURL: '/api/fbs/sc' }),
+    router: app.router,
+    reporter: createReporter(),
+  };
+}</code></pre></figure>
+<p>这个函数在 <code>index.ts</code> 中、路由注册之前执行。它必须在任何组件渲染之前完成——否则组件首次渲染时 <code>DepsContext</code> 的值还是空的。</p>
+<h3 id="缺失依赖的故障模式">缺失依赖的故障模式</h3>
+<p>如果 <code>initGlobalDepsForMMF()</code> 未被调用，组件中 <code>useContext(DepsContext)</code> 返回 <code>undefined</code>。根据组件内部的防御性代码编写程度，可能的症状：</p>
+<ul><li>组件不渲染（因为 <code>deps.request</code> 为 <code>undefined</code>，访问 <code>.get()</code> 报错）。</li><li>翻译不生效（所有文案显示为 key 名）。</li><li>路由跳转不工作（<code>deps.router</code> 为 <code>undefined</code>）。</li></ul>
+<p>排查方法：在浏览器 React DevTools 中找到组件树，检查 <code>DepsProvider</code> 的 value 是否正确。</p>
+<h2 id="版本迁移的兼容策略">版本迁移的兼容策略</h2>
+<h3 id="fbs-当前版本矩阵">FBS 当前版本矩阵</h3>
+<div class="table-wrap"><table><thead><tr><th>依赖</th><th>Portal</th><th>SC Vue</th><th>SC React</th></tr></thead><tbody><tr><td>React</td><td>16.14</td><td>-</td><td>18.x</td></tr><tr><td>Vue</td><td>-</td><td>3.x</td><td>-（通过宿主）</td></tr><tr><td>TypeScript</td><td>4.4</td><td>4.7</td><td>4.7</td></tr><tr><td>Axios</td><td>0.18</td><td>宿主提供</td><td>宿主提供</td></tr><tr><td>Node</td><td>16</td><td>20</td><td>20</td></tr></tbody></table></div>
+<h3 id="vue-react-迁移的渐进策略">Vue → React 迁移的渐进策略</h3>
+<p>FBS 团队正在将 SC 功能从 Vue 逐步迁移到 React。这不是&quot;大爆炸&quot;式的一刀切——而是渐进迁移：</p>
+<ul><li>新功能优先在 SC React 中开发。</li><li>SC Vue 的存量功能逐步被 SC React 的同功能页面替换。</li><li>远端组件使 Portal 和 SC React 可以共享同一套组件代码，减少重复开发。</li></ul>
+<p>迁移过程中的关键约束：</p>
+<ol><li><strong>API 契约不变</strong>：后端接口对 Vue 和 React 是一样的。前端改框架不能改接口。</li><li><strong>用户体验一致</strong>：迁移后的 React 页面在交互、样式、错误处理上应与 Vue 页面保持一致。</li><li><strong>渐进替换</strong>：先替换较少依赖的独立页面（如列表页），再替换复杂页面（如多步骤表单）。</li></ol>
+<h3 id="共享依赖升级的风险评估">共享依赖升级的风险评估</h3>
+<p>如果要升级某个共享依赖（如 axios 从 0.18 到 1.x）：</p>
+<div class="table-wrap"><table><thead><tr><th>风险项</th><th>评估方法</th><th>Portal 影响</th><th>SC Vue 影响</th><th>SC React 影响</th></tr></thead><tbody><tr><td>API 变化</td><td>对比 changelog</td><td>中</td><td>低（通过宿主）</td><td>低（通过宿主）</td></tr><tr><td>拦截器行为</td><td>测试现有拦截器</td><td>高</td><td>中</td><td>中</td></tr><tr><td>类型定义</td><td>TypeScript 编译</td><td>有</td><td>有</td><td>有</td></tr><tr><td>包体积</td><td>对比 bundle 大小</td><td>无关（external）</td><td>无关</td><td>无关</td></tr></tbody></table></div>
+<p>关键结论：Portal 对 axios 版本升级最敏感，因为它直接依赖 axios；SC 两个仓库通过宿主使用 axios，宿主升级后它们自动获得新版本，但需要确认拦截器行为是否兼容。</p>
+<h2 id="常见错误">常见错误</h2>
+<h3 id="在-sc-react-中直接-import-vuex-的-mutation">在 SC React 中直接 import Vuex 的 mutation</h3>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">// 错误：绕过 action 直接 commit
+app.vue3VuexStore.commit('FBS_STORE/SET_SHOP_INFO', data);
+
+// 正确：通过 dispatch 触发 action（action 内部会做校验和附加逻辑）
+app.vue3VuexStore.dispatch('FBS_STORE/SET_SHOP_INFO', data);</code></pre></figure>
+<h3 id="在多个地方初始化全局依赖">在多个地方初始化全局依赖</h3>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">// 错误：重复初始化可能导致版本不一致
+import { initGlobalDepsForMMF } from './global-deps-register';
+initGlobalDepsForMMF();  // index.ts 中已执行
+initGlobalDepsForMMF();  // 某个组件中又执行了一次</code></pre></figure>
+<p>全局依赖只应在模块入口初始化一次。如果组件需要特定的依赖配置，通过 Props 传入或使用自己的 Context，不要修改全局 deps。</p>
+<h3 id="跨框架共享对象时忘记不可变性">跨框架共享对象时忘记不可变性</h3>
+<p>Vue 的响应式系统会包装对象。如果将一个 Vue 响应式对象直接传给 React 的 state：</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">// 风险：Vue 响应式代理可能与 React 的不可变更新冲突
+const [shop, setShop] = useState(app.vue3VuexStore.getters['FBS_STORE/Shop/currentShop']);</code></pre></figure>
+<p>安全做法：读取需要的字段值，而非整个代理对象：</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">const rawShop = app.vue3VuexStore.getters['FBS_STORE/Shop/currentShop'];
+const [shop, setShop] = useState({
+  id: rawShop?.fbsShopId,
+  region: rawShop?.fbsWhsRegion,
+});</code></pre></figure>
+<h2 id="宿主请求实例的跨框架共享">宿主请求实例的跨框架共享</h2>
+<h3 id="app-request-的多重身份">app.request 的多重身份</h3>
+<p>在 FBS 前端代码中，<code>app.request</code> 不只是一种 Axios 实例。它同时承载了：</p>
+<ul><li><strong>会话管理</strong>：自动附带宿主 Cookie 和 CSRF token。</li><li><strong>请求拦截</strong>：统一注入请求 ID、语言、区域等 header。</li><li><strong>响应拦截</strong>：统一处理 retcode、错误提示、监控上报。</li><li><strong>实例克隆</strong>：通过 <code>.clone()</code> 创建不同配置的子实例（普通/PII/Blob）。</li></ul>
+<p>SC Vue 和 SC React 都通过 <code>app.request.clone()</code> 创建自己的请求实例，而不是直接使用 <code>app.request</code>。这样每个仓库可以配置自己的 <code>baseURL</code>、<code>responseType</code>、错误处理逻辑，但仍然继承宿主的会话和拦截器。</p>
+<h3 id="为什么不能自己创建-axios-实例">为什么不能自己创建 Axios 实例</h3>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">// 错误：自己创建的 Axios 实例没有宿主 Cookie 和 CSRF token
+import axios from 'axios';
+const myRequest = axios.create({ baseURL: '/api/fbs/sc' });
+
+// 正确：从宿主克隆
+const myRequest = app.request.clone({ baseURL: '/api/fbs/sc', unpackData: false });</code></pre></figure>
+<p>自己创建的 Axios 实例缺少宿主的请求拦截器——没有 Cookie、没有 CSRF token、没有请求 ID、没有监控上报。请求看起来发出了，但后端会因为缺少鉴权信息而返回 401。这个问题在本地开发时尤其容易混淆——因为本地可能配置了代理绕过鉴权。</p>
+<h3 id="clone-的配置继承">clone 的配置继承</h3>
+<p><code>app.request.clone(options)</code> 创建的新实例继承原实例的所有拦截器，但可以覆盖特定配置。常见的覆盖项：</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">// 普通 FBS 请求
+export const request = app.request.clone({ baseURL: '/api/fbs/sc', unpackData: false });
+
+// PII 请求——baseURL 指向敏感数据服务
+export const piiRequest = app.request.clone({ baseURL: '/api/fbs/pii/sc', unpackData: false });
+
+// Blob 请求——响应不解析为 JSON
+export const blobRequest = app.request.clone({ baseURL: '/api/fbs/sc', responseType: 'blob' });</code></pre></figure>
+<p>注意 <code>unpackData: false</code> 的含义：它告诉 Axios 不要自动解包响应数据（不要做 <code>response.data.data</code> 这种嵌套解构）。FBS 后端返回的响应结构为 <code>{ retcode, data, message }</code>，前端需要完整访问这个结构来判断业务成功与否——自动解包会让 <code>retcode</code> 字段丢失。</p>
+<h2 id="跨框架组件的实战开发策略">跨框架组件的实战开发策略</h2>
+<h3 id="先在一个框架中完整开发-再考虑跨框架">先在一个框架中完整开发，再考虑跨框架</h3>
+<p>FBS 当前不是所有组件都需要跨框架。大多数组件只在一个仓库中使用。只有以下情况才需要跨框架考虑：</p>
+<ol><li>组件在 Portal 和 SC 中都需要（如入库管理的某些共享视图）。</li><li>组件被标记为&quot;后续可能跨框架&quot;（团队规划中的迁移项）。</li><li>组件是基础设施级别的（如权限检查、翻译封装）。</li></ol>
+<p>如果你不确定一个组件是否需要跨框架，默认<strong>不需要</strong>。先在一个仓库中完成开发和验证，将来如果真的需要跨框架，再执行抽取和适配——避免过早抽象。</p>
+<h3 id="从单框架组件到跨框架组件的迁移步骤">从单框架组件到跨框架组件的迁移步骤</h3>
+<ol><li><strong>识别共享部分</strong>：哪些逻辑是框架无关的（纯数据转换、业务规则、API 调用）？哪些是框架相关的（渲染、事件处理、状态管理）？</li><li><strong>抽取框架无关逻辑</strong>：将框架无关的逻辑抽取为纯函数或自定义 hook / composable，放在 <code>basic/</code> 或 <code>domains/</code> 目录下。</li><li><strong>创建适配层</strong>：为每个目标框架创建适配组件，负责将框架无关逻辑桥接到框架的渲染和事件系统。</li><li><strong>测试双框架</strong>：在两种框架中各验证一次功能、样式和交互。</li></ol>
+<h3 id="跨框架组件的状态管理">跨框架组件的状态管理</h3>
+<p>跨框架组件不应该是&quot;万能&quot;的——它需要明确自己在每个框架中如何管理工作：</p>
+<ul><li><strong>数据获取</strong>：跨框架组件可以接收数据作为 Props，由消费方负责调用 API。或者，如果数据获取逻辑与框架无关，可以抽取为独立的数据 service。</li><li><strong>用户交互</strong>：跨框架组件通过回调函数（<code>onChange</code>、<code>onSubmit</code>）通知消费方用户操作，由消费方的框架状态管理来处理。</li><li><strong>样式</strong>：使用 CSS Modules 确保样式隔离——不会与消费方的样式系统冲突。</li></ul>
+<h2 id="从-sc-react-依赖图看全局注入的设计">从 SC React 依赖图看全局注入的设计</h2>
+<h3 id="绘制-sc-react-的依赖注入图">绘制 SC React 的依赖注入图</h3>
+<figure class="diagram-card"><pre class="mermaid">flowchart TD
+    A[&quot;宿主 Seller Center&quot;] --&gt; B[&quot;app 对象&quot;]
+    B --&gt; C[&quot;app.request&quot;]
+    B --&gt; D[&quot;app.i18n&quot;]
+    B --&gt; E[&quot;app.vue3VuexStore&quot;]
+    B --&gt; F[&quot;app.router&quot;]
+    C --&gt; G[&quot;initGlobalDepsForMMF()&quot;]
+    D --&gt; G
+    E --&gt; G
+    F --&gt; G
+    G --&gt; H[&quot;DepsContext.Provider&quot;]
+    H --&gt; I[&quot;所有通过 useContext 消费的组件&quot;]</pre><figcaption>图中关系须结合相邻正文与来源理解。</figcaption></figure>
+<h3 id="关键设计决策">关键设计决策</h3>
+<p>为什么 <code>app.vue3VuexStore</code> 没有通过 <code>DepsProvider</code> 注入，而是直接 import？因为 Vuex Store 的访问模式是&quot;一次读取、多处使用&quot;——shop、seller 等信息在 Store 初始化后很少变化。通过 Context 注入会触发不必要的重新渲染（Context 值变化会导致所有消费者重新渲染），而直接读取 <code>getters</code> 是惰性的——只在读取时获取当前值，不触发渲染。</p>
+<p>这个设计选择反映了 FBS 团队的实际权衡：Context 适合注入相对稳定的服务对象（如 <code>request</code>、<code>$gt</code>），不适合注入频繁变化的数据对象（如 Store state）。对于后者，直接访问 getter 是更轻量的方案。</p>
+<h2 id="跨框架开发的测试策略">跨框架开发的测试策略</h2>
+<p>跨框架组件的测试面临一个核心挑战：组件在一个框架中渲染，但依赖另一个框架提供的对象。以下是 FBS 中常用的测试策略：</p>
+<ol><li><strong>单元测试框架无关逻辑</strong>：纯函数（数据转换、校验规则）不需要框架上下文，直接测试输入输出。</li><li><strong>集成测试用 mock context</strong>：测试 DepsProvider 包裹的组件时，手动创建一个包含 mock deps 的 Context value。</li><li><strong>E2E 测试验证跨框架行为</strong>：通过浏览器自动化工具（Playwright/Cypress）在真实宿主中测试，而不是在单元测试中模拟宿主行为。</li></ol>
+<p>对于 SC React 组件的单元测试，标准的 mock 模式：</p>
+<figure class="code-card"><div class="code-toolbar"><span>typescript</span><button class="copy-code" type="button">复制</button></div><pre><code data-language="typescript">const mockDeps = {
+  $gt: (key: string) =&gt; key,
+  request: { get: jest.fn(), post: jest.fn() },
+  router: { push: jest.fn() },
+  reporter: { report: jest.fn() },
+};
+
+function renderWithDeps(ui: React.ReactElement) {
+  return render(
+    &lt;DepsContext.Provider value={mockDeps}&gt;
+      {ui}
+    &lt;/DepsContext.Provider&gt;
+  );
+}</code></pre></figure>
+<p>这个模式让你的组件测试不依赖真实的宿主环境，运行速度快且可靠。</p>
+<h2 id="练习">练习</h2>
+<h3 id="依赖追踪">依赖追踪</h3>
+<p>在 SC React 仓库中追踪 <code>$gt</code> 函数从宿主到组件的完整路径：宿主提供 → <code>initGlobalDepsForMMF()</code> → <code>DepsContext.Provider</code> → 组件 <code>useContext(DepsContext).$gt</code>。</p>
+<h3 id="故障定位">故障定位</h3>
+<p>SC React 页面中所有文案显示为 key 名而非翻译后文案。列出三个最可能的原因。</p>
+<h3 id="跨框架兼容">跨框架兼容</h3>
+<p>你在 SC React 中新增了一个组件，它依赖 <code>app.vue3VuexStore.getters['FBS_STORE/System/maintenanceMode']</code>。这个组件将来可能被抽取到远端组件，被 Portal 消费。写出在这种架构迁移中需要考虑的三个兼容问题。</p>
+<h3 id="参考答案">参考答案</h3>
+<p><strong>7.2</strong>：1) <code>initGlobalDepsForMMF()</code> 中 <code>$gt</code> 未正确赋值；2) <code>DepsProvider</code> 未包裹到这个组件的祖先链中；3) 组件在 <code>DepsProvider</code> 渲染之前就尝试访问了 deps。</p>
+<p><strong>7.3</strong>：1) Portal 没有 <code>app.vue3VuexStore</code>——远端组件不能直接依赖 Vuex getter，需要通过 Props 或 Context 传入；2) <code>maintenanceMode</code> 的语义在两个宿主中是否一致；3) 如果从 Vuex 改为 Props 传入，需要协调两个消费者的调用方式。</p>
+<h2 id="自检">自检</h2>
+<ol><li>SC React 模块中，React 组件如何读取宿主注入的 Vuex Store？这种跨框架状态共享的边界在哪里？</li></ol>
+<ol><li><code>initGlobalDepsForMMF</code> 和 <code>DepsProvider</code> 各自解决了什么问题？如果宿主依赖注入失败，前端会出现什么现象？</li></ol>
+<ol><li>Webpack external 机制在 FBS 中的作用是什么？如果 external 配置错误（如 axios 版本不匹配），会有什么后果？</li></ol>
+<ol><li>版本迁移时，为什么不能同时修改三个仓库？安全的迁移顺序是什么？</li></ol>
+<ol><li>跨框架组件的测试中，如何在不启动完整宿主的情况下验证组件的依赖注入？</li></ol>
+<h2 id="参考文献">参考文献</h2>
+<ul><li><a href="https://react.dev/learn/passing-data-deeply-with-context" target="_blank" rel="noreferrer">React Context</a></li><li><a href="https://vuex.vuejs.org/" target="_blank" rel="noreferrer">Vuex 4 Documentation</a></li><li><a href="https://react.dev/blog/2022/03/08/react-18-upgrade-guide" target="_blank" rel="noreferrer">React 18 Upgrade Guide</a></li><li><a href="https://webpack.js.org/configuration/externals/" target="_blank" rel="noreferrer">Webpack externals</a></li></ul><nav class="lesson-nav"><a href="../lessons/fe-a02-micro-frontends-remote-components.html">← FE-A02<br><strong>微前端与远端组件：Module Federation、qiankun、MMF</strong></a><a href="../lessons/fe-a04-testing-linting-build-artifacts.html">FE-A04 →<br><strong>测试、静态检查、构建与产物边界</strong></a></nav></main><aside class="toc"><strong>本章目录</strong><a class="" href="#这一章解决什么问题"><span class="toc-num">1</span>这一章解决什么问题</a><a class="" href="#跨框架共存的现实"><span class="toc-num">2</span>跨框架共存的现实</a><a class="sub" href="#fbs-中三种框架的共存地图"><span class="toc-num">2.1</span>FBS 中三种框架的共存地图</a><a class="sub" href="#跨框架不是-桥接-是-共享宿主基础设施"><span class="toc-num">2.2</span>跨框架不是&quot;桥接&quot;——是&quot;共享宿主基础设施&quot;</a><a class="" href="#sc-react-读取宿主的-vuex-store"><span class="toc-num">3</span>SC React 读取宿主的 Vuex Store</a><a class="sub" href="#直接访问-getters"><span class="toc-num">3.1</span>直接访问 getters</a><a class="sub" href="#为什么不用-react-vuex-bridge"><span class="toc-num">3.2</span>为什么不用 react-vuex-bridge</a><a class="sub" href="#访问宿主-vuex-的边界"><span class="toc-num">3.3</span>访问宿主 Vuex 的边界</a><a class="" href="#共享依赖的-webpack-external-机制"><span class="toc-num">4</span>共享依赖的 webpack external 机制</a><a class="sub" href="#为什么要-external"><span class="toc-num">4.1</span>为什么要 external</a><a class="sub" href="#mmf-模块中的-external-实践"><span class="toc-num">4.2</span>MMF 模块中的 external 实践</a><a class="sub" href="#external-失效的排查"><span class="toc-num">4.3</span>external 失效的排查</a><a class="" href="#全局依赖注入-depsprovider-与-initglobaldepsformmf"><span class="toc-num">5</span>全局依赖注入：DepsProvider 与 initGlobalDepsForMMF</a><a class="sub" href="#依赖注入的动机"><span class="toc-num">5.1</span>依赖注入的动机</a><a class="sub" href="#initglobaldepsformmf-的执行时机"><span class="toc-num">5.2</span>initGlobalDepsForMMF 的执行时机</a><a class="sub" href="#缺失依赖的故障模式"><span class="toc-num">5.3</span>缺失依赖的故障模式</a><a class="" href="#版本迁移的兼容策略"><span class="toc-num">6</span>版本迁移的兼容策略</a><a class="sub" href="#fbs-当前版本矩阵"><span class="toc-num">6.1</span>FBS 当前版本矩阵</a><a class="sub" href="#vue-react-迁移的渐进策略"><span class="toc-num">6.2</span>Vue → React 迁移的渐进策略</a><a class="sub" href="#共享依赖升级的风险评估"><span class="toc-num">6.3</span>共享依赖升级的风险评估</a><a class="" href="#常见错误"><span class="toc-num">7</span>常见错误</a><a class="sub" href="#在-sc-react-中直接-import-vuex-的-mutation"><span class="toc-num">7.1</span>在 SC React 中直接 import Vuex 的 mutation</a><a class="sub" href="#在多个地方初始化全局依赖"><span class="toc-num">7.2</span>在多个地方初始化全局依赖</a><a class="sub" href="#跨框架共享对象时忘记不可变性"><span class="toc-num">7.3</span>跨框架共享对象时忘记不可变性</a><a class="" href="#宿主请求实例的跨框架共享"><span class="toc-num">8</span>宿主请求实例的跨框架共享</a><a class="sub" href="#app-request-的多重身份"><span class="toc-num">8.1</span>app.request 的多重身份</a><a class="sub" href="#为什么不能自己创建-axios-实例"><span class="toc-num">8.2</span>为什么不能自己创建 Axios 实例</a><a class="sub" href="#clone-的配置继承"><span class="toc-num">8.3</span>clone 的配置继承</a><a class="" href="#跨框架组件的实战开发策略"><span class="toc-num">9</span>跨框架组件的实战开发策略</a><a class="sub" href="#先在一个框架中完整开发-再考虑跨框架"><span class="toc-num">9.1</span>先在一个框架中完整开发，再考虑跨框架</a><a class="sub" href="#从单框架组件到跨框架组件的迁移步骤"><span class="toc-num">9.2</span>从单框架组件到跨框架组件的迁移步骤</a><a class="sub" href="#跨框架组件的状态管理"><span class="toc-num">9.3</span>跨框架组件的状态管理</a><a class="" href="#从-sc-react-依赖图看全局注入的设计"><span class="toc-num">10</span>从 SC React 依赖图看全局注入的设计</a><a class="sub" href="#绘制-sc-react-的依赖注入图"><span class="toc-num">10.1</span>绘制 SC React 的依赖注入图</a><a class="sub" href="#关键设计决策"><span class="toc-num">10.2</span>关键设计决策</a><a class="" href="#跨框架开发的测试策略"><span class="toc-num">11</span>跨框架开发的测试策略</a><a class="" href="#练习"><span class="toc-num">12</span>练习</a><a class="sub" href="#依赖追踪"><span class="toc-num">12.1</span>依赖追踪</a><a class="sub" href="#故障定位"><span class="toc-num">12.2</span>故障定位</a><a class="sub" href="#跨框架兼容"><span class="toc-num">12.3</span>跨框架兼容</a><a class="sub" href="#参考答案"><span class="toc-num">12.4</span>参考答案</a><a class="" href="#自检"><span class="toc-num">13</span>自检</a><a class="" href="#参考文献"><span class="toc-num">14</span>参考文献</a></aside></div></div></div><footer class="site-footer">FBS 前后端转全栈 Landing · 已发布</footer></div></body></html>
