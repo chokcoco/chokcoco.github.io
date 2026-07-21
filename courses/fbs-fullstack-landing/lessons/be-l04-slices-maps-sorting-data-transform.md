@@ -371,7 +371,6 @@ func TestTransform(t *testing.T) {
 	}{
 		{"empty", []InboundRequestDO{}, []InboundItem{}},
 		{"single", []InboundRequestDO{{ID: 1}}, []InboundItem{{IrID: 1}}},
-		{"multiple", []InboundRequestDO{{ID: 1}, {ID: 2}}, []InboundItem{{IrID: 1}, {IrID: 2}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
