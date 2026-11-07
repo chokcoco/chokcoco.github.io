@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset=utf-8>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="black" name="apple-mobile-web-app-status-bar-style">
+  <meta content="telephone=no" name="format-detection">
+  <meta content="email=no" name="format-detection">
+  <title>恬齐网络AI思维实验室 - Coco AI 思维实验室</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reseter.css" />
+  <style>
+    :root {
+      --ink: #0d1716;
+      --ink-soft: #14211f;
+      --paper: #e8efec;
+      --muted: #9facaa;
+      --line: rgba(232, 239, 236, .16);
+      --mint: #9ce9d5;
+      --mint-deep: #4fb99f;
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--ink);
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--paper);
+      background: var(--ink);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.6;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    a:focus-visible {
+      outline: 2px solid var(--mint);
+      outline-offset: 4px;
+    }
+
+    .g-wave {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: .38;
+    }
+
+    .site-shell {
+      position: relative;
+      z-index: 1;
+      width: min(1180px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 72px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .wordmark {
+      flex: 0 0 auto;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .wordmark::before {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin: 0 10px 1px 0;
+      border: 1px solid var(--mint);
+      content: "";
+      transform: rotate(45deg);
+    }
+
+    .tab-nav {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .tab-nav a {
+      padding: 8px 12px;
+      color: var(--muted);
+      font-size: 13px;
+      transition: color .2s ease, background-color .2s ease;
+    }
+
+    .tab-nav a:hover {
+      color: var(--paper);
+      background: rgba(156, 233, 213, .08);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr);
+      align-items: end;
+      min-height: min(700px, calc(100vh - 72px));
+      padding: 76px 0 68px;
+      gap: 40px;
+    }
+
+    .hero-kicker,
+    .section-index,
+    .course-meta,
+    .hero-note span,
+    .path-list span {
+      color: var(--mint);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      letter-spacing: .08em;
+    }
+
+    .hero h1 {
+      max-width: 730px;
+      margin: 14px 0 18px;
+      font-size: clamp(42px, 6vw, 82px);
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 1.06;
+    }
+
+    .hero h1 em {
+      color: var(--mint);
+      font-style: normal;
+    }
+
+    .hero-summary {
+      max-width: 540px;
+      margin: 0;
+      color: #c5d0cc;
+      font-size: 17px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .action {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      font-size: 14px;
+      transition: transform .18s ease, background-color .18s ease, border-color .18s ease;
+    }
+
+    .action:hover {
+      border-color: var(--mint);
+      transform: translateY(-2px);
+    }
+
+    .action:active,
+    .course-card:active {
+      transform: translateY(1px);
+    }
+
+    .action-primary {
+      border-color: var(--mint);
+      color: var(--ink);
+      background: var(--mint);
+    }
+
+    .action-primary:hover {
+      background: #c4f7e8;
+    }
+
+    .hero-note {
+      display: grid;
+      gap: 18px;
+      padding: 24px 0 2px 24px;
+      border-left: 1px solid var(--mint-deep);
+    }
+
+    .hero-note p {
+      max-width: 260px;
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .hero-note .welcome {
+      margin-top: 14px;
+      color: #c5d0cc;
+      font-size: 12px;
+    }
+
+    section {
+      scroll-margin-top: 28px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: clamp(28px, 3.4vw, 44px);
+      letter-spacing: 0;
+      line-height: 1.16;
+    }
+
+    .path-section {
+      padding: 92px 0 110px;
+      border-top: 1px solid var(--line);
+    }
+
+    .path-intro {
+      max-width: 570px;
+      margin: 0 0 48px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .path-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .path-list li {
+      min-height: 168px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .path-list strong {
+      display: block;
+      margin-top: 34px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .path-list p {
+      max-width: 290px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .courses-section {
+      padding: 84px 0 110px;
+      border-top: 1px solid var(--line);
+    }
+
+    .courses-copy {
+      max-width: 520px;
+      margin: -10px 0 38px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .course-card {
+      position: relative;
+      display: flex;
+      width: 100%;
+      min-height: 238px;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 22px;
+      border: 1px solid var(--line);
+      background: rgba(13, 23, 22, .68);
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
+      transition: transform .2s ease, border-color .2s ease, background-color .2s ease;
+    }
+
+    .course-card::after {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      color: var(--mint);
+      content: "↗";
+      font-size: 19px;
+      opacity: 0;
+      transform: translate(-4px, 4px);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .course-card:hover {
+      border-color: rgba(156, 233, 213, .72);
+      background: rgba(22, 43, 39, .88);
+      transform: translateY(-4px);
+    }
+
+    .course-card:hover::after {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+
+    .course-card h3 {
+      max-width: 28ch;
+      margin: 10px 0 8px;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0;
+      line-height: 1.25;
+    }
+
+    .course-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .course-featured {
+      grid-column: span 7;
+      min-height: 314px;
+      background: #173b35;
+    }
+
+    .course-featured h3 {
+      max-width: 16ch;
+      font-size: clamp(26px, 3vw, 39px);
+    }
+
+    .course-featured p {
+      max-width: 48ch;
+      font-size: 15px;
+    }
+
+    .course-tall {
+      grid-column: span 5;
+      min-height: 314px;
+      background: #192927;
+    }
+
+    .course-wide {
+      grid-column: span 5;
+    }
+
+    .course-standard {
+      grid-column: span 4;
+    }
+
+    .course-notice {
+      position: fixed;
+      right: 28px;
+      bottom: 28px;
+      z-index: 5;
+      display: flex;
+      width: min(360px, calc(100% - 32px));
+      align-items: flex-start;
+      gap: 16px;
+      padding: 16px 14px 16px 18px;
+      border: 1px solid rgba(156, 233, 213, .58);
+      background: #173b35;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, .28);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .course-notice.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .course-notice p {
+      flex: 1;
+      margin: 0;
+      color: var(--paper);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .notice-close {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+      place-items: center;
+      margin: -3px -3px 0 0;
+      padding: 0;
+      border: 1px solid transparent;
+      color: var(--mint);
+      background: transparent;
+      cursor: pointer;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .notice-close:hover {
+      border-color: var(--line);
+    }
+
+    .about-section {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(260px, .9fr);
+      gap: 64px;
+      padding: 90px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .about-section h2 {
+      max-width: 12ch;
+      margin: 0;
+      font-size: clamp(31px, 4vw, 52px);
+      line-height: 1.14;
+    }
+
+    .about-copy {
+      align-self: end;
+    }
+
+    .about-copy p {
+      max-width: 460px;
+      margin: 0 0 24px;
+      color: #c5d0cc;
+      font-size: 16px;
+    }
+
+    .resource-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .resource-links a {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .resource-links a:hover {
+      color: var(--mint);
+    }
+
+    .site-footer {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 92px;
+      padding: 24px 0;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .site-footer p {
+      margin: 0;
+    }
+
+    .filing-space {
+      min-width: 150px;
+      min-height: 18px;
+    }
+
+    @media (max-width: 760px) {
+      .site-shell {
+        width: min(100% - 32px, 620px);
+      }
+
+      .site-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+        min-height: 96px;
+        padding: 18px 0 13px;
+      }
+
+      .tab-nav {
+        width: calc(100% + 32px);
+        margin: 0 -16px;
+        padding: 0 16px;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .tab-nav::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tab-nav a {
+        flex: 0 0 auto;
+        padding: 6px 10px;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        padding: 65px 0 75px;
+        gap: 54px;
+      }
+
+      .hero h1 {
+        max-width: 9ch;
+        font-size: clamp(42px, 13vw, 62px);
+      }
+
+      .hero-summary {
+        font-size: 16px;
+      }
+
+      .hero-note {
+        padding: 18px 0 0 18px;
+      }
+
+      .path-section,
+      .courses-section,
+      .about-section {
+        padding: 68px 0;
+      }
+
+      .path-list,
+      .about-section {
+        grid-template-columns: 1fr;
+      }
+
+      .path-list {
+        gap: 0;
+      }
+
+      .path-list li {
+        min-height: 146px;
+      }
+
+      .course-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .course-featured,
+      .course-tall,
+      .course-wide,
+      .course-standard {
+        grid-column: auto;
+        min-height: 220px;
+      }
+
+      .course-featured h3 {
+        font-size: 29px;
+      }
+
+      .about-section {
+        gap: 34px;
+      }
+
+      .site-footer {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 18px;
+        min-height: 110px;
+      }
+
+      .course-notice {
+        right: 16px;
+        bottom: 16px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+  <script type="text/javascript" src="https://s9.cnzz.com/z_stat.php?id=1280199803&web_id=1280199803"></script>
+</head>
+
+<body>
+  <div class="g-wave" id="g-wave">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+      width="100%" height="100%" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+      <defs>
+        <linearGradient id="bg">
+          <stop offset="0%" style="stop-color:rgba(130, 158, 249, 0.06)"></stop>
+          <stop offset="50%" style="stop-color:rgba(76, 190, 255, 0.6)"></stop>
+          <stop offset="100%" style="stop-color:rgba(115, 209, 72, 0.2)"></stop>
+        </linearGradient>
+        <path id="wave" fill="url(#bg)" d="M-363.852,502.589c0,0,236.988-41.997,505.475,0
+	s371.981,38.998,575.971,0s293.985-39.278,505.474,5.859s493.475,48.368,716.963-4.995v560.106H-363.852V502.589z"></path>
+      </defs>
+      <g>
+        <use xlink:href="#wave" opacity=".3" transform="translate(31.4615 210.253)">
+          <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="10s" calcMode="spline"
+            values="270 230; -334 180; 270 230" keyTimes="0; .5; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0"
+            repeatCount="indefinite"></animateTransform>
+        </use>
+        <use xlink:href="#wave" opacity=".6" transform="translate(-266.403 229.93)">
+          <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="8s" calcMode="spline"
+            values="-270 230;243 220;-270 230" keyTimes="0; .6; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0"
+            repeatCount="indefinite"></animateTransform>
+        </use>
+        <use xlink:href="#wave" opacty=".9" transform="translate(-122.387 203.774)">
+          <animateTransform attributeName="transform" attributeType="XML" type="translate" dur="6s" calcMode="spline"
+            values="0 230;-140 200;0 230" keyTimes="0; .4; 1" keySplines="0.42, 0, 0.58, 1.0;0.42, 0, 0.58, 1.0"
+            repeatCount="indefinite"></animateTransform>
+        </use>
+      </g>
+    </svg>
+  </div>
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="wordmark" href="#lab">Coco AI 思维实验室</a>
+      <nav class="tab-nav" aria-label="主导航">
+        <a href="#lab">实验室</a>
+        <a href="#path">学习路径</a>
+        <a href="#courses">课程</a>
+        <a href="#about">关于</a>
+      </nav>
+    </header>
+
+    <main id="lab">
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <div class="hero-kicker">THOUGHT / SYSTEM / PRACTICE</div>
+          <h1 id="hero-title">把 AI 从概念，<em>做成能力。</em></h1>
+          <p class="hero-summary">在真实工程里学习智能体、知识系统与可靠交付。</p>
+          <div class="hero-actions">
+            <a class="action action-primary" href="#courses">浏览课程</a>
+            <a class="action" href="#path">查看学习路径</a>
+          </div>
+        </div>
+        <aside class="hero-note" aria-label="实验室简介">
+          <div>
+            <span>LAB NOTE / 01</span>
+            <p>从问题出发，穿过工具和框架，到可以检验、持续使用的工作系统。</p>
+          </div>
+          <div>
+            <span>FOCUS</span>
+            <p>AI Agent · RAG · Knowledge · Engineering</p>
+          </div>
+          <p class="welcome">Welcome to Coco’s home, 也许你想去</p>
+        </aside>
+      </section>
+
+      <section class="path-section" id="path" aria-labelledby="path-title">
+        <div class="section-heading">
+          <span class="section-index">01 / PATH</span>
+          <h2 id="path-title">从理解，到构建，<br>到可靠交付。</h2>
+        </div>
+        <p class="path-intro">这里不把学习拆成孤立的知识点。每一条路径都围绕一个能落地的系统展开，让概念、代码和真实工作彼此连起来。</p>
+        <ol class="path-list">
+          <li>
+            <span>01</span>
+            <strong>建立坐标</strong>
+            <p>理解模型、检索、工作流与智能体之间真正的边界。</p>
+          </li>
+          <li>
+            <span>02</span>
+            <strong>搭建系统</strong>
+            <p>把知识、工具、上下文和接口组织成可运行的系统。</p>
+          </li>
+          <li>
+            <span>03</span>
+            <strong>验证实践</strong>
+            <p>用测试、评测和真实项目让学习真正留下来。</p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="courses-section" id="courses" aria-labelledby="courses-title">
+        <div class="section-heading">
+          <span class="section-index">02 / COURSES</span>
+          <h2 id="courses-title">正在生长的<br>课程目录。</h2>
+        </div>
+        <p class="courses-copy">每一门课都是一段完整的研究路线：先建立判断力，再走进代码与项目，最后把它放进真实的工程约束里。</p>
+
+        <div class="course-grid">
+          <button class="course-card course-featured" type="button" data-course="AI Agent 开发编程指南" data-course-url="/courses/ai-agent-development-programming-guide/">
+            <div>
+              <span class="course-meta">24 CHAPTERS · 36–40 HOURS</span>
+              <h3>AI Agent 开发编程指南</h3>
+              <p>从架构模式到两个可运行项目，建立面向真实任务的 Agent 工程能力。</p>
+            </div>
+            <span class="course-meta">AGENT ENGINEERING</span>
+          </button>
+          <button class="course-card course-tall" type="button" data-course="LangChain + LangGraph 从入门到实战进阶" data-course-url="/courses/langchain-langgraph-from-beginner-to-advanced/">
+            <div>
+              <span class="course-meta">15 CHAPTERS · PYTHON + REACT</span>
+              <h3>LangChain + LangGraph 从入门到实战进阶</h3>
+              <p>从最简 API 到可暂停、可恢复的 TicketPilot AI 工作流。</p>
+            </div>
+            <span class="course-meta">LANGCHAIN SYSTEMS</span>
+          </button>
+          <button class="course-card course-wide" type="button" data-course="RAG 从入门到精通" data-course-url="/courses/rag-from-beginner-to-expert/">
+            <div>
+              <span class="course-meta">12 CHAPTERS · RAG</span>
+              <h3>RAG 从入门到精通</h3>
+              <p>围绕内部知识库与客诉答疑，走通从资料到可引用回答的检索系统。</p>
+            </div>
+            <span class="course-meta">RETRIEVAL SYSTEMS</span>
+          </button>
+          <button class="course-card course-standard" type="button" data-course="Harness Engineering" data-course-url="/courses/harness-engineering/">
+            <div>
+              <span class="course-meta">13 CHAPTERS · 12–15 HOURS</span>
+              <h3>Harness Engineering</h3>
+              <p>为 AI 智能体设计可靠的意图、环境、工具、边界与反馈。</p>
+            </div>
+            <span class="course-meta">RELIABLE AGENTS</span>
+          </button>
+          <button class="course-card course-standard" type="button" data-course="如何实现高质量的 AI Code Review" data-course-url="/courses/high-quality-ai-code-review/">
+            <div>
+              <span class="course-meta">9 CHAPTERS · 12–16 HOURS</span>
+              <h3>如何实现高质量的 AI Code Review</h3>
+              <p>把一次模型评论升级为可度量、可恢复、可演进的审查系统。</p>
+            </div>
+            <span class="course-meta">ENGINEERING QUALITY</span>
+          </button>
+          <button class="course-card course-standard" type="button" data-course="从零开始，学会搭建一个酷炫的 Obsidian 个人知识库" data-course-url="/courses/advanced-learning-of-obsidian/">
+            <div>
+              <span class="course-meta">9 CHAPTERS · KNOWLEDGE</span>
+              <h3>从零开始，学会搭建一个酷炫的 Obsidian 个人知识库</h3>
+              <p>从 Markdown 到本地 RAG、GraphRAG 与 MCP，构建可生长的个人知识系统。</p>
+            </div>
+            <span class="course-meta">KNOWLEDGE SYSTEMS</span>
+          </button>
+          <button class="course-card course-wide" type="button" data-course="ExportFlow 完整项目实战" data-course-url="/courses/exportf-flow/">
+            <div>
+              <span class="course-meta">20 CHAPTERS · TYPESCRIPT + JAVA</span>
+              <h3>ExportFlow 完整项目实战</h3>
+              <p>以一个可靠异步任务系统为主线，拆解前后端契约、消息、文件与崩溃恢复。</p>
+            </div>
+            <span class="course-meta">FULL-STACK PROJECT</span>
+          </button>
+          <button class="course-card course-standard" type="button" data-course="Python 从入门到掌握 Web 开发" data-course-url="/courses/python-from-beginner-to-advanced/">
+            <div>
+              <span class="course-meta">10 CHAPTERS · PYTHON</span>
+              <h3>Python 从入门到掌握 Web 开发</h3>
+              <p>从语言基础走到 FastAPI、数据库、认证、测试与部署的完整链路。</p>
+            </div>
+            <span class="course-meta">WEB FOUNDATIONS</span>
+          </button>
+          <button class="course-card course-standard" type="button" data-course="Java Web 后端入门到进阶" data-course-url="/courses/java-web-backend-from-beginner-to-advanced/">
+            <div>
+              <span class="course-meta">36 CHAPTERS · JAVA</span>
+              <h3>Java Web 后端入门到进阶</h3>
+              <p>以 JDK 17 与 Spring Boot 3 为线索，逐步建立后端工程基本功。</p>
+            </div>
+            <span class="course-meta">BACKEND FOUNDATIONS</span>
+          </button>
+          <button class="course-card course-standard" type="button" data-course="如何沉淀一份优秀的 SKILL" data-course-url="/courses/how-to-write-a-excellent-skill/">
+            <div>
+              <span class="course-meta">3 CHAPTERS · SKILL DESIGN</span>
+              <h3>如何沉淀一份优秀的 SKILL</h3>
+              <p>从定义、边界到发布，做出可以复用、可以交付的高质量能力说明。</p>
+            </div>
+            <span class="course-meta">CAPABILITY DESIGN</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="about-section" id="about" aria-labelledby="about-title">
+        <div>
+          <span class="section-index">03 / ABOUT</span>
+          <h2 id="about-title">把复杂的事，变成可以一起思考的事。</h2>
+        </div>
+        <div class="about-copy">
+          <p>恬齐网络AI思维实验室关注的不是追逐某个工具的热度，而是把 AI 思维、系统设计和可验证实践放进同一条长期学习的路上。</p>
+          <div class="resource-links" aria-label="实验室链接">
+            <a href="/">首页</a>
+            <a href="/inspiration/">CSS 灵感</a>
+            <a href="https://github.com/chokcoco/iCSS">iCSS</a>
+            <a href="https://juejin.cn/user/2330620350437678">My Blog</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>@2026 Coco AI 思维实验室. All rights reserved.</p>
+      <p class="filing-space" aria-label="ICP备案信息"><a href="https://beian.miit.gov.cn">琼ICP备2026011528号-1</a></p>
+    </footer>
+  </div>
+
+  <aside class="course-notice" id="course-notice" role="status" aria-live="polite" aria-hidden="true">
+    <p id="course-notice-message">课程即将上传，敬请期待。</p>
+    <button class="notice-close" type="button" aria-label="关闭提示">&times;</button>
+  </aside>
+
+  <script>
+    (function () {
+      var notice = document.getElementById("course-notice");
+      var message = document.getElementById("course-notice-message");
+      var closeButton = notice.querySelector(".notice-close");
+      var timer;
+
+      function closeNotice() {
+        window.clearTimeout(timer);
+        notice.classList.remove("is-visible");
+        notice.setAttribute("aria-hidden", "true");
+      }
+
+      document.querySelectorAll(".course-card").forEach(function (card) {
+        card.addEventListener("click", function () {
+          window.clearTimeout(timer);
+          message.textContent = "《" + card.dataset.course + "》即将上传，敬请期待。";
+          notice.classList.add("is-visible");
+          notice.setAttribute("aria-hidden", "false");
+          timer = window.setTimeout(closeNotice, 3000);
+        });
+      });
+
+      closeButton.addEventListener("click", closeNotice);
+    }());
+  </script>
+</body>
+
+</html>
